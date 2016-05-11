@@ -1,0 +1,124 @@
+body {
+   margin:0px;
+}
+
+.main-title-bar {
+   font-size: 1.25em;
+   background-image: linear-gradient(#888888, #333);
+}
+
+.main-title-bar-right {
+   position:absolute;
+   top:10px;
+   right:10px;
+   font-size: 0.8em;
+   color:white;
+}
+
+.main-title-bar-content {
+   max-width:80%;   /*950px;*/
+   margin:auto;
+   padding:10px;   
+   position:relative;
+}
+
+.main-page-link {
+   text-decoration:none;
+}
+
+.main-title-open {
+   color:#FFFF88;
+}
+.main-title-media {
+   color:#88FFFF;
+}
+.main-title-gallery {
+   color:#FFFFFF;
+}
+
+.main-body {
+   max-width:850px;
+   margin:auto;
+   position:relative;
+}
+
+.main-description {
+   font-size: 1.5em;
+   padding:18px;
+   text-align:center;   
+}
+
+.main-search-area {
+   padding:10px;
+   width:90%;
+   margin:auto;
+   margin-top:10px;
+}
+
+.main-search-input {
+   font-size:16pt;
+   width:65%;
+}
+
+.main-search-area button {
+  font-size:16pt;
+  width:25%;
+}
+
+.main-learn-more {
+   color:#888888;
+   font-size:0.6em;
+   text-align:center;
+}
+
+.toc {
+   margin-top:20px;
+}
+
+.toc-page {
+   width:50%;
+   float:left;
+}
+
+.main-invitation {
+   font-size: 1.4em;
+   padding:8px;
+   text-align:center;   
+   color:#505050;
+   font-style:italic;
+}
+
+.main-separator {
+   text-align:center;
+   margin:30px auto;
+   height:1px;
+   width:70%;
+   background-color:#CCCCCC;
+}
+
+.main-create-area {
+   text-align:center;
+}
+
+.main-create-something {
+   color:black;
+   text-decoration:none;
+   font-size:1.2em;
+   font-family: Helvetica;
+   display:inline-block;
+   border:1px solid black;
+   border-radius:2px;
+   width:30%;
+   padding:20px;
+   margin:20px;
+   background-image: linear-gradient(#DDD, #88FFFF);
+}
+
+.main-create-something:hover {
+   background-image: linear-gradient(#FFF, #88FFFF);
+
+}
+
+.main-featured {
+   font-family: Helvetica;  
+}

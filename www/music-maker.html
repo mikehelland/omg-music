@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+   <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+
+   <meta name="apple-mobile-web-app-capable" content="yes" />
+   <link rel="apple-touch-icon" href="http://openmusicgallery.appspot.com/img/omg256.png" />
+
+   <meta property="og:image" content="http://openmusicgallery.appspot.com/img/omg256.png"/>
+   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+   <title>OMG Music Maker</title>   
+
+   <link rel="stylesheet" href="main.css" type="text/css" />
+   <link rel="stylesheet" href="music-maker.css" type="text/css" />
+</head>
+
+<body>
+
+<div class="main-title-bar">
+   <div class="main-title-bar-content">
+      <a class="main-page-link" href="index.html">
+      <span class="main-title-open">Open</span><span class="main-title-media">Music</span><span class="main-title-gallery">.Gallery</span>
+      </a>
+
+      <div class="main-title-bar-right">
+         You are not logged in.
+      </div>
+   </div>
+
+   <div  id="no-web-audio">
+	   <span class="old-browser">
+	   <b>This browser doesn't support Web Audio API.</b></span> 		
+	   (Try an updated Chrome, Safari, or FireFox for sound.)
+   </div> 
+</div>
+
+   <div class="omg-music-controls">
+      <div id="omg-music-controls-play-button" class="omg-music-controls-button">Play</div>
+      <div class="omg-music-controls-label">Label</div>
+      <div class="omg-music-controls-right">
+	      <div class="omg-music-controls-button">Share</div>
+         <div id="omg-music-controls-next-button" class="omg-music-controls-button">Next</div>
+      </div>
+   </div>
+
+
+<div class="main-body">
+
+   <div id="omgbam">
+      <div id="master" class="master">
+		      <div class="song">
+		      </div>
+      </div>
+
+ 
+   </div> <!--omgbam-->
+
+
+   <div id="finish-zone" class="area">
+      <div class="remixer-caption">Congratulations!</div>
+
+      <p>You've created a song. Now what? Here are some ideas:</p>
+
+      <ul>
+	      <li>Make an animation for this song</li>
+	      <li><a href="editor.jsp?new=section">Create another song</a></li>
+	      <li>Share this song, your friends can remix it</li>
+	
+      </ul>
+		
+   </div>
+
+   <div id="share-zone" class="area">
+      <div class="remixer-caption">Share!</div>
+
+      url: <input type="text" id="share-url"></input>
+      <br/>
+      <br/>
+      <a target="_blank" href="" id="facebook-link"><img id="facebook-button" src="img/f_logo.png"></a>
+      <a target="_blank" href="" id="twitter-link"><img id="twitter-button" src="img/twitter_logo.png"></a>
+      <a target="_blank" href="" id="email-link"><img id="email-button" src="img/email.png"></a>
+
+      <div class="panel-option" id="finish-share">Back</div>
+
+   </div>
+
+   <div id="login-zone" class="area">
+      <div class="login-area">
+      <p>You aren't logged in. Don't lose your progess! Creating an account is easy.</p>
+
+      <a class="login-google-link" href=""><img align="middle" style="padding-bottom:10px;" src="img/signingoogle.png"/></a>
+
+      <p><a class="login-cancel" href="javascript:void(0)">Go back to playing...</a></p>
+      </div>
+   </div> 
+
+</div> <!--main-body-->
+
+<script>
+   var mainbody = document.getElementsByClassName("main-body")[0];
+   mainbody.style.height = window.innerHeight - mainbody.offsetTop + "px";
+
+   var omgbamElement = document.getElementById("omgbam");
+   omgbamElement.style.height = mainbody.clientHeight - omgbamElement.offsetTop + "px";
+</script>
+
+<script src="omgservice.js"></script>
+<script src="omg-music/omusic_editor.js"></script>
+<script src="omg-music/omusic_partsui.js"></script>
+<script src="omg-music/omusic_player.js"></script>
+<script src="music-maker.js"></script>
+
+</body>
+</html>

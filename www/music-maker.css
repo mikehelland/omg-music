@@ -1,0 +1,346 @@
+#omgbam {
+   position:relative;
+}
+
+.main-body {
+   width:100%;
+   max-width:100%;
+/*   max-width:80%; /* or 800px? */
+/*   margin-top:0.5em;*/
+}
+
+.omg-music-controls {
+   /*padding:1em;*/
+   position:relative;
+   padding:0.8em 10%;
+   background-image: linear-gradient(#FFFFFF, #FFFF88);
+   font-size:1.1em;
+}
+
+.omg-music-controls-right {
+   right:10%;
+   top:0.8em;
+   position:absolute;
+}
+
+.omg-music-controls-button {
+   cursor:pointer;
+   display:inline-block;
+   padding:0.8em;
+   border:1px solid #808080;   
+   border:1px solid black;
+   border-radius:2px;
+   font-family: Helvetica;
+   background-image: linear-gradient(#EEEEEE, #BBBBBB);
+}
+
+
+.omg-music-controls-button-blink {
+   cursor:pointer;
+   background-image: linear-gradient(#FFFFFF, #BBBBBB);
+   display:inline-block;
+   padding:0.8em;
+   border:1px solid black;   
+   font-family: Helvetica;
+}
+
+.omg-music-controls-label {
+   display:inline-block;
+}
+
+#bam-controls  {
+	position:relative;
+}
+
+.master {
+	position:absolute;
+	top:0px;
+	left:0px;
+	height:100%;
+	width:100%;
+	overflow-x:hidden;	
+	overflow-y:hidden;
+}
+
+.song {	
+	position:absolute;
+	background-color:#99FF99;
+	height:100%;
+	width:100%;
+	left:0px;
+	top:0px;
+	overflow-x:hidden;	
+	overflow-y:hidden;
+	display:none;
+	border:0px solid black;
+		
+}
+.section {
+	background-color:#99AAFF;
+	position:absolute;
+	height:100%;
+	width:100%;
+	left:0px;
+	top:0px;
+	overflow-x:hidden;	
+	overflow-y:hidden;
+	/*border-radius:8px;*/
+	border:0px solid black;
+	display:none;
+}
+.part2 {
+	background-color:#FFFF99;
+	position:absolute;	
+	left:0px;
+	top:0px;
+	height:100%;
+	width:100%;
+	overflow-x:hidden;	
+	overflow-y:hidden;
+	border:0px solid black;
+	/*padding:4px;
+	border-radius:8px;
+	*/
+	display:none;
+}
+
+.share {
+	background-color:#FFFFFF;
+	position:absolute;	
+	overflow-x:hidden;	
+	overflow-y:hidden;
+	border-radius:8px;
+	border:2px solid black;
+}
+
+
+
+#no-web-audio {
+	display:none;
+	position:absolute;
+	top:0px;
+	left:0px;
+	width:100%;
+	text-align:center;
+	z-index:-1;
+}
+.old-browser {
+	color:red;
+	font-size:16pt;
+	text-align:center;
+}
+
+.area {
+   position:relative;
+   display:none;
+}
+
+.horizontal-panel-option {
+	border-radius:6px;
+	text-align:center;
+	padding:18px;
+	margin:18px;
+	width:240px;
+	border-bottom:2px solid #0F0F0F;
+	border-top:1px solid #FFFFFF;
+	background-color:#F0F0F0;
+	
+	font:14pt Helvetica, arial, freesans, clean, sans-serif;
+	cursor:pointer;
+	
+	display:inline-block;
+}
+
+
+.horizontal-panel-option:hover {
+	border-bottom:2px solid #60A060;
+	border-top:1px solid #808080;
+}
+
+
+
+
+
+
+
+
+
+/*from the original*/
+
+
+.remixer-message {
+	padding:5px;
+	margin:5px;
+}
+.remixer-part-command {
+	margin:2px;
+	border:1px solid white;
+	padding:0px 4px 0px 4px;
+	/*position:absolute;*/
+	font: 18px Helvetica, arial, freesans, clean, sans-serif;
+	/*font-style:bold;*/
+	display:inline-block;
+	margin-top:0px;
+	margin-left:2px;
+	margin-right:0px;
+	cursor:pointer;	
+}
+.remixer-part-command:hover {
+    border:1px solid black;
+}
+
+.beat-marker {
+	position:absolute;
+	background-color:#4fa5d5;
+	top:0px;
+	height:200px;
+	width:30px;
+	opacity:0.6;
+	display:none;
+	cursor:pointer;
+}
+
+.remixer-part-rightbar {
+	position:absolute;
+	right:0.3em;
+	top:0.3em;
+}
+.remixer-part-type {
+	font-family: Helvetica, arial, freesans, clean, sans-serif;
+	display:inline-block;
+   margin:0.3em;
+	/*text-align:center;*/
+}
+
+   
+
+#melody-maker-canvas, #beatmaker-canvas {
+	width:100%;
+}
+
+
+
+.nodata, #contact, #left-panel-go-back, #left-panel-heading {
+	text-align:center;
+	color:#404040;
+	font:10pt Helvetica, arial, freesans, clean, sans-serif;
+}
+
+
+.app-desc,.nodata {
+	color:#404040;
+	font:10pt Helvetica, arial, freesans, clean, sans-serif;
+}
+
+.remixer-part-leftbar {
+	display:inline-block;
+}
+
+
+.remixer-part-instrument {
+	position:relative;
+	top:-4px;
+}
+
+.part-controls {
+	height:94px;
+	width:650px;
+}
+
+
+#add-section {
+	left:130px;
+	top:103px;
+	width:60px;
+	height:200px;
+	padding:50px 20px 50px 20px;
+
+	text-align:center;
+	cursor:pointer;
+	border-radius:1px;
+	border:1px dotted #808080;
+	display:block;
+}
+
+.song-edit-panel {
+	display:none;
+	position:absolute;
+	left:0px;
+	bottom:15px;
+	width:100%;
+	text-align:center;
+}
+
+#remove-section-button {
+	width:200px;
+	background-color:#FFCCCC;
+}
+
+.remixer-add-buttons {
+	position:absolute;
+	right:0px;
+	padding:4px;
+}
+
+.remixer-add-button {
+  margin:5px;
+   text-align:center;
+   padding:12px;
+   width:100px;
+   border:1px dotted #808080;
+   cursor:pointer;
+   background-color:#FFFF99;
+}
+
+
+
+
+
+
+#login-zone {
+	display:none;
+	margin-top:90px;
+}
+#dialog-border {
+	display:none;
+	position:fixed;
+	top:0px;
+	left:0px;
+	width:100%;
+	height:100%;
+	background-color:#303030;
+	opacity:0.6;
+}
+
+#twitter-button {
+	padding:20px;
+	background-color:white;
+	border:1px solid gray;
+	border-radius:4px;
+	cursor:pointer;
+}
+
+#email-button {
+	padding:20px;
+	background-color:#FF80FF;
+    border:1px solid gray;
+    border-radius:4px;
+    /*padding-right:2px;*/
+    cursor:pointer;
+}
+
+#facebook-button {
+	margin-left:27px;
+	border:1px solid gray;
+	padding:20px;
+	cursor:pointer;
+}
+
+#logout-area {
+	text-align:center;
+}
+
+#share-url {
+	width:300px;
+}
+

@@ -1,0 +1,64 @@
+#omgviewer {
+   width:100%;
+   height:320px;
+   position:relative;
+   border:1px solid #808080;
+   overflow-x:scroll;
+}
+
+#viewer-title {
+   display:inline-block;
+   font-size:1.5em;
+   margin:0.8em;
+}
+
+#viewer-user {
+   display:inline-block;
+}
+
+#viewer-datetime {
+   text-align:right;
+}
+
+
+.omg-music-controls-right {
+   right:0;
+   top:0.8em;
+   position:absolute;
+}
+.omg-music-controls-button {
+   cursor:pointer;
+   display:inline-block;
+   padding:0.8em;
+   border:1px solid #808080;   
+   border:1px solid black;
+   border-radius:2px;
+   font-family: Helvetica;
+   background-image: linear-gradient(#EEEEEE, #BBBBBB);
+}
+
+
+.omg-music-controls-button-blink {
+   cursor:pointer;
+   background-image: linear-gradient(#FFFFFF, #BBBBBB);
+   display:inline-block;
+   padding:0.8em;
+   border:1px solid black;   
+   font-family: Helvetica;
+}
+
+
+.beat-marker {
+	position:absolute;
+	background-color:#4fa5d5;
+	top:0px;
+   left:0px;
+	height:100%;
+	width:0px;
+	opacity:0.6;
+}
+
+#play-button {
+   min-width:40px;
+   text-align:center;
+}

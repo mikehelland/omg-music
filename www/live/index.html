@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+body {
+    margin:0px;
+    height:100%;
+    width:100%;
+    overflow-x:hidden;
+    overflow-y:hidden;
+    background-color:black;
+}
+
+.colorCell {
+   display:inline-block;
+   width:50%;
+   height:18%;
+   position:absolute;
+   margin:0px;
+}
+</style>
+
+
+</head>
+
+<body>
+
+
+
+
+<script>
+var canvas = document.getElementById("main-canvas");
+
+var isTouching = false;
+
+var colors = [ "Choose a color", "#FFFFFF", "#FF0000", "#FFFF00", "#00FF00", 
+            "#0000FF", "#FF8000", "#9E9E9E", "#00FFFF", "#800080", "#632DFF", "#63FF08"];
+
+var colorI = Math.floor(Math.random() * colors.length);
+if (window.location.search) {
+   colorI = parseInt(window.location.search.substring(1));
+}
+
+var color = colors[colorI];
+console.log(color);
+
+var colorCells = document.getElementsByClassName("colorCell");
+
+colors.forEach(function (c, i) {
+   
+   var newElement = document.createElement("div");
+
+   if (c.startsWith("#")) {
+      newElement.style.backgroundColor = c;
+      newElement.onclick = function () {
+         window.location = "remote.html?" + (i - 1);   
+      };
+   } else {
+      newElement.style.color = "white";
+      newElement.innerHTML = c;
+   }
+   newElement.className = "colorCell";
+   newElement.style.top = window.innerHeight / 6 * Math.floor(i / 2) + "px";
+   newElement.style.left = window.innerWidth / 2 * (i % 2) + "px";
+   newElement.style.width = window.innerWidth / 2 + "px";
+   newElement.style.height = window.innerHeight / 6 + "px";
+   document.body.appendChild(newElement);
+});
+
+
+</script>
+
+</body>
+</html>
