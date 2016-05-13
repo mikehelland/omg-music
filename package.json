@@ -10,7 +10,9 @@
   "license": "ISC",
   "dependencies": {
     "body-parser": "^1.15.0",
+    "cookie-parser": "^1.4.1",
     "express": "^4.13.4",
+    "express-session": "^1.13.0",
     "massive": "^2.2.0",
     "passport": "^0.3.2",
     "passport-local": "^1.0.0",

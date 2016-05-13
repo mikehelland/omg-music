@@ -9,3 +9,6 @@
 sudo -u postgres psql postgres -c "CREATE DATABASE omusic_db"
 sudo -u postgres psql omusic_db -c "CREATE USER omusic_db WITH PASSWORD 'Ursa5830'"
 
+#CREATE TABLE users (id bigserial primary key,
+#   created_at timestamp not null default current_timestamp, username char(20) not null, password char(20) not null);
+

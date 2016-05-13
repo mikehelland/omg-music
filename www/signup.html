@@ -3,11 +3,6 @@
 
 <head>
    <link rel="stylesheet" type="text/css" href="main.css">
-   <style>
-      .invalid-login {
-         color:red; display:none;
-      }
-   </style>
 </head>
 
 <body>
@@ -20,23 +15,17 @@
 
 <div class="main-body">
 
-   <h1>
-      Login
-   </h1>
+   <div class="main-description">
+      Create a New Account
+   </div>
 
-   <div class="invalid-login">Invalid username or password.</div>
-
-   <form action="/login" method="post">
+   <form action="/signup" method="post">
       <input name="username" type="text" placeholder="username"/>
       <input name="password" type="password" placeholder="password"/>
       <input type="submit" value="Log In"/>
    </form>
 
 </div> <!--main-body-->
-<script>
-if (window.location.search.indexOf("invalid") > -1) {
-   document.getElementsByClassName("invalid-login")[0].style.display = "block";
-}
-</script>
 </body>
+
 </html>
