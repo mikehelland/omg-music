@@ -36,6 +36,16 @@ body {
    color:#FFFFFF;
 }
 
+.title-bar-user-controls {
+   border:0px solid #888888;
+   padding:0 4px;
+}
+
+.title-bar-user-controls a {
+   color:white;
+   text-decoration:none;
+}
+
 .main-body {
    max-width:850px;
    margin:auto;
@@ -60,7 +70,8 @@ body {
    width:65%;
 }
 
-.main-search-area button {
+.main-search-area button {}
+.main-search-submit {
   font-size:16pt;
   width:25%;
 }

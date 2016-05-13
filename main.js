@@ -27,7 +27,7 @@ passport.deserializeUser(function(id, done) {
         done(err, user);
     });
 });
-app.use(express.static('www'));
+app.use(express.static('www', {index: "index.htm"}));
 
 
 var LocalStrategy = require("passport-local").Strategy;
@@ -90,6 +90,13 @@ app.post('/signup',
                                    failureRedirect: "/signup.html"})
 );
 
+app.get('/user', function (req, res) {
+    if (req.user) {
+        res.send(req.user);
+    } else {
+        res.send(false);
+    }
+});
 
 
 app.get('/data/', function (req, res) {

@@ -31,7 +31,7 @@ playButton.onclick = function () {
 document.getElementById("omg-music-controls-next-button").onclick = function () {
    omgbam.nextButtonClick(function () {
       if (omgbam.musicMakerZone === "SONG") {
-         window.location = "viewer.html?id=" + omgbam.song.data.id;
+         window.location = "viewer.htm?id=" + omgbam.song.data.id;
       }
    });
 };

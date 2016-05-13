@@ -11,20 +11,20 @@
 
    <title>OMG Music Maker</title>   
 
-   <link rel="stylesheet" href="main.css" type="text/css" />
-   <link rel="stylesheet" href="music-maker.css" type="text/css" />
+   <link rel="stylesheet" href="css/main.css" type="text/css" />
+   <link rel="stylesheet" href="css/music-maker.css" type="text/css" />
 </head>
 
 <body>
 
 <div class="main-title-bar">
    <div class="main-title-bar-content">
-      <a class="main-page-link" href="index.html">
+      <a class="main-page-link" href="index.htm">
       <span class="main-title-open">Open</span><span class="main-title-media">Music</span><span class="main-title-gallery">.Gallery</span>
       </a>
 
       <div class="main-title-bar-right">
-         You are not logged in.
+         <div class="title-bar-user-controls"></div>
       </div>
    </div>
 
@@ -105,11 +105,15 @@
    omgbamElement.style.height = mainbody.clientHeight - omgbamElement.offsetTop + "px";
 </script>
 
-<script src="omgservice.js"></script>
+<script src="js/omgservice.js"></script>
 <script src="omg-music/omusic_editor.js"></script>
 <script src="omg-music/omusic_partsui.js"></script>
 <script src="omg-music/omusic_player.js"></script>
-<script src="music-maker.js"></script>
+<script src="js/music-maker.js"></script>
 
+<script src="js/usercontrols.js"></script>
+<script>
+setupUserControls(document.getElementsByClassName("title-bar-user-controls")[0]);
+</script>
 </body>
 </html>

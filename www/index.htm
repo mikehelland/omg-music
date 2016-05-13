@@ -2,7 +2,7 @@
 <html>
 
 <head>
-   <link rel="stylesheet" type="text/css" href="main.css">
+   <link rel="stylesheet" type="text/css" href="css/main.css">
 </head>
 
 <body>
@@ -10,6 +10,11 @@
 <div class="main-title-bar">
    <div class="main-title-bar-content">
    <span class="main-title-open">Open</span><span class="main-title-media">Music</span><span class="main-title-gallery">.Gallery</span>
+
+      <div class="main-title-bar-right">
+         <div class="title-bar-user-controls"></div>
+      </div>
+
    </div>
 </div>
 
@@ -20,8 +25,10 @@
    </div>
 
    <div class="main-search-area">
-      <input class="main-search-input" placeholder="Enter Search terms here"></input>
-      <button>OMG!</button>
+      <form action="search.htm">
+         <input class="main-search-input" name="q" placeholder="Enter Search terms here"></input>
+         <input class="main-search-submit" type="submit" value="OMG!"></input> <!--<button>OMG!</button>-->
+      </form>
    </div>
 
    <div class="main-separator">
@@ -32,10 +39,10 @@
    </div>
 
    <div class="main-create-area">
-      <a href="music-maker.html" class="main-create-something">
+      <a href="music-maker.htm" class="main-create-something">
          Create a Melody
       </a>
-      <a href="music-maker.html?new=drumbeat" class="main-create-something">
+      <a href="music-maker.htm?new=drumbeat" class="main-create-something">
          Create a Beat
       </a>
    </div>
@@ -53,6 +60,11 @@
    </div>-->
 
 </div> <!--main-body-->
+
+<script src="js/usercontrols.js"></script>
+<script>
+setupUserControls(document.getElementsByClassName("title-bar-user-controls")[0]);
+</script>
 </body>
 
 </html>
