@@ -3,6 +3,9 @@
 
 <head>
    <link rel="stylesheet" type="text/css" href="css/main.css">
+   <style>
+      .invalid-login {color:red; display:none;}
+   </style>
 </head>
 
 <body>
@@ -21,6 +24,8 @@
       Create a New Account
    </h1>
 
+   <div class="invalid-login">Username already exists.</div>
+
    <form action="/signup" method="post">
       <input name="username" type="text" placeholder="username"/>
       <input name="password" type="password" placeholder="password"/>
@@ -34,6 +39,10 @@
       Or <a href="login.htm">Log In</a> if you have an account.
    </div>
 </div> <!--main-body-->
+<script>
+if (window.location.search.indexOf("invalid") > -1) {
+   document.getElementsByClassName("invalid-login")[0].style.display = "block";
+}
+</script>
 </body>
-
 </html>

@@ -19,6 +19,7 @@ app.use(require('express-session')({
 app.use(passport.initialize());
 app.use(passport.session());
 passport.serializeUser(function(user, done) {
+    console.log("user:"); console.log(user); 
     done(null, user.id);
 });
 passport.deserializeUser(function(id, done) {
@@ -49,20 +50,20 @@ passport.use("login", new LocalStrategy(
 passport.use("signup", new LocalStrategy(
     function (username, password, done) {
         var db = app.get("db");
-
         db.users.findOne({username: username}, function (err, user) {
             if (err) {
                 return done(err);
             }
             if (user) {
-                return done(null, {message: "This username already exists"});
-            }             
+                return done(null, false);
+            }
+
             var newUser = {username: username, password: password};
             db.users.save(newUser, function (err, saveResult) {
                 if (err) {
                     return done(err);
                 } 
-                return done(null, newUser);
+                return done(null, saveResult);
             });
         });
     })
@@ -83,7 +84,7 @@ userSocket.on('connection', function(socket){
 
 app.post("/login",
    passport.authenticate("login", {successRedirect: "/",
-                                   failureRedirect: "/login.html?invalid"})
+                                   failureRedirect: "/login.htm?invalid"})
 );
 app.get("/logout", function (req, res) {
       req.logout();
@@ -92,7 +93,7 @@ app.get("/logout", function (req, res) {
 );
 app.post('/signup', 
    passport.authenticate("signup", {successRedirect: "/",
-                                   failureRedirect: "/signup.html"})
+                                   failureRedirect: "/signup.htm?invalid"})
 );
 
 app.get('/user', function (req, res) {

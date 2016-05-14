@@ -7,6 +7,7 @@
    padding:16px;
    background-color:#F8F8F8;
    cursor:pointer;
+   position:relative;
 }
 
 .search-thing-image {
@@ -20,3 +21,11 @@
    margin:4px;
    display:inline-block;
 }
+
+.search-thing-right-data {
+   position:absolute;
+   right:12px; /*12 not 16 because of margin*/
+   top:12px;
+}
+
+

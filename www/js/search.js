@@ -31,15 +31,19 @@ var loadSearchResults = function (results) {
       resultData.innerHTML = "by " + (result.username || "");
       resultDiv.appendChild(resultData);
 
-      resultData = document.createElement("div");
-      resultData.className = "search-thing-datetime";
-      resultData.innerHTML = result.created_at;
-      resultDiv.appendChild(resultData);
+      var rightData = document.createElement("div");
+      rightData.className = "search-thing-right-data";
+      resultDiv.appendChild(rightData);
 
       resultData = document.createElement("div");
       resultData.className = "search-thing-votes";
       resultData.innerHTML = (result.votes || "0") + " votes";
-      resultDiv.appendChild(resultData);
+      rightData.appendChild(resultData);
+
+      resultData = document.createElement("div");
+      resultData.className = "search-thing-datetime";
+      resultData.innerHTML = result.created_at;
+      rightData.appendChild(resultData);
 
       resultDiv.onclick = function () {
          window.location = "viewer.htm?id=" + result.id;

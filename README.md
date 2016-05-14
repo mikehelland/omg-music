@@ -1,13 +1,7 @@
-So, this basically needs:
+#OpenMusic.Gallery
 
-  "dependencies": {
-    "body-parser": "^1.15.0",
-    "express": "^4.13.4",
-    "massive": "^2.2.0",
-    "passport": "^0.3.2",
-    "passport-local": "^1.0.0"
-  }
+This is a web app, you can see in action at http://openmusic.gallery.
 
-And, install postgresql. Database openmusic_db
+    node main.js
 
-The database should have.... um, some things, wait, I should know this
+sudo if you want to use port 80 which is how it is set. Needs a postgresql installed (9.4 or later).
