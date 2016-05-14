@@ -2,22 +2,24 @@
 <html>
 
 <head>
-   <link rel="stylesheet" type="text/css" href="main.css">
+   <link rel="stylesheet" type="text/css" href="css/main.css">
 </head>
 
 <body>
 
 <div class="main-title-bar">
    <div class="main-title-bar-content">
-   <span class="main-title-open">Open</span><span class="main-title-media">Music</span><span class="main-title-gallery">.Gallery</span>
+      <a class="main-page-link" href="index.htm">
+         <span class="main-title-open">Open</span><span class="main-title-media">Music</span><span class="main-title-gallery">.Gallery</span>
+      </a>
    </div>
 </div>
 
 <div class="main-body">
 
-   <div class="main-description">
+   <h1>
       Create a New Account
-   </div>
+   </h1>
 
    <form action="/signup" method="post">
       <input name="username" type="text" placeholder="username"/>
@@ -25,6 +27,12 @@
       <input type="submit" value="Log In"/>
    </form>
 
+   <div class="main-separator">
+   </div>
+
+   <div class="main-invitation">
+      Or <a href="login.htm">Log In</a> if you have an account.
+   </div>
 </div> <!--main-body-->
 </body>
 

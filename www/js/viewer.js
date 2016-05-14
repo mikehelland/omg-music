@@ -9,6 +9,7 @@ viewer.canvas.width = viewer.canvas.clientWidth
 viewer.canvas.height = viewer.canvas.clientHeight
 
 viewer.playButton = document.getElementById("play-button");
+viewer.editButton = document.getElementById("edit-button");
 
 viewer.partMargin = 40;
 viewer.sectionMargin = 0;
@@ -39,6 +40,10 @@ viewer.loadPlayer = function (dataToPlay) {
    viewer.player.onBeatPlayedListeners.push(function(isubbeat, isection) {
       viewer.beatMarker.style.width = pxPerBeat * (1 + isubbeat + isection * beatsInSection) + "px";
    });
+
+   viewer.editButton.onclick = function () {
+      window.location = "music-maker.htm?id=" + dataToPlay.id;
+   };
 };
 
 viewer.drawSong = function (song) {

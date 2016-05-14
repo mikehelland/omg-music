@@ -2,18 +2,23 @@
 <html>
 <head>
 
-   <link rel="stylesheet" href="main.css" type="text/css" />
-   <link rel="stylesheet" href="viewer.css" type="text/css" />
+   <link rel="stylesheet" href="css/main.css" type="text/css" />
+   <link rel="stylesheet" href="css/search.css" type="text/css" />
 
 </head>
 <body>
 
    <div class="main-title-bar">
-      <div class="main-title-bar-content">
-      <a href="index.html">
+         <div class="main-title-bar-content">
+         <a class="main-page-link" href="index.htm">
          <span class="main-title-open">Open</span><span class="main-title-media">Music</span><span class="main-title-gallery">.Gallery</span>
-      </a>
+         </a>
+
+         <div class="main-title-bar-right">
+            <div class="title-bar-user-controls"></div>
+         </div>
       </div>
+
    </div>
 
    <div class="main-body">
@@ -23,15 +28,17 @@
          <span class="search-info-terms">search terms</span>
       </div>
 
-      <div class="search-things">
-
-         <div class="search-thing">
-            Untitled Song
-         </div>
-
-      </div>
+      <div class="search-things"></div>
 
    </div>
+
+   <script src="js/search.js"></script>
+
+   <script src="js/usercontrols.js"></script>
+   <script>
+   setupUserControls(document.getElementsByClassName("title-bar-user-controls")[0]);
+   </script>
+
 
 </body>
 </html>

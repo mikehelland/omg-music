@@ -2,17 +2,22 @@
 <html>
 <head>
 
-   <link rel="stylesheet" href="main.css" type="text/css" />
-   <link rel="stylesheet" href="viewer.css" type="text/css" />
+   <link rel="stylesheet" href="css/main.css" type="text/css" />
+   <link rel="stylesheet" href="css/viewer.css" type="text/css" />
 
 </head>
 <body>
 
    <div class="main-title-bar">
       <div class="main-title-bar-content">
-      <a href="index.html">
+      <a class="main-page-link" href="index.htm">
          <span class="main-title-open">Open</span><span class="main-title-media">Music</span><span class="main-title-gallery">.Gallery</span>
       </a>
+
+         <div class="main-title-bar-right">
+            <div class="title-bar-user-controls"></div>
+         </div>
+
       </div>
    </div>
 
@@ -26,7 +31,7 @@
          <div class="omg-music-controls-button" id="vote-button">Vote</div>
          <div class="omg-music-controls-button" id="tip-button">Tip</div>
          <div class="omg-music-controls-button" id="share-button">Share</div>
-         <div class="omg-music-controls-button" id="share-button">Edit</div>
+         <div class="omg-music-controls-button" id="edit-button">Edit</div>
       </div>
 
       <div id="omgviewer"><div class="beat-marker"></div></div>
@@ -36,6 +41,12 @@
 
    <script src="omg-music/omusic_partsui.js"></script>
    <script src="omg-music/omusic_player.js"></script>
-   <script src="viewer.js"></script>
+   <script src="js/viewer.js"></script>
+
+   <script src="js/usercontrols.js"></script>
+   <script>
+   setupUserControls(document.getElementsByClassName("title-bar-user-controls")[0]);
+   </script>
+
 </body>
 </html>

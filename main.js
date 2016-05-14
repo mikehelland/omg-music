@@ -85,6 +85,11 @@ app.post("/login",
    passport.authenticate("login", {successRedirect: "/",
                                    failureRedirect: "/login.html?invalid"})
 );
+app.get("/logout", function (req, res) {
+      req.logout();
+      res.redirect("/");
+   }
+);
 app.post('/signup', 
    passport.authenticate("signup", {successRedirect: "/",
                                    failureRedirect: "/signup.html"})

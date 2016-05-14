@@ -1,0 +1,22 @@
+.search-info {
+   margin:8px; padding:16px; border:1px solid #404040;
+}
+
+.search-thing {
+   margin:16px;
+   padding:16px;
+   background-color:#F8F8F8;
+   cursor:pointer;
+}
+
+.search-thing-image {
+   position:relative;
+   background-color:red;
+   width:48px;
+   border-radius:3px;
+}
+
+.search-thing div {
+   margin:4px;
+   display:inline-block;
+}
