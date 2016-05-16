@@ -11,6 +11,10 @@ viewer.canvas.height = viewer.canvas.clientHeight
 viewer.playButton = document.getElementById("play-button");
 viewer.editButton = document.getElementById("edit-button");
 
+viewer.titleDiv = document.getElementById("viewer-title");
+viewer.userDiv = document.getElementById("viewer-user");
+viewer.datetimeDiv = document.getElementById("viewer-datetime");
+
 viewer.partMargin = 40;
 viewer.sectionMargin = 0;
 viewer.sectionWidth = 200;
@@ -31,6 +35,11 @@ viewer.loadPlayer = function (dataToPlay) {
 
    viewer.player.play(viewer.omgsong);
    viewer.playButton.innerHTML = "Stop";
+
+   viewer.titleDiv.innerHTML = dataToPlay.title || "(untitled)";
+   viewer.userDiv.innerHTML = dataToPlay.username || "(unknown)";
+   viewer.datetimeDiv.innerHTML = getTimeCaption(dataToPlay.created_at);
+
 
    //maybe
    var beatsInSection = viewer.player.beats * viewer.player.subbeats;
@@ -132,3 +141,34 @@ viewer.getDataById(viewer.queryStringParameters.id, function (dataToPlay) {
 }, function () {
    //error
 });
+
+
+function getTimeCaption(timeMS) {
+
+    if (!timeMS) {
+        return "";
+    }
+
+    var seconds = Math.round((Date.now() - timeMS) / 1000);
+    if (seconds < 60) return seconds + " sec ago";
+
+    var minutes = Math.floor(seconds / 60);
+    if (minutes < 60) return minutes + " min ago";    
+   
+    var hours = Math.floor(minutes / 60);
+    if (hours < 24) return hours + " hr ago";    
+
+    var days = Math.floor(hours / 24);
+    if (days < 7) return days + " days ago";
+
+    var date  = new Date(timeMS);
+    var months = ["Jan", "Feb", "Mar", "Apr", "May",
+                "Jun", "Jul", "Aug", "Sep", "Oct", 
+                "Nov", "Dec"];
+    var monthday = months[date.getMonth()] + " " + date.getDate();
+    if (days < 365) {
+	    return monthday;
+    }
+    return monthday + " " + date.getYear();
+};
+

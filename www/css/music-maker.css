@@ -23,6 +23,15 @@
    position:absolute;
 }
 
+.omg-music-controls-title {
+   background-color:transparent;
+   border-width:0px;
+}
+.omg-music-controls-title:hover {
+/*   background-color:transparent;*/
+   border-width:1px;
+}
+
 .omg-music-controls-button {
    cursor:pointer;
    display:inline-block;

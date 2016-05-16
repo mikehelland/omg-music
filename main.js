@@ -24,7 +24,8 @@ passport.serializeUser(function(user, done) {
 });
 passport.deserializeUser(function(id, done) {
     var db = app.get("db");
-    db.users.find(id, function (err, user) {
+    id = typeof id === "string" ? parseInt(id) : id;
+    db.users.findOne(id, function (err, user) {
         done(err, user);
     });
 });
@@ -37,6 +38,8 @@ passport.use("login", new LocalStrategy(
         var db = app.get("db");
         db.users.findOne({username: username}, function (err, user) {
             if (err) return done(err);
+
+            console.log("passport login");
 
             console.log("user:"); console.log(user);
             if (user && user.password.trim() === password) {
@@ -107,8 +110,8 @@ app.get('/user', function (req, res) {
 
 app.get('/data/', function (req, res) {
     var db = app.get('db');
-    var options = {limit : 10, order : "id"};
-    db.things.findDoc("*", function (err, docs) {
+    var options = {limit : 20, order : "created_at desc"};
+    db.things.findDoc("*", options, function (err, docs) {
         if (err) {
             res.send(err);
         }
@@ -128,6 +131,16 @@ app.get('/data/:id', function (req, res) {
     });
 });
 app.post('/data/', function (req, res) {
+    if (req.user) {
+        req.body.user_id = req.user.id;
+        req.body.username = req.user.username;
+    }
+
+    if (!req.body.created_at) {
+        req.body.created_at = Date.now();
+    }
+    req.body.last_modified = Date.now();
+
     var db = app.get('db');
     db.saveDoc("things", req.body, function (err, result) {
         console.log(err);

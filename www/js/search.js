@@ -28,7 +28,7 @@ var loadSearchResults = function (results) {
 
       resultData = document.createElement("div");
       resultData.className = "search-thing-user";
-      resultData.innerHTML = "by " + (result.username || "");
+      resultData.innerHTML = result.username ? "by " + result.username : "";
       resultDiv.appendChild(resultData);
 
       var rightData = document.createElement("div");
@@ -41,8 +41,8 @@ var loadSearchResults = function (results) {
       rightData.appendChild(resultData);
 
       resultData = document.createElement("div");
-      resultData.className = "search-thing-datetime";
-      resultData.innerHTML = result.created_at;
+      resultData.className = "search-thing-created-at";
+      resultData.innerHTML = getTimeCaption(parseInt(result.created_at));
       rightData.appendChild(resultData);
 
       resultDiv.onclick = function () {
@@ -103,3 +103,34 @@ function getBackgroundColor(type) {
 
    return "#808080";
 }
+
+
+function getTimeCaption(timeMS) {
+
+    if (!timeMS) {
+        return "";
+    }
+
+    var seconds = Math.round((Date.now() - timeMS) / 1000);
+    if (seconds < 60) return seconds + " sec ago";
+
+    var minutes = Math.floor(seconds / 60);
+    if (minutes < 60) return minutes + " min ago";    
+   
+    var hours = Math.floor(minutes / 60);
+    if (hours < 24) return hours + " hr ago";    
+
+    var days = Math.floor(hours / 24);
+    if (days < 7) return days + " days ago";
+
+    var date  = new Date(timeMS);
+    var months = ["Jan", "Feb", "Mar", "Apr", "May",
+                "Jun", "Jul", "Aug", "Sep", "Oct", 
+                "Nov", "Dec"];
+    var monthday = months[date.getMonth()] + " " + date.getDate();
+    if (days < 365) {
+	    return monthday;
+    }
+    return monthday + " " + date.getYear();
+};
+

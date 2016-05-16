@@ -940,6 +940,11 @@ OMusicEditor.prototype.load = function (params)  {
          //bam.songEditor.songName.value = bam.song.data.name;
 			
 		}
+
+      if (typeof bam.onzonechange == "function") {
+         bam.onzonechange(bam.song);
+      }
+
 		return;
 	} 
 
@@ -976,7 +981,11 @@ OMusicEditor.prototype.load = function (params)  {
 			bam.section = new OMGSection(newDiv);
 			bam.fadeIn([newDiv, bam.sectionEditor], restoreColors);
 		}
-		
+
+      if (typeof bam.onzonechange == "function") {
+         bam.onzonechange(bam.section);
+      }		
+
 		return;
 	}
 
