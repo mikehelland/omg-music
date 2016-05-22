@@ -187,7 +187,9 @@ omg.ui.drawMelodyCanvas = function (params, canvas_p, w, h) {
 		}, 200);
 	}
 		    
-	canvas.omusic_refresh = function () {
+	canvas.omusic_refresh = function (newW, newH) {
+      if (newW) w = newW;
+      if (newH) h = newH;
 		try {
 			drawNotes();	
 		}
@@ -1235,15 +1237,10 @@ OMGMelodyMaker.prototype.onDisplay = function () {
 		canvas.removeButtonRow = [{button:true, text:"Remove Note", width:120}];
 		
 		canvas.removeButtonRow[0].onclick = function () {
-			console.log(omgmm.noteSelecting);
 			for (var inote = 0; inote < omgmm.part.data.notes.length; inote++) {
-				console.log(omgmm.part.data.notes[inote]);
 				
 				if (omgmm.part.data.notes[inote] == omgmm.noteSelecting) {
-					console.log(omgmm.part.data.notes.length)
 					omgmm.part.data.notes.splice(inote, 1);
-					console.log(omgmm.part.data.notes.length)
-					
 					break;
 				}
 			}
@@ -1729,10 +1726,8 @@ OMGMelodyMaker.prototype.onupInEdittingDialog = function (x, y) {
 			}
 		}
 	}
-	console.log("on up");
-	console.log(this.buttonTouched);
+
 	if (button && this.buttonTouched && button == this.buttonTouched) {
-		console.log(button.onclick)
 		if (button.onclick) {
 			button.onclick();
 		}
@@ -1877,8 +1872,6 @@ OMGMelodyMaker.prototype.animateDrawing = function () {
 			
 			if (!omgmm.player.playing) {
 				var newSong = omgmm.player.makeOMGSong(omgmm.part);
-				console.log("new song");
-				console.log(omgmm.part);
 				omgmm.player.play(newSong);				
 			}
 

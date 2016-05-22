@@ -24,7 +24,7 @@ OMusicEditor.prototype.setup = function (options) {
 	var bam = this;
 
    if (!options) {
-      console.log("OMusicEditor() needs setup options: div, omgservice");
+      debug("OMusicEditor() needs setup options: div, omgservice");
       return;
    }
 
@@ -103,7 +103,6 @@ OMusicEditor.prototype.setup = function (options) {
 		loadParams = bam.getLoadParams();
       if (loadParams.id) {
          bam.omgservice.getId(loadParams.id, function(result) {
-            console.log("getid result"); console.log(result);
             loadParams.dataToLoad = result;
       		bam.load(loadParams);
          });
@@ -174,6 +173,11 @@ OMusicEditor.prototype.nextButtonClick = function (callback) {
 OMusicEditor.prototype.setupPartDiv = function (part) {
 	var bam = this;
 	
+   if (part.controls) {
+      debug("setupPartDiv: We are already setup!");
+      return;
+   }
+
 	part.controls = document.createElement("div");
 	part.controls.className = "part-controls";
 	part.controls.style.height = part.div.clientHeight - 6 + "px";
@@ -515,6 +519,7 @@ OMusicEditor.prototype.setupSectionEditor = function () {
 			if (!part.controls) {
 				//not entirely sure why this should still be the case
 				//controls were formerly hidden from the song view
+            console.log("calling setup part div");
 				bam.setupPartDiv(part);
 				fadeInList.push(part.controls);
 			}
@@ -917,7 +922,6 @@ OMusicEditor.prototype.load = function (params)  {
 	var songDiv = bam.div.getElementsByClassName("song")[0];
 	bam.zones.push(songDiv);
 
-   console.log(params.type);
 	if (params.type == "SONG") {
 		bam.fadeIn([songDiv, bam.songEditor, bam.songEditor.addSectionButton], restoreColors);
 
@@ -931,14 +935,11 @@ OMusicEditor.prototype.load = function (params)  {
 					bam.setupPartDiv(part);
 					part.controls.rightBar.style.display = "none";
                part.controls.selectInstrument.style.display = "none";
+               newSections.push(part.controls);
 				});
 			});
 			bam.fadeIn(newSections);
-			bam.arrangeSections();
-			
-			//TODO display this somewhere or something
-         //bam.songEditor.songName.value = bam.song.data.name;
-			
+			bam.arrangeSections();			
 		}
 
       if (typeof bam.onzonechange == "function") {
@@ -1356,7 +1357,7 @@ OMusicEditor.prototype.setupMelodyMaker = function () {
 				if (response && response.result == "good") {
 					part.saved = true;
 				} else {
-               console.log(response);
+               debug(response);
             }
 			});
          
@@ -1379,14 +1380,15 @@ OMusicEditor.prototype.setupMelodyMaker = function () {
 
 				   bam.setupPartDiv(part);
 
-				   var otherParts = [];
+				   var otherParts = [part.controls];
 				   var otherPart;
 				   var otherPartsList = bam.section.div
 						   .getElementsByClassName("part2");
 				   for (var ii = 0; ii < otherPartsList.length; ii++) {
 					   otherPart = otherPartsList.item(ii)
-					   if (bam.part.div != otherPart)
+					   if (bam.part.div != otherPart) {
 						   otherParts.push(otherPart);
+                  }
 				   }
 
 				   otherParts.push(bam.sectionEditor);
@@ -1564,9 +1566,8 @@ OMusicEditor.prototype.arrangeParts = function(callback) {
 	var height = bam.mobile ? 75 : 105;
 	var width = Math.min((bam.windowWidth - bam.offsetLeft) * 0.7);
 	var spaceBetween = 18;
-	
-	console.log(top + (height + spaceBetween) * bam.section.parts.length);
-	var extraRows = 0.2; //bam.mobile ? 2.7 : 1;
+		
+   var extraRows = 0.2; //bam.mobile ? 2.7 : 1;
 	if (top + (height + spaceBetween) * (bam.section.parts.length + extraRows) > bam.windowHeight) {
 		height = (bam.windowHeight - top) / (bam.section.parts.length + extraRows);
 		spaceBetween = height * 0.1;
@@ -1614,6 +1615,7 @@ OMusicEditor.prototype.arrangeParts = function(callback) {
 	var interval = setInterval(function() {
 		var now = Date.now() - startedAt;
 		var now = Math.min(1, now / bam.animLength);
+      var cwidth, cheight;
 
 		for (ip = 0; ip < children.length; ip++) {
 			child = children[ip];
@@ -1621,21 +1623,22 @@ OMusicEditor.prototype.arrangeParts = function(callback) {
 					+ (child.targetX - child.originalX) * now + "px";
 			child.div.style.top = child.originalY
 					+ (child.targetY - child.originalY) * now + "px";
-			child.div.style.width = child.originalW
-					+ (child.targetW - child.originalW) * now + "px";
-			child.div.style.height = child.originalH
-					+ (child.targetH - child.originalH) * now + "px";
+
+         cwidth = child.originalW + (child.targetW - child.originalW) * now;
+         cheight = child.originalH + (child.targetH - child.originalH) * now
+			child.div.style.width = cwidth + "px";
+			child.div.style.height = cheight + "px";
 
 			if (child.canvas) {
-				child.canvas.style.width = child.originalW
-					+ (child.targetW - child.originalW) * now + "px";
-				child.canvas.style.height = child.originalH
-						+ (child.targetH - child.originalH) * now - child.canvas.offsetTop + "px";
+				child.canvas.style.width = cwidth + "px";
+				child.canvas.style.height = cheight - child.canvas.offsetTop + "px";
+				child.canvas.width = cwidth;
+				child.canvas.height = cheight - child.canvas.offsetTop;
+            
 
 				if (typeof(child.canvas.omusic_refresh) === "function") {
-					child.canvas.omusic_refresh();
+					child.canvas.omusic_refresh(cwidth, cheight - child.canvas.offsetTop);
 				}
-
 			}
 		}
 
@@ -1695,7 +1698,6 @@ OMusicEditor.prototype.arrangeSections = function(callback, animLength) {
 		child.targetH = height;
 
 		children.push(child);
-
 		if (!sections[ip].partsAreClean) {
 			sections[ip].partsAreClean = true;
 			
@@ -1714,7 +1716,6 @@ OMusicEditor.prototype.arrangeSections = function(callback, animLength) {
 				child.children.push(grandchild);
 				
 				grandchild.canvas = grandchild.div.getElementsByTagName("canvas").item(0);
-
 			}
 		}
 	}
@@ -1727,7 +1728,7 @@ OMusicEditor.prototype.arrangeSections = function(callback, animLength) {
 			child.originalW = 60; // padding does the rest;
 			child.originalX = child.div.offsetLeft;
 			child.originalY = child.div.offsetTop;
-			child.targetX = bam.offsetLeft + 5 + bam.song.sections.length * (10 + sectionWidth);// - bam.song.slidLeft;
+			child.targetX = bam.offsetLeft + 5 + bam.song.sections.length * (10 + sectionWidth) - bam.song.slidLeft;
 			child.targetY = bam.offsetTop;
 			child.targetW = child.originalW;
 			
@@ -1770,13 +1771,13 @@ OMusicEditor.prototype.arrangeSections = function(callback, animLength) {
 					gchild.div.style.height = gheight + "px"; 
 
 					if (gchild.canvas) {
-						gchild.canvas.style.width = gchild.originalW
-								+ (gchild.targetW - gchild.originalW) * now + "px";
-						gchild.canvas.style.height = gchild.originalH
-								+ (gchild.targetH - gchild.originalH) * now + "px";
+                  gchild.canvas.style.width = gwidth + "px";
+                  gchild.canvas.style.height = gheight + "px";
+                  gchild.canvas.width = gwidth;
+                  gchild.canvas.height = gheight;
 						
 						if (gchild.canvas.omusic_refresh)
-							gchild.canvas.omusic_refresh();
+							gchild.canvas.omusic_refresh(gwidth, gheight);
 
 					}
 				}
