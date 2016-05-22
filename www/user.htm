@@ -3,35 +3,49 @@
 <head>
 
    <link rel="stylesheet" href="css/main.css" type="text/css" />
-   <link rel="stylesheet" href="css/viewer.css" type="text/css" />
+   <link rel="stylesheet" href="css/search.css" type="text/css" />
 
 </head>
 <body>
 
    <div class="main-title-bar">
       <div class="main-title-bar-content">
-      <a href="index.htm">
+      <a class="main-page-link" href="index.htm">
          <span class="main-title-open">Open</span><span class="main-title-media">Music</span><span class="main-title-gallery">.Gallery</span>
       </a>
+
+      <div class="main-title-bar-right">
+         <div class="title-bar-user-controls"></div>
+      </div>
+
       </div>
    </div>
 
    <div class="main-body">
 
+      <h1 class="user-username"></h1>
       <div class="user-info">
-         <div class="user-username">Username</div>
-         <div class="user-created-at">May 12, 2016</div>
+         Account created <span class="user-created-at"></span>
       </div>
 
-      <div class="user-things">
+      <div class="main-separator"></div>
 
-         <div class="user-thing">
-            Untitled Song
-         </div>
+      <div class="search-things">
+
+         <!--<div class="user-thing">
+         </div>-->
 
       </div>
 
    </div>
+
+   <script src="js/usercontrols.js"></script>
+   <script src="js/user.js"></script>
+   <script>
+   setupUserControls(document.getElementsByClassName("title-bar-user-controls")[0], function (user) {
+      getUserThings(user);
+   });
+   </script>
 
 </body>
 </html>

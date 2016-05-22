@@ -1562,7 +1562,7 @@ OMusicEditor.prototype.arrangeParts = function(callback) {
 	
 	var top = bam.offsetTop; //bam.mobile ? 60 : 88; 
 	var height = bam.mobile ? 75 : 105;
-	var width = Math.min(640, bam.windowWidth - 15)
+	var width = Math.min((bam.windowWidth - bam.offsetLeft) * 0.7);
 	var spaceBetween = 18;
 	
 	console.log(top + (height + spaceBetween) * bam.section.parts.length);
@@ -1604,7 +1604,7 @@ OMusicEditor.prototype.arrangeParts = function(callback) {
 		child.originalY = child.div.offsetTop;
 		child.targetX = bam.bbody.clientWidth * 0.9 - 140;
       child.targetY = 0;
-		child.targetW = child.div.clientWidth;
+		child.targetW = 50; //child.div.clientWidth;
 		child.targetH = child.div.clientHeight;
 		children.push(child);		
 	}

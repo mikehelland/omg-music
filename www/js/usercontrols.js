@@ -1,4 +1,8 @@
-function setupUserControls(div) {
+if (typeof omg == "undefined") {
+   omg = {};
+}
+
+function setupUserControls(div, successCallback) {
    var loggedIn = false;
    var user;
 
@@ -37,6 +41,12 @@ function setupUserControls(div) {
    var onLoggedIn = function () {
       div.omg.username.innerHTML = user.username;
       div.omg.dropDownContainer.style.display = "inline-block";
+
+      omg.user = user;
+
+      if (typeof successCallback == "function") {
+         successCallback(user);
+      }
    };
 
 

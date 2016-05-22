@@ -1,7 +1,4 @@
-var parameters = getQueryParameters();
-
-var searchTermsDiv = document.getElementsByClassName("search-info-terms")[0];
-searchTermsDiv.innerHTML = parameters.q || "";
+//var parameters = getQueryParameters();
 
 var resultList = document.getElementsByClassName("search-things")[0];
 
@@ -52,24 +49,33 @@ var loadSearchResults = function (results) {
    });
 };
 
-var xhr = new XMLHttpRequest();
-xhr.open("GET", "data/?q=" + (parameters.q || ""));
-xhr.onreadystatechange = function () {
-   var results;
-   if (xhr.readyState == 4) {
-      console.log(xhr.responseText);
-      try {
-         results = JSON.parse(xhr.responseText);
-      }
-      catch (exception) {
-         resultList.innerHTML = "Error parsing search results.";
-         return;
-      }
-      loadSearchResults(results);
-   }
-};
-xhr.send();
 
+function getUserThings(user) {
+
+   var div = document.getElementsByClassName("user-username")[0];
+   div.innerHTML = user.username;
+
+   div = document.getElementsByClassName("user-created-at")[0];
+   div.innerHTML = getTimeCaption(user.created_at);
+
+   var xhr = new XMLHttpRequest();
+   xhr.open("GET", "data/?user_id=" + user.id);
+   xhr.onreadystatechange = function () {
+      var results;
+      if (xhr.readyState == 4) {
+         console.log(xhr.responseText);
+         try {
+            results = JSON.parse(xhr.responseText);
+         }
+         catch (exception) {
+            resultList.innerHTML = "Error parsing search results.";
+            return;
+         }
+         loadSearchResults(results);
+      }
+   };
+   xhr.send();
+}
 
 function getQueryParameters() {
 
@@ -127,6 +133,8 @@ function getTimeCaption(timeMS) {
     var months = ["Jan", "Feb", "Mar", "Apr", "May",
                 "Jun", "Jul", "Aug", "Sep", "Oct", 
                 "Nov", "Dec"];
+
+    console.log(date.getYear());
     var monthday = months[date.getMonth()] + " " + date.getDate();
     if (days < 365) {
 	    return monthday;

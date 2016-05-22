@@ -39,9 +39,7 @@ passport.use("login", new LocalStrategy(
         db.users.findOne({username: username}, function (err, user) {
             if (err) return done(err);
 
-            console.log("passport login");
-
-            console.log("user:"); console.log(user);
+            console.log("login user:"); console.log(user);
             if (user && user.password.trim() === password) {
                 return done(null, user);
             }
@@ -111,7 +109,13 @@ app.get('/user', function (req, res) {
 app.get('/data/', function (req, res) {
     var db = app.get('db');
     var options = {limit : 20, order : "created_at desc"};
-    db.things.findDoc("*", options, function (err, docs) {
+    var find = "*";
+    if (req.query.user_id) {
+        //find = {user_id: parseInt(req.query.user_id)};
+        find = {user_id: req.query.user_id};
+    }
+
+    db.things.findDoc(find, options, function (err, docs) {
         if (err) {
             res.send(err);
         }
