@@ -129,6 +129,7 @@ OMusicPlayer.prototype.play = function (song) {
             }
             
             //cancel all oscilators that aren't used next section
+            //TODO make this work right
             var usedAgain;
             for (var ils = 0; ils < lastSection.parts.length; ils++) {
             	if (!lastSection.parts[ils].osc)
@@ -496,13 +497,18 @@ OMusicPlayer.prototype.makeOsc = function (part) {
     }
     
     part.osc.finishPart = function () {
-		part.osc.stop(0);
-		part.osc.disconnect(part.gain);
-		part.gain.disconnect(p.context.destination);
+      part.gain.gain.value = 0;
+
+      //total hack, this is why things should be processed ala AudioContext, not our own thread
+      setTimeout(function () {
+		   part.osc.stop(0);
+		   part.osc.disconnect(part.gain);
+		   part.gain.disconnect(p.context.destination);
 		
-		part.oscStarted = false;
-		part.osc = null;
-		part.gain = null;
+		   part.oscStarted = false;
+		   part.osc = null;
+		   part.gain = null;
+      }, 50);
     };
         
     part.oscStarted = true;
