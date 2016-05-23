@@ -502,7 +502,7 @@ OMusicEditor.prototype.setupSectionEditor = function () {
 		var fadeOutList = [bam.sectionEditor]; 
 		bam.section.parts.forEach(function (part) {
 			fadeOutList.push(part.controls.rightBar);
-			fadeOutList.push(part.controls.selectInstrument);
+			//fadeOutList.push(part.controls.selectInstrument);
 			if (part.controls.beatMarker) {
 				fadeOutList.push(part.controls.beatMarker);
 			}		
@@ -523,8 +523,12 @@ OMusicEditor.prototype.setupSectionEditor = function () {
 				bam.setupPartDiv(part);
 				fadeInList.push(part.controls);
 			}
+         //Probably a better way for this, but fadein makes it opaque
+         if (part.controls.beatMarker) {
+            part.controls.beatMarker.style.opacity = 0.6;
+         }
 			fadeInList.push(part.controls.rightBar);
-         fadeInList.push(part.controls.selectInstrument);
+         //fadeInList.push(part.controls.selectInstrument);
 		}
 		bam.fadeIn(fadeInList);
 
