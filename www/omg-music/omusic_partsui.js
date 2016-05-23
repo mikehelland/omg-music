@@ -1395,8 +1395,7 @@ OMGMelodyMaker.prototype.onDisplay = function () {
 					note = {
 						note : fret - omgmm.frets.rootNote,
 						scaledNote : noteNumber,
-						beats : 0.25,
-						drawData : []
+						beats : 0.25
 					};
 					omgmm.data.notes.push(note);
 					omgmm.lastNewNote = Date.now();
@@ -1406,6 +1405,9 @@ OMGMelodyMaker.prototype.onDisplay = function () {
 				}
 
 				if (omgmm.welcomeStyle && note) {
+               if (!note.drawData) {
+                  note.drawData = [];
+               }
 					note.drawData.push({
 						x : x,
 						y : y,
@@ -1413,7 +1415,6 @@ OMGMelodyMaker.prototype.onDisplay = function () {
 						originalY : y
 					});
 				}
-
 			}
 
 			if (oldCurrent != omgmm.frets.current) {
@@ -1544,8 +1545,7 @@ OMGMelodyMaker.prototype.onDisplay = function () {
 			note = {
 				note : fret - omgmm.frets.rootNote,
 				scaledNote : noteNumber,
-				beats : 0.25,
-				drawData : []
+				beats : 0.25
 			};
 			omgmm.data.notes.push(note);
 
@@ -1555,6 +1555,10 @@ OMGMelodyMaker.prototype.onDisplay = function () {
 			omgmm.addTimeToNote(note, omgmm.lastNewNote);
 
 			if (omgmm.welcomeStyle) {
+            if (!note.drawData) {
+               note.drawData = [];
+            }
+
 				if (!omgmm.drawStarted && !omgmm.animationStarted) {
 					omgmm.startDrawCountDown();
 				}

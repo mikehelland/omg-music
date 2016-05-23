@@ -822,6 +822,7 @@ OMusicEditor.prototype.cancelPart = function (part) {
 
 	var partInArray = bam.section.parts.indexOf(part);
 	if (partInArray > -1) {
+      bam.section.parts.splice(partInArray, 1);
 
 		if (bam.section.parts.length == 0) {
 			bam.player.stop();
