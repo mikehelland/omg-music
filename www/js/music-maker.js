@@ -39,6 +39,15 @@ playButton.onclick = function () {
    omgbam.playButtonClick();
 };
 
+var shareButton = document.getElementById("omg-music-controls-share-button");
+shareButton.onclick = function () {
+   if (!omg.shareWindow) {
+      omg.setupShareWindow();
+   }
+   omg.shareWindow.show();
+};
+
+
 document.getElementById("omg-music-controls-next-button").onclick = function () {
    omgbam.nextButtonClick(function () {
       if (omgbam.musicMakerZoneType === "SONG") {

@@ -10,6 +10,10 @@ viewer.canvas.height = viewer.canvas.clientHeight
 
 viewer.playButton = document.getElementById("play-button");
 viewer.editButton = document.getElementById("edit-button");
+viewer.shareButton = document.getElementById("share-button");
+viewer.shareButton.onclick = function () {
+   omg.shareWindow.show();
+};
 
 viewer.titleDiv = document.getElementById("viewer-title");
 viewer.userDiv = document.getElementById("viewer-user");
