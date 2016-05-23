@@ -754,6 +754,7 @@ OMusicEditor.prototype.setupSongEditor = function () {
 			bam.player.stop();
 		
 		if (!bam.song.saved) {
+         bam.song.data.id = undefined;
 			bam.omgservice.post(bam.song.getData(), function(response) {
 				if (response && response.id) {
 					bam.song.saved = true;
