@@ -203,7 +203,7 @@ OMusicPlayer.prototype.loadPart = function (part) {
       part.data.volume = 0.6;
    }
    if (part.data.pan == undefined) {
-      part.data.pan = 0.6;
+      part.data.pan = 0;
    }
 };
 
@@ -466,7 +466,8 @@ OMusicPlayer.prototype.makeOsc = function (part) {
 		try {
 			part.osc.stop(0);
 			part.osc.disconnect(part.gain);
-			part.gain.disconnect(p.context.destination);
+			part.gain.disconnect(part.panner);
+			part.panner.disconnect(p.context.destination);
 		}
 		catch (e) {}
 	}
@@ -479,7 +480,23 @@ OMusicPlayer.prototype.makeOsc = function (part) {
 
     part.gain = p.context.createGain();
     part.osc.connect(part.gain);
-    part.gain.connect(p.context.destination);
+
+    //Mock for the old browsers I have
+    if (!p.context.createStereoPanner) {
+        part.panner = p.context.createPanner();
+        part.panner.setValue = function (x) {
+            part.panner.setPosition(0, 0, (x - 0.5) * 10)
+        };
+    } else {
+        part.panner = p.context.createStereoPanner();
+        part.panner.setValue = function (x) {
+            part.panner.pan.value = x;
+        };
+    }
+
+    part.gain.connect(part.panner);
+    part.panner.connect(p.context.destination);
+    part.panner.setValue(part.data.pan);
     
     if (part.muted) {
     	part.gain.gain.value = 0;
@@ -915,9 +932,12 @@ OMusicPlayer.prototype.makeOMGSong = function (data) {
 
 OMusicPlayer.prototype.updatePartVolumeAndPan = function (part) {
 
-   if (part.gain) {
-      part.gain.gain.value = part.data.volume;
-   }
+    if (part.gain) {
+        part.gain.gain.value = part.data.volume;
+    }
+    if (part.panner) {
+        part.panner.setValue(part.data.pan);
+    }
 
 };    
 

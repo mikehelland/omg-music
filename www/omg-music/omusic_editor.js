@@ -589,13 +589,15 @@ OMusicEditor.prototype.setupSectionAddButtons = function (buttonGroup) {
 
 	var mixerButton = document.createElement("div");
    mixerButton.className = "remixer-add-button";
-   mixerButton.innerHTML = "Mixer View";
+   mixerButton.innerHTML = "Mixer <br/>View";
    buttonGroup.appendChild(mixerButton);
 	mixerButton.onclick = function() {
       if (bam.sectionEditor.mixerMode) {
          bam.sectionEditor.endMixerMode();
+         mixerButton.innerHTML = "Mixer <br/>View";
       } else {
          bam.sectionEditor.startMixerMode();
+         mixerButton.innerHTML = "Standard <br/>View";
       }
 	};
 
