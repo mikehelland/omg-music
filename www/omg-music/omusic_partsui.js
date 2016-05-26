@@ -1942,3 +1942,127 @@ OMGMelodyMaker.prototype.setPart = function(part, welcomeStyle) {
 		}, 100);
 	}
 };
+
+function OMGDragAndDropHelper() {
+
+   this.onstartnewlevel = function() {
+   };
+
+   this.ondrag = function (div, x, y) {
+      console.log(x, y);
+      return true;
+   };
+
+   this.longClickTimeMS = 250;
+   this.children = [];
+}
+
+OMGDragAndDropHelper.prototype.disable = function () {
+   this.children.forEach(function (div) {
+      div.onmousedown = undefined;
+	   div.ontouchstart = undefined;
+   });
+};
+
+OMGDragAndDropHelper.prototype.setupChildDiv = function (div) {
+
+   this.children.push(div);
+   ddh = this;
+   div.omgdd = {dragLevel: 0};
+	
+   div.onmousedown = function(event) {
+		event.preventDefault();
+		ddh.ondown(div, event.clientX, event.clientY);
+	};
+	div.ontouchstart = function(event) {
+		event.preventDefault();
+		ddh.ondown(div, event.targetTouches[0].pageX, event.targetTouches[0].pageY);
+	};
+
+   div.omgdd.parentOffsets = omg.ui.totalOffsets(div.parentElement);
+
+   div.omgdd.onclick = div.onclick;
+   div.onclick = undefined;
+};
+
+OMGDragAndDropHelper.prototype.ondown = function (div, x, y) {
+
+   var ddh = this;
+   var divdd = div.omgdd;
+
+   divdd.dragLevel = 1; // 0 for off, 1 for short click then drag, 2 for long click and drag
+
+	divdd.firstX = x;
+	divdd.lastX = x;
+	divdd.lastY = y;
+	
+	divdd.doClick = true;
+	
+   ddh.onstartnewlevel(div);
+
+	// sense for a long click, and then move the drag level up and cancel the click
+	divdd.downTimeout = setTimeout(function () {
+		
+		divdd.doClick = false;
+      console.log("doclick = false");
+		
+		if (Math.abs(divdd.lastX - divdd.firstX) < 15) {				
+			
+         divdd.dragLevel = 2;      
+         ddh.onstartnewlevel(div);
+		}
+		
+	}, ddh.longClickTimeMS);
+
+
+	div.parentElement.onmousemove = function (event) {
+		ddh.onmove(div, event.clientX, event.clientY);
+	};
+	div.parentElement.ontouchmove = function (e) {
+		ddh.onmove(div, e.targetTouches[0].pageX, e.targetTouches[0].pageY);
+	};
+	div.parentElement.ontouchend = function () {
+		ddh.onmouseup(div);
+	};
+	div.parentElement.onmouseup = function() {
+		ddh.onup(div);
+	};
+
+};
+
+
+OMGDragAndDropHelper.prototype.onmove = function (div, x, y) {
+
+   var px = (x - div.omgdd.parentOffsets.left) / div.parentElement.clientWidth;
+   var py = (y - div.omgdd.parentOffsets.top) / div.parentElement.clientHeight;
+   if (this.ondrag(div, x, y, px, py)) {
+      div.omgdd.resetZ = true;
+      div.style.zIndex = "1";
+		div.style.left = div.offsetLeft + x - div.omgdd.lastX + "px";
+		div.style.top  = div.offsetTop  + y - div.omgdd.lastY + "px";
+	}
+
+	div.omgdd.lastX = x;
+	div.omgdd.lastY = y;
+};
+
+OMGDragAndDropHelper.prototype.onup = function (div) {
+
+   div.omgdd.dragLevel = 0;
+
+   if (div.omgdd.resetZ) {
+      div.style.zIndex = "0";
+   }
+	div.parentElement.onmousemove = undefined;
+	div.parentElement.ontouchmove = undefined;
+	div.parentElement.ontouchend = undefined;
+	div.parentElement.onmouseup = undefined;
+
+	if (!div.omgdd.doClick)
+		return;
+
+	clearTimeout(div.omgdd.downTimeout);
+
+   //div.omgdd.onclick();
+};
+

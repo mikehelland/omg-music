@@ -202,6 +202,9 @@ OMusicPlayer.prototype.loadPart = function (part) {
    if (part.data.volume == undefined) {
       part.data.volume = 0.6;
    }
+   if (part.data.pan == undefined) {
+      part.data.pan = 0.6;
+   }
 };
 
 OMusicPlayer.prototype.loadMelody = function (part) {
@@ -480,10 +483,10 @@ OMusicPlayer.prototype.makeOsc = function (part) {
     
     if (part.muted) {
     	part.gain.gain.value = 0;
-    	part.gain.gain.preMuteGain = 0.15;
+    	part.gain.gain.preMuteGain = part.data.volume;
     }
     else {
-        part.gain.gain.value = 0.15;    	
+        part.gain.gain.value = part.data.volume;    	
     }
  
     part.osc.frequency.setValueAtTime(0, 0);
@@ -909,7 +912,14 @@ OMusicPlayer.prototype.makeOMGSong = function (data) {
 	
 	return null;
 };
-    
+
+OMusicPlayer.prototype.updatePartVolumeAndPan = function (part) {
+
+   if (part.gain) {
+      part.gain.gain.value = part.data.volume;
+   }
+
+};    
 
 function OMGSong(div, data) {
 	this.div = div;

@@ -178,6 +178,8 @@ OMusicEditor.prototype.setupPartDiv = function (part) {
       return;
    }
 
+   part.div.omgpart = part; //maybe not the best design, but helpful for in dragndrop
+
 	part.controls = document.createElement("div");
 	part.controls.className = "part-controls";
 	part.controls.style.height = part.div.clientHeight - 6 + "px";
@@ -293,6 +295,11 @@ OMusicEditor.prototype.setupDivForDrumbeat = function (part) {
 		if (bam.zones[bam.zones.length - 1] != bam.section.div) {
 			return;
 		}
+
+      if (bam.sectionEditor.mixerMode) {
+         // mute?
+         return;
+      }
 		
 		bam.part = part;
 
@@ -378,6 +385,11 @@ OMusicEditor.prototype.setupMelodyDiv = function (part) {
 		if (bam.zones[bam.zones.length - 1] != bam.section.div) {
 			return;
 		}
+
+      if (bam.sectionEditor.mixerMode) {
+         // mute?
+         return;
+      }
 
 		bam.part = part;
 
@@ -541,11 +553,52 @@ OMusicEditor.prototype.setupSectionEditor = function () {
       }
 	};
 
+   bam.sectionEditor.startMixerMode = function () {
+      bam.sectionEditor.mixerMode = true;
+      bam.sectionEditor.dragAndDrop = new OMGDragAndDropHelper();
+
+      bam.sectionEditor.dragAndDrop.ondrag = function (div, x, y, px, py) {
+         div.omgpart.data.volume = 1 - py;
+         div.omgpart.data.pan = (px - 0.5) * 2;
+
+         if (bam.player.playing) {
+            bam.player.updatePartVolumeAndPan(div.omgpart);
+         }
+         return true;
+      };
+
+      bam.section.parts.forEach(function (part) {
+         bam.sectionEditor.dragAndDrop.setupChildDiv(part.div);
+      });
+
+      bam.arrangeParts();      
+   };
+
+   bam.sectionEditor.endMixerMode = function () {
+      bam.sectionEditor.mixerMode = false;
+
+      bam.sectionEditor.dragAndDrop.disable();
+
+      bam.arrangeParts();      
+   };
+
 };
 
 OMusicEditor.prototype.setupSectionAddButtons = function (buttonGroup) {
 	var bam = this;
-	
+
+	var mixerButton = document.createElement("div");
+   mixerButton.className = "remixer-add-button";
+   mixerButton.innerHTML = "Mixer View";
+   buttonGroup.appendChild(mixerButton);
+	mixerButton.onclick = function() {
+      if (bam.sectionEditor.mixerMode) {
+         bam.sectionEditor.endMixerMode();
+      } else {
+         bam.sectionEditor.startMixerMode();
+      }
+	};
+
 	var melodyButton = document.createElement("div");
    melodyButton.className = "remixer-add-button";
    melodyButton.innerHTML = "Add <br/>Melody";
@@ -1571,6 +1624,11 @@ OMusicEditor.prototype.arrangeParts = function(callback) {
 	var top = bam.offsetTop; //bam.mobile ? 60 : 88; 
 	var height = bam.mobile ? 75 : 105;
 	var width = Math.min((bam.windowWidth - bam.offsetLeft) * 0.7);
+  
+   if (bam.sectionEditor.mixerMode) {
+      width = height;
+   }
+
 	var spaceBetween = 18;
 		
    var extraRows = 0.2; //bam.mobile ? 2.7 : 1;
@@ -1580,6 +1638,7 @@ OMusicEditor.prototype.arrangeParts = function(callback) {
 		height = height * 0.9;
 	}
 
+   var volume, pan;
 	var parts = div.getElementsByClassName("part2");
 	for (var ip = 0; ip < parts.length; ip++) {
 		child = {
@@ -1590,8 +1649,16 @@ OMusicEditor.prototype.arrangeParts = function(callback) {
 		child.originalX = child.div.offsetLeft;
 		child.originalY = child.div.offsetTop;
 
-		child.targetX = bam.bbody.clientWidth * 0.1; //bam.offsetLeft;
-		child.targetY = top + ip * (height + spaceBetween);
+      if (bam.sectionEditor.mixerMode) {
+         volume = bam.section.parts[ip].data.volume || 0.6;
+         pan = bam.section.parts[ip].data.pan || 0;
+		   child.targetX = bam.windowWidth * (pan / 2 + 0.5) - width / 2; //;
+		   child.targetY = bam.windowHeight * (1 - volume) - height / 2 ;
+      }
+      else {
+		   child.targetX = bam.bbody.clientWidth * 0.1; //bam.offsetLeft;
+		   child.targetY = top + ip * (height + spaceBetween);
+      }
 		child.targetW = width;
 		child.targetH = height;
 
