@@ -241,7 +241,7 @@ OMusicEditor.prototype.setupPartDiv = function (part) {
 	if (type == "MELODY" || type == "BASSLINE") {
 		bam.setupMelodyDiv(part);
 	}
-
+/*
 	var muteButton = document.createElement("div");
 	muteButton.className = "remixer-part-command";
 	muteButton.innerHTML = "mute";
@@ -251,7 +251,7 @@ OMusicEditor.prototype.setupPartDiv = function (part) {
 		e.stopPropagation();
 	};
 	part.controls.rightBar.appendChild(muteButton);
-	part.controls.muteButton = muteButton;
+	part.controls.muteButton = muteButton;*/
 
 	var closePartButton = document.createElement("div");
 	closePartButton.innerHTML = "&times;";
@@ -422,6 +422,8 @@ OMusicEditor.prototype.setupSectionEditor = function () {
 
 	bam.sectionEditor = document.createElement("div"); 
    bam.sectionEditor.className = "area";
+   bam.sectionEditor.style.height = "100%";
+   bam.sectionEditor.style.pointerEvents = "none";
    bam.bbody.appendChild(bam.sectionEditor);
 
 	bam.sectionEditor.playButtonClick = function(e) {
@@ -438,6 +440,32 @@ OMusicEditor.prototype.setupSectionEditor = function () {
    		e.stopPropagation();
       }
 	};
+
+   //TODO these should probably be replaced with a canvas soon
+   //TODO also suggests a significant refactor
+   //eliminating the separation of master/song/section and the editor
+   //now uses css pointer-events:none and auto to make it work
+	bam.sectionEditor.mixerHints = document.createElement("div");
+   var hintDiv;
+   hintDiv = document.createElement("div");
+   hintDiv.className = "mixer-hint-volume-up";
+   hintDiv.innerHTML = "Volume Up";
+   bam.sectionEditor.mixerHints.appendChild(hintDiv);
+   hintDiv = document.createElement("div");
+   hintDiv.className = "mixer-hint-volume-down";
+   hintDiv.innerHTML = "Volume Down";
+   bam.sectionEditor.mixerHints.appendChild(hintDiv);
+   hintDiv = document.createElement("div");
+   hintDiv.className = "mixer-hint-pan-left";
+   hintDiv.innerHTML = "Pan Left";
+   bam.sectionEditor.mixerHints.appendChild(hintDiv);
+   hintDiv = document.createElement("div");
+   hintDiv.className = "mixer-hint-pan-right";
+   hintDiv.innerHTML = "Pan Right";
+   bam.sectionEditor.mixerHints.appendChild(hintDiv);
+   bam.sectionEditor.mixerHints.style.display = "none";
+   bam.sectionEditor.appendChild(bam.sectionEditor.mixerHints);
+
 
 	bam.sectionEditor.nosection = document.createElement("div");
 	bam.sectionEditor.nosection.className = "no-section-message";
@@ -556,6 +584,7 @@ OMusicEditor.prototype.setupSectionEditor = function () {
    bam.sectionEditor.startMixerMode = function () {
       bam.sectionEditor.mixerMode = true;
       bam.sectionEditor.dragAndDrop = new OMGDragAndDropHelper();
+      bam.sectionEditor.mixerHints.style.display = "block";
 
       bam.sectionEditor.dragAndDrop.ondrag = function (div, x, y, px, py) {
          div.omgpart.data.volume = 1 - py;
@@ -565,6 +594,9 @@ OMusicEditor.prototype.setupSectionEditor = function () {
             bam.player.updatePartVolumeAndPan(div.omgpart);
          }
          return true;
+      };
+      bam.sectionEditor.dragAndDrop.onshortclick = function (div) {
+         bam.toggleMute(div.omgpart);
       };
 
       bam.section.parts.forEach(function (part) {
@@ -576,7 +608,7 @@ OMusicEditor.prototype.setupSectionEditor = function () {
 
    bam.sectionEditor.endMixerMode = function () {
       bam.sectionEditor.mixerMode = false;
-
+      bam.sectionEditor.mixerHints.style.display = "none";
       bam.sectionEditor.dragAndDrop.disable();
 
       bam.arrangeParts();      
@@ -1132,7 +1164,7 @@ OMusicEditor.prototype.toggleMute = function (part, newMute) {
 	if (newMute) {
 		part.muted = true;
 
-		part.controls.muteButton.style.backgroundColor = "red";
+      part.controls.style.backgroundColor = "#FF8888";
 
 		if (part.gain) {
 			part.preMuteGain = part.gain.gain.value;
@@ -1140,7 +1172,8 @@ OMusicEditor.prototype.toggleMute = function (part, newMute) {
 		}
 	} else {
 		part.muted = false;
-		part.controls.muteButton.style.backgroundColor = "";
+
+		part.controls.style.backgroundColor = "";
 
 		if (part.gain && part.preMuteGain) {
 			part.gain.gain.value = part.preMuteGain;
@@ -1629,6 +1662,7 @@ OMusicEditor.prototype.arrangeParts = function(callback) {
   
    if (bam.sectionEditor.mixerMode) {
       width = height;
+      height = height * 0.8;
    }
 
 	var spaceBetween = 18;

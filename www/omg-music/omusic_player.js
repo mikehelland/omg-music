@@ -490,14 +490,14 @@ OMusicPlayer.prototype.makeOsc = function (part) {
     } else {
         part.panner = p.context.createStereoPanner();
         part.panner.setValue = function (x) {
-            part.panner.pan.value = x;
+            part.panner.pan.value = x || 0;
         };
     }
 
     part.gain.connect(part.panner);
     part.panner.connect(p.context.destination);
     part.panner.setValue(part.data.pan);
-    
+
     if (part.muted) {
     	part.gain.gain.value = 0;
     	part.gain.gain.preMuteGain = part.data.volume;
@@ -1080,7 +1080,7 @@ function OMGPart(div, data) {
 		this.data = data;
 	}
 	else {
-		this.data = {type: "MELODY", notes: []};	
+		this.data = {type: "MELODY", notes: [], volume: 0.6, pan: 0};	
 	}
 	
 		

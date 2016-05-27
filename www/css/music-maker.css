@@ -290,6 +290,7 @@
 	position:absolute;
 	right:0px;
 	padding:4px;
+   pointer-events:auto;
 }
 
 .remixer-add-button {
@@ -354,3 +355,31 @@
 	width:300px;
 }
 
+
+.mixer-hint-volume-up {
+   position:absolute;
+   width:100%;
+   text-align:center;
+   top:5%;
+   left:0px;
+}
+.mixer-hint-volume-down {
+   position:absolute;
+   width:100%;
+   text-align:center;
+   bottom:5%;
+   left:0px;
+}
+
+.mixer-hint-pan-right {
+   position:absolute;
+   width:100%;
+   text-align:right;
+   bottom:50%;
+   right:5%;
+}
+.mixer-hint-pan-left {
+   position:absolute;
+   bottom:50%;
+   left:5%;
+}

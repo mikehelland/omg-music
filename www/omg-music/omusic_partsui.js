@@ -1945,13 +1945,12 @@ OMGMelodyMaker.prototype.setPart = function(part, welcomeStyle) {
 
 function OMGDragAndDropHelper() {
 
-   this.onstartnewlevel = function() {
-   };
-
+   // caller hooks
    this.ondrag = function (div, x, y) {
-      console.log(x, y);
-      return true;
+      return true; // return false to manually handle dragging
    };
+   this.onstartnewlevel = function() {};
+   this.onshortclick = function (div) {};
 
    this.longClickTimeMS = 250;
    this.children = [];
@@ -2063,6 +2062,7 @@ OMGDragAndDropHelper.prototype.onup = function (div) {
 
 	clearTimeout(div.omgdd.downTimeout);
 
+   this.onshortclick(div);
    //div.omgdd.onclick();
 };
 
