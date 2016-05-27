@@ -1444,6 +1444,10 @@ OMusicEditor.prototype.setupMelodyMaker = function () {
 		} else {
 			position = bam.section.parts.length;;
 			bam.section.parts.push(part);
+
+         if (bam.sectionEditor.mixerMode) {
+            bam.sectionEditor.dragAndDrop.setupChildDiv(part.div);
+         }
 		}
 
 		if (!part.saved) {
