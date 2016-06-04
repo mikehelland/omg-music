@@ -1452,7 +1452,7 @@ OMusicEditor.prototype.setupMelodyMaker = function () {
 
 		if (!part.saved) {
 			bam.omgservice.post(part.data, function(response) {
-				if (response && response.result == "good") {
+				if (response && response.id) {
 					part.saved = true;
 				} else {
                debug(response);
