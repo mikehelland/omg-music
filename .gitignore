@@ -2,3 +2,4 @@
 .*
 node_modules/
 !.gitignore
+setup_database.sh

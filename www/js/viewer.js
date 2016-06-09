@@ -60,7 +60,7 @@ viewer.loadPlayer = function (dataToPlay) {
    };
    
    viewer.tipButton.onclick = function () {
-      window.location = "bitcoin:1qc54zFKR4GAp9qAdaS513YT6CDHrjpU3";
+      window.location = "bitcoin:1EMU5FpZ6JFG8Y2H5HqQx5rcS8PYJ6wn7X?amount=0.004";
    };
 };
 
