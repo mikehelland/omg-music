@@ -98,11 +98,13 @@ OMusicEditor.prototype.setup = function (options) {
 		}
 	});
 
+   var loadId;
    var loadParams;
 	if (this.loadWhenReady) {
 		loadParams = bam.getLoadParams();
-      if (loadParams.id) {
-         bam.omgservice.getId(loadParams.id, function(result) {
+      loadId = loadParams.song || loadParams.section || loadParams.part ;
+      if (!isNaN(loadId)) {
+         bam.omgservice.getId(loadId, function(result) {
             loadParams.dataToLoad = result;
       		bam.load(loadParams);
          });
@@ -982,6 +984,7 @@ OMusicEditor.prototype.getLoadParams = function () {
 OMusicEditor.prototype.load = function (params)  {	
 	var bam = this;
 
+   //hmmmm, why is this does here?
 	if (!bam.windowWidth || bam.windowWidth < 0) {
 		bam.windowWidth = bam.bbody.clientWidth;
 		bam.windowHeight = bam.bbody.clientHeight;
@@ -990,6 +993,7 @@ OMusicEditor.prototype.load = function (params)  {
 		bam.mobile = bam.windowWidth < 1000;
 	}
 
+   console.log(params);
    if (params.dataToLoad && params.dataToLoad.type) {
       params.type = params.dataToLoad.type;
    }
@@ -1015,6 +1019,7 @@ OMusicEditor.prototype.load = function (params)  {
 	var songDiv = bam.div.getElementsByClassName("song")[0];
 	bam.zones.push(songDiv);
 
+//	if (params.type == "SONG") {
 	if (params.type == "SONG") {
 		bam.fadeIn([songDiv, bam.songEditor, bam.songEditor.addSectionButton], restoreColors);
 

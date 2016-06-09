@@ -11,6 +11,7 @@ viewer.canvas.height = viewer.canvas.clientHeight
 viewer.playButton = document.getElementById("play-button");
 viewer.editButton = document.getElementById("edit-button");
 viewer.shareButton = document.getElementById("share-button");
+viewer.tipButton = document.getElementById("tip-button");
 viewer.shareButton.onclick = function () {
    omg.shareWindow.show();
 };
@@ -56,6 +57,10 @@ viewer.loadPlayer = function (dataToPlay) {
 
    viewer.editButton.onclick = function () {
       window.location = "music-maker.htm?id=" + dataToPlay.id;
+   };
+   
+   viewer.tipButton.onclick = function () {
+      window.location = "bitcoin:1qc54zFKR4GAp9qAdaS513YT6CDHrjpU3";
    };
 };
 
