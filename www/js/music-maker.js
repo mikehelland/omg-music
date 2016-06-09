@@ -24,6 +24,32 @@ omgbam.onzonechange = function (zone) {
 
       var zoneBG = window.getComputedStyle(zone.div, null).backgroundColor;
       document.getElementsByClassName("omg-music-controls")[0].style.background = "linear-gradient(#FFFFFF, " + zoneBG + ")";
+
+      var updateWindowHistory = function () {
+         console.log("update window history");
+         window.history.pushState({},"", window.location.pathname + "?" + zone.data.type.toLowerCase() + "=" + zone.data.id);
+      };
+
+      console.log("zone.data");
+      console.log(zone.data);
+      if (zone.data.id) {
+         updateWindowHistory();
+      } else {
+         var attempts = 0;
+         var getIdHandle = setInterval(function () {
+            if (zone.data.id) {
+               updateWindowHistory();
+               clearInterval(getIdHandle);
+               return;
+            }
+
+            attempts++;
+            if (attempts > 20) {
+               clearInterval(getIdHandle);
+               console.log("hasn't saved, not updating window history!!!");
+            }
+         }, 100);
+      }
    }
 };
 
