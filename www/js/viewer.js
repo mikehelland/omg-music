@@ -30,7 +30,7 @@ viewer.context = viewer.canvas.getContext("2d");
 viewer.beatMarker = document.getElementsByClassName("beat-marker")[0];
 
 omg.musicUrl = "omg-music/";
-omg.ui.setupNoteImages()
+omg.ui.setupNoteImages();
 
 viewer.loadPlayer = function (dataToPlay) {
    viewer.player = new OMusicPlayer();
@@ -60,7 +60,7 @@ viewer.loadPlayer = function (dataToPlay) {
    };
    
    viewer.tipButton.onclick = function () {
-      window.location = "bitcoin:1EMU5FpZ6JFG8Y2H5HqQx5rcS8PYJ6wn7X?amount=0.004";
+      window.location = "bitcoin:1Jdam2fBZxfhWLB8yP69Zbw6fLzRpweRjc?amount=0.004";
    };
 };
 

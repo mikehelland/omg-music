@@ -120,15 +120,16 @@ body {
    border:1px solid black;
    border-radius:2px;
    width:30%;
-   padding:20px;
-   margin:20px;
+   padding:15px;
+   margin:15px;
    background-image: linear-gradient(#DDD, #88FFFF);
 }
 
-.main-create-something:hover {
+.main-create-something:hover, .main-create-something-easy:hover {
    background-image: linear-gradient(#FFF, #88FFFF);
 
 }
+
 
 .main-featured {
    font-family: Helvetica;  
@@ -180,3 +181,4 @@ body {
    border-radius:8px;
    border:1px solid #808080;
 }
+
