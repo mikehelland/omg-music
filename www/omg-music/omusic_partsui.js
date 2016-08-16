@@ -781,9 +781,9 @@ OMGMelodyMaker.prototype.drawCanvas = function () {
 		if (this.drawStarted) {
 			now = Date.now() - this.drawStarted;
 			context.globalAlpha = 0.3;
-			context.fillStyle = this.selectedColor;
-			context.fillRect(0, this.topFretTop, now / 4000 * canvas.width, 
-					canvas.height - this.bottomFretBottom - this.topFretTop);
+			//context.fillStyle = this.selectedColor;
+			//context.fillRect(0, this.topFretTop, now / 4000 * canvas.width, 
+			//		canvas.height - this.bottomFretBottom - this.topFretTop);
 			
 			welcomeAlpha = 1 - Math.min(1, now / 4000);
 		}
