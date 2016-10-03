@@ -3,3 +3,4 @@
 node_modules/
 !.gitignore
 setup_database.sh
+install_database.sh

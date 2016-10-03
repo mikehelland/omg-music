@@ -9,26 +9,7 @@ body {
 #main-canvas {position:absolute;
              width:100%;
              height:100%;
-             z-index:-1;
              }
-
-
-   body {color:white; font-family:Helvetica; }
-
-   .mike {color:white; z-index:1; padding:5%; font-size:5em; text-align:center;
-			opacity:0.5;}
-
-   .calvin, .pedro {
-      color:white;
-      display:inline-block;
-      text-align:center;
-      width:40%;
-      font-size:5em;
-      padding-top:40px;
-   }
-
-   .calvin {padding-left:10%;}
-
 </style>
 
 <script src="/socket.io/socket.io.js"></script>
@@ -41,10 +22,6 @@ body {
 
 <canvas id="main-canvas">
 </canvas>
-
-   <div class="mike">MikeHelland.com</div>
-   <!--<div class="calvin">Calvin Stephens</div>
-   <div class="pedro">Pedro <br/>Bartes</div>-->
 
 <script>
 
@@ -77,9 +54,9 @@ app.clearAlpha = 1;
 app.framesBetweenFadeFrame = 0;
 app.framesSinceLastFadeFrame = 0;
 
-app.maxHistoryLength = 50;
+app.maxHistoryLength = 800;
 
-app.messages = ["MikeHelland.com", "MOB ROLL 2016", "Big Building, Seattle"];
+app.messages = ["http://OpenMusic.Gallery", "MOB ROLL 2016", "Big Building, Seattle"];
 app.currentMessageI = 0;
 app.messageStartTime = Date.now();
 
@@ -93,7 +70,6 @@ var findUser = function (data) {
     
     var user = {"username": data.user, "firsttime": Date.now(), "lastX": -1};
     user.color = colors[data.colorI];
-    user.letter = data.letter;
     user.history = [];
     user.startTime = Date.now();
     users.push(user);
@@ -120,23 +96,45 @@ var drawMessage = function () {
 };
 
 var drawCanvas = function () {
+    //canvas.width = canvas.width;
+    //ctx.lineWidth = 2;
     
-    ctx.fillStyle = "black";
-    ctx.fillRect(0, 0, width, height);
-    
-    ctx.font = 32 + "pt Helvetica";
+    if (app.framesSinceLastFadeFrame == app.framesBetweenFadeFrame) {
+        ctx.fillStyle = "black";
+        ctx.globalAlpha = app.clearAlpha;
+        ctx.fillRect(0, 0, width, height);
+        ctx.globalAlpha = 1;
+        app.framesSinceLastFadeFrame = 0;
+    } else {
+        app.framesSinceLastFadeFrame++;
+    }
+
+    drawMessage();    
     users.forEach(function (user) {
-        if (user.lastX > -1) {
-            drawUserData(user);
-        }
+        user.history = user.history.filter(function (data, i) {
+
+            if (i < user.history.length - app.maxHistoryLength) {
+                return false;
+            }
+
+            drawCircle(data[0], data[1], user.color);
+            return true;
+        });
+        //if (user.lastX > -1) {
+        //    drawCircle(user.lastX, user.lastY, user.color);
+        //}
     });
     setTimeout(drawCanvas, 33);
 };
 
-var drawUserData = function (user) {
+var drawCircle = function (x, y, color) {
 
-    ctx.fillStyle = user.color;
-    ctx.fillText(user.letter, user.lastX * width, user.lastY * height);
+        
+    ctx.beginPath();
+    ctx.arc(x * width, y * height, 15, 0, 2 * Math.PI);
+    //ctx.stroke();
+    ctx.fillStyle = color;
+    ctx.fill();
     
 };
 
@@ -145,7 +143,7 @@ socket.on("playnote", function (data) {
     var user = findUser(data);
     user.lastX = data.x;
     user.lastY = data.y;
-    //user.history.push([data.x, data.y, Date.now() - user.startTime]);
+    user.history.push([data.x, data.y, Date.now() - user.startTime]);
 
     if (!user.audio) {
         user.audio = setupAudioChannel(data.colorI);
@@ -169,7 +167,6 @@ socket.on("playnote", function (data) {
 
 var currentUserI = -1;
 var lastUserPlayed;
-var rootNote = 48;
 var playNotes = function () {
     if (lastUserPlayed) {
         lastUserPlayed.audio.volume.gain.value = 0;
@@ -202,7 +199,7 @@ var playNotes = function () {
     }
     else {
         user.audio.volume.gain.value = 0.5;
-        user.audio.osc.frequency.setValueAtTime(buildFrequency(ascale, 3, 1 - user.lastY, rootNote), 0);
+        user.audio.osc.frequency.setValueAtTime(buildFrequency(ascale, 3, 1 - user.lastY, 48), 0);
         user.audio.panner.setPosition(0, 0, (user.lastX - 0.5) * 10)
     }
     lastUserPlayed = user;
@@ -323,8 +320,6 @@ document.body.onkeyup = function(e){
         console.log(audioMode);
     } else if (e.keyCode == 46) {
         app.clear();
-    } else if (e.keyCode == 69) {
-        rootNote = 55;
     }
     console.log(e.keyCode);
 };

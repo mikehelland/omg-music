@@ -31,7 +31,6 @@ var colors = [ "#FFFFFF", "#FF0000", "#FFFF00", "#00FF00", "#0000FF",
             "#FF8000", "#9E9E9E", "#00FFFF", "#800080", "#632DFF", "#63FF08" ];
 
 var colorI = Math.floor(Math.random() * colors.length);
-var letter = String.fromCharCode(Math.floor(Math.random() * 26) + 65);
 if (window.location.search) {
    colorI = parseInt(window.location.search.substring(1));
 }
@@ -90,13 +89,13 @@ var canvasDownEvent = function (x, y) {
     isTouching = true;
     drawCircle(x, y); 
     
-    socket.emit("playnote", {'user': username, 'x': x/width, 'y': y/height, 'colorI': colorI, 'letter': letter});
+    socket.emit("playnote", {'user': username, 'x': x/width, 'y': y/height, 'colorI': colorI});
 };
 
 var canvasMoveEvent = function (x, y) {
     if (isTouching){
         drawCircle(x, y);    
-        socket.emit("playnote", {'user': username, 'x': x/width, 'y': y/height, 'colorI': colorI, 'letter': letter});
+        socket.emit("playnote", {'user': username, 'x': x/width, 'y': y/height, 'colorI': colorI});
     }
 };
 
