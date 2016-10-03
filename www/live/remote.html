@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+	<meta name="viewport" content="width=device-width">
 <style>
 body {
     margin:0px;
@@ -24,7 +25,10 @@ body {
 
 <script>
 var canvas = document.getElementById("main-canvas");
+var ctx = canvas.getContext("2d");
 
+var lastX = -1;
+var lastY = -1;
 var isTouching = false;
 
 var colors = [ "#FFFFFF", "#FF0000", "#FFFF00", "#00FF00", "#0000FF",
@@ -37,72 +41,80 @@ if (window.location.search) {
 }
 
 var color = colors[colorI];
-console.log(color);
-
-colors.forEach(function (c, i) {
-   var newElement = document.createElement("div");
-   newElement.style.backgroundColor = c;
-   newElement.onclick = function () {
-      colorI = i;   
-      color = c;
-   };
-   newElement.style.display = "inline-block";
-   newElement.style.position = "relative";
-   newElement.style.height = "10%";
-   newElement.style.width = "10%";
-   document.body.appendChild(newElement);
-});
-
-
-//document.body.appendChild(canvas);
-//canvas.height = canvas.parentElement.clientHeight - canvas.offsetTop;
-//canvas.style.height = canvas.height + "px";
-
-var height = window.innerHeight;
-var width = window.innerWidth;
-canvas.clientWidth = width;
-canvas.clientHeight = height;
-canvas.width = canvas.clientWidth;
-canvas.height = canvas.clientHeight;
-
 var username = Math.random().toString(36).substr(2);
 
-canvas.style.backgroundColor = color;
-var ctx = canvas.getContext("2d");
+
+window.onload = function () {
+	console.log("loaded!");
+	
+	setupCanvas();
+};
+
+window.onresize = function () {
+	setupCanvas();
+};
+
+var setupCanvas = function () {
+	
+	var height = window.innerHeight;
+	var width = window.innerWidth;
+	canvas.clientWidth = width;
+	canvas.clientHeight = height;
+	canvas.width = canvas.clientWidth;
+	canvas.height = canvas.clientHeight;
+
+	ctx.font = "5em Helvetica";
+	ctx.textAlign = "center";
+	ctx.textBaseline = "middle";
+
+	drawCanvas(canvas.width / 2, canvas.height / 2);
+};
 
 
-if (window.innerWidth < window.innerHeight) {
+var drawCanvas = function (x, y) {
 
-}
-
-var drawCircle = function (x, y) {
-
-    canvas.width = canvas.width;
-    ctx.lineWidth = 3;
-        
-    ctx.beginPath();
-    ctx.arc(x, y, 12, 0, 2 * Math.PI);
-    ctx.stroke();
+	if (x > -1) {	
+		lastX = x;
+		lastY = y;
+	}
+	
+    ctx.fillStyle = "black";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    ctx.font = "10pt Helvetica";
+    ctx.fillStyle = "white";
+    ctx.fillText("Move your letter around", canvas.width / 2, canvas.height / 4);
+    
+    ctx.font = "5em Helvetica";
+    ctx.fillStyle = color;
+    ctx.globalAlpha = isTouching ? 1.0 : 0.5;
+    ctx.fillText(letter, lastX, lastY);
+    ctx.globalAlpha = 1.0;
     
 };
 
 var canvasDownEvent = function (x, y) {
     isTouching = true;
-    drawCircle(x, y); 
+    drawCanvas(x, y); 
     
-    socket.emit("playnote", {'user': username, 'x': x/width, 'y': y/height, 'colorI': colorI, 'letter': letter});
+    socket.emit("playnote", {'user': username, 
+		'x': x/canvas.width, 'y': y/canvas.height, 
+		'colorI': colorI, 'letter': letter});
 };
 
 var canvasMoveEvent = function (x, y) {
     if (isTouching){
-        drawCircle(x, y);    
-        socket.emit("playnote", {'user': username, 'x': x/width, 'y': y/height, 'colorI': colorI, 'letter': letter});
+        drawCanvas(x, y);    
+        socket.emit("playnote", {'user': username, 
+			'x': x/canvas.width, 'y': y/canvas.height, 
+			'colorI': colorI, 'letter': letter});
     }
 };
 
 var canvasEndEvent = function (x, y) {
     isTouching = false;    
-    canvas.width = canvas.width;
+    //canvas.width = canvas.width;
+    drawCanvas(-1);
     socket.emit("playnote", {'user': username, 'x':-1});
 };
 

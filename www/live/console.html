@@ -124,9 +124,12 @@ var drawCanvas = function () {
     ctx.fillStyle = "black";
     ctx.fillRect(0, 0, width, height);
     
-    ctx.font = 32 + "pt Helvetica";
+    ctx.font = 20 + "pt Helvetica";
+    ctx.textAlign = "center";
+	ctx.textBaseline = "middle";
     users.forEach(function (user) {
         if (user.lastX > -1) {
+						
             drawUserData(user);
         }
     });
@@ -135,8 +138,12 @@ var drawCanvas = function () {
 
 var drawUserData = function (user) {
 
+	var fontSize = lastUserPlayed == user ? 50 : 25;
+	ctx.font = fontSize + "pt Helvetica";
+
     ctx.fillStyle = user.color;
-    ctx.fillText(user.letter, user.lastX * width, user.lastY * height);
+    ctx.fillText(user.letter, user.lastX * width, 
+							  user.lastY * height);
     
 };
 
@@ -186,7 +193,7 @@ var playNotes = function () {
         currentUserI = -1;
         return;
     }
-    console.log(currentUserI);
+    //console.log(currentUserI);
     while (users[currentUserI].lastX == -1) {
         currentUserI++;
         if (currentUserI >= users.length) {
