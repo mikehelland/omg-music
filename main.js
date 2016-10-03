@@ -80,6 +80,10 @@ userSocket.on('connection', function(socket){
   socket.on("playnote", function(data) {
     consoleSocket.emit("playnote", data);
   });
+
+  socket.on("programchange", function(data) {
+    consoleSocket.emit("programchange", data);
+  });
 });
 
 

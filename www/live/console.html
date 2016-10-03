@@ -16,7 +16,7 @@ body {
    body {color:white; font-family:Helvetica; }
 
    .mike {color:white; z-index:1; padding:5%; font-size:5em; text-align:center;
-			opacity:0.5;}
+			opacity:0.75;}
 
    .calvin, .pedro {
       color:white;
@@ -48,7 +48,7 @@ body {
 
 <script>
 
-var audioMode = 0;
+var audioMode = 1;
 
 var canvas = document.getElementById("main-canvas");
 var ctx = canvas.getContext("2d");
@@ -64,6 +64,10 @@ canvas.clientWidth = width + "px";
 canvas.clientHeight = height + "px";
 canvas.width = canvas.clientWidth;
 canvas.height = canvas.clientHeight;
+
+ctx.textAlign = "center";
+ctx.textBaseline = "middle";
+
 
 var app = {};
 app.clear = function () {
@@ -124,9 +128,6 @@ var drawCanvas = function () {
     ctx.fillStyle = "black";
     ctx.fillRect(0, 0, width, height);
     
-    ctx.font = 20 + "pt Helvetica";
-    ctx.textAlign = "center";
-	ctx.textBaseline = "middle";
     users.forEach(function (user) {
         if (user.lastX > -1) {
 						
@@ -138,8 +139,8 @@ var drawCanvas = function () {
 
 var drawUserData = function (user) {
 
-	var fontSize = lastUserPlayed == user ? 50 : 25;
-	ctx.font = fontSize + "pt Helvetica";
+	var fontSize = lastUserPlayed == user ? 5 : 2;
+	ctx.font = fontSize + "em Helvetica";
 
     ctx.fillStyle = user.color;
     ctx.fillText(user.letter, user.lastX * width, 
