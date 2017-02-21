@@ -148,6 +148,12 @@ var drawUserData = function (user) {
     
 };
 
+socket.on("programchange", function (data) {
+	if (data.key != undefined) {
+		
+	}
+};
+
 socket.on("playnote", function (data) {
 
     var user = findUser(data);
