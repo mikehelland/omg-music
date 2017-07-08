@@ -119,6 +119,9 @@ app.get('/data/', function (req, res) {
         //find = {user_id: parseInt(req.query.user_id)};
         find = {user_id: req.query.user_id};
     }
+    if (req.query.type) {
+		find = {type: req.query.type};
+	}
 
     db.things.findDoc(find, options, function (err, docs) {
         if (err) {

@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+   <link rel="stylesheet" href="css/main.css" type="text/css" />
+   <link rel="stylesheet" href="css/search.css" type="text/css" />
+   
+   <style>
+	   .url-input {width: 300px;}
+   </style>
+
+</head>
+<body>
+
+   <div class="main-title-bar">
+         <div class="main-title-bar-content">
+         <a class="main-page-link" href="index.htm">
+         <span class="main-title-open">Open</span><span class="main-title-media">Music</span><span class="main-title-gallery">.Gallery</span>
+         </a>
+
+         <div class="main-title-bar-right">
+            <div class="title-bar-user-controls"></div>
+         </div>
+      </div>
+
+   </div>
+
+   <div class="main-body">
+	   
+	   <h1>Add/Edit a Sound Set</h1>
+	   Sound Set Name: 
+	   <br>
+	   <input id="soundset-name">
+	   
+	  
+	  <div class="search-info">
+       Sound 1 Name:
+	   
+	   <input id="sound-1-name">
+	   
+	   URL:
+	   
+	   <input id="sound-1-url" class="url-input">
+	  </div>
+
+	  <div class="search-info">
+       Sound 2 Name:
+	   
+	   <input id="sound-2-name">
+	   
+	   URL:
+	   
+	   <input id="sound-2-url" class="url-input">
+	  </div>
+
+	  <div class="search-info">
+       Sound 3 Name:
+	   
+	   <input id="sound-3-name">
+	   
+	   URL:
+	   
+	   <input id="sound-3-url" class="url-input">
+	  </div>
+
+	  <div class="search-info">
+       Sound 4 Name:
+	   
+	   <input id="sound-4-name">
+	   
+	   URL:
+	   
+	   <input id="sound-4-url" class="url-input">
+	  </div>
+
+	  <div class="search-info">
+       Sound 5 Name:
+	   
+	   <input id="sound-5-name">
+	   
+	   URL:
+	   
+	   <input id="sound-5-url" class="url-input">
+	  </div>
+
+	  <div class="search-info">
+       Sound 6 Name:
+	   
+	   <input id="sound-6-name">
+	   
+	   URL:
+	   
+	   <input id="sound-6-url" class="url-input">
+	  </div>
+
+	  <div class="search-info">
+       Sound 7 Name:
+	   
+	   <input id="sound-7-name">
+	   
+	   URL:
+	   
+	   <input id="sound-7-url" class="url-input">
+	  </div>
+
+	  <div class="search-info">
+       Sound 8 Name:
+	   
+	   <input id="sound-8-name">
+	   
+	   URL:
+	   
+	   <input id="sound-8-url" class="url-input">
+	  </div>
+
+
+	  <button id="submit-button">Submit Sound Set</button>
+   
+   </div>
+
+   <script src="js/usercontrols.js"></script>
+   <script>
+   setupUserControls(document.getElementsByClassName("title-bar-user-controls")[0]);
+   </script>
+
+   <script src="js/omgservice.js"></script>
+   <script>
+   document.getElementById("submit-button").onclick = function () {
+	   var newSoundSet = {type: "SOUNDSET", 
+		      name: document.getElementById("soundset-name").value, 
+              data: [], 
+		};
+		
+		var cap, url
+		for (var i = 1; i < 9; i++) {
+			url = document.getElementById("sound-" + i + "-url").value;
+			cap = document.getElementById("sound-" + i + "-name").value;
+			if (url.length > 0 && cap.length > 0) {
+				newSoundSet.data.push({url: url, caption: cap});
+			}
+		}
+		
+		console.log(JSON.stringify(newSoundSet));
+		
+		if (newSoundSet.name.length > 0 && newSoundSet.data.length > 0) {
+			var omgservice = new OMGService();
+			omgservice.post(newSoundSet, function (response) {
+				console.log(response);
+			});
+		}
+		else {
+			alert("SoundSet needs a name, and a sound with a caption and url.")
+		}
+   };
+   </script>
+
+</body>
+</html>
