@@ -46,7 +46,13 @@ var loadSearchResults = function (results) {
       rightData.appendChild(resultData);
 
       resultDiv.onclick = function () {
-         window.location = "viewer.htm?id=" + result.id;
+		 var page;
+		 if (result.type == "SOUNDSET")
+		    page = "soundset.htm";
+		 else
+		    page = "viewer.htm";
+		    
+         window.location = page + "?id=" + result.id;
       };
       resultList.appendChild(resultDiv);
    });
