@@ -126,6 +126,24 @@
 
    <script src="js/omgservice.js"></script>
    <script>
+	   
+
+   for (var i = 1; i < 9; i++) {
+	   urlElement = document.getElementById("sound-" + i + "-url");
+	   urlElement.addEventListener ("paste", function (e) {
+		   console.log(e.clipboardData.getData("Text"));
+			
+		   var nameInput = document.getElementById(e.target.id.replace("url", "name"));
+		   if (nameInput.value.length == 0) {
+			   
+			   var filename;		   
+			   filename = e.clipboardData.getData("Text");
+			   
+			   nameInput.value = filename.split("/").pop().split(".")[0]
+		   }
+	   }, false);
+   }
+	   
    document.getElementById("submit-button").onclick = function () {
 	   var newSoundSet = {type: "SOUNDSET", 
 		      name: document.getElementById("soundset-name").value, 
