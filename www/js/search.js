@@ -23,7 +23,7 @@ var loadSearchResults = function (results) {
 
       resultData = document.createElement("div");
       resultData.className = "search-thing-title";
-      resultData.innerHTML = result.title || "";
+      resultData.innerHTML = result.name || "";
       resultDiv.appendChild(resultData);
 
       resultData = document.createElement("div");
@@ -105,6 +105,10 @@ function getBackgroundColor(type) {
 
    if (type === "MELODY" || type === "DRUMBEAT" || type === "BASSLINE") {
       return "#FFFF99";
+   }
+
+   if (type === "SOUNDSET") {
+      return "#FF9999";
    }
 
    return "#808080";
