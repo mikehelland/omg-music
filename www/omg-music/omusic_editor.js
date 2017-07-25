@@ -176,6 +176,7 @@ OMusicEditor.prototype.setupPartDiv = function (part) {
     var bam = this;
 
     var type = part.data.type;
+    var surface = part.data.surfaceURL;
     
     if (type == "CHORDPROGRESSION") {
 		//todo might show this thing?
@@ -230,7 +231,7 @@ OMusicEditor.prototype.setupPartDiv = function (part) {
 
             part.sound = ss;
 
-            if (type == "DRUMBEAT") {
+            if (surfaceURL == "PRESET_SEQUENCER") {
                 bam.player.setupDrumPartWithSoundSet(ss, part, true);
             }
             else {
@@ -243,10 +244,10 @@ OMusicEditor.prototype.setupPartDiv = function (part) {
 
     part.controls.appendChild(document.createElement("br"));
 
-    if (type == "DRUMBEAT") {
+    if (surface == "PRESET_SEQUENCER") {
         bam.setupDivForDrumbeat(part);
     }
-    if (type == "MELODY" || type == "BASSLINE") {
+    else {
         bam.setupMelodyDiv(part);
     }
 /*
@@ -1119,7 +1120,7 @@ OMusicEditor.prototype.load = function (params)  {
     bam.section.div.appendChild(newDiv);
     bam.zones.push(newDiv);
 
-    if (params.type == "DRUMBEAT") {
+    if (params.surfaceURL == "PRESET_SEQUENCER") {
         if (params.dataToLoad) {
             bam.part = new OMGDrumpart(newDiv, params.dataToLoad);
             bam.fadeIn([bam.part.div, bam.beatmaker ], restoreColors);  
@@ -1139,9 +1140,9 @@ OMusicEditor.prototype.load = function (params)  {
         }
     } 
     else {
-      if (params.type !== "MELODY" && params.type !== "BASSLINE") {
-         params.type = "MELODY";
-      }
+      //if (params.type !== "MELODY" && params.type !== "BASSLINE") {
+      //   params.type = "MELODY";
+      //}
         
         if (params.dataToLoad) {
             bam.part = new OMGPart(newDiv, params.dataToLoad);
@@ -1462,6 +1463,7 @@ OMusicEditor.prototype.setupMelodyMaker = function () {
         var part = bam.part;
 
         var type = bam.part.data.type;
+        var surface = bam.part.data.surfaceURL;
 
         var position;
         if (typeof (part.position) == "number") {
@@ -1527,12 +1529,13 @@ OMusicEditor.prototype.setupMelodyMaker = function () {
            });
       };
 
-        if (type == "MELODY" || type == "BASSLINE") {
-            bam.fadeOut([ bam.mm ], shrinkPart);
-            bam.mm.playAfterAnimation = false;
-        } else if (type == "DRUMBEAT") {
+        if (surface == "PRESET_SEQUENCER") {
             bam.fadeOut([ bam.beatmaker ], shrinkPart);
         }
+        else  {
+            bam.fadeOut([ bam.mm ], shrinkPart);
+            bam.mm.playAfterAnimation = false;
+		}
     };
     
    //TODO not used, use it, or lose it

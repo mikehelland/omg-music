@@ -89,13 +89,15 @@ viewer.drawSong = function (song) {
          params.height = partHeight - currentMargin * 2;
          params.width = viewer.sectionWidth;
 
-         if (part.data.type == "DRUMBEAT") {
+		 if (part.data.type == "CHORDPROGERSSION") {
+			//TODO draw chord progression and all that 
+		 }
+         else if (part.data.surfaceURL == "PRESET_SEQUENCER") {
             params.captionWidth = 0;
             omg.ui.drawDrumCanvas(params)
-         } else if (part.data.type == "BASSLINE" || part.data.type == "MELODY") {
+         } else if (part.data.surfaceURL) {
             omg.ui.drawMelodyCanvas(params);
          }
-         //TODO draw chord progression and all that
 
          viewer.drawPartBorder(params);
       });
