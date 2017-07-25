@@ -174,7 +174,14 @@ OMusicEditor.prototype.nextButtonClick = function (callback) {
 
 OMusicEditor.prototype.setupPartDiv = function (part) {
     var bam = this;
+
+    var type = part.data.type;
     
+    if (type == "CHORDPROGRESSION") {
+		//todo might show this thing?
+		return;
+	}
+        
    if (part.controls) {
       debug("setupPartDiv: We are already setup!");
       return;
@@ -187,7 +194,6 @@ OMusicEditor.prototype.setupPartDiv = function (part) {
     part.controls.style.height = part.div.clientHeight - 6 + "px";
     part.div.appendChild(part.controls);
 
-    var type = part.data.type;
     var typeDiv = document.createElement("div");
     typeDiv.className = 'remixer-part-type';
     typeDiv.innerHTML = type;
