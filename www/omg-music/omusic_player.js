@@ -375,7 +375,11 @@ OMusicPlayer.prototype.playBeat = function (section, iSubBeat) {
 
 OMusicPlayer.prototype.playBeatForPart = function (iSubBeat, part) {
     var p = this;
-    if (part.data.surfaceURL == "PRESET_SEQUENCER") {
+    if (part.data.type == "CHORDPROGRESSION") {
+        //TODO should this really be in here? As a part that is?
+        
+    }
+    else if (part.data.surfaceURL == "PRESET_SEQUENCER") {
         p.playBeatForDrumPart(iSubBeat, part);        
     }
     else {
