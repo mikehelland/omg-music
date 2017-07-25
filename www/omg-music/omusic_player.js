@@ -945,9 +945,9 @@ OMusicPlayer.prototype.updatePartVolumeAndPan = function (part) {
 OMusicPlayer.prototype.splitInts = function (input) {
 	var newInts = [];
 	var elements = input.split(",");
-	for (var el : elements) {
+	elements.forEach(function (el) {
 		newInts.push(parseInt(el));
-	}
+	});
 };
 
 function OMGSong(div, data) {
