@@ -423,6 +423,10 @@ OMusicPlayer.prototype.playBeatForMelody = function (iSubBeat, part) {
     }
 
     if (beatToPlay == part.nextBeat) {
+        if (data.notes == undefined) {
+            console.log("something wrong here");
+            return;
+        }
         var note = data.notes[part.currentI];
         
 //            if (part.soundset) {
