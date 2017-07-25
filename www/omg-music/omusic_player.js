@@ -226,7 +226,7 @@ OMusicPlayer.prototype.loadMelody = function (part) {
 	//}
 	//else {
 		if (!data.ascale && data.scale) {
-			data.ascale = omg.util.splitInts(data.scale);
+			data.ascale = p.splitInts(data.scale);
 		}
 		ascale = data.ascale;
 	//}
@@ -940,6 +940,15 @@ OMusicPlayer.prototype.updatePartVolumeAndPan = function (part) {
     }
 
 };    
+
+
+OMusicPlayer.prototype.splitInts = function (input) {
+	var newInts = [];
+	var elements = input.split(",");
+	for (var el : elements) {
+		newInts.push(parseInt(el));
+	}
+};
 
 function OMGSong(div, data) {
 	this.div = div;
