@@ -76,7 +76,7 @@ omg.ui.drawMelodyCanvas = function (params, canvas_p, w, h) {
       w = w || canvas.width;
       h = h || canvas.height;
    }
-
+	console.log(melody);
     var high;
     var low;
     var note;

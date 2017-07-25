@@ -503,6 +503,19 @@ OMusicEditor.prototype.setupSectionEditor = function () {
 
         bam.sectionEditor.hide(function() {
 
+			if (!bam.section.saved) {
+			 bam.section.data.id = undefined;
+				bam.omgservice.post(bam.section.getData(), function(response) {
+					if (response && response.id) {
+						bam.section.saved = true;
+						/*bam.section.data.id = response.id;
+						if (saveCallback) {
+								saveCallback();
+						}*/
+					}
+				});
+			}
+
             // keep it rolling? maybe preference
             // bam.sectionEditor.stop();
 
@@ -2478,6 +2491,7 @@ OMusicEditor.prototype.setupSharer = function () {
         };
 
         bam.omgservice.post(params.data, function(response) {
+			console.log(response);
             if (response && response.result == "good") {
                 goToId(response.id);
             }
