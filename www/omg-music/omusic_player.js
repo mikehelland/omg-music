@@ -375,10 +375,10 @@ OMusicPlayer.prototype.playBeat = function (section, iSubBeat) {
 
 OMusicPlayer.prototype.playBeatForPart = function (iSubBeat, part) {
     var p = this;
-    if (part.data.type == "DRUMBEAT") {
+    if (part.data.surfaceURL == "PRESET_SEQUENCER") {
         p.playBeatForDrumPart(iSubBeat, part);        
     }
-    if (part.data.type == "MELODY" || part.data.type == "BASSLINE") {
+    else {
         p.playBeatForMelody(iSubBeat, part);        
     }
 };
@@ -585,7 +585,7 @@ OMusicPlayer.prototype.loadSound = function (sound, part) {
     if (sound.indexOf("PRESET_") == 0) {
         var preseturl;
         if (!omg.dev) {
-            preseturl = "https://dl.dropboxusercontent.com/u/24411900/omg/drums/";
+            preseturl = "http://mikehelland.com/omg/drums/";
         }
         else {
             preseturl = "http://localhost:8888/music/audio/";
