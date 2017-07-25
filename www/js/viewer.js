@@ -92,9 +92,10 @@ viewer.drawSong = function (song) {
          if (part.data.type == "DRUMBEAT") {
             params.captionWidth = 0;
             omg.ui.drawDrumCanvas(params)
-         } else {
+         } else if (part.data.type == "BASSLINE" || part.data.type == "MELODY") {
             omg.ui.drawMelodyCanvas(params);
          }
+         //TODO draw chord progression and all that
 
          viewer.drawPartBorder(params);
       });
