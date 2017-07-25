@@ -948,6 +948,7 @@ OMusicPlayer.prototype.splitInts = function (input) {
 	elements.forEach(function (el) {
 		newInts.push(parseInt(el));
 	});
+	return newInts;
 };
 
 function OMGSong(div, data) {
