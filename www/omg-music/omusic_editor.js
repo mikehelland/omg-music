@@ -1120,7 +1120,7 @@ OMusicEditor.prototype.load = function (params)  {
     bam.section.div.appendChild(newDiv);
     bam.zones.push(newDiv);
 
-    if (params.surfaceURL == "PRESET_SEQUENCER") {
+    if (params.type == "DRUMBEAT") {
         if (params.dataToLoad) {
             bam.part = new OMGDrumpart(newDiv, params.dataToLoad);
             bam.fadeIn([bam.part.div, bam.beatmaker ], restoreColors);  

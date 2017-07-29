@@ -23,7 +23,7 @@ var loadSearchResults = function (results) {
 
       resultData = document.createElement("div");
       resultData.className = "search-thing-title";
-      resultData.innerHTML = result.name || "";
+      resultData.innerHTML = result.name || result.tags || "";
       resultDiv.appendChild(resultData);
 
       resultData = document.createElement("div");
