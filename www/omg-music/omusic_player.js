@@ -194,6 +194,11 @@ OMusicPlayer.prototype.loadPart = function (part) {
     part.soundsLoading = 0;
     part.loaded = false;
     if (type == "PART") {
+		
+		if (!part.data.soundsetURL) {
+			part.data.soundsetURL = "PRESET_OSC_SINE_SOFT_DELAY";
+		}
+		
         if (part.data.volume == undefined) {
           part.data.volume = 0.6;
         }
@@ -492,17 +497,20 @@ OMusicPlayer.prototype.makeOsc = function (part) {
 
     part.osc = p.context.createOscillator();
 
-    if (part.data.soundsetURL.indexOf("SAW") > -1) {
+	var soundsetURL = part.data.soundsetURL || 
+		"PRESET_OSC_SINE_SOFT_DELAY";
+		
+    if (soundsetURL.indexOf("SAW") > -1) {
         part.osc.type = part.osc.SAWTOOTH || "sawtooth";
     }
-    else if (part.data.soundsetURL.indexOf("SINE") > -1) {
+    else if (soundsetURL.indexOf("SINE") > -1) {
         part.osc.type = part.osc.SAWTOOTH || "sine";
     }
-    else if (part.data.soundsetURL.indexOf("SQUARE") > -1) {
+    else if (soundsetURL.indexOf("SQUARE") > -1) {
         part.osc.type = part.osc.SAWTOOTH || "square";
     }
 
-	if (part.data.soundsetURL.indexOf("SOFT") > -1) {
+	if (soundsetURL.indexOf("SOFT") > -1) {
         part.osc.soft = true;
     }
 
