@@ -557,13 +557,14 @@ OMusicPlayer.prototype.makeOsc = function (part) {
     }
     
     part.osc.finishPart = function () {
-      part.gain.gain.value = 0;
+      part.gain.gain.setValueAtTime(0, 0);
 
       //total hack, this is why things should be processed ala AudioContext, not our own thread
       setTimeout(function () {
            part.osc.stop(0);
            part.osc.disconnect(part.gain);
-           part.gain.disconnect(p.context.destination);
+           part.gain.disconnect(part.panner);
+           part.panner.disconnect(p.context.destination);
         
            part.oscStarted = false;
            part.osc = null;
@@ -913,8 +914,10 @@ OMusicPlayer.prototype.playNote = function (note, part, data) {
     //  });
     //}, fromNow - 100);
 
-    if (audio)
-        audio.stop(p.context.currentTime + fromNow * 0.98);
+    if (audio) {
+		audio.gain2.gain.setValueAtTime(0, p.context.currentTime + fromNow * 0.95);
+        //audio.stop(p.context.currentTime + fromNow);
+	}
     
     if (part)
         part.currentAudio = audio;

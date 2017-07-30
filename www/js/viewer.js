@@ -36,6 +36,8 @@ viewer.loadPlayer = function (dataToPlay) {
    viewer.player = new OMusicPlayer();
    viewer.omgsong = viewer.player.makeOMGSong(dataToPlay);
 
+   viewer.sectionWidth = Math.max(viewer.sectionWidth, 
+		viewer.div.clientWidth / viewer.omgsong.sections.length);
    viewer.drawSong(viewer.omgsong);
 
    viewer.player.play(viewer.omgsong);
