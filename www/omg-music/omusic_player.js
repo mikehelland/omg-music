@@ -8,6 +8,8 @@ function OMusicPlayer() {
     
     p.playing = false;
     p.loadedSounds = {};
+    p.downloadedSoundSets = [];
+
 
     if (!window.AudioContext)
         window.AudioContext = window.webkitAudioContext;
@@ -237,9 +239,12 @@ OMusicPlayer.prototype.loadMelody = function (part) {
     //}
     p.rescale(data, rootNote, ascale);
     
-    if (typeof data.sound == "string" &&
-            data.sound.indexOf("PRESET_") == 0) {
-        p.setupPartWithSoundSet(p.getPresetSoundSet(data.sound), part);
+    if (typeof data.soundsetURL == "string") {
+		 p.getSoundSet(data.soundsetURL, function (soundset) {
+			 console.log("soundset = ");
+			 console.log(soundset);
+			 p.setupPartWithSoundSet(soundset, part);			 
+		 });
     }
     var soundsToLoad = 0;
 
@@ -487,8 +492,18 @@ OMusicPlayer.prototype.makeOsc = function (part) {
 
     part.osc = p.context.createOscillator();
 
-    if (part.data.type == "BASSLINE") {
+    if (part.data.soundsetURL.indexOf("SAW") > -1) {
         part.osc.type = part.osc.SAWTOOTH || "sawtooth";
+    }
+    else if (part.data.soundsetURL.indexOf("SINE") > -1) {
+        part.osc.type = part.osc.SAWTOOTH || "sine";
+    }
+    else if (part.data.soundsetURL.indexOf("SQUARE") > -1) {
+        part.osc.type = part.osc.SAWTOOTH || "square";
+    }
+
+	if (part.data.soundsetURL.indexOf("SOFT") > -1) {
+        part.osc.soft = true;
     }
 
     part.gain = p.context.createGain();
@@ -511,12 +526,16 @@ OMusicPlayer.prototype.makeOsc = function (part) {
     part.panner.connect(p.context.destination);
     part.panner.setValue(part.data.pan);
 
+	var volume = part.data.volume/2;
+	if (part.osc.soft) {
+		volume = part.data.volume * 0.6;
+	}
     if (part.muted) {
         part.gain.gain.value = 0;
-        part.gain.gain.preMuteGain = part.data.volume;
+        part.gain.gain.preMuteGain = volume;
     }
     else {
-        part.gain.gain.value = part.data.volume;        
+        part.gain.gain.value = volume;        
     }
  
     part.osc.frequency.setValueAtTime(0, 0);
@@ -734,14 +753,59 @@ OMusicPlayer.prototype.setupDrumPartWithSoundSet = function (ss, part, load) {
 
 };
 
+OMusicPlayer.prototype.getSoundSet = function (url, callback) {
+    var p = this;
+    
+    if (typeof url != "string") {
+		return;
+	}
+	
+	if (!callback) {
+		callback = function () {};
+	}
+    
+    var dl = p.downloadedSoundSets[url];
+    if (dl) {
+        callback(dl)
+        return;
+    }
+
+    if (url.indexOf("PRESET_") == 0) {
+        dl = p.getPresetSoundSet(url);
+        p.downloadedSoundSets[url] = dl;
+        callback(dl);
+        return;
+    }
+
+    var xhr2 = new XMLHttpRequest();
+    xhr2.open("GET", url, true)
+    xhr2.onreadystatechange = function() {
+
+        if (xhr2.readyState == 4) {
+            var ojson = JSON.parse(xhr2.responseText);
+            if (ojson) {
+                p.downloadedSoundSets[url] = ojson.list[0];
+                callback(ojson.list[0]);
+            } else {
+                callback(ojson);
+            }
+        }
+
+    };
+    xhr2.send();
+
+};
+
+
+
 OMusicPlayer.prototype.getPresetSoundSet = function (preset) {
     var p = this;
     
     var oret;
-    if (preset == "PRESET_SYNTH1") {
+    if (preset == "PRESET_KEYBOARD") {
         oret = {"name" : "Keyboard", 
                 "id" : -101, "bottomNote" : 33, 
-                "data" : {"name":"PRESET_SYNTH1",
+                "data" : {"name":"PRESET_KEYBOARD",
                 "data":[
                 {"url":"a1","caption":"A1"},{"url":"bf1","caption":"Bb1"},{"url":"b1","caption":"B1"},{"url":"c2","caption":"C2"},{"url":"cs2","caption":"C#2"},{"url":"d2","caption":"D2"},
                 {"url":"ds2","caption":"D#2"},{"url":"e2","caption":"E3"},{"url":"f2","caption":"F2"},{"url":"fs2","caption":"F#2"},{"url":"g2","caption":"G2"},{"url":"gs2","caption":"G#2"},
@@ -755,7 +819,7 @@ OMusicPlayer.prototype.getPresetSoundSet = function (preset) {
                 {"url":"ds6","caption":"D#6"},{"url":"e6","caption":"E6"},{"url":"f6","caption":"F6"},{"url":"fs6","caption":"F#6"},{"url":"g6","caption":"G6"},{"url":"gs6","caption":"G#6"},
                 {"url":"a6","caption":"A6"}
                 ],
-                "prefix":"https://dl.dropboxusercontent.com/u/24411900/omg/kb/kb1_",
+                "prefix":"http://mikehelland.com/omg/kb/kb1_",
                 "postfix":".mp3","bottomNote":33} };
         if (omg.dev) {
             oret.data.prefix = "http://localhost/mp3/kb/kb1_";
@@ -788,7 +852,7 @@ OMusicPlayer.prototype.getPresetSoundSet = function (preset) {
                  {"url":"bf","caption":"Bb2"},{"url":"b","caption":"B2"},{"url":"c","caption":"C3"},{"url":"cs","caption":"C#3"},{"url":"d","caption":"D3"},{"url":"ds","caption":"Eb3"},
                  {"url":"e2","caption":"E3"},{"url":"f2","caption":"F3"},{"url":"fs2","caption":"F#3"},{"url":"g2","caption":"G3"},{"url":"gs2","caption":"G#3"},{"url":"a2","caption":"A3"},
                  {"url":"bf2","caption":"Bb3"},{"url":"b2","caption":"B3"},{"url":"c2","caption":"C4"}
-                 ],"prefix": "https://dl.dropboxusercontent.com/u/24411900/omg/bass1/bass_",
+                 ],"prefix": "http://mikehelland.com/omg/bass1/bass_",
                  "postfix": ".mp3",
                  "bottomNote":19} };
         

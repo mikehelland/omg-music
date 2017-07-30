@@ -14,7 +14,6 @@ function OMusicEditor() {
     this.beats = 8;
     this.subbeats = 4;
     this.fileext = ".mp3"; //needsMP3() ? ".mp3" : ".ogg",
-    this.downloadedSoundSets = [];
 
    this.loadWhenReady = true;
 }
@@ -1206,42 +1205,6 @@ OMusicEditor.prototype.toggleMute = function (part, newMute) {
         }
     }
 };
-
-OMusicEditor.prototype.getSoundSet = function (id, callback) {
-    var bam = this;
-    
-    var dl = bam.downloadedSoundSets[id];
-    if (dl) {
-        callback(dl)
-        return;
-    }
-
-    if (typeof id == "string" && id.indexOf("PRESET_") == 0) {
-        dl = bam.player.getPresetSoundSet(id);
-        bam.downloadedSoundSets[id] = dl;
-        callback(dl);
-        return;
-    }
-
-    var xhr2 = new XMLHttpRequest();
-    xhr2.open("GET", omg.url + "/soundset?id=" + id, true)
-    xhr2.onreadystatechange = function() {
-
-        if (xhr2.readyState == 4) {
-            var ojson = JSON.parse(xhr2.responseText);
-            if (id) {
-                bam.downloadedSoundSets[id] = ojson.list[0];
-                callback(ojson.list[0]);
-            } else {
-                callback(ojson);
-            }
-        }
-
-    };
-    xhr2.send();
-
-};
-
 
 
 

@@ -1,0 +1,14 @@
+<html>
+<body>
+<textarea id="input"></textarea>
+<br>
+<button id="post">x</button>
+
+<script src="js/omgservice.js"></script>
+<script>
+document.getElementById("post").onclick = function () {
+	var omgs = new OMGService();
+	omgs.post(JSON.parse(document.getElementById("input").value));
+};
+
+</script>
