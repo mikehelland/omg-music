@@ -86,7 +86,9 @@
 				if (typeof omg != "undefined" && omg.user && omg.user.admin) {
 					var deleteButton = document.getElementById("delete-button");
 					deleteButton.onclick = function () {
-						omgservice.deleteId(params.id);
+						omgservice.deleteId(params.id, function() {
+							window.history.back();
+						});
 					};
 					deleteButton.style.visibility = "visible";
 				}			   

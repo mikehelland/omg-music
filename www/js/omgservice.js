@@ -70,14 +70,9 @@ OMGService.prototype.deleteId = function (id, callback) {
 		if (xhr.readyState == 4) {
 
 			var results = JSON.parse(xhr.responseText);
-			if (results.id) {
-				console.log("get omg id");
-            console.log(results);
-				if (callback)
-					callback(results);
-			} else {
-				console.log(results);
-			}
+			console.log(results);
+			if (callback)
+				callback(results);
 		}
 	};
    xhr.send();
