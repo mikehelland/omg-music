@@ -5,7 +5,17 @@ searchTermsDiv.innerHTML = parameters.q || "";
 
 var resultList = document.getElementsByClassName("search-things")[0];
 
+var filterType = document.getElementById("filter-type");
+var type = parameters.type || "";
+filterType.onchange = function () {
+	//todo set the location?
+	type = filterType.value;
+	search();
+}
+
 var loadSearchResults = function (results) {
+	
+   resultList.innerHTML = "";
    results.forEach(function (result) {
       var resultDiv = document.createElement("div");
       resultDiv.className = "search-thing";
@@ -58,24 +68,31 @@ var loadSearchResults = function (results) {
    });
 };
 
-var xhr = new XMLHttpRequest();
-xhr.open("GET", "data/?q=" + (parameters.q || ""));
-xhr.onreadystatechange = function () {
-   var results;
-   if (xhr.readyState == 4) {
-      console.log(xhr.responseText);
-      try {
-         results = JSON.parse(xhr.responseText);
-      }
-      catch (exception) {
-         resultList.innerHTML = "Error parsing search results.";
-         return;
-      }
-      loadSearchResults(results);
-   }
+var search = function () {
+	var xhr = new XMLHttpRequest();
+	var url = "data/?q=" + (parameters.q || "");
+	if (type) {
+		url = url + "&type=" + type;
+	}
+	xhr.open("GET", url);
+	xhr.onreadystatechange = function () {
+	   var results;
+	   if (xhr.readyState == 4) {
+		  console.log(xhr.responseText);
+		  try {
+			 results = JSON.parse(xhr.responseText);
+		  }
+		  catch (exception) {
+			 resultList.innerHTML = "Error parsing search results.";
+			 return;
+		  }
+		  loadSearchResults(results);
+	   }
+	};
+	xhr.send();
 };
-xhr.send();
 
+search();
 
 function getQueryParameters() {
 

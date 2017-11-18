@@ -534,7 +534,7 @@ OMusicPlayer.prototype.makeOsc = function (part) {
     part.panner.connect(p.context.destination);
     part.panner.setValue(part.data.pan);
 
-	var volume = part.data.volume/2;
+	var volume = part.data.volume/10;
 	if (part.osc.soft) {
 		volume = part.data.volume * 0.6;
 	}
@@ -994,8 +994,8 @@ OMusicPlayer.prototype.makeOMGSong = function (data) {
         newSong.sections.push(newSection);
         return newSong;
     }
-    
-    if (data.type == "MELODY" || data.type == "BASSLINE") {
+
+    if (data.type == "PART") {
         newPart = new OMGPart(null, data);
         newSong = new OMGSong();
         newSection = new OMGSection();
@@ -1005,13 +1005,22 @@ OMusicPlayer.prototype.makeOMGSong = function (data) {
         return newSong;
     }
     
+    //todo this could go away, we only have type = "PART" now
+    //its for back compat with pre-launch data
+    if (data.type == "MELODY" || data.type == "BASSLINE") {
+        newPart = new OMGPart(null, data);
+        newSong = new OMGSong();
+        newSection = new OMGSection();
+        newSection.parts.push(newPart);
+        newSong.sections.push(newSection);
+        return newSong;
+    }
     if (data.type == "DRUMBEAT") {
         newPart = new OMGDrumpart(null, data);
         newSong = new OMGSong();
         newSection = new OMGSection();
         newSection.parts.push(newPart);
         newSong.sections.push(newSection);
-        
         return newSong;
     }
     

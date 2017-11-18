@@ -52,6 +52,7 @@ passport.use("login", new LocalStrategy(
 passport.use("signup", new LocalStrategy(
     function (username, password, done) {
         var db = app.get("db");
+        
         db.users.findOne({username: username}, function (err, user) {
             if (err) {
                 return done(err);
@@ -60,7 +61,8 @@ passport.use("signup", new LocalStrategy(
                 return done(null, false);
             }
 
-            var newUser = {username: username, password: password};
+			var newUser = {username: username, password: password, 
+				admin:false};
             db.users.save(newUser, function (err, saveResult) {
                 if (err) {
                     return done(err);
@@ -161,7 +163,25 @@ app.post('/data/', function (req, res) {
         }
     }); 
 });
+app.delete('/data/:id', function (req, res) {
+    if (req.user && req.user.admin) {
+		console.log(req.user);
+        req.body.user_id = req.user.id;
+        req.body.username = req.user.username;
+    }
+    else {
+		res.send({"error": "access denied"});
+		return;
+	}
 
+    var db = app.get('db');
+    db.things.destroy({id: req.params.id}, function (err, result) {
+        console.log(err);
+        if (!err) {
+            res.send(result);
+        }
+    }); 
+});
 
 
 console.log("Connecting to database...");

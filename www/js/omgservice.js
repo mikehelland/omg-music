@@ -62,3 +62,23 @@ OMGService.prototype.getQueryString = function () {
 	return params;
 };
 
+OMGService.prototype.deleteId = function (id, callback) {
+
+	var xhr = new XMLHttpRequest();
+	xhr.open("DELETE", this.url + "/data/" + id, true);
+	xhr.onreadystatechange = function() {
+		if (xhr.readyState == 4) {
+
+			var results = JSON.parse(xhr.responseText);
+			if (results.id) {
+				console.log("get omg id");
+            console.log(results);
+				if (callback)
+					callback(results);
+			} else {
+				console.log(results);
+			}
+		}
+	};
+   xhr.send();
+};

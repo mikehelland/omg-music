@@ -1178,9 +1178,10 @@ OMGMelodyMaker.prototype.doneTouching = function () {
 		this.cancelOscTimeout = setTimeout(function () {
 			if (omgmm.part.osc) {
 				omgmm.part.osc.stop(0);
-
+				//todo this should be in the player!
 				omgmm.part.osc.disconnect(omgmm.part.gain);
-				omgmm.part.gain.disconnect(omgmm.player.context.destination);
+				omgmm.part.gain.disconnect(omgmm.part.panner);
+				omgmm.part.panner.disconnect(omgmm.player.context.destination);
 				omgmm.part.oscStarted = false;
 				omgmm.part.osc = null;
 			}
