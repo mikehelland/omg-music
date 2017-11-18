@@ -9,7 +9,7 @@
 	   .url-input {width: 300px;}
 	   audio {position:relative; top: 8px;}
 	   .sound {padding: 8px;}
-	   #delete-button {visibility: hidden};
+	   #edit-button, #delete-button {visibility: hidden};
    </style>
 
 </head>
@@ -43,7 +43,9 @@
 	  </a>
 
 
-	  <button class="main-create-something" id="delete-button">
+	  <button id="edit-button">
+		  Edit SoundSet</button>
+	  <button id="delete-button">
 		  Delete SoundSet</button>
    
    </div>
@@ -91,6 +93,11 @@
 						});
 					};
 					deleteButton.style.visibility = "visible";
+					var editButton = document.getElementById("edit-button");
+					editButton.onclick = function () {
+						window.location = "soundset-editor.htm?id=" + params.id;
+					};
+					editButton.style.visibility = "visible";
 				}			   
 		   }
        );
