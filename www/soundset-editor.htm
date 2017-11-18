@@ -34,6 +34,16 @@
        <br>
        <input id="soundset-name">
        
+       <br>
+       Default Surface: <select id="default-surface">
+                       <option value="PRESET_VERTICAL">Vertical</option>
+                       <option value="PRESET_FRETBOARD">Fretboard</option>
+                       <option value="PRESET_SEQUENCER">Sequencer</option>
+                       </select>
+       Chromatic: <input type="checkbox" id="chromatic-checkbox"> 
+       <!--Low Note: <input id="low-note"> 
+       High Note: <input id="high-note"> -->
+       
       
       <div class="search-info">
        Sound 1 Name:
@@ -153,7 +163,9 @@
    document.getElementById("submit-button").onclick = function () {
        var newSoundSet = {type: "SOUNDSET", 
               name: document.getElementById("soundset-name").value, 
-              data: [], 
+              data: [],
+              chromatic: document.getElementById("chromatic-checkbox").checked,
+              defaultSurface: document.getElementById("default-surface").value
         };
         
         if (params.id)
