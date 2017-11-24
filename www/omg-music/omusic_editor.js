@@ -101,7 +101,7 @@ OMusicEditor.prototype.setup = function (options) {
    var loadParams;
     if (this.loadWhenReady) {
         loadParams = bam.getLoadParams();
-      loadId = loadParams.song || loadParams.section || loadParams.part ;
+      loadId = loadParams.id; //loadParams.song || loadParams.section || loadParams.part ;
       if (!isNaN(loadId)) {
          bam.omgservice.getId(loadId, function(result) {
             loadParams.dataToLoad = result;
