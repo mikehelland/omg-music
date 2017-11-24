@@ -515,6 +515,9 @@ OMusicPlayer.prototype.makeOsc = function (part) {
 	if (soundsetURL.indexOf("SOFT") > -1) {
         part.osc.soft = true;
     }
+	if (soundsetURL.indexOf("DELAY") > -1) {
+        part.osc.delay = true;
+    }
 
     part.gain = p.context.createGain();
     part.osc.connect(part.gain);
@@ -533,12 +536,22 @@ OMusicPlayer.prototype.makeOsc = function (part) {
     }
 
     part.gain.connect(part.panner);
-    part.panner.connect(p.context.destination);
-    part.panner.setValue(part.data.pan);
+    if (part.osc.delay) {
+		part.delay = p.context.createDelay();
+		part.delay.delayTime.value = 0.5;
+		part.feedback = p.context.createGain();
+		part.feedback.gain.value = 0.4;
+		part.panner.connect(part.delay);
+		part.delay.connect(part.feedback);
+		part.feedback.connect(part.delay);
+		part.delay.connect(p.context.destination);
+	}
+	part.panner.connect(p.context.destination);
+	part.panner.setValue(part.data.pan);
 
 	var volume = part.data.volume/10;
 	if (part.osc.soft) {
-		volume = part.data.volume * 0.6;
+		volume = part.data.volume * 0.5;
 	}
     if (part.muted) {
         part.gain.gain.value = 0;

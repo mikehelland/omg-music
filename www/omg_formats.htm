@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+   <link rel="stylesheet" href="css/main.css" type="text/css" />
+   <link rel="stylesheet" href="css/search.css" type="text/css" />
+
+</head>
+<body>
+
+   <div class="main-title-bar">
+         <div class="main-title-bar-content">
+         <a class="main-page-link" href="index.htm">
+         <span class="main-title-open">Open</span><span class="main-title-media">Music</span><span class="main-title-gallery">.Gallery</span>
+         </a>
+
+         <div class="main-title-bar-right">
+            <div class="title-bar-user-controls"></div>
+         </div>
+      </div>
+
+   </div>
+
+   <div class="main-body">
+
+
+<h1>OMG Data Formats</h1>
+<hr>
+
+<p><b>Overview:</b> A song is made of sections, and sections are made of parts. There are two 
+types of parts:</p>
+
+<h2>
+Part: Drumbeat
+</h2>
+
+<script src="https://gist.github.com/mikehelland/ad25021b905380f2e34bba8d992ae7eb.js"></script>
+
+<h2>
+Part: Melody/Bassline
+</h2>
+
+<script src="https://gist.github.com/mikehelland/d7c9ea3e4a4e2d42d5ab74bec6de8853.js"></script>
+
+<hr>
+
+<h2>Sections</h2>
+<p>A <em>section</em> contains melodies, basslines, and drumbeats to be played at the same time</p>
+
+<script src="https://gist.github.com/mikehelland/2beff4ab4c04517abd6a23bb1dd0693f.js"></script>
+
+<p>(<a href="https://gist.github.com/mikehelland/1d6af0ac2c070400a7471869024b3a42">
+	Here is a more detailed example</a>)</p>
+
+<hr>
+<h3>Songs</h3>
+<p>A <em>song</em> contains a list of sections to be played one after another.</p>
+
+<script src="https://gist.github.com/mikehelland/baf7f759e27b494d39154ab9f6cb0a2e.js"></script>
+
+<p>(<a href="https://gist.github.com/mikehelland/18c50f83f337d8a18febcaa7192ea468">
+	Here is a more detailed example</a>)</p>
+
+
+<ul>
+	<li>
+	The code for OpenMusic.Gallery is <a href="https://github.com/mikehelland/openmusic.gallery/">here on GitHub</a>. 
+	</li>
+</ul>
+
+
+   </div>
+
+
+   <script src="js/usercontrols.js"></script>
+   <script>
+   setupUserControls(document.getElementsByClassName("title-bar-user-controls")[0]);
+   </script>
+
+
+</body>
+</html>

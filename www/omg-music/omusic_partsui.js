@@ -1173,7 +1173,8 @@ OMGMelodyMaker.prototype.doneTouching = function () {
 	this.lastNewNote = Date.now();
 	this.frets.touching = -1;
 	if (this.part.osc) {
-		this.part.osc.frequency.setValueAtTime(0, 0);
+		this.part.osc.frequency.setValueAtTime(0, 
+				this.player.context.currentTime);
 		var omgmm = this;
 		this.cancelOscTimeout = setTimeout(function () {
 			if (omgmm.part.osc) {
@@ -1181,7 +1182,14 @@ OMGMelodyMaker.prototype.doneTouching = function () {
 				//todo this should be in the player!
 				omgmm.part.osc.disconnect(omgmm.part.gain);
 				omgmm.part.gain.disconnect(omgmm.part.panner);
+				if (omgmm.part.delay) {
+					omgmm.part.panner.disconnect(omgmm.part.delay);
+					omgmm.part.delay.disconnect(omgmm.part.feedback);
+					omgmm.part.feedback.disconnect(omgmm.part.delay);
+					omgmm.part.delay.disconnect(omgmm.player.context.destination);
+				}
 				omgmm.part.panner.disconnect(omgmm.player.context.destination);
+
 				omgmm.part.oscStarted = false;
 				omgmm.part.osc = null;
 			}
@@ -1379,8 +1387,9 @@ OMGMelodyMaker.prototype.onDisplay = function () {
 					var noteNumber = omgmm.frets[fret].note;
 
 					if (omgmm.part.osc)
-						omgmm.part.osc.frequency.setValueAtTime(omgmm.player
-								.makeFrequency(noteNumber), 0);
+						omgmm.part.osc.frequency.setValueAtTime(
+								omgmm.player.makeFrequency(noteNumber), 
+								omgmm.player.context.currentTime);
 
 					note = {
 						note : fret - omgmm.frets.rootNote,
