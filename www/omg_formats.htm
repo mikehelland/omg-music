@@ -4,7 +4,15 @@
 
    <link rel="stylesheet" href="css/main.css" type="text/css" />
    <link rel="stylesheet" href="css/search.css" type="text/css" />
+   <link rel="stylesheet" href="css/viewer.css" type="text/css" />
 
+	<style>
+		.fake-song {border-spacing:10px; font-size:1.5em; background-color:#99FF99; border-radius:8px;}
+		.fake-section {background-color:#99AAFF; border-radius:8px;
+			display:table-cell; padding:4px; width:18%; margin:8px;}
+		.fake-part {background-color:#FFFF99; border-radius:8px; 
+			margin:4px; padding:4px; }
+	</style>
 </head>
 <body>
 
@@ -27,39 +35,125 @@
 <h1>OMG Data Formats</h1>
 <hr>
 
-<p><b>Overview:</b> A song is made of sections, and sections are made of parts. There are two 
-types of parts:</p>
+<div class="fake-song">
+	Song
+	<br>
+	<div class="fake-section">
+		Section 
+		<div class="fake-part">Part</div>
+		<div class="fake-part">Part</div>
+	</div>
+	<div class="fake-section">
+		Section
+		<div class="fake-part">Part</div>
+		<div class="fake-part">Part</div>
+	</div>
+	<div class="fake-section">
+		Section
+		<div class="fake-part">Part</div>
+		<div class="fake-part">Part</div>
+		<div class="fake-part">Part</div>
+	</div>
+	<div class="fake-section">
+		Section
+		<div class="fake-part">Part</div>
+		<div class="fake-part">Part</div>
+		<div class="fake-part">Part</div>
+	</div>
+</div>
+
+
+<p><b>Overview:</b> A <a href="#song">Song</a> is made of 
+	<a href="#section">Sections</a>, and <em>Sections</em> are made of 
+	<em>Parts</em>. There are two 
+	types of <em>Parts</em>:</p>
 
 <h2>
 Part: Drumbeat
 </h2>
 
+<p>This type of <em>Part</em> has a <code>tracks</code> property which is an array of objects that 
+can point to any available sound on the Internet by putting a URL in the <code>sound</code> property.</p>
+
 <script src="https://gist.github.com/mikehelland/ad25021b905380f2e34bba8d992ae7eb.js"></script>
 
+<p>The example above sounds like this:</p>
+
+
+	<div id="drum-example" class="omgviewer"><div class="beat-marker"></div></div>
+
+   <script src="omg-music/omusic_partsui.js"></script>
+   <script src="omg-music/omusic_player.js"></script>
+   <script src="js/omgservice.js"></script>
+   <script src="js/embedded_viewer.js"></script>
+
+<script>
+omg_embedded_viewer_loadURL(document.getElementById("drum-example"),
+		"https://gist.githubusercontent.com/mikehelland/ad25021b905380f2e34bba8d992ae7eb/raw/d2d472f35415f9c5a1f43c847802371ca4ffc162/omg_drumbeat.json");
+</script>
+
+<hr>
 <h2>
 Part: Melody/Bassline
 </h2>
 
+<p>This type of <em>Part</em> has a list of <code>notes</code> to play. 
+The <code>note</code> property is not a MIDI note, but instead the note's
+position in the <code>scale</code> relative to the <code>rootNote</code>. This way, <code>scale</code>
+be changed, for example, from major intervals (0, 2, 4, 5, 7, 9, 11) to minor intervals 
+(0, 2, 3, 5, 7, 8, 10) and the melody can be translated easily.
+Using the <code>note</code>, the <code>octave</code>, the <code>rootNote</code>, 
+and the <code>scale</code> properties, a MIDI note can be determined. 
+</p>
+
 <script src="https://gist.github.com/mikehelland/d7c9ea3e4a4e2d42d5ab74bec6de8853.js"></script>
+
+<p>The example above sounds like this:</p>
+
+<div id="melody-example" class="omgviewer"><div class="beat-marker"></div></div>
+
+<script>
+omg_embedded_viewer_loadURL(document.getElementById("melody-example"),
+		"https://gist.githubusercontent.com/mikehelland/d7c9ea3e4a4e2d42d5ab74bec6de8853/raw/ec72af039b5606e2354580fbbc7fc87ce0b2a088/omg_melodybassline.json");
+</script>
 
 <hr>
 
+<a name="section"></a>
 <h2>Sections</h2>
-<p>A <em>section</em> contains melodies, basslines, and drumbeats to be played at the same time</p>
+<p>A <em>Section</em> has a <code>parts</code> array that contains melodies, basslines, and drumbeats
+to be played at the same time.</p>
 
 <script src="https://gist.github.com/mikehelland/2beff4ab4c04517abd6a23bb1dd0693f.js"></script>
 
-<p>(<a href="https://gist.github.com/mikehelland/1d6af0ac2c070400a7471869024b3a42">
-	Here is a more detailed example</a>)</p>
+<p>(Here is <a href="https://gist.github.com/mikehelland/1d6af0ac2c070400a7471869024b3a42">
+	a more detailed example</a>)</p>
+
+<div id="section-example" class="omgviewer"><div class="beat-marker"></div></div>
+
+<script>
+omg_embedded_viewer_loadURL(document.getElementById("section-example"),
+		"http://openmusic.gallery/data/284");
+</script>
+
 
 <hr>
+
+<a name="song"></a>
 <h3>Songs</h3>
-<p>A <em>song</em> contains a list of sections to be played one after another.</p>
+<p>A <em>Song</em> contains a list of <em>Sections</em> to be played one after another.</p>
 
 <script src="https://gist.github.com/mikehelland/baf7f759e27b494d39154ab9f6cb0a2e.js"></script>
 
 <p>(<a href="https://gist.github.com/mikehelland/18c50f83f337d8a18febcaa7192ea468">
 	Here is a more detailed example</a>)</p>
+
+<div id="song-example" class="omgviewer"><div class="beat-marker"></div></div>
+
+<script>
+omg_embedded_viewer_loadURL(document.getElementById("song-example"),
+		"http://openmusic.gallery/data/290");
+</script>
 
 
 <ul>

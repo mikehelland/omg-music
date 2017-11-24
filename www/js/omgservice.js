@@ -47,6 +47,21 @@ OMGService.prototype.getId = function (id, callback) {
    xhr.send();
 };
 
+OMGService.prototype.getHTTP = function (url, callback) {
+
+	var xhr = new XMLHttpRequest();
+	xhr.open("GET", url, true);
+	xhr.onreadystatechange = function() {
+		if (xhr.readyState == 4) {
+
+			var results = JSON.parse(xhr.responseText);
+			if (callback)
+				callback(results);
+		}
+	};
+   xhr.send();
+};
+
 OMGService.prototype.getQueryString = function () {
 	// see if there's somethign to do here
 	var rawParams = document.location.search;

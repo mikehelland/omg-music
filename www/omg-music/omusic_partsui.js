@@ -11,7 +11,8 @@ omg.ui.noteImageUrls = [[2, "note_half", "note_rest_half"],
               [0.5, "note_eighth", "note_rest_eighth", "note_eighth_upside"],
               [0.375, "note_dotted_sixteenth", "note_rest_dotted_sixteenth"],
               [0.25, "note_sixteenth", "note_rest_sixteenth", "note_sixteenth_upside"],
-              [0.125, "note_thirtysecond", "note_rest_thirtysecond"]];
+              [0.125, "note_thirtysecond", "note_rest_thirtysecond"],
+              [-1, "no_file", "no_file"]];
 
 omg.ui.noteNames = ["C-", "C#-", "D-", "Eb-", "E-", "F-", "F#-", "G-", "G#-", "A-", "Bb-", "B-", 
              "C0", "C#0", "D0", "Eb0", "E0", "F0", "F#0", "G0", "G#0", "A0", "Bb0", "B0", 
@@ -307,7 +308,7 @@ console.log("width=");console.log(width);
 
 omg.ui.getImageForNote = function (note, upsideDown) {
 
-    var draw_noteImage;
+    var draw_noteImage = omg.ui.noteImages[8][note.rest ? 1 : 0];
     if (note.beats == 2.0) {
         draw_noteImage = omg.ui.noteImages[0][note.rest ? 1 : 0];
     }

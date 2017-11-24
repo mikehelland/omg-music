@@ -462,13 +462,13 @@ OMusicPlayer.prototype.playBeatForMelody = function (iSubBeat, part) {
                 part.osc.frequency.setValueAtTime(freq, p.context.currentTime);
                 part.playingI = part.currentI;
                 var playingI = part.playingI;
-                //setTimeout(function () {
+                setTimeout(function () {
                     if (part.osc && part.playingI == playingI) {
                         part.osc.frequency.setValueAtTime(0, 
-								p.subbeats * note.beats * p.subbeatLength * 0.85)
-											//p.context.currentTime);
+								//p.subbeats * note.beats * p.subbeatLength * 0.85)
+											p.context.currentTime);
                     }
-                //}, p.subbeats * note.beats * p.subbeatLength * 0.85);
+                }, p.subbeats * note.beats * p.subbeatLength * 0.85);
             }
         }
         
