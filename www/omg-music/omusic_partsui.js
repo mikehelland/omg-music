@@ -740,7 +740,7 @@ OMGMelodyMaker.prototype.drawCanvas = function () {
 	canvas.width = canvas.clientWidth;
 
 //	context.fillStyle = "#F4F4F4";
-	context.fillStyle = "white ";
+	context.fillStyle = "white";
 	context.fillRect(0, this.topFretTop, canvas.width, 
 			canvas.height - this.bottomFretBottom - this.topFretTop);
 	

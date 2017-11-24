@@ -455,18 +455,20 @@ OMusicPlayer.prototype.playBeatForMelody = function (iSubBeat, part) {
             }
 
             if (!note || note.rest)
-                part.osc.frequency.setValueAtTime(0, 0);
+                part.osc.frequency.setValueAtTime(0, p.context.currentTime);
             else {
                 
                 var freq = p.makeFrequency(note.scaledNote);
-                part.osc.frequency.setValueAtTime(freq, 0);
+                part.osc.frequency.setValueAtTime(freq, p.context.currentTime);
                 part.playingI = part.currentI;
                 var playingI = part.playingI;
-                setTimeout(function () {
+                //setTimeout(function () {
                     if (part.osc && part.playingI == playingI) {
-                        part.osc.frequency.setValueAtTime(0, 0);
+                        part.osc.frequency.setValueAtTime(0, 
+								p.subbeats * note.beats * p.subbeatLength * 0.85)
+											//p.context.currentTime);
                     }
-                }, p.subbeats * note.beats * p.subbeatLength * 0.85);
+                //}, p.subbeats * note.beats * p.subbeatLength * 0.85);
             }
         }
         
@@ -501,13 +503,13 @@ OMusicPlayer.prototype.makeOsc = function (part) {
 		"PRESET_OSC_SINE_SOFT_DELAY";
 		
     if (soundsetURL.indexOf("SAW") > -1) {
-        part.osc.type = part.osc.SAWTOOTH || "sawtooth";
+        part.osc.type = "sawtooth";
     }
     else if (soundsetURL.indexOf("SINE") > -1) {
-        part.osc.type = part.osc.SAWTOOTH || "sine";
+        part.osc.type = "sine";
     }
     else if (soundsetURL.indexOf("SQUARE") > -1) {
-        part.osc.type = part.osc.SAWTOOTH || "square";
+        part.osc.type = "square";
     }
 
 	if (soundsetURL.indexOf("SOFT") > -1) {
@@ -546,7 +548,7 @@ OMusicPlayer.prototype.makeOsc = function (part) {
         part.gain.gain.value = volume;        
     }
  
-    part.osc.frequency.setValueAtTime(0, 0);
+    part.osc.frequency.setValueAtTime(0, p.context.currentTime);
     if (part.osc.start)
         part.osc.start(0);
     else {
@@ -557,7 +559,7 @@ OMusicPlayer.prototype.makeOsc = function (part) {
     }
     
     part.osc.finishPart = function () {
-      part.gain.gain.setValueAtTime(0, 0);
+      part.gain.gain.setValueAtTime(0, p.context.currentTime);
 
       //total hack, this is why things should be processed ala AudioContext, not our own thread
       setTimeout(function () {
@@ -586,7 +588,7 @@ OMusicPlayer.prototype.initSound = function () {
     try {
         var osc = p.context.createOscillator();
         osc.connect(p.context.destination);
-        osc.frequency.setValueAtTime(0, 0);
+        osc.frequency.setValueAtTime(0, p.context.currentTime);
         if (osc.start) {
             osc.start(0);
         }
