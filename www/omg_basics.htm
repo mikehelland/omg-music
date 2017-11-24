@@ -32,7 +32,7 @@
 
    <div class="main-body">
 
-<h1>OMG Data Formats</h1>
+<h1>OMG Basics</h1>
 <hr>
 
 <p><b>Overview:</b> A <a href="#song">Song</a> is made of 
@@ -74,14 +74,6 @@
 Part: Drumbeat
 </h2>
 
-<p>This type of <em>Part</em> has a <code>tracks</code> property which is an array of objects that 
-can point to any available sound on the Internet by putting a URL in the <code>sound</code> property.</p>
-
-<script src="https://gist.github.com/mikehelland/ad25021b905380f2e34bba8d992ae7eb.js"></script>
-
-<p>The example above sounds like this:</p>
-
-
 	<div id="drum-example" class="omgviewer"><div class="beat-marker"></div></div>
 
    <script src="omg-music/omusic_partsui.js"></script>
@@ -99,19 +91,6 @@ omg_embedded_viewer_loadURL(document.getElementById("drum-example"),
 Part: Melody/Bassline
 </h2>
 
-<p>This type of <em>Part</em> has a list of <code>notes</code> to play. 
-The <code>note</code> property is not a MIDI note, but instead the note's
-position in the <code>scale</code> relative to the <code>rootNote</code>. This way, <code>scale</code>
-be changed, for example, from major intervals (0, 2, 4, 5, 7, 9, 11) to minor intervals 
-(0, 2, 3, 5, 7, 8, 10) and the melody can be translated easily.
-Using the <code>note</code>, the <code>octave</code>, the <code>rootNote</code>, 
-and the <code>scale</code> properties, a MIDI note can be determined. 
-</p>
-
-<script src="https://gist.github.com/mikehelland/d7c9ea3e4a4e2d42d5ab74bec6de8853.js"></script>
-
-<p>The example above sounds like this:</p>
-
 <div id="melody-example" class="omgviewer"><div class="beat-marker"></div></div>
 
 <script>
@@ -123,13 +102,7 @@ omg_embedded_viewer_loadURL(document.getElementById("melody-example"),
 
 <a name="section"></a>
 <h2>Sections</h2>
-<p>A <em>Section</em> has a <code>parts</code> array that contains melodies, basslines, and drumbeats
-to be played at the same time.</p>
-
-<script src="https://gist.github.com/mikehelland/2beff4ab4c04517abd6a23bb1dd0693f.js"></script>
-
-<p>(Here is <a href="https://gist.github.com/mikehelland/1d6af0ac2c070400a7471869024b3a42">
-	a more detailed example</a>)</p>
+<p>A <em>Section</em> contains melodies, basslines, and drumbeats to be played at the same time.</p>
 
 <div id="section-example" class="omgviewer"><div class="beat-marker"></div></div>
 
@@ -145,11 +118,6 @@ omg_embedded_viewer_loadURL(document.getElementById("section-example"),
 <h3>Songs</h3>
 <p>A <em>Song</em> contains a list of <em>Sections</em> to be played one after another.</p>
 
-<script src="https://gist.github.com/mikehelland/baf7f759e27b494d39154ab9f6cb0a2e.js"></script>
-
-<p>(<a href="https://gist.github.com/mikehelland/18c50f83f337d8a18febcaa7192ea468">
-	Here is a more detailed example</a>)</p>
-
 <div id="song-example" class="omgviewer"><div class="beat-marker"></div></div>
 
 <script>
@@ -159,15 +127,20 @@ omg_embedded_viewer_loadURL(document.getElementById("song-example"),
 
 <hr>
 
-<ul>
-	<li>
-	The code for OpenMusic.Gallery is <a href="https://github.com/mikehelland/openmusic.gallery/">here on GitHub</a>. 
-	</li>
-</ul>
+   <div class="main-invitation">
+      Making music is easier than you think! 
+   </div>   
 
-
+   <div class="main-create-area">
+	   
+      <a href="music-maker.htm" class="main-create-something">
+         Start with a Melody
+      </a>
+      <a href="music-maker.htm?type=drumbeat" class="main-create-something">
+         Start with a Beat
+      </a>
+      
    </div>
-
 
    <script src="js/usercontrols.js"></script>
    <script>
