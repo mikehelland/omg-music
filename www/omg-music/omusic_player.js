@@ -26,6 +26,14 @@ function OMusicPlayer() {
             nowebaudio.style.display = "inline-block";
         //return;
     }
+    
+    p.compressor = p.context.createDynamicsCompressor();
+	p.compressor.threshold.value = -50;
+	p.compressor.knee.value = 40;
+	p.compressor.ratio.value = 12;
+	p.compressor.attack.value = 0;
+	p.compressor.release.value = 0.25;
+	p.compressor.connect(p.context.destination);
 
     p.onBeatPlayedListeners = [];
 
@@ -489,10 +497,10 @@ OMusicPlayer.prototype.makeOsc = function (part) {
     if (part.osc) {
         console.log("makeOsc, already exists");
         try {
-            part.osc.stop(0);
+            part.osc.stop(p.context.currentTime);
             part.osc.disconnect(part.gain);
             part.gain.disconnect(part.panner);
-            part.panner.disconnect(p.context.destination);
+            part.panner.disconnect(p.compressor);
         }
         catch (e) {}
     }
@@ -522,64 +530,46 @@ OMusicPlayer.prototype.makeOsc = function (part) {
     part.gain = p.context.createGain();
     part.osc.connect(part.gain);
 
-    //Mock for the old browsers I have
-    if (!p.context.createStereoPanner) {
-        part.panner = p.context.createPanner();
-        part.panner.setValue = function (x) {
-            part.panner.setPosition(0, 0, (x - 0.5) * 10)
-        };
-    } else {
-        part.panner = p.context.createStereoPanner();
-        part.panner.setValue = function (x) {
-            part.panner.pan.value = x || 0;
-        };
-    }
+	part.panner = p.context.createStereoPanner();
 
     part.gain.connect(part.panner);
     if (part.osc.delay) {
 		part.delay = p.context.createDelay();
 		part.delay.delayTime.value = 0.5;
 		part.feedback = p.context.createGain();
-		part.feedback.gain.value = 0.4;
-		part.panner.connect(part.delay);
+		part.feedback.gain.value = 0.3;
+		part.gain.connect(part.delay);
 		part.delay.connect(part.feedback);
 		part.feedback.connect(part.delay);
-		part.delay.connect(p.context.destination);
+		part.feedback.connect(p.compressor);
 	}
-	part.panner.connect(p.context.destination);
-	part.panner.setValue(part.data.pan);
+	part.panner.connect(p.compressor);
+	part.panner.pan.setValueAtTime(part.data.pan, p.context.currentTime);
 
 	var volume = part.data.volume/10;
 	if (part.osc.soft) {
-		volume = part.data.volume * 0.5;
+		volume = volume * 0.5;
 	}
     if (part.muted) {
-        part.gain.gain.value = 0;
+        part.gain.gain.setValueAtTime(0, p.context.currentTime);
         part.gain.gain.preMuteGain = volume;
     }
     else {
-        part.gain.gain.value = volume;        
+        part.gain.gain.setValueAtTime(volume, p.context.currentTime);        
     }
  
     part.osc.frequency.setValueAtTime(0, p.context.currentTime);
-    if (part.osc.start)
-        part.osc.start(0);
-    else {
-        part.osc.noteOn(0);
-        part.osc.stop = function (iii) {
-            part.osc.noteOff(iii);
-        };
-    }
+	part.osc.start(p.context.currentTime);
     
     part.osc.finishPart = function () {
       part.gain.gain.setValueAtTime(0, p.context.currentTime);
 
       //total hack, this is why things should be processed ala AudioContext, not our own thread
       setTimeout(function () {
-           part.osc.stop(0);
+           part.osc.stop(p.context.currentTime);
            part.osc.disconnect(part.gain);
            part.gain.disconnect(part.panner);
-           part.panner.disconnect(p.context.destination);
+           part.panner.disconnect(p.compressor);
         
            part.oscStarted = false;
            part.osc = null;
@@ -602,19 +592,10 @@ OMusicPlayer.prototype.initSound = function () {
         var osc = p.context.createOscillator();
         osc.connect(p.context.destination);
         osc.frequency.setValueAtTime(0, p.context.currentTime);
-        if (osc.start) {
-            osc.start(0);
-        }
-        else {
-            osc.noteOn(0);
-        }
+		osc.start(p.context.currentTime);
+        
         setTimeout(function () {
-            if (osc.stop) {
-                osc.stop(0);
-            }
-            else {
-                osc.noteOff(0);
-            }
+			osc.stop(p.context.currentTime);
             osc.disconnect(p.context.destination);
 
         }, 500);
@@ -948,18 +929,11 @@ OMusicPlayer.prototype.playSound = function (sound, volume) {
         var source = p.context.createBufferSource();
         source.buffer = p.loadedSounds[sound];                   
 
-        if (source.start)
-            source.start(0);
-        else {
-            source.noteOn(0);
-            source.stop = function () {
-                source.noteOff(0);
-            };
-        } 
+		source.start(p.context.currentTime);
 
         source.gain2 = p.context.createGain();
         source.connect(source.gain2);
-        source.gain2.connect(p.context.destination);
+        source.gain2.connect(p.compressor);
         
         source.gain2.gain.value = volume; 
 

@@ -1176,7 +1176,7 @@ OMGMelodyMaker.prototype.doneTouching = function () {
 	if (this.part.osc) {
 		this.part.osc.frequency.setValueAtTime(0, 
 				this.player.context.currentTime);
-		var omgmm = this;
+		/*var omgmm = this;
 		this.cancelOscTimeout = setTimeout(function () {
 			if (omgmm.part.osc) {
 				omgmm.part.osc.stop(0);
@@ -1194,7 +1194,7 @@ OMGMelodyMaker.prototype.doneTouching = function () {
 				omgmm.part.oscStarted = false;
 				omgmm.part.osc = null;
 			}
-		}, 2000);
+		}, 2000);*/
 	}
 
 	
