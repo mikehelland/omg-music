@@ -27,7 +27,7 @@ function omg_embedded_viewer_loadData(div, data) {
 	//viewer.datetimeDiv.className = "omg-music-controls-button";
 
 	viewer.div.appendChild(viewer.playButton);
-	//viewer.div.appendChild(viewer.editButton);
+	if (data.id) viewer.div.appendChild(viewer.editButton);
 	//viewer.div.appendChild(viewer.shareButton);
 	viewer.div.appendChild(viewer.tipButton);
 	//viewer.div.appendChild(viewer.titleDiv);
@@ -187,6 +187,13 @@ function omg_embedded_viewer_loadURL(div, url) {
 		omg_embedded_viewer_loadData(div, result);
 	});
 }
+
+function omg_embedded_viewer_loadId(div, id) {
+	new OMGService().getId(id, function (result) {
+		omg_embedded_viewer_loadData(div, result);
+	});
+}
+
 
 /*wow that's ugly
  * viewer.getDataById(viewer.queryStringParameters.id, function (dataToPlay) {
