@@ -3,6 +3,7 @@ function omg_embedded_viewer_loadData(div, data) {
 	var viewer = {};	
 	viewer.div = div;
 	div.style.position = "relative";
+	div.style.overflowX = "scroll";
 
 	viewer.playButton = document.createElement("div");
 	viewer.editButton = document.createElement("div");

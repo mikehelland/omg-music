@@ -1,4 +1,4 @@
-#OpenMusic.Gallery
+#OpenMusic.Gallery#
 
 OMG is an instrument, an audio workstation, and a distribution platform
 all rolled into one, based on the idea of open music.
