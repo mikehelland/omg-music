@@ -695,6 +695,8 @@ OMusicEditor.prototype.setupSectionAddButtons = function (buttonGroup) {
         
         var newPart = new OMGPart(newdiv)
         newPart.data.type = "BASSLINE";
+        //newPart.data.soundsetURL = "PRESET_BASS"; 
+        newPart.data.soundsetURL = "PRESET_OSC_SAW";
 
         var otherParts = [];
         var otherPartsList = bam.section.div.getElementsByClassName("part2");

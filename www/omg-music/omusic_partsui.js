@@ -242,7 +242,7 @@ omg.ui.drawDrumCanvas = function (params) {
    else {
 	   width = canvas.width;  
    }
-console.log("width=");console.log(width);
+
    if (typeof(params.height) == "number") {
       height = params.height;
    }

@@ -509,7 +509,7 @@ OMusicPlayer.prototype.makeOsc = function (part) {
 
 	var soundsetURL = part.data.soundsetURL || 
 		"PRESET_OSC_SINE_SOFT_DELAY";
-		
+	console.log("soundsetUrl=" + soundsetURL);	
     if (soundsetURL.indexOf("SAW") > -1) {
         part.osc.type = "sawtooth";
     }
