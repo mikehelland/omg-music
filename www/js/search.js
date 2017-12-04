@@ -28,7 +28,7 @@ var loadSearchResults = function (results) {
 
       resultData = document.createElement("div");
       resultData.className = "search-thing-type";
-      resultData.innerHTML = result.type;
+      resultData.innerHTML = result.partType || result.type;
       resultDiv.appendChild(resultData);
 
       resultData = document.createElement("div");
@@ -120,7 +120,8 @@ function getBackgroundColor(type) {
       return "#99AAFF";
    }
 
-   if (type === "MELODY" || type === "DRUMBEAT" || type === "BASSLINE") {
+   if (type == "PART" || type === "MELODY" || 
+		type === "DRUMBEAT" || type === "BASSLINE") {
       return "#FFFF99";
    }
 

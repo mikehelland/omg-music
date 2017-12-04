@@ -6,16 +6,25 @@ omgbam.js ported to a class definition
 
 function OMusicEditor() {
     this.animLength = 700;
-   this.borderRadius = 3;
+    this.borderRadius = 3;
     this.fadingOut = [];
 
     this.url = "/music";
     this.bpm = 120;
-    this.beats = 8;
-    this.subbeats = 4;
+    //this.beats = 8;
+    //this.subbeats = 4;
     this.fileext = ".mp3"; //needsMP3() ? ".mp3" : ".ogg",
 
-   this.loadWhenReady = true;
+    this.loadWhenReady = true;
+   
+    this.keys = ["C", "C#/Db", "D", "D#/Eb", 
+                "E", "F", "F#/Gb", "G", "G#/Ab",
+                "A", "A#/Bb", "B"];
+    this.scales = [{name: "Major", value: [0,2,4,5,7,9,11]},
+                  {name: "Minor", value: [0,2,3,5,7,8,10]},
+                  {name: "Pentatonic", value: [0,2,5,7,9]},
+                  {name: "Blues", value: [0,3,5,6,7,10]}];
+
 }
 
 
@@ -46,6 +55,8 @@ OMusicEditor.prototype.setup = function (options) {
     bam.offsetTop = 5; //bam.mobile ? 60: 88;
     
     bam.div = document.getElementById("master");
+    bam.keyButton = document.getElementById("omg-music-controls-key-button");
+    bam.tempoButton = document.getElementById("omg-music-controls-tempo-button");
     bam.zones = [];
 
     bam.setupSectionEditor();
@@ -178,9 +189,9 @@ OMusicEditor.prototype.setupPartDiv = function (part) {
     var surface = part.data.surfaceURL;
     
     if (type == "CHORDPROGRESSION") {
-		//todo might show this thing?
-		return;
-	}
+        //todo might show this thing?
+        return;
+    }
         
    if (part.controls) {
       debug("setupPartDiv: We are already setup!");
@@ -509,18 +520,18 @@ OMusicEditor.prototype.setupSectionEditor = function () {
 
         bam.sectionEditor.hide(function() {
 
-			if (!bam.section.saved) {
-			 bam.section.data.id = undefined;
-				bam.omgservice.post(bam.section.getData(), function(response) {
-					if (response && response.id) {
-						bam.section.saved = true;
-						/*bam.section.data.id = response.id;
-						if (saveCallback) {
-								saveCallback();
-						}*/
-					}
-				});
-			}
+            if (!bam.section.saved) {
+             bam.section.data.id = undefined;
+                bam.omgservice.post(bam.section.getData(), function(response) {
+                    if (response && response.id) {
+                        bam.section.saved = true;
+                        /*bam.section.data.id = response.id;
+                        if (saveCallback) {
+                                saveCallback();
+                        }*/
+                    }
+                });
+            }
 
             // keep it rolling? maybe preference
             // bam.sectionEditor.stop();
@@ -1066,6 +1077,7 @@ OMusicEditor.prototype.load = function (params)  {
          bam.onzonechange(bam.song);
       }
 
+        bam.refreshKeyTempoChordsButtons();
         return;
     } 
 
@@ -1107,6 +1119,7 @@ OMusicEditor.prototype.load = function (params)  {
          bam.onzonechange(bam.section);
       }     
 
+        bam.refreshKeyTempoChordsButtons();
         return;
     }
 
@@ -1121,7 +1134,8 @@ OMusicEditor.prototype.load = function (params)  {
     bam.section.div.appendChild(newDiv);
     bam.zones.push(newDiv);
 
-    if (params.type == "DRUMBEAT") {
+    if (params.type == "DRUMBEAT" || 
+            (params.dataToLoad && params.dataToLoad.partType == "DRUMBEAT")) {
         if (params.dataToLoad) {
             bam.part = new OMGDrumpart(newDiv, params.dataToLoad);
             bam.fadeIn([bam.part.div, bam.beatmaker ], restoreColors);  
@@ -1141,10 +1155,6 @@ OMusicEditor.prototype.load = function (params)  {
         }
     } 
     else {
-      //if (params.type !== "MELODY" && params.type !== "BASSLINE") {
-      //   params.type = "MELODY";
-      //}
-        
         if (params.dataToLoad) {
             bam.part = new OMGPart(newDiv, params.dataToLoad);
             bam.fadeIn([bam.part.div, bam.mm], restoreColors);
@@ -1152,12 +1162,15 @@ OMusicEditor.prototype.load = function (params)  {
         }
         else {
             bam.part = new OMGPart(newDiv);
-         bam.part.data.type = params.type;
+            bam.part.data.partType = params.type;
             bam.fadeIn([bam.part.div, bam.mm], restoreColors);
             
             bam.mm.setPart(bam.part, params.welcome);
         }
+        
     }
+    
+    bam.refreshKeyTempoChordsButtons();
 };
 
 OMusicEditor.prototype.clear = function () {
@@ -1434,12 +1447,12 @@ OMusicEditor.prototype.setupMelodyMaker = function () {
         if (typeof (part.position) == "number") {
             position = part.position;
         } else {
-            position = bam.section.parts.length;;
+            position = bam.section.parts.length;
             bam.section.parts.push(part);
 
-         if (bam.sectionEditor.mixerMode) {
-            bam.sectionEditor.dragAndDrop.setupChildDiv(part.div);
-         }
+            if (bam.sectionEditor.mixerMode) {
+                bam.sectionEditor.dragAndDrop.setupChildDiv(part.div);
+            }
         }
 
         if (!part.saved) {
@@ -1447,8 +1460,8 @@ OMusicEditor.prototype.setupMelodyMaker = function () {
                 if (response && response.id) {
                     part.saved = true;
                 } else {
-               debug(response);
-            }
+                    debug(response);
+                }
             });
          
          //TODO THIS NEEDS TO CHECK TO SEE IF THE USER IS LOGGED IN
@@ -1478,7 +1491,7 @@ OMusicEditor.prototype.setupMelodyMaker = function () {
                        otherPart = otherPartsList.item(ii)
                        if (bam.part.div != otherPart) {
                            otherParts.push(otherPart);
-                  }
+                        }
                    }
 
                    otherParts.push(bam.sectionEditor);
@@ -1500,7 +1513,7 @@ OMusicEditor.prototype.setupMelodyMaker = function () {
         else  {
             bam.fadeOut([ bam.mm ], shrinkPart);
             bam.mm.playAfterAnimation = false;
-		}
+        }
     };
     
    //TODO not used, use it, or lose it
@@ -2465,7 +2478,7 @@ OMusicEditor.prototype.setupSharer = function () {
         };
 
         bam.omgservice.post(params.data, function(response) {
-			console.log(response);
+            console.log(response);
             if (response && response.result == "good") {
                 goToId(response.id);
             }
@@ -2511,7 +2524,10 @@ OMusicEditor.prototype.songZoneBeatPlayed = function (isubbeat, isection) {
     }
     
     section.beatmarker.style.display = "block";
-    section.beatmarker.style.width = isubbeat / (this.subbeats * this.beats) * 100 + "%";
+    if (isubbeat == 0 && isection > 0) {
+        bam.song.sections[isection - 1].beatmarker.style.width = "100%";
+    }
+    section.beatmarker.style.width = isubbeat / this.player.getTotalSubbeats() * 100 + "%";
     if (isubbeat % 4 == 0) {                
         //if we wanted to do it only the downbeats
     }   
@@ -2520,7 +2536,9 @@ OMusicEditor.prototype.songZoneBeatPlayed = function (isubbeat, isection) {
 OMusicEditor.prototype.partZoneBeatPlayed = function (isubbeat) {
     var bam = this;
     
-    if (bam.part.data.type == "DRUMBEAT") {
+    //dec2017, I think partType is the way to go
+    if (bam.part.data.type == "DRUMBEAT" || 
+            bam.part.data.partType == "DRUMBEAT") {
         bam.beatmaker.ui.drawLargeCanvas(isubbeat); 
     }
     else {
@@ -2602,4 +2620,201 @@ OMusicEditor.prototype.setOnUp = function (element, callback) {
         element.onmouseout = undefined;
     }
 
+};
+
+OMusicEditor.prototype.showKeyChooser = function (e) {
+    var bam = this;
+    
+    if (this.keyChooser) {
+        this.keyChooser.parentElement.removeChild(this.keyChooser);
+        this.keyChooser = undefined;        
+        return;
+    }
+
+    var thing = bam.zones[bam.zones.length - 1] == bam.song.div ? bam.song :
+            (bam.section && bam.zones[bam.zones.length - 1] == bam.section.div) ? 
+            bam.section : bam.part;
+    
+    var chooserDiv = document.createElement("div");
+    chooserDiv.style.position = "absolute";
+    chooserDiv.style.backgroundColor = "white";
+    chooserDiv.style.top = e.target.offsetTop + e.target.clientHeight + 
+                           e.target.parentElement.offsetTop + "px";
+    chooserDiv.style.left = e.target.offsetLeft + "px";
+    var div = document.createElement("div");
+    div.style.display = "inline-block";
+    div.style.verticalAlign = "top";
+    div.style.borderWidth = "1px";
+    div.style.borderStyle = "solid";
+    var keyDiv;
+    var selectedKeyDiv;
+    for (var i = 0; i < this.keys.length; i++) {
+        keyDiv = document.createElement("div");
+        keyDiv.innerHTML = this.keys[i];
+        keyDiv.style.padding = "5px";
+        keyDiv.style.paddingLeft = "10px";
+        keyDiv.style.paddingRight = "10px";
+        keyDiv.style.borderBottomStyle = "solid";
+        keyDiv.style.borderBottomWidth = "1px";
+        
+        if ((bam.song.data.rootNote || 0 )== i) {
+            selectedKeyDiv = keyDiv;
+            keyDiv.style.backgroundColor = "lightgreen";
+        }
+        
+        keyDiv.onclick = (function (keyDiv, i) {
+            return function () {
+                if (selectedKeyDiv) {
+                    selectedKeyDiv.style.backgroundColor = "white";
+                }
+                selectedKeyDiv = keyDiv;
+                bam.song.data.rootNote = i;
+                bam.player.rescaleSong(i)
+                keyDiv.style.backgroundColor = "lightgreen";
+                e.target.innerHTML = bam.getKeyCaption();
+            };
+        }(keyDiv, i));
+        keyDiv.onmousemove = function (e) {
+            e.target.style.backgroundColor = "orange";
+        };
+        keyDiv.onmouseout = function (e) {
+            e.target.style.backgroundColor = 
+                e.target == selectedKeyDiv ? "lightgreen" : "white";
+        };
+        div.appendChild(keyDiv);
+    }
+    chooserDiv.appendChild(div);
+    
+    div = document.createElement("div");
+    div.style.display = "inline-block";
+    div.style.verticalAlign = "top";
+    div.style.borderWidth = "1px";
+    div.style.borderStyle = "solid";
+    var selectedScaleDiv;
+    this.scales.forEach(function (scale) {
+        var scaleDiv = document.createElement("div");
+        scaleDiv.innerHTML = scale.name;
+        scaleDiv.onclick = function () {
+            if (selectedScaleDiv) {
+                selectedScaleDiv.style.backgroundColor = "white";
+            }
+            selectedScaleDiv = scaleDiv;
+            bam.song.data.ascale = scale.value;
+            bam.player.rescaleSong(undefined, scale.value)
+            scaleDiv.style.backgroundColor = "lightgreen";
+            e.target.innerHTML = bam.getKeyCaption();
+        };
+        scaleDiv.style.padding = "35px";
+        scaleDiv.style.borderBottomStyle = "solid";
+        scaleDiv.style.borderBottomWidth = "1px";
+        div.appendChild(scaleDiv);
+        
+        scaleDiv.onmousemove = function () {
+            scaleDiv.style.backgroundColor = "orange";
+        };
+        scaleDiv.onmouseout = function () {
+            scaleDiv.style.backgroundColor = "white";
+        };
+    });
+    chooserDiv.appendChild(div);
+    this.showPopUpWindow(chooserDiv);
+    e.target.parentElement.parentElement.appendChild(chooserDiv);
+};
+
+OMusicEditor.prototype.showPopUpWindow = function (popup) {
+    var backgroundDiv = document.createElement("div");
+    backgroundDiv.style.position = "absolute";
+    backgroundDiv.style.top = "0px";
+    backgroundDiv.style.width = "100%";
+    backgroundDiv.style.height = "100%";
+    backgroundDiv.style.backgroundColor = "#777777";
+    backgroundDiv.style.opacity = "0.5";
+    document.body.appendChild(backgroundDiv);
+    backgroundDiv.onclick = function () {
+        document.body.removeChild(backgroundDiv);
+        popup.parentElement.removeChild(popup);
+    }
+}
+
+OMusicEditor.prototype.getKeyCaption = function () {
+    var bam = this;
+    var scaleName = "Major";
+    if (bam.song.data.ascale) {
+        this.scales.forEach(function (scale) {
+            if (scale.value.join() == bam.song.data.ascale.join())
+                scaleName = scale.name;
+        });
+    }
+    return this.keys[(this.song.data.rootNote || 0)] + " " + scaleName;
+};
+
+OMusicEditor.prototype.refreshKeyTempoChordsButtons = function () {
+    if (this.keyButton) 
+        this.keyButton.innerHTML = this.getKeyCaption();
+    
+    if (this.tempoButton)
+        this.tempoButton.innerHTML = this.getBPM() + "bpm";
+    
+    if (this.chordsButton)
+        this.chordsButton.innerHTML = this.getChordsCaption();
+        
+    
+};
+
+
+OMusicEditor.prototype.showTempoChooser = function (e) {
+    var bam = this;
+    
+    var thing = bam.zones[bam.zones.length - 1] == bam.song.div ? bam.song :
+            (bam.section && bam.zones[bam.zones.length - 1] == bam.section.div) ? 
+            bam.section : bam.part;
+    
+    var chooserDiv = document.createElement("div");
+    chooserDiv.style.position = "absolute";
+    chooserDiv.style.backgroundColor = "white";
+    chooserDiv.style.top = e.target.offsetTop + e.target.clientHeight + 
+                           e.target.parentElement.offsetTop + "px";
+    chooserDiv.style.left = e.target.offsetLeft + "px";
+    chooserDiv.style.borderWidth = "1px";
+    chooserDiv.style.borderStyle = "solid";
+
+    var div;
+    for (var i = 20; i <= 220; i += 20) {
+        div = document.createElement("button");
+        div.style.display = "inline-block";
+        div.style.verticalAlign = "top";
+        div.innerHTML = i;
+        
+        div.onclick = (function (div, i) {
+            return function () {
+                e.target.innerHTML = i + "bpm";
+                bam.song.data.subbeatMillis = 
+                    Math.round(1000 / (i / 60 * (bam.song.data.subbeats || 4)));
+                if (bam.player.playing) {
+                    bam.player.setSubbeatMillis(bam.song.data.subbeatMillis);
+                }
+                if (thing.data) {
+                    thing.data.subbeatMillis = bam.song.data.subbeatMillis;
+                    if (thing == bam.part)
+                        bam.section.data.subbeatMillis = thing.data.subbeatMillis;
+                }
+            };
+        }(div, i));
+
+        div.onmousemove = function (e) {
+        };
+        div.onmouseout = function (e) {
+        };
+        chooserDiv.appendChild(div);
+    }
+    
+
+    chooserDiv.appendChild(div);
+    this.showPopUpWindow(chooserDiv);
+    e.target.parentElement.parentElement.appendChild(chooserDiv);
+};
+
+OMusicEditor.prototype.getBPM = function () {
+    return Math.round(60000 / ((this.song.data.subbeatMillis || 125) * 
+            (this.song.data.subbeats || 4)));
 };

@@ -16,6 +16,7 @@
    padding:0.8em 10%;
    background-image: linear-gradient(#FFFFFF, #FFFF88);
    font-size:1.1em;
+   overflow:display;
 }
 
 .omg-music-controls-right {
@@ -44,6 +45,17 @@
    background-image: linear-gradient(#EEEEEE, #BBBBBB);
 }
 
+.omg-music-settings-button {
+   cursor:pointer;
+   display:inline-block;
+   padding:1.2em 0.4em;
+   border:1px solid #808080;   
+   border:1px solid black;
+   border-radius:2px;
+   font-family: Helvetica;
+   font-size: 0.8em;
+   background-image: linear-gradient(#FFFFCC, #FFFF77);
+}
 
 .omg-music-controls-button-blink {
    cursor:pointer;

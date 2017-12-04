@@ -83,3 +83,15 @@ document.getElementById("omg-music-controls-next-button").onclick = function () 
 };
 
 
+var keyButton = document.getElementById("omg-music-controls-key-button");
+keyButton.onclick = function (e) {
+   omgbam.showKeyChooser(e);
+};
+var tempoButton = document.getElementById("omg-music-controls-tempo-button");
+tempoButton.onclick = function (e) {
+   omgbam.showTempoChooser(e);
+};
+var chordsButton = document.getElementById("omg-music-controls-chords-button");
+chordsButton.onclick = function (e) {
+   omgbam.showChordChooser(e);
+};
