@@ -46,7 +46,7 @@ function OMusicPlayer() {
     
     p.nextUp = null;
 
-
+	p.loopSection = -1;
 }
 
     
@@ -56,15 +56,9 @@ OMusicPlayer.prototype.play = function (song) {
         return;
 
     if (song) {
-
-        p.prepareSong(song);
-
-        if (p.playing) {
-            p.nextUp = song;
-            return p.playingIntervalHandle;
-        }
-
-        p.song = song;
+        if (!p.prepareSong(song)) {
+			return;
+		}
     }
 
     // if there is no song already here, this'll blow
@@ -98,6 +92,10 @@ OMusicPlayer.prototype.play = function (song) {
 
         if (!p.playing)
             return;
+
+		if (p.loopSection > -1 && p.loopSection < p.song.sections.length) {
+			p.song.playingSection = p.loopSection;
+		}
         
         p.playBeat(p.song.sections[p.song.playingSection], 
                 p.iSubBeat);
@@ -118,7 +116,9 @@ OMusicPlayer.prototype.play = function (song) {
             
             p.iSubBeat = 0;
             p.loopStarted = Date.now();
-            p.song.playingSection++;
+            if (p.loopSection == -1) {
+				p.song.playingSection++;
+			}
             
             if (p.nextUp) {
                 p.song = p.nextUp;
@@ -371,6 +371,14 @@ OMusicPlayer.prototype.prepareSong = function (song) {
             p.loadPart(part, section, song);
         }
     }
+    
+	if (p.playing) {
+		p.nextUp = song;
+		return false;
+	}
+
+	p.song = song;
+	return true;
 };
 
 /*p.prepareArrangementData = function (arrangement) {
@@ -412,9 +420,14 @@ OMusicPlayer.prototype.playBeatForPart = function (iSubBeat, part) {
     var p = this;
     if (part.data.type == "CHORDPROGRESSION") {
         //TODO should this really be in here? As a part that is?
-        
+        return;
     }
-    else if (part.data.surfaceURL == "PRESET_SEQUENCER") {
+
+    if (!part.loaded) {
+		p.loadPart(part, part.section, part.section.song);
+	}
+    
+    if (part.data.surfaceURL == "PRESET_SEQUENCER") {
         p.playBeatForDrumPart(iSubBeat, part);        
     }
     else {
@@ -1017,7 +1030,8 @@ OMusicPlayer.prototype.makeOMGSong = function (data) {
     
     //todo this could go away, we only have type = "PART" now
     //its for back compat with pre-launch data
-    if (data.type == "MELODY" || data.type == "BASSLINE") {
+    if (data.type == "MELODY" || data.type == "BASSLINE" 
+			|| data.partType == "MELODY" || data.partType == "BASSLINE" )  {
         newPart = new OMGPart(null, data);
         newSong = new OMGSong();
         newSection = new OMGSection();
@@ -1025,7 +1039,8 @@ OMusicPlayer.prototype.makeOMGSong = function (data) {
         newSong.sections.push(newSection);
         return newSong;
     }
-    if (data.type == "DRUMBEAT") {
+    if (data.type == "DRUMBEAT"
+			|| data.partType == "DRUMBEAT") {
         newPart = new OMGDrumpart(null, data);
         newSong = new OMGSong();
         newSection = new OMGSection();
@@ -1085,16 +1100,23 @@ OMusicPlayer.prototype.setSubbeatMillis = function (subbeatMillis) {
 
 
 
-function OMGSong(div, data) {
+function OMGSong(div, data, headerOnly) {
     this.div = div;
     this.sections = [];
     this.loop = true;
     
-    if (data) {
+    if (headerOnly) {
+		this.setHeaderData(data);
+	}
+    else if (data) {
         this.setData(data);
+        if (data.id) {
+			this.saved = true;
+		}
     }
     else {
-        this.data = {type: "SONG", name: "(untitled)"};     
+        this.data = {type: "SONG", name: "(untitled)", 
+			measures: 1, beats: 8, subbeats: 4, subbeatMillis: 125};     
     }
 
     
@@ -1105,11 +1127,19 @@ OMGSong.prototype.setData = function (data) {
     
     for (var i = 0; i < data.sections.length; i++) {
         this.sections.push(new OMGSection(null, data.sections[i]));
+        this.sections[i].song = this;
+        this.sections[i].position = i;
     }
     
     if (!this.data.name)
         this.data.name = "(untitled)";
 };
+OMGSong.prototype.setHeaderData = function (data) {
+	this.measures = data.measures || this,measures;
+	this.beats = data.beats || this.beats;
+	this.subbeats = data.subbeats || this.subbeats;
+	this.subbeatMillis = data.subbeatMillis || this.subbeatMillis;
+}
 OMGSong.prototype.getData = function () {
 
     this.data.sections = [];
@@ -1126,11 +1156,16 @@ function OMGSection(div, data) {
     this.div = div;
     
     this.parts = [];
+    this.position = 0;
     
     // key? tempo? we need it here too, I guess
     
     if (data) {
         this.data = data;
+
+        if (data.id) {
+			this.saved = true;
+		}
 
         for (var ip = 0; ip < data.parts.length; ip++) {
             partData = data.parts[ip];
@@ -1145,7 +1180,8 @@ function OMGSection(div, data) {
             else {
                 part = new OMGPart(null, partData);
             }
-
+			part.position = ip;
+			part.section = this;
             this.parts.push(part);
         }
     }
@@ -1164,9 +1200,12 @@ OMGSection.prototype.getData = function () {
 
 function OMGDrumpart(div, data) {
     this.div = div; 
-    
+
     if (data) {
         this.data = data;
+        if (data.id) {
+			this.saved = true;
+		}
     }
     else {
         this.data = {"type":"PART", "partType":"DRUMBEAT",
@@ -1226,6 +1265,7 @@ function OMGDrumpart(div, data) {
 
 function OMGPart(div, data) {
     this.div = div;
+    this.position = 0;
     if (data) {
         this.data = data;
     }

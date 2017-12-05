@@ -5,14 +5,11 @@ omgbam.js ported to a class definition
 
 
 function OMusicEditor() {
-    this.animLength = 700;
+    this.animLength = 500;
     this.borderRadius = 3;
     this.fadingOut = [];
 
     this.url = "/music";
-    this.bpm = 120;
-    //this.beats = 8;
-    //this.subbeats = 4;
     this.fileext = ".mp3"; //needsMP3() ? ".mp3" : ".ogg",
 
     this.loadWhenReady = true;
@@ -41,6 +38,7 @@ OMusicEditor.prototype.setup = function (options) {
    
     if (!bam.player) {
         bam.player = new OMusicPlayer();        
+        bam.player.loopSection = 0;
     }
 
    //omg.ui should exist, obviously. Maybe this should be omg.ui = OMusicUI() 
@@ -70,10 +68,13 @@ OMusicEditor.prototype.setup = function (options) {
     bam.finishZone = document.getElementById("finish-zone");
     
     bam.player.onPlay = function() {
-      //turn the play button caption to stop?
+		if (bam.showingPlayButton) {
+			bam.showingPlayButton.innerHTML = "STOP";
+		}
     };
     bam.player.onStop = function() {
         if (bam.showingPlayButton) {
+            bam.showingPlayButton.innerHTML = "PLAY";
             bam.showingPlayButton.className = bam.showingPlayButton.className
             .replace("-blink", "");         
         }
@@ -112,7 +113,7 @@ OMusicEditor.prototype.setup = function (options) {
    var loadParams;
     if (this.loadWhenReady) {
         loadParams = bam.getLoadParams();
-      loadId = loadParams.id; //loadParams.song || loadParams.section || loadParams.part ;
+      loadId = loadParams.id || loadParams.song || loadParams.section || loadParams.part ;
       if (!isNaN(loadId)) {
          bam.omgservice.getId(loadId, function(result) {
             loadParams.dataToLoad = result;
@@ -315,10 +316,10 @@ OMusicEditor.prototype.setupDivForDrumbeat = function (part) {
             return;
         }
 
-      if (bam.sectionEditor.mixerMode) {
-         // mute?
-         return;
-      }
+		if (bam.sectionEditor.mixerMode) {
+			// mute?
+			return;
+		}
         
         bam.part = part;
 
@@ -333,8 +334,10 @@ OMusicEditor.prototype.setupDivForDrumbeat = function (part) {
 
         bam.fadeOut(fadeList);
         bam.grow(part.div, function() {
-            bam.fadeIn([ bam.beatmaker ]);
-        bam.beatmaker.setPart(part);
+            bam.fadeIn([ bam.beatmaker ], function () {
+				bam.beatmaker.setPart(part);
+			});
+			bam.beatmaker.setPart(part);
         });
     };
 
@@ -449,9 +452,7 @@ OMusicEditor.prototype.setupSectionEditor = function () {
         if (bam.player.playing) {
             bam.player.stop();
         } else {
-            var playSong = new OMGSong();
-            playSong.sections.push(bam.section);
-            bam.player.play(playSong);
+            bam.player.play();
         }
 
       //TODO ? e doesn't necessarily exist, why is this here again?
@@ -510,31 +511,18 @@ OMusicEditor.prototype.setupSectionEditor = function () {
 
     bam.sectionEditor.nextButtonClick = function() {
 
-        var sections = bam.song.sections.length;
-        if (typeof (bam.section.position) != "number"
-                || bam.section.position < 0) {
-            bam.section.position = sections;
-            bam.song.sections.push(bam.section);
-            sections++;
-        }
-
         bam.sectionEditor.hide(function() {
 
             if (!bam.section.saved) {
-             bam.section.data.id = undefined;
+				bam.section.data.id = undefined;
+				bam.section.saving = true;
                 bam.omgservice.post(bam.section.getData(), function(response) {
                     if (response && response.id) {
                         bam.section.saved = true;
-                        /*bam.section.data.id = response.id;
-                        if (saveCallback) {
-                                saveCallback();
-                        }*/
                     }
+					bam.section.saving = false;
                 });
             }
-
-            // keep it rolling? maybe preference
-            // bam.sectionEditor.stop();
 
             bam.section.partsAreClean = false;
             
@@ -551,7 +539,7 @@ OMusicEditor.prototype.setupSectionEditor = function () {
                 
                     bam.songEditor.show(bam.section);
                 
-                    bam.player.play(bam.song);
+                    bam.player.loopSection = -1; //play(bam.song);
 
                     bam.setupSectionDiv(bam.section);
 
@@ -609,9 +597,9 @@ OMusicEditor.prototype.setupSectionEditor = function () {
             //
         }
 
-      if (typeof bam.onzonechange == "function") {
-         bam.onzonechange(bam.section);
-      }
+		if (typeof bam.onzonechange == "function") {
+			bam.onzonechange(bam.section);
+		}
     };
 
    bam.sectionEditor.startMixerMode = function () {
@@ -647,6 +635,9 @@ OMusicEditor.prototype.setupSectionEditor = function () {
       bam.arrangeParts();      
    };
 
+	bam.sectionEditor.showSongEditor = function () {
+		bam.sectionEditor.nextButtonClick();
+	};
 };
 
 OMusicEditor.prototype.setupSectionAddButtons = function (buttonGroup) {
@@ -675,7 +666,11 @@ OMusicEditor.prototype.setupSectionAddButtons = function (buttonGroup) {
         var newdiv = bam.createElementOverElement("part2", melodyButton, bam.bbody);
 
         var newPart = new OMGPart(newdiv);
-
+        newPart.section = bam.section;
+        newPart.data.partType = "MELODY";
+		newPart.position = bam.section.parts.length;
+		bam.section.parts.push(newPart);
+		
         var otherParts = [];
         var otherPartsList = bam.section.div.getElementsByClassName("part2");
         for (var ii = 0; ii < otherPartsList.length; ii++) {
@@ -704,11 +699,14 @@ OMusicEditor.prototype.setupSectionAddButtons = function (buttonGroup) {
 
         var newdiv = bam.createElementOverElement("part2", bassButton, bam.bbody);
         
-        var newPart = new OMGPart(newdiv)
-        newPart.data.type = "BASSLINE";
-        //newPart.data.soundsetURL = "PRESET_BASS"; 
+        var newPart = new OMGPart(newdiv);
+        newPart.section = bam.section;
+        newPart.data.partType = "BASSLINE";
+        newPart.data.soundsetURL = "PRESET_BASS"; 
         newPart.data.soundsetURL = "PRESET_OSC_SAW";
-
+		newPart.position = bam.section.parts.length;
+		bam.section.parts.push(newPart);
+		
         var otherParts = [];
         var otherPartsList = bam.section.div.getElementsByClassName("part2");
         for (var ii = 0; ii < otherPartsList.length; ii++) {
@@ -739,6 +737,9 @@ OMusicEditor.prototype.setupSectionAddButtons = function (buttonGroup) {
         var newdiv = bam.createElementOverElement("part2", drumButton, bam.bbody);
         
         var newPart = new OMGDrumpart(newdiv)
+        newPart.section = bam.section;
+        newPart.data.partType = "DRUMBEAT";
+        newPart.position = bam.section.parts.length;
 
         var otherParts = [];
         var otherPartsList = bam.section.div.getElementsByClassName("part2");
@@ -750,20 +751,7 @@ OMusicEditor.prototype.setupSectionAddButtons = function (buttonGroup) {
         bam.section.div.appendChild(newPart.div);
         bam.fadeIn([newdiv]);
         bam.part = newPart;
-
-        if (bam.player.playing) {
-            var newSong = new OMGSong();
-            newSong.loop = true;
-            var newSection = new OMGSection();
-            for (var ip = 0; ip < bam.section.parts.length; ip++) {
-                newSection.parts.push(bam.section.parts[ip]);
-            }
-
-            newSection.parts.push(bam.part);
-
-            newSong.sections.push(newSection);
-            bam.player.play(newSong);
-        }
+		bam.section.parts.push(newPart);
 
         bam.fadeOut([ bam.sectionEditor ]);
         bam.grow(newPart.div, function() {
@@ -845,26 +833,26 @@ OMusicEditor.prototype.setupSongEditor = function () {
 
         var lastSection = bam.song.sections[bam.song.sections.length - 1] || new OMGSection();
         bam.copySection(lastSection);
-
-        bam.player.play(bam.player.makeOMGSong(bam.section));
+		bam.song.sections.push(bam.section);
+		bam.section.song = bam.song;
+		bam.section.position = bam.song.sections.length - 1;
+		bam.player.loopSection = bam.section.position;
 
         bam.songEditor.hide(bam.section, function () {
             bam.grow(bam.section.div);
             bam.arrangeParts(function() {
-                
                 bam.sectionEditor.show();
-
             });
         });
 
     };
 
     bam.songEditor.addSectionButton = document.createElement("div");
-   bam.songEditor.addSectionButton.className = "section";
-   bam.songEditor.addSectionButton.id = "add-section";
-   bam.songEditor.addSectionButton.innerHTML = "+ Add Section";
-   bam.songEditor.addSectionButton.style.top = "0px";
-   bam.songEditor.appendChild(bam.songEditor.addSectionButton);
+	bam.songEditor.addSectionButton.className = "section";
+	bam.songEditor.addSectionButton.id = "add-section";
+	bam.songEditor.addSectionButton.innerHTML = "+ Add Section";
+	bam.songEditor.addSectionButton.style.top = "0px";
+	bam.songEditor.appendChild(bam.songEditor.addSectionButton);
     if (bam.songEditor.addSectionButton) {
         bam.songEditor.addSectionButton.onclick = bam.songEditor.addSectionButtonClick;
     }
@@ -928,9 +916,20 @@ OMusicEditor.prototype.setupSongEditor = function () {
         bam.arrangeSections();
         
         if (typeof bam.onzonechange == "function") {
-         bam.onzonechange(bam.song);
-      }
+			bam.onzonechange(bam.song);
+		}
     };
+
+	bam.songEditor.editSection = function (section) {
+		bam.section = section;
+		bam.songEditor.hide(section, function () {
+			bam.grow(section.div);
+			bam.arrangeParts(function() {
+				bam.player.loopSection = section.position;
+				bam.sectionEditor.show();
+			});
+		});
+	};
     
     /*bam.songEditor.songName.onchange = function () {
         bam.song.data.name = bam.songEditor.songName.value;
@@ -1027,15 +1026,15 @@ OMusicEditor.prototype.load = function (params)  {
     }
 
    console.log(params);
-   if (params.dataToLoad && params.dataToLoad.type) {
-      params.type = params.dataToLoad.type;
-   }
-   if (params.type) {
-      params.type = params.type.toUpperCase();
-   } else {
-      params.type = "MELODY";
-      params.welcome = true;
-   }
+	if (params.dataToLoad && params.dataToLoad.type) {
+		params.type = params.dataToLoad.type;
+	}
+	if (params.type) {
+		params.type = params.type.toUpperCase();
+	} else {
+		params.type = "MELODY";
+		params.welcome = true;
+	}
 
     // to make the beginning as pretty as possible (no weird flickers)
     // we whiteout the container divs and add their color after 
@@ -1052,37 +1051,16 @@ OMusicEditor.prototype.load = function (params)  {
     var songDiv = bam.div.getElementsByClassName("song")[0];
     bam.zones.push(songDiv);
 
-//  if (params.type == "SONG") {
     if (params.type == "SONG") {
         bam.fadeIn([songDiv, bam.songEditor, bam.songEditor.addSectionButton], restoreColors);
-
-      if (params.dataToLoad) {
-            bam.song = new OMGSong(songDiv, params.dataToLoad);
-            var newSection;
-            var newSections = [];
-            bam.song.sections.forEach(function (section) {
-                newSections.push(bam.makeSectionDiv(section));
-                section.parts.forEach(function (part) {
-                    bam.setupPartDiv(part);
-                    part.controls.rightBar.style.display = "none";
-               part.controls.selectInstrument.style.display = "none";
-               newSections.push(part.controls);
-                });
-            });
-            bam.fadeIn(newSections);
-            bam.arrangeSections();          
-        }
-
-      if (typeof bam.onzonechange == "function") {
-         bam.onzonechange(bam.song);
-      }
-
-        bam.refreshKeyTempoChordsButtons();
+        params.songDiv = songDiv;
+        bam.loadSong(params);
         return;
     } 
 
     bam.song = new OMGSong(songDiv);
-    
+	bam.player.prepareSong(bam.song);    
+	
     var newDiv = document.createElement("div");
     newDiv.className = "section";
     bam.song.div.appendChild(newDiv);
@@ -1095,11 +1073,11 @@ OMusicEditor.prototype.load = function (params)  {
     if (params.type == "SECTION") {
 
         if (params.dataToLoad) {
+            bam.section = new OMGSection(newDiv, params.dataToLoad);
 
             bam.fadeIn([newDiv, bam.sectionEditor], restoreColors);
                 
-            bam.section = new OMGSection(newDiv, params.dataToLoad);
-
+            
             var newPart;
             var newParts = [];
             for (var ip = 0; ip < bam.section.parts.length; ip++) {
@@ -1113,17 +1091,21 @@ OMusicEditor.prototype.load = function (params)  {
             bam.section = new OMGSection(newDiv);
             bam.fadeIn([newDiv, bam.sectionEditor], restoreColors);
         }
+        bam.section.song = bam.song;
+		bam.song.sections.push(bam.section);
         bam.arrangeParts();
 
-      if (typeof bam.onzonechange == "function") {
-         bam.onzonechange(bam.section);
-      }     
+		if (typeof bam.onzonechange == "function") {
+			bam.onzonechange(bam.section);
+		}     
 
         bam.refreshKeyTempoChordsButtons();
         return;
     }
 
     bam.section = new OMGSection(newDiv);
+    bam.section.song = bam.song;
+    bam.song.sections.push(bam.section);
 
     sectionBG = window.getComputedStyle(bam.section.div, null).backgroundColor;
     bam.section.div.style.backgroundColor = "white";
@@ -1167,10 +1149,48 @@ OMusicEditor.prototype.load = function (params)  {
             
             bam.mm.setPart(bam.part, params.welcome);
         }
-        
     }
+    bam.part.section = bam.section;
+    bam.section.parts.push(bam.part);
     
     bam.refreshKeyTempoChordsButtons();
+};
+
+OMusicEditor.prototype.loadSong = function (params) {
+	var bam = this;
+	if (params.dataToLoad) {
+		bam.song = new OMGSong(params.songDiv, params.dataToLoad);
+		var newSection;
+		var newSections = [];
+		bam.song.sections.forEach(function (section) {
+			newSections.push(bam.makeSectionDiv(section));
+			section.parts.forEach(function (part) {
+				bam.setupPartDiv(part);
+				part.controls.rightBar.style.display = "none";
+				part.controls.selectInstrument.style.display = "none";
+				newSections.push(part.controls);
+			});
+		});
+		bam.player.prepareSong(bam.song);
+		bam.fadeIn(newSections);
+		bam.arrangeSections(function () {
+			if (params.section) {
+				bam.song.sections.forEach(function (section) {
+					if (params.section == section.data.id) {
+						bam.songEditor.editSection(section);
+					}
+				});
+			}
+		});          
+	}
+
+	//if (!params.section && typeof bam.onzonechange == "function") {
+	if (typeof bam.onzonechange == "function") {
+		//needs this because songEditor.show() isn't called
+		bam.onzonechange(bam.song);
+	}
+
+	bam.refreshKeyTempoChordsButtons();
 };
 
 OMusicEditor.prototype.clear = function () {
@@ -1418,22 +1438,11 @@ OMusicEditor.prototype.setupMelodyMaker = function () {
     };
     
     bam.mm.playButtonClick = function() {
-
         if (bam.player.playing) {
             bam.player.stop();
             return;
         }
-
-        //if (bam.part.data.type == "DRUMBEAT") {
-            var newSong = new OMGSong();
-            newSong.loop = true;
-            var newSection = new OMGSection();
-            newSection.parts.push(bam.part);
-            newSong.sections.push(newSection);
-            bam.player.play(newSong);
-        //} else {
-        //  bam.part.play();
-        //}
+		bam.player.play();
     };
     
     bam.mm.nextButtonClick = function() {
@@ -1443,25 +1452,19 @@ OMusicEditor.prototype.setupMelodyMaker = function () {
         var type = bam.part.data.type;
         var surface = bam.part.data.surfaceURL;
 
-        var position;
-        if (typeof (part.position) == "number") {
-            position = part.position;
-        } else {
-            position = bam.section.parts.length;
-            bam.section.parts.push(part);
-
-            if (bam.sectionEditor.mixerMode) {
-                bam.sectionEditor.dragAndDrop.setupChildDiv(part.div);
-            }
-        }
+		if (bam.sectionEditor.mixerMode) {
+			bam.sectionEditor.dragAndDrop.setupChildDiv(part.div);
+		}
 
         if (!part.saved) {
+			part.saving = true;
             bam.omgservice.post(part.data, function(response) {
                 if (response && response.id) {
                     part.saved = true;
                 } else {
                     debug(response);
                 }
+                part.saving = false;
             });
          
          //TODO THIS NEEDS TO CHECK TO SEE IF THE USER IS LOGGED IN
@@ -1498,12 +1501,6 @@ OMusicEditor.prototype.setupMelodyMaker = function () {
                    bam.fadeIn(otherParts);
 
                    bam.arrangeParts();
-
-                   var playSong = new OMGSong();
-                   playSong.sections.push(bam.section);
-                
-                   bam.player.play(playSong);
-
            });
       };
 
@@ -1539,7 +1536,7 @@ OMusicEditor.prototype.setupMelodyMaker = function () {
     bam.mm.shareButtonClick = function() {
 
         var shareParams = {};
-        shareParams.type = bam.part.data.type;
+        shareParams.type = bam.part.data.partType || bam.part.data.type;
         shareParams.button = bam.mm.shareButton;
         
         if (shareParams.type == "DRUMBEAT") {
@@ -2291,13 +2288,12 @@ OMusicEditor.prototype.setupSectionDiv = function(section) {
         //arrangeparts needs this
         bam.section = section;
 
+		bam.player.loopSection = section.position;
         bam.songEditor.hide(section, function () { 
             
             bam.grow(section.div);
             
             bam.arrangeParts(function() {               
-
-                bam.player.play(bam.player.makeOMGSong(section));
 
                 bam.sectionEditor.show();
                 

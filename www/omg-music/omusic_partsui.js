@@ -77,7 +77,7 @@ omg.ui.drawMelodyCanvas = function (params, canvas_p, w, h) {
       w = w || canvas.width;
       h = h || canvas.height;
    }
-	console.log(melody);
+
     var high;
     var low;
     var note;
@@ -591,9 +591,6 @@ OMGDrumMachine.prototype.setPart = function (part) {
 
 OMGDrumMachine.prototype.drawLargeCanvas = function (iSubBeat) {
 	
-	if (!this.part)
-		return;
-	
 	var boxMargin = 6;
 	
 	var ctx = this.ctx;
@@ -603,11 +600,14 @@ OMGDrumMachine.prototype.drawLargeCanvas = function (iSubBeat) {
 	
 	ctx.fillStyle = "black";
 	ctx.fillRect(0, 0, width, height);
-	
-	var part = this.part.data;
-	
+		
 	ctx.fillStyle = "#8888FF";
 	ctx.fillRect(0, 0, this.columnWidth, height);
+
+	if (!this.part)
+		return;
+	
+	var part = this.part.data;
 
 	var currentBeat;
 	if (typeof(iSubBeat) == "number") {
@@ -628,7 +628,7 @@ OMGDrumMachine.prototype.drawLargeCanvas = function (iSubBeat) {
 		}
 		this.captionsAreSetup = true;
 	}
-	
+
 	this.captionRowHeight = height / this.captions.length;
 	
 	var x, y, w, h;
@@ -1875,8 +1875,8 @@ OMGMelodyMaker.prototype.animateDrawing = function () {
 			}
 			
 			if (!omgmm.player.playing) {
-				var newSong = omgmm.player.makeOMGSong(omgmm.part);
-				omgmm.player.play(newSong);				
+				//var newSong = omgmm.player.makeOMGSong(omgmm.part);
+				omgmm.player.play();				
 			}
 
 		}
@@ -2003,7 +2003,6 @@ OMGDragAndDropHelper.prototype.ondown = function (div, x, y) {
 	divdd.downTimeout = setTimeout(function () {
 		
 		divdd.doClick = false;
-      console.log("doclick = false");
 		
 		if (Math.abs(divdd.lastX - divdd.firstX) < 15) {				
 			

@@ -10,31 +10,83 @@ document.getElementsByClassName("omg-music-controls-title")[0].oninput = functio
    }
 };
 
-omgbam.onzonechange = function (zone) {
-   var label = document.getElementsByClassName("omg-music-controls-label")[0];
-   var title = document.getElementsByClassName("omg-music-controls-title")[0];
+window.onpopstate = function (event) {
+	//the type here is the type we're moving to
+	//section can be from either part or song
+	if (event.state.type == "SECTION") {
+		if (omgbam.musicMakerZoneType == "PART") {
+			omgbam.mm.nextButtonClick();
+		}
+		if (omgbam.musicMakerZoneType == "SONG") {
+			omgbam.songEditor.editSection(omgbam.section);
+		}
+	}
+	else if (event.state.type == "PART") {
+		omgbam.section.parts[omgbam.part.position].canvas.onclick();
+	}
+	else if (event.state.type == "SONG") {
+		omgbam.sectionEditor.showSongEditor();
+	}
+	else {
+		return;
+	}
+	//omgbam.onzonechange(omgbam[event.state.type.toLowerCase()]);
+};
 
-   var type;
-   omgbam.musicMakerZone = zone;
-   if (zone && zone.data && zone.data.type) {
-      type = zone.data.type;
-      omgbam.musicMakerZoneType = type;
-      label.innerHTML = type.slice(0, 1).toUpperCase() + type.slice(1).toLowerCase();
-      title.value = zone.data.title || "";
+var skipNextOnZoneChange = true;
 
-      var zoneBG = window.getComputedStyle(zone.div, null).backgroundColor;
-      document.getElementsByClassName("omg-music-controls")[0].style.background = "linear-gradient(#FFFFFF, " + zoneBG + ")";
+omgbam.onzonechange = function (zone, pop) {
+	console.log("zone.data");
+	console.log(zone.data);
+	
+	//hasn't been initialized yet, don't need to add history
+	var skipAddHistory = !omgbam.musicMakerZone;
 
-      var updateWindowHistory = function () {
-         console.log("update window history");
-         window.history.pushState({},"", window.location.pathname + "?" + zone.data.type.toLowerCase() + "=" + zone.data.id);
-      };
+	var label = document.getElementsByClassName("omg-music-controls-label")[0];
+	var title = document.getElementsByClassName("omg-music-controls-title")[0];
 
-      console.log("zone.data");
-      console.log(zone.data);
-      if (zone.data.id) {
+	var type;
+	omgbam.musicMakerZone = zone;
+	if (zone && zone.data && zone.data.type) {
+		type = zone.data.type;
+		omgbam.musicMakerZoneType = type;
+		label.innerHTML = type.slice(0, 1).toUpperCase() + type.slice(1).toLowerCase();
+		title.value = zone.data.title || "";
+
+		var zoneBG = window.getComputedStyle(zone.div, null).backgroundColor;
+		document.getElementsByClassName("omg-music-controls")[0].style.background = "linear-gradient(#FFFFFF, " + zoneBG + ")";
+		
+		var updateWindowHistory = function () {
+		var queryString = "";
+		if (omgbam.song.data.id || zone.data.type == "SONG") {
+			queryString += "?song=" + (omgbam.song.data.id || 0);
+		}
+		if (zone.data.type == "SECTION"
+				|| (zone.data.type == "PART" 
+					&& (omgbam.section.data.id 
+						|| omgbam.song.data.id))) {
+			queryString += queryString.length > 0 ? "&" : "?";
+			queryString += "section=" + (omgbam.section.data.id || 0);
+		}
+		if (zone.data.type == "PART") {
+			queryString += queryString.length > 0 ? "&" : "?";
+			queryString += "part=" + (omgbam.part.data.id || 0);
+		}
+
+		if (skipAddHistory) {
+			window.history.replaceState(zone.data,"", window.location.pathname + queryString);			
+		}
+		else {
+			if (window.location.search != queryString) {
+				console.log("update window history");
+				window.history.pushState(zone.data,"", window.location.pathname + queryString);
+			}
+		}
+	};
+
+	if (!zone.saving) {
          updateWindowHistory();
-      } else {
+	} else {
          var attempts = 0;
          var getIdHandle = setInterval(function () {
             if (zone.data.id) {
@@ -46,11 +98,11 @@ omgbam.onzonechange = function (zone) {
             attempts++;
             if (attempts > 20) {
                clearInterval(getIdHandle);
-               console.log("hasn't saved, not updating window history!!!");
+				updateWindowHistory();
             }
          }, 100);
       }
-   }
+	}
 };
 
 omgbam.setup({div:        omgbamElement, 
@@ -92,6 +144,6 @@ tempoButton.onclick = function (e) {
    omgbam.showTempoChooser(e);
 };
 var chordsButton = document.getElementById("omg-music-controls-chords-button");
-chordsButton.onclick = function (e) {
-   omgbam.showChordChooser(e);
-};
+//chordsButton.onclick = function (e) {
+//   omgbam.showChordChooser(e);
+//};

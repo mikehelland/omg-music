@@ -50,11 +50,10 @@
    display:inline-block;
    padding:1.2em 0.4em;
    border:1px solid #808080;   
-   border:1px solid black;
    border-radius:2px;
    font-family: Helvetica;
    font-size: 0.8em;
-   background-image: linear-gradient(#FFFFCC, #FFFF77);
+   background-image: linear-gradient(#FFFFFF, #DDDDDD);
 }
 
 .omg-music-controls-button-blink {
