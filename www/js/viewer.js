@@ -58,7 +58,8 @@ viewer.loadPlayer = function (dataToPlay) {
    });
 
    viewer.editButton.onclick = function () {
-      window.location = "music-maker.htm?id=" + dataToPlay.id;
+      window.location = "music-maker.htm?" + 
+			dataToPlay.type.toLowerCase() + "=" + dataToPlay.id;
    };
    
    viewer.tipButton.onclick = function () {

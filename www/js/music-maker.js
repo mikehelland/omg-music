@@ -5,8 +5,7 @@ var omgservice = new OMGService();
 
 document.getElementsByClassName("omg-music-controls-title")[0].oninput = function (e) {
    if (omgbam.musicMakerZone) {
-      omgbam.musicMakerZone.data.title = e.target.value;
-      console.log(e.target.value);
+		omgbam.musicMakerZone.data.title = e.target.value;
    }
 };
 
@@ -36,14 +35,11 @@ window.onpopstate = function (event) {
 var skipNextOnZoneChange = true;
 
 omgbam.onzonechange = function (zone, pop) {
-	console.log("zone.data");
-	console.log(zone.data);
 	
-	//hasn't been initialized yet, don't need to add history
-	var skipAddHistory = !omgbam.musicMakerZone;
-
 	var label = document.getElementsByClassName("omg-music-controls-label")[0];
 	var title = document.getElementsByClassName("omg-music-controls-title")[0];
+
+	var firstTime = !omgbam.musicMakerZone;
 
 	var type;
 	omgbam.musicMakerZone = zone;
@@ -54,7 +50,14 @@ omgbam.onzonechange = function (zone, pop) {
 		title.value = zone.data.title || "";
 
 		var zoneBG = window.getComputedStyle(zone.div, null).backgroundColor;
-		document.getElementsByClassName("omg-music-controls")[0].style.background = "linear-gradient(#FFFFFF, " + zoneBG + ")";
+		var controls = document.getElementsByClassName("omg-music-controls")[0];
+		controls.style.background = "linear-gradient(#FFFFFF, " + zoneBG + ")";
+		controls.style.opacity = 1;
+		
+		if (firstTime) {
+			window.history.replaceState(zone.data, "");
+			return;
+		}
 		
 		var updateWindowHistory = function () {
 		var queryString = "";
@@ -73,14 +76,9 @@ omgbam.onzonechange = function (zone, pop) {
 			queryString += "part=" + (omgbam.part.data.id || 0);
 		}
 
-		if (skipAddHistory) {
-			window.history.replaceState(zone.data,"", window.location.pathname + queryString);			
-		}
-		else {
-			if (window.location.search != queryString) {
-				console.log("update window history");
-				window.history.pushState(zone.data,"", window.location.pathname + queryString);
-			}
+		if (omgbam.initialized && window.location.search != queryString) {
+			console.log("update window history");
+			window.history.pushState(zone.data,"", window.location.pathname + queryString);
 		}
 	};
 

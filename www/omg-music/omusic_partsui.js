@@ -578,6 +578,13 @@ OMGDrumMachine.prototype.setPart = function (part) {
 	// shouldn't this be read from this part?
 	this.columns = 1 + this.subbeats;
 	this.rows = this.beats;	
+
+	this.refresh();
+	
+	this.captionsAreSetup = false
+}
+
+OMGDrumMachine.prototype.refresh = function (part) {
 	this.columnWidth = this.canvas.clientWidth / this.columns;
 	this.rowHeight =  this.canvas.clientHeight / this.rows;
 	
@@ -585,9 +592,8 @@ OMGDrumMachine.prototype.setPart = function (part) {
 	
 	this.offsetLeft = offsets.left;
 	this.offsetTop = offsets.top;
-	
-	this.captionsAreSetup = false
-}
+
+};
 
 OMGDrumMachine.prototype.drawLargeCanvas = function (iSubBeat) {
 	
@@ -1886,6 +1892,9 @@ OMGMelodyMaker.prototype.animateDrawing = function () {
 	}, 1000 / 60);
 };
 
+OMGMelodyMaker.prototype.refresh = function(part, welcomeStyle) {
+	//todo check the key and scale?
+};
 
 OMGMelodyMaker.prototype.setPart = function(part, welcomeStyle) {
 

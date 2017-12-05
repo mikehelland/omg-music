@@ -320,25 +320,8 @@ OMusicEditor.prototype.setupDivForDrumbeat = function (part) {
 			// mute?
 			return;
 		}
-        
-        bam.part = part;
-
-        var fadeList = [ bam.sectionEditor, part.controls ];
-        var otherPartsList = bam.section.div.getElementsByClassName("part2");
-        for (var ii = 0; ii < otherPartsList.length; ii++) {
-            if (otherPartsList.item(ii) != part.div)
-                fadeList.push(otherPartsList.item(ii));
-            else
-                part.position = ii;
-        }
-
-        bam.fadeOut(fadeList);
-        bam.grow(part.div, function() {
-            bam.fadeIn([ bam.beatmaker ], function () {
-				bam.beatmaker.setPart(part);
-			});
-			bam.beatmaker.setPart(part);
-        });
+      
+		bam.sectionEditor.editPart(part);
     };
 
     part.isNew = false;
@@ -408,33 +391,12 @@ OMusicEditor.prototype.setupMelodyDiv = function (part) {
             return;
         }
 
-      if (bam.sectionEditor.mixerMode) {
-         // mute?
-         return;
-      }
+		if (bam.sectionEditor.mixerMode) {
+			// mute?
+			return;
+		}
 
-        bam.part = part;
-
-        if (bam.player.playing)
-            bam.player.stop();
-
-        var fadeList = [ bam.sectionEditor, part.controls ];
-        var otherPartsList = bam.section.div.getElementsByClassName("part2");
-        for (var ii = 0; ii < otherPartsList.length; ii++) {
-            if (otherPartsList.item(ii) != part.div)
-                fadeList.push(otherPartsList.item(ii));
-            else
-                part.position = ii;
-        }
-
-        bam.fadeOut(fadeList);
-        bam.grow(part.div, function() {
-            bam.fadeIn([ bam.mm ]);
-
-            bam.mm.setPart(part);
-
-        });
-
+		bam.sectionEditor.editPart(part);
     };
 
 };
@@ -572,7 +534,7 @@ OMusicEditor.prototype.setupSectionEditor = function () {
         
     };
     
-    bam.sectionEditor.show = function () {
+    bam.sectionEditor.show = function (callback) {
         var fadeInList = [ bam.sectionEditor ];
         var part;
         for (var ip = bam.section.parts.length - 1; ip > -1; ip--) {
@@ -580,7 +542,7 @@ OMusicEditor.prototype.setupSectionEditor = function () {
             if (!part.controls) {
                 //not entirely sure why this should still be the case
                 //controls were formerly hidden from the song view
-            console.log("calling setup part div");
+				console.log("no part.controls: calling setup part div");
                 bam.setupPartDiv(part);
                 fadeInList.push(part.controls);
             }
@@ -591,7 +553,7 @@ OMusicEditor.prototype.setupSectionEditor = function () {
             fadeInList.push(part.controls.rightBar);
          //fadeInList.push(part.controls.selectInstrument);
         }
-        bam.fadeIn(fadeInList);
+        bam.fadeIn(fadeInList, callback);
 
         if (bam.section.parts.length > 0) {
             //
@@ -637,6 +599,30 @@ OMusicEditor.prototype.setupSectionEditor = function () {
 
 	bam.sectionEditor.showSongEditor = function () {
 		bam.sectionEditor.nextButtonClick();
+	};
+	
+	bam.sectionEditor.editPart = function (part) {
+        bam.part = part;
+
+        var fadeList = [ bam.sectionEditor, part.controls ];
+        var otherPartsList = bam.section.div.getElementsByClassName("part2");
+        for (var ii = 0; ii < otherPartsList.length; ii++) {
+            if (otherPartsList.item(ii) != part.div)
+                fadeList.push(otherPartsList.item(ii));
+            else
+                part.position = ii;
+        }
+
+        bam.fadeOut(fadeList);
+        
+        var surface= part.data.surfaceURL == "PRESET_SEQUENCER" ?
+				bam.beatmaker : bam.mm;
+        bam.grow(part.div, function() {
+            bam.fadeIn([surface], function () {
+				surface.ui.refresh();
+			});
+			surface.setPart(part);
+        });
 	};
 };
 
@@ -920,13 +906,13 @@ OMusicEditor.prototype.setupSongEditor = function () {
 		}
     };
 
-	bam.songEditor.editSection = function (section) {
+	bam.songEditor.editSection = function (section, callback) {
 		bam.section = section;
 		bam.songEditor.hide(section, function () {
 			bam.grow(section.div);
 			bam.arrangeParts(function() {
 				bam.player.loopSection = section.position;
-				bam.sectionEditor.show();
+				bam.sectionEditor.show(callback);
 			});
 		});
 	};
@@ -1025,7 +1011,6 @@ OMusicEditor.prototype.load = function (params)  {
         bam.mobile = bam.windowWidth < 1000;
     }
 
-   console.log(params);
 	if (params.dataToLoad && params.dataToLoad.type) {
 		params.type = params.dataToLoad.type;
 	}
@@ -1071,35 +1056,9 @@ OMusicEditor.prototype.load = function (params)  {
     bam.song.div.style.display = "block";
 
     if (params.type == "SECTION") {
-
-        if (params.dataToLoad) {
-            bam.section = new OMGSection(newDiv, params.dataToLoad);
-
-            bam.fadeIn([newDiv, bam.sectionEditor], restoreColors);
-                
-            
-            var newPart;
-            var newParts = [];
-            for (var ip = 0; ip < bam.section.parts.length; ip++) {
-                newPart = bam.makePartDiv(bam.section.parts[ip]);
-                if (newPart)
-                    newParts.push(newPart.div);
-            };
-            bam.fadeIn(newParts);
-        }
-        else {
-            bam.section = new OMGSection(newDiv);
-            bam.fadeIn([newDiv, bam.sectionEditor], restoreColors);
-        }
-        bam.section.song = bam.song;
-		bam.song.sections.push(bam.section);
-        bam.arrangeParts();
-
-		if (typeof bam.onzonechange == "function") {
-			bam.onzonechange(bam.section);
-		}     
-
-        bam.refreshKeyTempoChordsButtons();
+		params.sectionDiv = newDiv;
+		params.callback = restoreColors;
+		bam.loadSection(params);
         return;
     }
 
@@ -1175,11 +1134,10 @@ OMusicEditor.prototype.loadSong = function (params) {
 		bam.fadeIn(newSections);
 		bam.arrangeSections(function () {
 			if (params.section) {
-				bam.song.sections.forEach(function (section) {
-					if (params.section == section.data.id) {
-						bam.songEditor.editSection(section);
-					}
-				});
+				bam.editSectionOnLoad(params);
+			}
+			else {
+				bam.initialized = true;
 			}
 		});          
 	}
@@ -1192,6 +1150,67 @@ OMusicEditor.prototype.loadSong = function (params) {
 
 	bam.refreshKeyTempoChordsButtons();
 };
+
+OMusicEditor.prototype.editSectionOnLoad = function (params) {
+	var bam = this;
+	bam.song.sections.forEach(function (section) {
+		if (params.section == section.data.id) {
+			bam.songEditor.editSection(section, function () {
+				if (params.part) {
+					bam.editPartOnLoad(params);
+				}
+				else {
+					bam.initialized = true;
+				}
+			});
+		}
+	});
+};
+
+OMusicEditor.prototype.editPartOnLoad = function (params) {
+	var bam = this;
+	bam.section.parts.forEach(function (part) {
+		if (params.part == part.data.id) {
+			bam.sectionEditor.editPart(part);
+		}
+	});
+	bam.initialized = true;
+};
+
+OMusicEditor.prototype.loadSection = function (params) {
+	var bam = this;
+	
+	var newPart;
+	var fadeIn = [params.sectionDiv, bam.sectionEditor];
+	if (params.dataToLoad) {
+		bam.section = new OMGSection(params.sectionDiv, params.dataToLoad);
+		for (var ip = 0; ip < bam.section.parts.length; ip++) {
+			newPart = bam.makePartDiv(bam.section.parts[ip]);
+			if (newPart)
+				fadeIn.push(newPart.div);
+		};
+	}
+	else {
+		bam.section = new OMGSection(params.sectionDiv);
+	}
+	bam.fadeIn(fadeIn, params.callback);
+	bam.section.song = bam.song;
+	bam.song.sections.push(bam.section);
+	bam.arrangeParts(function () {
+		if (params.part) {
+			bam.editPartOnLoad(params);
+		}
+		else {
+			bam.initialized = true;
+		}
+	});
+
+	if (typeof bam.onzonechange == "function") {
+		bam.onzonechange(bam.section);
+	}     
+
+	bam.refreshKeyTempoChordsButtons();
+}
 
 OMusicEditor.prototype.clear = function () {
     var bam = this;
@@ -1720,8 +1739,6 @@ OMusicEditor.prototype.arrangeParts = function(callback) {
         child.targetH = child.div.clientHeight;
         child.targetW = bam.bbody.clientWidth;
         child.targetX = bam.bbody.clientWidth * 0.1;
-        console.log("child targetX)");
-        console.log(child.targetX);
         child.targetY = child.div.offsetTop;
         children.push(child);
     
@@ -2474,7 +2491,6 @@ OMusicEditor.prototype.setupSharer = function () {
         };
 
         bam.omgservice.post(params.data, function(response) {
-            console.log(response);
             if (response && response.result == "good") {
                 goToId(response.id);
             }

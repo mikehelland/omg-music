@@ -17,6 +17,7 @@
    background-image: linear-gradient(#FFFFFF, #FFFF88);
    font-size:1.1em;
    overflow:display;
+   opacity:0;
 }
 
 .omg-music-controls-right {

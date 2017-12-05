@@ -271,8 +271,7 @@ OMusicPlayer.prototype.loadMelody = function (part, section, song) {
     
     if (typeof data.soundsetURL == "string") {
 		 p.getSoundSet(data.soundsetURL, function (soundset) {
-			 console.log("soundset = ");
-			 console.log(soundset);
+			 console.log("soundset =" + soundset);
 			 p.setupPartWithSoundSet(soundset, part);			 
 		 });
     }
@@ -539,7 +538,6 @@ OMusicPlayer.prototype.makeOsc = function (part) {
 
 	var soundsetURL = part.data.soundsetURL || 
 		"PRESET_OSC_SINE_SOFT_DELAY";
-	console.log("soundsetUrl=" + soundsetURL);	
     if (soundsetURL.indexOf("SAW") > -1) {
         part.osc.type = "sawtooth";
     }
@@ -737,7 +735,6 @@ OMusicPlayer.prototype.setupPartWithSoundSet = function (ss, part, load) {
     var prefix = ss.data.prefix || "";
     var postfix = ss.data.postfix || "";
 
-    console.log(ss);
     for (var ii = 0; ii < part.data.notes.length; ii++) {
         note = part.data.notes[ii];
         
