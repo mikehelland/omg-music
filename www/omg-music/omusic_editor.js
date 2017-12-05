@@ -2550,7 +2550,8 @@ OMusicEditor.prototype.partZoneBeatPlayed = function (isubbeat) {
     
     //dec2017, I think partType is the way to go
     if (bam.part.data.type == "DRUMBEAT" || 
-            bam.part.data.partType == "DRUMBEAT") {
+            bam.part.data.partType == "DRUMBEAT" ||
+            bam.part.data.surfaceURL == "PRESET_SEQUENCER") {
         bam.beatmaker.ui.drawLargeCanvas(isubbeat); 
     }
     else {

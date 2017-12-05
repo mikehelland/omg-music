@@ -1200,6 +1200,10 @@ function OMGDrumpart(div, data) {
 
     if (data) {
         this.data = data;
+        if (!data.partType) {
+			data.partType = "DRUMBEAT";
+			data.type = "PART";
+		}
         if (data.id) {
 			this.saved = true;
 		}
@@ -1265,6 +1269,11 @@ function OMGPart(div, data) {
     this.position = 0;
     if (data) {
         this.data = data;
+        if (!data.partType) {
+			//if type is melody or bassline
+			data.partType = data.type;
+			data.type = "PART";
+		}
     }
     else {
         this.data = {type: "PART", 
