@@ -58,7 +58,7 @@ function omg_embedded_viewer_loadData(div, data) {
 	viewer.beatMarker.style.marginTop = viewer.canvas.offsetTop + "px";
 	viewer.beatMarker.style.height = viewer.canvas.height + "px";
 
-	omg.musicUrl = "omg-music/";
+	omg.ui.omgUrl = "omg-music/";
 	omg.ui.setupNoteImages();
 
 	viewer.loadPlayer = function (dataToPlay) {
@@ -183,13 +183,13 @@ function omg_embedded_viewer_loadData(div, data) {
 }
 
 function omg_embedded_viewer_loadURL(div, url) {
-	new OMGService().getHTTP(url, function (result) {
+	omg.server.getHTTP(url, function (result) {
 		omg_embedded_viewer_loadData(div, result);
 	});
 }
 
 function omg_embedded_viewer_loadId(div, id) {
-	new OMGService().getId(id, function (result) {
+	omg.server.getId(id, function (result) {
 		omg_embedded_viewer_loadData(div, result);
 	});
 }

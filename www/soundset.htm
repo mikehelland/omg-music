@@ -1,109 +1,107 @@
 <!DOCTYPE html>
 <html>
-<head>
+    <head>
 
-   <link rel="stylesheet" href="css/main.css" type="text/css" />
-   <link rel="stylesheet" href="css/search.css" type="text/css" />
-   
-   <style>
-	   .url-input {width: 300px;}
-	   audio {position:relative; top: 8px;}
-	   .sound {padding: 8px;}
-	   #edit-button, #delete-button {visibility: hidden};
-   </style>
+        <link rel="stylesheet" href="css/main.css" type="text/css" />
+        <link rel="stylesheet" href="css/search.css" type="text/css" />
 
-</head>
-<body>
+        <style>
+            .url-input {width: 300px;}
+            audio {position:relative; top: 8px;}
+            .sound {padding: 8px;}
+            #edit-button, #delete-button {visibility: hidden};
+        </style>
 
-   <div class="main-title-bar">
-         <div class="main-title-bar-content">
-         <a class="main-page-link" href="index.htm">
-         <span class="main-title-open">Open</span><span class="main-title-media">Music</span><span class="main-title-gallery">.Gallery</span>
-         </a>
+    </head>
+    <body>
 
-         <div class="main-title-bar-right">
-            <div class="title-bar-user-controls"></div>
-         </div>
-      </div>
+        <div class="main-title-bar">
+            <div class="main-title-bar-content">
+                <a class="main-page-link" href="index.htm">
+                    <span class="main-title-open">Open</span><span class="main-title-media">Music</span><span class="main-title-gallery">.Gallery</span>
+                </a>
 
-   </div>
+                <div class="main-title-bar-right">
+                    <div class="title-bar-user-controls"></div>
+                </div>
+            </div>
 
-   <div class="main-body">
-	   
-	   <h1>Sound Set: <span id="soundset-name"></span></h1>
-	   
-	  
-	  <div id="sound-list" class="search-info">
-	  </div>
+        </div>
+
+        <div class="main-body">
+
+            <h1>Sound Set: <span id="soundset-name"></span></h1>
 
 
-	  <a href="soundset-editor.htm">
-		  <button class="main-create-something" id="create-another-button">
-			  Create A New SoundSet</button>
-	  </a>
+            <div id="sound-list" class="search-info">
+            </div>
 
 
-	  <button id="edit-button">
-		  Edit SoundSet</button>
-	  <button id="delete-button">
-		  Delete SoundSet</button>
-   
-   </div>
+            <a href="soundset-editor.htm">
+                <button class="main-create-something" id="create-another-button">
+                    Create A New SoundSet</button>
+            </a>
 
-   <script src="js/usercontrols.js"></script>
-   <script src="js/omgservice.js"></script>
-   <script>
-	   
-	   
-	var soundsetName = document.getElementById("soundset-name");
-	var soundList = document.getElementById("sound-list");
-	
-	var omgservice = new OMGService();
-	var params = omgservice.getQueryString();
-	if (!params.id) {
-		soundsetName.innerText = "(Invalid ID)";
-	}
-	else {
-		
-		omgservice.getId(params.id, function (response) {
-			soundsetName.innerText = response.name;
-			var newDiv;
-			for (var i = 0; i < response.data.length; i++) {
-				newDiv = document.createElement("div");
-				newDiv.className = "sound";
-				var data = response.data[i];
-				newDiv.innerHTML = data.name + 
-								" - <a href='" + data.url +
-								"'>" + data.url + "</a> - " +
-								"<audio controls src='" + data.url + 
-								"'></audio>";
-				soundList.appendChild(newDiv);
-			}
-		});
-		
-	
-	   setupUserControls(
-           document.getElementsByClassName("title-bar-user-controls")[0], 
-           function () {
-				if (typeof omg != "undefined" && omg.user && omg.user.admin) {
-					var deleteButton = document.getElementById("delete-button");
-					deleteButton.onclick = function () {
-						omgservice.deleteId(params.id, function() {
-							window.history.back();
-						});
-					};
-					deleteButton.style.visibility = "visible";
-					var editButton = document.getElementById("edit-button");
-					editButton.onclick = function () {
-						window.location = "soundset-editor.htm?id=" + params.id;
-					};
-					editButton.style.visibility = "visible";
-				}			   
-		   }
-       );
-			
-	}
-   </script>
 
-</body>
+            <button id="edit-button">
+                Edit SoundSet</button>
+            <button id="delete-button">
+                Delete SoundSet</button>
+
+        </div>
+
+        <script src="js/usercontrols.js"></script>
+        <script src="js/omgservice.js"></script>
+        <script>
+
+
+            var soundsetName = document.getElementById("soundset-name");
+            var soundList = document.getElementById("sound-list");
+
+            var params = omg.server.getQueryString();
+            if (!params.id) {
+                soundsetName.innerText = "(Invalid ID)";
+            } else {
+
+                omg.server.getId(params.id, function (response) {
+                    soundsetName.innerText = response.name;
+                    var newDiv;
+                    for (var i = 0; i < response.data.length; i++) {
+                        newDiv = document.createElement("div");
+                        newDiv.className = "sound";
+                        var data = response.data[i];
+                        newDiv.innerHTML = data.name +
+                                " - <a href='" + data.url +
+                                "'>" + data.url + "</a> - " +
+                                "<audio controls src='" + data.url +
+                                "'></audio>";
+                        soundList.appendChild(newDiv);
+                    }
+                });
+
+
+                setupUserControls(
+                        document.getElementsByClassName("title-bar-user-controls")[0],
+                        function () {
+                            if (typeof omg != "undefined" && omg.user && omg.user.admin) {
+                                var deleteButton = document.getElementById("delete-button");
+                                deleteButton.onclick = function () {
+                                    omg.server.deleteId(params.id, function () {
+                                        window.history.back();
+                                    });
+                                };
+                                deleteButton.style.visibility = "visible";
+                                var editButton = document.getElementById("edit-button");
+                                editButton.onclick = function () {
+                                    window.location = "soundset-editor.htm?id=" + params.id;
+                                };
+                                editButton.style.visibility = "visible";
+                            }
+                        }
+                );
+
+            }
+        </script>
+
+    </body>
 </html>

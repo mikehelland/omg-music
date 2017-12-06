@@ -4,3 +4,5 @@ node_modules/
 !.gitignore
 setup_database.sh
 install_database.sh
+/nbproject/private/
+www/soundsets.json

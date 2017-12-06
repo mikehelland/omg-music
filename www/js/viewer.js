@@ -29,7 +29,7 @@ viewer.context = viewer.canvas.getContext("2d");
 
 viewer.beatMarker = document.getElementsByClassName("beat-marker")[0];
 
-omg.musicUrl = "omg-music/";
+omg.ui.omgUrl = "omg-music/";
 omg.ui.setupNoteImages();
 
 viewer.loadPlayer = function (dataToPlay) {

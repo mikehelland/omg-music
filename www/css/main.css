@@ -67,13 +67,19 @@ body {
 
 .main-search-input {
    font-size:16pt;
-   width:65%;
+   width:62%;
+   margin:0%;
+   padding:0%;
 }
 
-.main-search-area button {}
+.main-search-area {
+	text-align:center;
+}
 .main-search-submit {
   font-size:16pt;
-  width:25%;
+  width:32%;
+  margin:0%;
+  padding:0%;
 }
 
 .main-learn-more {
