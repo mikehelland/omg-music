@@ -91,6 +91,7 @@ viewer.drawSong = function (song) {
          params.offsetLeft = viewer.leftOffset + isection * (viewer.sectionWidth + viewer.sectionMargin);
          params.height = partHeight - currentMargin * 2;
          params.width = viewer.sectionWidth;
+         params.part = part;
 
 		 if (part.data.type == "CHORDPROGERSSION") {
 			//TODO draw chord progression and all that 
@@ -98,6 +99,7 @@ viewer.drawSong = function (song) {
          else if (part.data.surfaceURL == "PRESET_SEQUENCER") {
             params.captionWidth = 0;
             omg.ui.drawDrumCanvas(params)
+            //omg.ui.draw(params);
          } else if (part.data.surfaceURL) {
             omg.ui.drawMelodyCanvas(params);
          }

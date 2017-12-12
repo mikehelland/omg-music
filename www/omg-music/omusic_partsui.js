@@ -59,6 +59,104 @@ omg.ui.totalOffsets = function (element, parent) {
 };
 
 
+omg.ui.drawDrumCanvas = function (params) {
+    
+    var drumbeat = params.drumbeat || params.data;
+    var canvas = params.canvas;
+    var captionWidth = params.captionWidth;
+    var rowHeight = params.rowHeight;
+    var subbeat = params.subbeat;
+
+    canvas.omusic_refresh = function (subbeat) {
+        try {
+            params.subbeat = subbeat;
+            omg.ui.drawDrumCanvas(params);
+        } catch (exp) {
+            console.log("error drawing drum canvas");
+            console.log(exp);
+        }
+    };
+
+    if (!drumbeat.tracks || drumbeat.tracks.length == 0)
+        return;
+
+    var top;
+    var height, width;
+
+    var left = params.offsetLeft || 0;
+
+    if (typeof (params.offsetTop) == "number") {
+        top = params.offsetTop;
+    } else {
+        top = 0;
+    }
+
+    if (typeof (params.width) == "number") {
+        width = params.width;
+    } else {
+        width = canvas.width;
+    }
+
+    if (typeof (params.height) == "number") {
+        height = params.height;
+    } else {
+        height = canvas.height - top;
+    }
+
+    var context = canvas.getContext("2d");
+    if (rowHeight === undefined) {
+        rowHeight = height / drumbeat.tracks.length;
+    }
+
+    if (!params.keepCanvasDirty) {
+        canvas.width = params.width || canvas.clientWidth;
+    }
+
+    var longestCaptionWidth = 0;
+
+    for (var i = 0; i < drumbeat.tracks.length; i++) {
+        context.fillText(drumbeat.tracks[i].name, left, top + rowHeight * (i + 1) - 2);
+        if (captionWidth === undefined && drumbeat.tracks[i].name.length > 0) {
+            longestCaptionWidth = Math.max(longestCaptionWidth,
+                    context.measureText(drumbeat.tracks[i].name).width);
+        }
+    }
+
+    if (captionWidth === undefined) {
+        captionWidth = Math.min(canvas.width * 0.2, 50, longestCaptionWidth + 4);
+    }
+
+    context.fillStyle = "white";
+    //context.fillRect(captionWidth, 0, canvas.width, canvas.height);
+    context.fillRect(left + captionWidth, top, width - captionWidth, height);
+
+    var columnWidth = (width - captionWidth) / drumbeat.tracks[0].data.length;
+
+    canvas.rowHeight = rowHeight;
+    canvas.columnWidth = columnWidth;
+    canvas.captionWidth = captionWidth;
+
+    for (var i = 0; i < drumbeat.tracks.length; i++) {
+        for (var j = 0; j < drumbeat.tracks[i].data.length; j++) {
+
+            context.fillStyle = drumbeat.tracks[i].data[j] ? "black" :
+                    (j % 4 == 0) ? "#C0C0C0" : "#E0E0E0";
+
+            context.fillRect(left + captionWidth + columnWidth * j + 1, top + rowHeight * i + 1,
+                    columnWidth - 2, rowHeight - 2);
+        }
+    }
+
+    context.globalAlpha = 0.5;
+    context.fillStyle = "#4fa5d5";
+    if (subbeat != undefined) {
+        context.fillRect(captionWidth + columnWidth * subbeat + 1, 0,
+                columnWidth - 2, canvas.height);
+    }
+    context.globalAlpha = 1;
+};
+
+
 omg.ui.drawMelodyCanvas = function (params, canvas_p, w, h) {
 
     // old parameters were melody, canvas, w, h, now accepting params object
@@ -200,106 +298,6 @@ omg.ui.drawMelodyCanvas = function (params, canvas_p, w, h) {
 
 };
 
-
-omg.ui.drawDrumCanvas = function (params) {
-
-    var drumbeat = params.drumbeat || params.data;
-    var canvas = params.canvas;
-    var captionWidth = params.captionWidth;
-    var rowHeight = params.rowHeight;
-    var subbeat = params.subbeat;
-
-    canvas.omusic_refresh = function () {
-        try {
-            omg.ui.drawDrumCanvas(params);
-        } catch (exp) {
-            console.log("error drawing drum canvas");
-            console.log(exp);
-        }
-    };
-
-    if (!drumbeat.tracks || drumbeat.tracks.length == 0)
-        return;
-
-    var top;
-    var height, width;
-
-    var left = params.offsetLeft || 0;
-
-    if (typeof (params.offsetTop) == "number") {
-        top = params.offsetTop;
-    } else {
-        top = 0;
-    }
-
-    if (typeof (params.width) == "number") {
-        width = params.width;
-    } else {
-        width = canvas.width;
-    }
-
-    if (typeof (params.height) == "number") {
-        height = params.height;
-    } else {
-        height = canvas.height - top;
-    }
-
-    var context = canvas.getContext("2d");
-    if (rowHeight === undefined) {
-        rowHeight = height / drumbeat.tracks.length;
-    }
-
-    if (!params.keepCanvasDirty) {
-        canvas.width = params.width || canvas.clientWidth;
-    }
-
-    var longestCaptionWidth = 0;
-
-    for (var i = 0; i < drumbeat.tracks.length; i++) {
-        context.fillText(drumbeat.tracks[i].name, left, top + rowHeight * (i + 1) - 2);
-        if (captionWidth === undefined && drumbeat.tracks[i].name.length > 0) {
-            longestCaptionWidth = Math.max(longestCaptionWidth,
-                    context.measureText(drumbeat.tracks[i].name).width);
-        }
-    }
-
-    if (captionWidth === undefined) {
-        captionWidth = Math.min(canvas.width * 0.2, 50, longestCaptionWidth + 4);
-    }
-
-    context.fillStyle = "white";
-    //context.fillRect(captionWidth, 0, canvas.width, canvas.height);
-    context.fillRect(left + captionWidth, top, width - captionWidth, height);
-
-    var columnWidth = (width - captionWidth) / drumbeat.tracks[0].data.length;
-
-    canvas.rowHeight = rowHeight;
-    canvas.columnWidth = columnWidth;
-    canvas.captionWidth = captionWidth;
-
-    for (var i = 0; i < drumbeat.tracks.length; i++) {
-        for (var j = 0; j < drumbeat.tracks[i].data.length; j++) {
-
-            context.fillStyle = drumbeat.tracks[i].data[j] ? "black" :
-                    (j % 4 == 0) ? "#C0C0C0" : "#E0E0E0";
-
-            context.fillRect(left + captionWidth + columnWidth * j + 1, top + rowHeight * i + 1,
-                    columnWidth - 2, rowHeight - 2);
-        }
-    }
-
-
-    context.globalAlpha = 0.5;
-    context.fillStyle = "#4fa5d5";
-    if (subbeat != undefined) {
-        context.fillRect(captionWidth + columnWidth * subbeat + 1, 0,
-                columnWidth - 2, canvas.height);
-    }
-    context.globalAlpha = 1;
-
-};
-
-
 omg.ui.getImageForNote = function (note, upsideDown) {
 
     var draw_noteImage = omg.ui.noteImages[8][note.rest ? 1 : 0];
@@ -423,6 +421,8 @@ omg.ui.splitInts = function (string) {
 function OMGDrumMachine(canvas, part) {
     this.canvas = canvas;
 
+    this.readOnly = true;
+
     this.beats = 8;
     this.subbeats = 4;
 
@@ -488,20 +488,24 @@ function OMGDrumMachine(canvas, part) {
     };
 
     canvas.ondown = function (x, y) {
+        if (omgdrums.readOnly)
+            return;
 
-        var column = Math.floor(x / omgdrums.columnWidth);
-        var row = Math.floor(y / omgdrums.rowHeight);
+        var column = Math.floor((x - canvas.captionWidth) / canvas.columnWidth);
+        var row = Math.floor(y / canvas.rowHeight);
 
-        if (column == 0) {
-            if (omgdrums.drawTrackColumn) {
-                omgdrums.currentTrack = Math.min(Math.floor(y / omgdrums.captionRowHeight),
-                        omgdrums.part.data.tracks.length - 1);
-            }
+        console.log({x: x, y: y, column: column, row: row});
+
+        if (column < 0) {
         } else {
             // figure out the subbeat this is
-            var subbeat = column - 1 + row * omgdrums.subbeats;
+            //var subbeat = column - 1 + row * omgdrums.subbeats;
+            var subbeat = column; // - 1 + row * omgdrums.subbeats;
 
-            var data = omgdrums.part.data.tracks[omgdrums.currentTrack].data;
+            //var data = omgdrums.part.data.tracks[omgdrums.currentTrack].data;
+            console.log(row);
+            console.log(omgdrums.part.data.tracks);
+            var data = omgdrums.part.data.tracks[row].data;
             data[subbeat] = !data[subbeat];
 
             lastBox = [column, row];
@@ -511,24 +515,30 @@ function OMGDrumMachine(canvas, part) {
                 omgdrums.onchange();
         }
 
-        omgdrums.drawLargeCanvas();
+        //omgdrums.drawLargeCanvas();
+        omgdrums.canvas.omusic_refresh();
     };
 
     canvas.onmove = function (x, y) {
 
+        if (omgdrums.readOnly)
+            return;
+
         if (!omgdrums.isTouching)
             return;
 
-        var column = Math.floor(x / omgdrums.columnWidth);
-        var row = Math.floor(y / omgdrums.rowHeight);
+        var column = Math.floor((x - canvas.captionWidth) / canvas.columnWidth);
+        var row = Math.floor(y / canvas.rowHeight);
 
         if (column == 0) {
             omgdrums.isTouching = false;
         } else if (lastBox[0] != column || lastBox[1] !== row) {
             // figure out the subbeat this is
-            var subbeat = column - 1 + row * omgdrums.subbeats;
+            //var subbeat = column - 1 + row * omgdrums.subbeats;
+            var subbeat = column;
 
-            var data = omgdrums.part.data.tracks[omgdrums.currentTrack].data;
+            //var data = omgdrums.part.data.tracks[omgdrums.currentTrack].data;
+            var data = omgdrums.part.data.tracks[row].data;
             data[subbeat] = data[subbeat] ? 0 : 1;
 
             lastBox = [column, row];
@@ -538,13 +548,13 @@ function OMGDrumMachine(canvas, part) {
 
         }
 
-        omgdrums.drawLargeCanvas();
+        //omgdrums.drawLargeCanvas();
+        omgdrums.canvas.omusic_refresh();
 
     };
 
 
-}
-;
+};
 
 OMGDrumMachine.prototype.setSize = function (width, height) {
     var canvas = this.canvas;
@@ -563,14 +573,27 @@ OMGDrumMachine.prototype.setPart = function (part) {
 
     this.part = part;
 
-    // shouldn't this be read from this part?
-    this.columns = 1 + this.subbeats;
-    this.rows = this.beats;
+    var beats = 4;
+    var subbeats = 4;
+    var measures = 2;
+    if (part.section && part.section.song && part.section.song.data) {
+        beats = part.section.song.data.beats || beats;
+        subbeats = part.section.song.data.subbeats || subbeats;
+        measures = part.section.song.data.measures || measures;
+    }
+    this.totalSubbeats = measures * beats * subbeats;
+    
+    this.columns = this.totalSubbeats; //1 + this.subbeats;
+    this.rows = this.part.data.tracks.length;
 
     this.refresh();
 
-    this.captionsAreSetup = false
-}
+    this.captionsAreSetup = false;
+};
+
+OMGDrumMachine.prototype.draw = function () {
+    
+};
 
 OMGDrumMachine.prototype.refresh = function (part) {
     this.columnWidth = this.canvas.clientWidth / this.columns;
@@ -1880,6 +1903,7 @@ OMGMelodyMaker.prototype.animateDrawing = function () {
 
 OMGMelodyMaker.prototype.refresh = function (part, welcomeStyle) {
     //todo check the key and scale?
+    this.drawCanvas();
 };
 
 OMGMelodyMaker.prototype.setPart = function (part, welcomeStyle) {

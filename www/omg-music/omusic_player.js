@@ -696,8 +696,8 @@ OMusicPlayer.prototype.setupPartWithSoundSet = function (ss, part, load) {
     var note;
     var noteIndex;
 
-    var prefix = ss.data.prefix || "";
-    var postfix = ss.data.postfix || "";
+    var prefix = ss.prefix || "";
+    var postfix = ss.postfix || "";
 
     for (var ii = 0; ii < part.data.notes.length; ii++) {
         note = part.data.notes[ii];
@@ -705,16 +705,22 @@ OMusicPlayer.prototype.setupPartWithSoundSet = function (ss, part, load) {
         if (note.rest)
             continue;
 
-        noteIndex = note.scaledNote - ss.bottomNote;
+        if (ss.chromatic) {
+            noteIndex = note.scaledNote - ss.bottomNote;
+        }
+        else {
+            noteIndex = note.note;
+        }
+
         if (noteIndex < 0) {
             noteIndex = noteIndex % 12 + 12;
         } else {
-            while (noteIndex >= ss.data.data.length) {
+            while (noteIndex >= ss.data.length) {
                 noteIndex = noteIndex - 12;
             }
         }
 
-        note.sound = prefix + ss.data.data[noteIndex].url + postfix;
+        note.sound = prefix + ss.data[noteIndex].url + postfix;
 
         if (!note.sound)
             continue;
@@ -783,8 +789,8 @@ OMusicPlayer.prototype.getSoundSet = function (url, callback) {
         if (xhr2.readyState == 4) {
             var ojson = JSON.parse(xhr2.responseText);
             if (ojson) {
-                p.downloadedSoundSets[url] = ojson.list[0];
-                callback(ojson.list[0]);
+                p.downloadedSoundSets[url] = ojson;
+                callback(ojson);
             } else {
                 callback(ojson);
             }
