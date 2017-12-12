@@ -108,6 +108,20 @@ OMusicEditor.prototype.setup = function (options) {
         }
     });
 
+    var loadSoundSets = function () {
+        bam.getSoundSets("", function (soundsets) {
+            if (!bam.song)
+                return;
+            bam.song.sections.forEach(function (section) {
+               section.parts.forEach(function (part) {
+                   part.controls.selectInstrument.innerHTML = 
+                           bam.getSelectInstrumentOptions(part.data.partType);
+                   part.controls.selectInstrument.value = part.data.soundsetURL;
+               });
+            });
+        });
+    };
+
     var loadId;
     var loadParams;
     if (this.loadWhenReady) {
@@ -117,21 +131,13 @@ OMusicEditor.prototype.setup = function (options) {
             bam.omgservice.getId(loadId, function (result) {
                 loadParams.dataToLoad = result;
                 bam.load(loadParams);
+                loadSoundSets();
             });
         } else {
             bam.load(loadParams);
+            loadSoundSets();
         }
     }
-
-    bam.getSoundSets("", function (soundsets) {
-        bam.song.sections.forEach(function (section) {
-           section.parts.forEach(function (part) {
-               part.controls.selectInstrument.innerHTML = 
-                       bam.getSelectInstrumentOptions(part.data.partType);
-               part.controls.selectInstrument.value = part.data.soundsetURL;
-           });
-        });
-    });
 
     window.onresize = function () {
         bam.windowWidth = bam.bbody.clientWidth;
