@@ -125,8 +125,7 @@ function omg_embedded_viewer_loadData(div, data) {
 			 }
 			 else if (part.data.surfaceURL == "PRESET_SEQUENCER") {
 				params.captionWidth = 0;
-				//omg.ui.drawDrumCanvas(params)
-                                part.ui.draw(params);
+				omg.ui.drawDrumCanvas(params)
 			 } else if (part.data.surfaceURL) {
 				omg.ui.drawMelodyCanvas(params);
 			 }

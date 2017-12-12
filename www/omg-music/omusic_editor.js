@@ -41,8 +41,15 @@ OMusicEditor.prototype.setup = function (options) {
         bam.player.loopSection = 0;
     }
 
+    bam.soundsets = [];
+    bam.soundsetsURLMap = {};
     bam.getSoundSets("", function (soundsets) {
-        bam.soundsets = soundsets;
+        bam.song.sections.forEach(function (section) {
+           section.parts.forEach(function (part) {
+               part.controls.selectInstrument.innerHTML = 
+                       bam.getSelectInstrumentOptions(part.data.partType);
+           });
+        });
     });
 
     //omg.ui should exist, obviously. Maybe this should be omg.ui = OMusicUI() 
@@ -209,48 +216,23 @@ OMusicEditor.prototype.setupPartDiv = function (part) {
 
     var barDiv = document.createElement("div");
     barDiv.className = 'remixer-part-leftbar';
-    barDiv.innerHTML = bam.getSelectInstrument(part.data.partType);
+    part.controls.selectInstrument = document.createElement("select");
+    part.controls.selectInstrument.className = "remixer-part-instrument";
+    barDiv.appendChild(part.controls.selectInstrument);
     part.controls.appendChild(barDiv);
 
     part.controls.rightBar = document.createElement("div");
     part.controls.rightBar.className = "remixer-part-rightbar";
     part.controls.appendChild(part.controls.rightBar);
 
-    part.controls.selectInstrument = part.controls
-            .getElementsByClassName("remixer-part-instrument")[0];
-    part.controls.selectInstrument
-    part.controls.selectInstrument.onchange = function () {
-        var instrument = part.controls.selectInstrument.value;
-
-        if (instrument == "DEFAULT") {
-
-            for (var ii = 0; ii < part.data.notes.length; ii++) {
-                if (part.data.notes[ii].hasOwnProperty("sound")) {
-                    delete part.data.notes[ii].sound;
-                }
-            }
-
-            delete part.sound;
-
-            return;
-        }
-
-        //bam.getSoundSet(instrument, function(ss) {
-        //bam.player.getSoundSet(instrument, function (ss) {
-        //    part.sound = ss;
-        console.log(instrument);
-        var ss = JSON.parse(instrument);
-        console.log(ss);
-
-        //if (surfaceURL == "PRESET_SEQUENCER") {
-        if (part.data.partType == "DRUMBEAT") {
-            bam.player.setupDrumPartWithSoundSet(ss, part, true);
-        } else {
-            bam.player.setupPartWithSoundSet(ss, part, true);
-        }
-        //});
-
-    };
+    bam.setupSelectInstrument(part);
+    if (part.data.soundsetURL && 
+                !bam.soundsetsURLMap[part.data.soundsetURL]) {
+        bam.soundsetsURLMap[part.data.soundsetURL] = {}; 
+        //todo try to download it?
+        //add an option?
+    }
+    part.controls.selectInstrument.value = part.data.soundsetURL;
 
     part.controls.appendChild(document.createElement("br"));
 
@@ -299,7 +281,7 @@ OMusicEditor.prototype.setupDivForDrumbeat = function (part) {
     part.canvas = canvas;
 
     canvas.update = function (isubbeat) {
-        drawDrumCanvas(part, isubbeat);
+        bam.drawDrumCanvas(part, isubbeat);
     };
     canvas.update();
 
@@ -324,12 +306,7 @@ OMusicEditor.prototype.setupDivForDrumbeat = function (part) {
 
     part.isNew = false;
 
-    /*part.div.onBeatPlayedListener = function(subbeat) {
-     drawDrumCanvas(part, subbeat);
-     };
-     bam.player.onBeatPlayedListeners.push(part.div.onBeatPlayedListener);*/
-
-     part.ui = new OMGDrumMachine(canvas, part);
+    part.ui = new OMGDrumMachine(canvas, part);
 }
 
 OMusicEditor.prototype.setupMelodyDiv = function (part) {
@@ -613,6 +590,7 @@ OMusicEditor.prototype.setupSectionEditor = function () {
                     targetY: 0,
                     targetH: bam.windowHeight - part.canvas.offsetTop - 15};
         var children = [child];
+        part.div.style.zIndex = "1";
         bam.grow(part.div, function () {
             if (callback) 
                 callback();
@@ -623,6 +601,7 @@ OMusicEditor.prototype.setupSectionEditor = function () {
                 part.ui.readOnly = false;
                 part.ui.refresh();
             }
+            part.div.style.zIndex = "auto";
         }, children);
     };
  };
@@ -1073,9 +1052,23 @@ OMusicEditor.prototype.load = function (params) {
                 });
             }
         }
-        //bam.fadeIn([bam.part.div, bam.beatmaker], loadPartCallback);
-        //bam.beatmaker.setPart(bam.part);
-        bam.fadeIn([bam.part.div], loadPartCallback);
+        bam.setupPartDiv(bam.part);
+        bam.part.div.style.display = "block";
+        bam.part.controls.style.marginLeft = "10%";
+        bam.part.controls.style.width = "80%";
+        bam.part.controls.style.height = bam.windowHeight - 
+                            bam.part.canvas.offsetTop - 15 + "px";
+        bam.part.canvas.width = bam.part.controls.clientWidth;
+        bam.part.canvas.height = bam.part.controls.clientHeight;
+        bam.part.canvas.style.width = bam.part.canvas.width + "px";
+        bam.part.canvas.style.height = bam.part.canvas.height + "px";
+        bam.part.ui.refresh();
+        bam.part.canvas.omusic_refresh();
+        bam.part.ui.readOnly = false;
+
+        bam.fadeIn([bam.part.div], function () {
+            loadPartCallback();
+        });
     } else {
         var welcome = false;
         if (params.dataToLoad) {
@@ -1090,6 +1083,9 @@ OMusicEditor.prototype.load = function (params) {
     }
     bam.part.section = bam.section;
     bam.section.parts.push(bam.part);
+
+    if (typeof bam.onzonechange === "function")
+        bam.onzonechange(bam.part);
 
     bam.refreshKeyTempoChordsButtons();
 };
@@ -1289,7 +1285,7 @@ function rescale(part, rootNote, scale) {
 }
 
 
-function drawDrumCanvas(part, subbeat) {
+OMusicEditor.prototype.drawDrumCanvas = function (part, subbeat) {
 
     if (part.data.tracks.length == 0)
         return;
@@ -1298,14 +1294,14 @@ function drawDrumCanvas(part, subbeat) {
     params.drumbeat = part.data;
     params.canvas = part.canvas;
     params.subbeat = subbeat;
+    params.songData = this.song.data;
 
     omg.ui.drawDrumCanvas(params);
 
 }
 
-OMusicEditor.prototype.getSelectInstrument = function (type) {
-    var select = "<select class='remixer-part-instrument'>";
-
+OMusicEditor.prototype.getSelectInstrumentOptions = function (type) {
+    var select = "";
     if (type == "BASSLINE") {
         select += "<option value='DEFAULT'>Saw Wave</option>";
 
@@ -1327,16 +1323,16 @@ OMusicEditor.prototype.getSelectInstrument = function (type) {
                     : "6303373460504576" + "'>Cheese</option>";
         }
     } else if (type == "DRUMBEAT") {
-        select += "<option value='PRESET_HIP'>Hip</option>";
-        select += "<option value='PRESET_ROCK'>Rock</option>";
+        select += "<option value='PRESET_HIPKIT'>Hip Hop Drum Kit</option>";
+        select += "<option value='PRESET_ROCKKIT'>Rock Drum Kit</option>";
     }
 
     this.soundsets.forEach(function (soundset) {
-        select += "<option value='" + JSON.stringify(soundset) + "'>" +
+        select += "<option value='" + soundset.url + "'>" +
                 soundset.name + "</option>";
     });
 
-    return select + "</select>";
+    return select;
 
 };
 
@@ -1476,6 +1472,7 @@ OMusicEditor.prototype.setupMelodyMaker = function () {
             if (typeof bam.onzonechange == "function") {
                 bam.onzonechange(bam.section);
             }
+            part.div.style.zIndex = "1";
 
             bam.popZone(bam.part.div);
             bam.setupPartDiv(part);
@@ -1564,8 +1561,6 @@ OMusicEditor.prototype.grow = function (div, callback, children) {
             child.originalY = child.div.offsetTop;
         });
     }
-
-    div.style.zIndex = "1";
 
     var startedAt = Date.now();
 
@@ -2736,10 +2731,56 @@ OMusicEditor.prototype.getBPM = function () {
 
 OMusicEditor.prototype.getSoundSets = function (type, callback) {
     // we want to get the productions servers soundsets
+    var bam = this;
     var dev = this.omgservice.dev;
     var url = dev ? "soundsets.json" : "data/?type=SOUNDSET";
 
     this.omgservice.getHTTP(url, function (soundsets) {
-        callback(soundsets);
+        bam.soundsets = soundsets;
+        var url;
+        soundsets.forEach(function (soundset) {
+            url = (bam.omgservice.dev ? "http://openmusic.gallery/" : "") +
+                    "data/" + soundset.id;
+            bam.soundsetsURLMap[url] = soundset;
+            soundset.url = url;
+        });
+        if (typeof callback === "function") {
+            callback();
+        }
     });
+};
+
+OMusicEditor.prototype.setupSelectInstrument = function (part) {
+    var bam = this;
+    part.controls.selectInstrument.innerHTML = bam.getSelectInstrumentOptions(part.data.partType);
+    part.controls.selectInstrument.onchange = function () {
+        var soundsetURL = part.controls.selectInstrument.value;
+
+        if (soundsetURL == "DEFAULT") {
+            for (var ii = 0; ii < part.data.notes.length; ii++) {
+                if (part.data.notes[ii].hasOwnProperty("sound")) {
+                    delete part.data.notes[ii].sound;
+                }
+            }
+            delete part.sound;
+            return;
+        }
+
+        var soundset = bam.soundsetsURLMap[soundsetURL];
+        if (!soundset) {
+            //todo get the soundset if we can't find it
+        }
+        
+        part.data.soundsetURL = soundsetURL;
+        part.data.soundsetName = part.controls.selectInstrument.options
+                    [part.controls.selectInstrument.selectedIndex].text;
+        
+        if (part.data.partType === "DRUMBEAT") {
+            bam.player.setupDrumPartWithSoundSet(soundset, part, true);
+            part.canvas.omusic_refresh();
+        } else {
+            bam.player.setupPartWithSoundSet(soundset, part, true);
+        }
+    };
+  
 };

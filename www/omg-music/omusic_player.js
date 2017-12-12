@@ -26,7 +26,7 @@ function OMusicPlayer() {
     p.compressor = p.context.createDynamicsCompressor();
     p.compressor.threshold.value = -50;
     p.compressor.knee.value = 40;
-    p.compressor.ratio.value = 12;
+    p.compressor.ratio.value = 2;
     p.compressor.attack.value = 0;
     p.compressor.release.value = 0.25;
     p.compressor.connect(p.context.destination);
@@ -35,10 +35,6 @@ function OMusicPlayer() {
 
     p.iSubBeat = 0;
     p.loopStarted = 0;
-
-    p.beats = 8;
-    p.subbeats = 4;
-    p.measures = 1;
 
     p.nextUp = null;
 
@@ -71,14 +67,18 @@ OMusicPlayer.prototype.play = function (song) {
     p.iSubBeat = 0;
 
     //todo this bpm thing isn't consistent
-    var beatsPerSection = p.beats * p.subbeats * p.measures;
-    if (p.song.data && p.song.data.subbeatMillis)
+    var beatsPerSection = p.song.data.beats * p.song.data.subbeats * 
+                                        p.song.data.measures;
+    if (p.song.data && p.song.data.subbeatMillis) {
         p.subbeatLength = p.song.data.subbeatMillis;
+    }
     else if (p.song.sections[0].data &&
             p.song.sections[0].data.subbeatMillis) {
         p.subbeatLength = p.song.sections[0].data.subbeatMillis
-    } else
+    } 
+    else {
         p.subbeatLength = 125;
+    }
 
     var lastSection;
     var nextSection;
@@ -203,22 +203,20 @@ OMusicPlayer.prototype.loadPart = function (part, section, song) {
 
     part.soundsLoading = 0;
     part.loaded = false;
-    if (type == "PART") {
+    if (type === "PART") {
 
-        if (!part.data.soundsetURL) {
-            part.data.soundsetURL = "PRESET_OSC_SINE_SOFT_DELAY";
-        }
-
-        if (part.data.volume == undefined) {
+        if (part.data.volume === undefined) {
             part.data.volume = 0.6;
         }
-        if (part.data.pan == undefined) {
+        if (part.data.pan === undefined) {
             part.data.pan = 0;
         }
 
-        if (surface == "PRESET_SEQUENCER") {
+        if (surface === "PRESET_SEQUENCER") {
+            part.data.soundsetURL = part.data.soundsetURL || "PRESET_HIPKIT";
             this.loadDrumbeat(part);
         } else {
+            part.data.soundsetURL = part.data.soundsetURL || "PRESET_OSC_SINE_SOFT_DELAY";
             this.loadMelody(part, section, song);
         }
 
@@ -330,6 +328,16 @@ OMusicPlayer.prototype.playWhenReady = function (sections) {
 
 OMusicPlayer.prototype.prepareSong = function (song) {
     var p = this;
+    
+    if (!song.data.beats) {
+        song.data.beats = 4;
+    }
+    if (!song.data.subbeats) {
+        song.data.subbeats = 4;
+    }
+    if (!song.data.measures) {
+        song.data.measures = 1;
+    }
 
     var section;
     var part;
@@ -475,12 +483,12 @@ OMusicPlayer.prototype.playBeatForMelody = function (iSubBeat, part) {
                                 //p.subbeats * note.beats * p.subbeatLength * 0.85)
                                 p.context.currentTime);
                     }
-                }, p.subbeats * note.beats * p.subbeatLength * 0.85);
+                }, p.song.data.subbeats * note.beats * p.subbeatLength * 0.85);
             }
         }
 
         if (note) {
-            part.nextBeat += p.subbeats * note.beats;
+            part.nextBeat += p.song.data.subbeats * note.beats;
             part.currentI++;
         }
     }
@@ -743,10 +751,23 @@ OMusicPlayer.prototype.setupDrumPartWithSoundSet = function (ss, part, load) {
 
     var track;
 
-    for (var ii = 0; ii < part.data.tracks.length; ii++) {
+    for (var ii = 0; ii < Math.max(part.data.tracks.length, ss.data.length); ii++) {
         track = part.data.tracks[ii];
+        if (!track) {
+            track = {};
+            track.data = [];
+            track.data[p.getTotalSubbeats()] = false;
+            part.data.tracks.push(track);
+        }
 
-        track.sound = prefix + ss.data[ii].url + postfix;
+        if (ii < ss.data.length) {
+            track.sound = prefix + ss.data[ii].url + postfix;
+            track.name = ss.data[ii].name;            
+        }
+        else {
+            track.sound = "";
+            track.name = "";
+        }
 
         if (!track.sound)
             continue;
@@ -1079,7 +1100,7 @@ function OMGSong(div, data, headerOnly) {
         }
     } else {
         this.data = {type: "SONG", name: "(untitled)",
-            measures: 1, beats: 8, subbeats: 4, subbeatMillis: 125};
+            measures: 2, beats: 4, subbeats: 4, subbeatMillis: 125};
     }
 
 
@@ -1174,6 +1195,7 @@ function OMGDrumpart(div, data) {
     } else {
         this.data = {"type": "PART", "partType": "DRUMBEAT",
             "surfaceURL": "PRESET_SEQUENCER",
+            "soundsetURL": "PRESET_HIPKIT", "soundsetName": "Hip Hop Drum Kit",
             "bpm": 120, "kit": 0,
             isNew: true,
             "tracks": [{"name": "kick", "sound": "PRESET_HH_KICK",
@@ -1240,6 +1262,8 @@ function OMGPart(div, data) {
     } else {
         this.data = {type: "PART",
             partType: "MELODY", surfaceURL: "PRESET_VERTICAL",
+            soundsetURL: "PRESET_OSC_SINE_SOFT_DELAY",
+            soundsetName: "Osc Soft Sine Delay",
             notes: [], volume: 0.6, pan: 0};
     }
 

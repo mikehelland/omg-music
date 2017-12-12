@@ -80,6 +80,14 @@ omg.ui.drawDrumCanvas = function (params) {
     if (!drumbeat.tracks || drumbeat.tracks.length == 0)
         return;
 
+    var subbeats = (params.songData && params.songData.subbeats) ? 
+        params.songData.subbeats : 4;
+    var beats = (params.songData && params.songData.beats) ? 
+        params.songData.beats : 4;
+    var measures = (params.songData && params.songData.measures) ? 
+        params.songData.measures : 2;
+    var totalSubbeats = subbeats * beats * measures;
+
     var top;
     var height, width;
 
@@ -104,47 +112,62 @@ omg.ui.drawDrumCanvas = function (params) {
     }
 
     var context = canvas.getContext("2d");
-    if (rowHeight === undefined) {
-        rowHeight = height / drumbeat.tracks.length;
-    }
-
-    if (!params.keepCanvasDirty) {
-        canvas.width = params.width || canvas.clientWidth;
-    }
 
     var longestCaptionWidth = 0;
 
+    var totalTracks = 0;
     for (var i = 0; i < drumbeat.tracks.length; i++) {
-        context.fillText(drumbeat.tracks[i].name, left, top + rowHeight * (i + 1) - 2);
+        if (drumbeat.tracks[i].sound) {
+            totalTracks++;
+        }
         if (captionWidth === undefined && drumbeat.tracks[i].name.length > 0) {
             longestCaptionWidth = Math.max(longestCaptionWidth,
                     context.measureText(drumbeat.tracks[i].name).width);
         }
     }
 
+    if (rowHeight === undefined) {
+        rowHeight = height / totalTracks;
+    }
+
     if (captionWidth === undefined) {
         captionWidth = Math.min(canvas.width * 0.2, 50, longestCaptionWidth + 4);
     }
+    
+    if (totalTracks == 0) {
+        return;
+    }
+
+    if (!params.keepCanvasDirty) {
+        canvas.width = params.width || canvas.clientWidth;
+    }
 
     context.fillStyle = "white";
-    //context.fillRect(captionWidth, 0, canvas.width, canvas.height);
     context.fillRect(left + captionWidth, top, width - captionWidth, height);
 
-    var columnWidth = (width - captionWidth) / drumbeat.tracks[0].data.length;
+    var columnWidth = (width - captionWidth) / totalSubbeats;
 
     canvas.rowHeight = rowHeight;
     canvas.columnWidth = columnWidth;
     canvas.captionWidth = captionWidth;
 
+    var ii = 0;
     for (var i = 0; i < drumbeat.tracks.length; i++) {
+        if (!drumbeat.tracks[i].sound) {
+            continue;
+        }
+        context.fillStyle = "black";
+        context.fillText(drumbeat.tracks[i].name, left, top + rowHeight * (ii + 1) - 2);
+
         for (var j = 0; j < drumbeat.tracks[i].data.length; j++) {
 
             context.fillStyle = drumbeat.tracks[i].data[j] ? "black" :
-                    (j % 4 == 0) ? "#C0C0C0" : "#E0E0E0";
+                    (j % subbeats == 0) ? "#C0C0C0" : "#E0E0E0";
 
-            context.fillRect(left + captionWidth + columnWidth * j + 1, top + rowHeight * i + 1,
+            context.fillRect(left + captionWidth + columnWidth * j + 1, top + rowHeight * ii + 1,
                     columnWidth - 2, rowHeight - 2);
         }
+        ii++;
     }
 
     context.globalAlpha = 0.5;
