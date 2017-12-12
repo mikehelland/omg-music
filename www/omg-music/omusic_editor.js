@@ -128,6 +128,7 @@ OMusicEditor.prototype.setup = function (options) {
            section.parts.forEach(function (part) {
                part.controls.selectInstrument.innerHTML = 
                        bam.getSelectInstrumentOptions(part.data.partType);
+               part.controls.selectInstrument.value = part.data.soundsetURL;
            });
         });
     });
