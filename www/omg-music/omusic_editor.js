@@ -2746,7 +2746,8 @@ OMusicEditor.prototype.getSoundSets = function (type, callback) {
         bam.soundsets = soundsets;
         var url;
         soundsets.forEach(function (soundset) {
-            url = (bam.omgservice.dev ? "http://openmusic.gallery/" : "") +
+            //url = (bam.omgservice.dev ? "http://openmusic.gallery/" : "") +
+            url = "http://openmusic.gallery/" +
                     "data/" + soundset.id;
             bam.soundsetsURLMap[url] = soundset;
             soundset.url = url;
