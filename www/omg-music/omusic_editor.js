@@ -43,14 +43,6 @@ OMusicEditor.prototype.setup = function (options) {
 
     bam.soundsets = [];
     bam.soundsetsURLMap = {};
-    bam.getSoundSets("", function (soundsets) {
-        bam.song.sections.forEach(function (section) {
-           section.parts.forEach(function (part) {
-               part.controls.selectInstrument.innerHTML = 
-                       bam.getSelectInstrumentOptions(part.data.partType);
-           });
-        });
-    });
 
     //omg.ui should exist, obviously. Maybe this should be omg.ui = OMusicUI() 
     omg.ui.setupNoteImages();
@@ -121,7 +113,7 @@ OMusicEditor.prototype.setup = function (options) {
     if (this.loadWhenReady) {
         loadParams = bam.getLoadParams();
         loadId = loadParams.id || loadParams.song || loadParams.section || loadParams.part;
-        if (!isNaN(loadId)) {
+        if (!isNaN(loadId) && loadId > 0) {
             bam.omgservice.getId(loadId, function (result) {
                 loadParams.dataToLoad = result;
                 bam.load(loadParams);
@@ -131,6 +123,14 @@ OMusicEditor.prototype.setup = function (options) {
         }
     }
 
+    bam.getSoundSets("", function (soundsets) {
+        bam.song.sections.forEach(function (section) {
+           section.parts.forEach(function (part) {
+               part.controls.selectInstrument.innerHTML = 
+                       bam.getSelectInstrumentOptions(part.data.partType);
+           });
+        });
+    });
 
     window.onresize = function () {
         bam.windowWidth = bam.bbody.clientWidth;
