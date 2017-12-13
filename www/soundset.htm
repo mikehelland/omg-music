@@ -65,15 +65,17 @@
 
                 omg.server.getId(params.id, function (response) {
                     soundsetName.innerText = response.name;
+                    var prefix = response.prefix || "";
+                    var postfix = response.postfix || "";
                     var newDiv;
                     for (var i = 0; i < response.data.length; i++) {
                         newDiv = document.createElement("div");
                         newDiv.className = "sound";
                         var data = response.data[i];
                         newDiv.innerHTML = data.name +
-                                " - <a href='" + data.url +
+                                " - <a href='" + prefix + data.url + postfix +
                                 "'>" + data.url + "</a> - " +
-                                "<audio controls src='" + data.url +
+                                "<audio controls src='" + prefix + data.url + postfix +
                                 "'></audio>";
                         soundList.appendChild(newDiv);
                     }
