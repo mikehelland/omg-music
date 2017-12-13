@@ -142,9 +142,9 @@ OMusicEditor.prototype.setup = function (options) {
     window.onresize = function () {
         bam.windowWidth = bam.bbody.clientWidth;
         bam.windowHeight = bam.bbody.clientHeight;
-        bam.offsetLeft = bam.bbody.offsetLeft;
+        bam.offsetLeft = bam.bbody.clientWidth * 0.1;
 
-        bam.mobile = bam.windowWidth < 1000;
+        bam.mobile = bam.windowWidth < 1000 && bam.windowWidth < bam.windowHeight;
 
         bam.offsetTop = 5; //bam.mobile ? 60 : 88;
 
@@ -653,14 +653,14 @@ OMusicEditor.prototype.setupSectionAddButtons = function (buttonGroup) {
 
         bam.part = newPart;
         bam.section.div.appendChild(newdiv);
-        bam.fadeIn([newdiv]);
+        newdiv.style.display = "block";
+        newdiv.style.zIndex = "1";
 
         bam.fadeOut([bam.sectionEditor]);
         bam.grow(newPart.div, function () {
             bam.fadeIn([bam.mm]);
-
             bam.mm.setPart(newPart);
-
+            newdiv.style.zIndex = "auto";
         });
     };
 
@@ -689,15 +689,15 @@ OMusicEditor.prototype.setupSectionAddButtons = function (buttonGroup) {
         bam.fadeOut(otherParts);
 
         bam.section.div.appendChild(newdiv);
-        bam.fadeIn([newdiv]);
+        newdiv.style.display = "block";
+        newdiv.style.zIndex = "1";
         bam.part = newPart;
 
         bam.fadeOut([bam.sectionEditor]);
         bam.grow(newPart.div, function () {
             bam.fadeIn([bam.mm]);
-
             bam.mm.setPart(newPart);
-
+            newdiv.style.zIndex = "auto";
         });
     };
 
@@ -722,7 +722,7 @@ OMusicEditor.prototype.setupSectionAddButtons = function (buttonGroup) {
         bam.fadeOut(otherParts);
 
         bam.section.div.appendChild(newPart.div);
-        bam.fadeIn([newdiv]);
+        newdiv.style.display = "block";
         bam.part = newPart;
         bam.section.parts.push(newPart);
 
@@ -1311,24 +1311,8 @@ OMusicEditor.prototype.getSelectInstrumentOptions = function (type) {
     var select = "";
     if (type == "BASSLINE") {
         select += "<option value='DEFAULT'>Saw Wave</option>";
-
-        if (omg.dev)
-            select += "<option value='5444781580746752'>Electric Bass</option>";
-        else
-            select += "<option value='1540004'>Electric Bass</option>";
-
     } else if (type == "MELODY") {
         select += "<option value='DEFAULT'>Sine Wave</option>";
-        select += "<option value='PRESET_SYNTH1'>Keyboard</option>";
-        select += "<option value='PRESET_GUITAR1'>Electric Guitar</option>";
-        select += "<option value='"
-                + (omg.dev ? "5128122231947264" : "5157655500816384")
-                + "'>Power Chords</option>";
-
-        if (omg.golinski) {
-            select += "<option value='" + omg.dev ? "6139672929501184"
-                    : "6303373460504576" + "'>Cheese</option>";
-        }
     } else if (type == "DRUMBEAT") {
         select += "<option value='PRESET_HIPKIT'>Hip Hop Drum Kit</option>";
         select += "<option value='PRESET_ROCKKIT'>Rock Drum Kit</option>";

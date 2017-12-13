@@ -40,10 +40,36 @@
                 <option value="PRESET_FRETBOARD">Fretboard</option>
                 <option value="PRESET_SEQUENCER">Sequencer</option>
             </select>
-            Chromatic: <input type="checkbox" id="chromatic-checkbox"> 
-            <!--Low Note: <input id="low-note"> 
-            High Note: <input id="high-note"> -->
+            Chromatic <input type="checkbox" id="chromatic-checkbox"> 
+            Bottom Note:             
+            <select id="bottom-note-select">
+		<option>A0</option>	<option>Bb0</option>	<option>B0</option>	<option>C1</option>
+		<option>C#1</option>	<option>D1</option>	<option>Eb1</option>	<option>E1</option>
+		<option>F1</option>	<option>F#1</option>	<option>G1</option>	<option>G#1</option>
+		<option>A1</option>	<option>Bb1</option>	<option>B1</option>	<option>C2</option>
+		<option>C#2</option>	<option>D2</option>	<option>Eb2</option>	<option>E2</option>
+		<option>F2</option>	<option>F#2</option>	<option>G2</option>	<option>G#2</option>
+		<option>A2</option>	<option>Bb2</option>	<option>B2</option>	<option>C3</option>
+		<option>C#3</option>	<option>D3</option>	<option>Eb3</option>	<option>E3</option>
+		<option>F3</option>	<option>F#3</option>	<option>G3</option>	<option>G#3</option>
+		<option>A3</option>	<option>Bb3</option>	<option>B3</option>	<option>C4</option>
+		<option>C#4</option>	<option>D4</option>	<option>Eb4</option>	<option>E4</option>
+		<option>F4</option>	<option>F#4</option>	<option>G4</option>	<option>G#4</option>
+		<option>A4</option>	<option>Bb4</option>	<option>B4</option>	<option>C5</option>
+		<option>C#5</option>	<option>D5</option>	<option>Eb5</option>	<option>E5</option>
+		<option>F5</option>	<option>F#5</option>	<option>G5</option>	<option>G#5</option>
+		<option>A5</option>	<option>Bb5</option>	<option>B5</option>	<option selected="true">C6</option>
+		<option>C#6</option>	<option>D6</option>	<option>Eb6</option>	<option>E6</option>
+		<option>F6</option>	<option>F#6</option>	<option>G6</option>	<option>G#6</option>
+		<option>A6</option>	<option>Bb6</option>	<option>B6</option>	<option>C7</option>
+		<option>C#7</option>	<option>D7</option>	<option>Eb7</option>	<option>E7</option>
+		<option>F7</option>	<option>F#7</option>	<option>G7</option>	<option>G#7</option>
+		<option>A7</option>	<option>Bb7</option>	<option>B7</option>	<option>C8</option>
+            </select>
 
+            <br>
+            URL Prefix <input id="url-prefix">
+            URL Postfix <input id="url-postfix">
 
             <div class="search-info">
                 Sound 1 Name:
@@ -163,7 +189,10 @@
                     name: document.getElementById("soundset-name").value,
                     data: [],
                     chromatic: document.getElementById("chromatic-checkbox").checked,
-                    defaultSurface: document.getElementById("default-surface").value
+                    bottomNote: document.getElementById("bottom-note-select").selectedIndex + 9,
+                    defaultSurface: document.getElementById("default-surface").value,
+                    prefix: document.getElementById("url-postfix").value,
+                    postfix: document.getElementById("url-prefix").value
                 };
 
                 if (params.id)
@@ -201,8 +230,24 @@
                     data: [],
                 };
 
-                var lines = document.getElementById("batch-input").value.split("\n");
-                var cap, url
+                var input = document.getElementById("batch-input").value;
+                
+                if (input.startsWith("{")) {
+                    console.log(input)
+                    var ooo = JSON.parse(input);
+                    console.log(ooo)
+                    omg.server.post(ooo, function (response) {
+                        console.log(response);
+                        if (response.id > 0) {
+                            window.location = "soundset.htm?id=" + response.id;
+                        }
+                    });
+                    return;
+                }
+                
+                var lines = input.split("\n");
+                
+                var cap, url;
                 for (var i = 1; i <= lines.length; i++) {
                     document.getElementById("sound-" + i + "-url").value = lines[i - 1];
                     document.getElementById("sound-" + i + "-name").value = lines[i - 1].split("/").pop().split(".")[0];
