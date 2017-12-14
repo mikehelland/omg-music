@@ -714,7 +714,7 @@ OMusicPlayer.prototype.setupPartWithSoundSet = function (ss, part, load) {
             continue;
 
         if (ss.chromatic) {
-            noteIndex = note.scaledNote - ss.bottomNote;
+            noteIndex = note.scaledNote - ss.lowNote;
             if (noteIndex < 0) {
                 noteIndex = noteIndex % 12 + 12;
             } else {
