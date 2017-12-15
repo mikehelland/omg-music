@@ -64,7 +64,6 @@ OMusicEditor.prototype.setup = function (options) {
     bam.setupSongEditor();
 
     bam.setupMelodyMaker();
-    //bam.setupBeatMaker();
 
     bam.finishZone = document.getElementById("finish-zone");
 
@@ -339,7 +338,7 @@ OMusicEditor.prototype.setupMelodyDiv = function (part) {
     part.canvas.width = part.canvas.clientWidth;
 
     try {
-        omg.ui.drawMelodyCanvas(part.data, part.canvas);
+        omg.ui.drawMelodyCanvas({data: part.data, canvas: part.canvas});
     } catch (exp) {
         debug("error drawing melody canvas");
         debug(exp);
@@ -349,18 +348,30 @@ OMusicEditor.prototype.setupMelodyDiv = function (part) {
     var offsetLeft;
     var width;
     beatMarker.className = "beat-marker";
-    beatMarker.style.width = part.canvas.noteWidth + "px";
+    console.log(part.canvas.width);
+    //todo really sort out where beats subbeats and measures comes from
+    //beatMarker.style.width = part.canvas.noteWidth + "px";
+    beatMarker.style.width = part.canvas.clientWidth / 32 + "px";
+    console.log("beatMarker.style.width");
+    console.log(beatMarker.style.width);
     beatMarker.style.height = part.canvas.height + "px";
     beatMarker.style.top = part.canvas.offsetTop + "px";
     div.appendChild(beatMarker);
+    var sizeSet = false;
 
     part.canvas.update = function (isubbeat) {
-
+        if (!sizeSet) {
+            beatMarker.style.width = part.canvas.clientWidth / 32 + "px";   
+            beatMarker.style.top = part.canvas.offsetTop + "px";
+            sizeSet = true;
+        }
         if (part.currentI - 1 < part.data.notes.length
                 && part.currentI >= 0) {
             offsetLeft = part.canvas.offsetLeft;
-            width = part.canvas.noteWidth;
-            offsetLeft += width * part.currentI;
+            //width = part.canvas.noteWidth;
+            width = part.canvas.width;
+            //todo hardcoded total subbeats!!
+            offsetLeft += width / 32 * isubbeat;
             beatMarker.style.display = "block";
             beatMarker.style.left = offsetLeft + "px";
         } else {
@@ -737,10 +748,7 @@ OMusicEditor.prototype.setupSectionAddButtons = function (buttonGroup) {
         bam.setupPartDiv(newPart)
 
         bam.fadeOut([bam.sectionEditor]);
-        bam.sectionEditor.growPart(newPart, function () {
-            //bam.fadeIn([bam.beatmaker]);
-            //bam.beatmaker.setPart(newPart);
-        });
+        bam.sectionEditor.growPart(newPart);
 
     };
 
@@ -1209,19 +1217,11 @@ OMusicEditor.prototype.clear = function () {
 
     bam.songEditor.style.display = "none";
     bam.sectionEditor.style.display = "none";
-    bam.beatmaker.style.display = "none";
     bam.mm.style.display = "none";
-
-
-    //bam.songEditor.hide();
-    //bam.sectionEditor.hide();
-
-    //bam.fadeOut([bam.beatmaker, bam.mm]);
 
     bam.song.div.innerHTML = "";
     bam.section = undefined;
     bam.part = undefined;
-
 };
 
 OMusicEditor.prototype.toggleMute = function (part, newMute) {
@@ -1340,49 +1340,6 @@ function debug(out) {
 }
 
 /* bam components */
-OMusicEditor.prototype.setupBeatMaker = function () {
-    var bam = this;
-
-    bam.beatmaker = document.createElement("div");
-    bam.beatmaker.className = "area";
-    bam.bbody.appendChild(bam.beatmaker);
-
-    var canvas = document.createElement("canvas");
-    bam.beatmaker.canvas = canvas;
-    bam.beatmaker.appendChild(canvas);
-    canvas.style.width = "80%";
-    canvas.style.marginLeft = "10%";
-
-    bam.beatmaker.ui = new OMGDrumMachine(canvas);
-
-    bam.beatmaker.setSize = function (width, height) {
-        if (width == undefined) {
-            width = canvas.clientWidth;
-        }
-        if (height == undefined) {
-            height = bam.windowHeight - canvas.offsetTop - 15;
-        }
-
-        bam.beatmaker.ui.setSize(width, height);
-    };
-
-    bam.beatmaker.setSize();
-
-    bam.beatmaker.setPart = function (part) {
-        bam.beatmaker.ui.setPart(part);
-        bam.beatmaker.ui.drawLargeCanvas();
-
-        if (typeof bam.onzonechange == "function") {
-            bam.onzonechange(part);
-        }
-    };
-
-    /*bam.player.onBeatPlayedListeners.push(function(iSubBeat) {
-     if (bam.part && bam.zones[bam.zones.length - 1] == bam.part.div && 
-     bam.part.data.type == "DRUMBEAT")
-     bam.beatmaker.ui.drawLargeCanvas(iSubBeat);
-     });*/
-};
 
 OMusicEditor.prototype.setupMelodyMaker = function () {
     var bam = this;
@@ -1498,8 +1455,8 @@ OMusicEditor.prototype.setupMelodyMaker = function () {
         if (surface == "PRESET_SEQUENCER") {
             bam.part.ui.readOnly = true;
             shrinkPart();
-            //bam.fadeOut([bam.beatmaker], shrinkPart);
         } else {
+            //todo not fade out the whole melody maker, just the edit parts
             bam.fadeOut([bam.mm], shrinkPart);
             bam.mm.playAfterAnimation = false;
         }
@@ -1515,7 +1472,6 @@ OMusicEditor.prototype.setupMelodyMaker = function () {
                     track.data[j] = 0;
                 }
             }
-            bam.beatmaker.ui.drawLargeCanvas();
         } else {
             bam.part.data.notes = [];
             bam.mm.lastNewNote = 0;
@@ -2438,7 +2394,7 @@ OMusicEditor.prototype.songZoneBeatPlayed = function (isubbeat, isection) {
     if (isubbeat == 0 && isection > 0) {
         bam.song.sections[isection - 1].beatmarker.style.width = "100%";
     }
-    section.beatmarker.style.width = isubbeat / this.player.getTotalSubbeats() * 100 + "%";
+    //section.beatmarker.style.width = isubbeat / this.player.getTotalSubbeats() * 100 + "%";
     if (isubbeat % 4 == 0) {
         //if we wanted to do it only the downbeats
     }

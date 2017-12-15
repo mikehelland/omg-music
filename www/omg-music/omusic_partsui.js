@@ -180,26 +180,26 @@ omg.ui.drawDrumCanvas = function (params) {
 };
 
 
-omg.ui.drawMelodyCanvas = function (params, canvas_p, w, h) {
+omg.ui.drawMelodyCanvas = function (params) {
 
-    // old parameters were melody, canvas, w, h, now accepting params object
-    var canvas = canvas_p;
-    var melody = params;
+    if (!params || !params.canvas || !params.data)
+        return;
+
+    //todo why do we just get part.data? why not part?
+    //I want it
     var top = 0;
     var left = 0;
     var clear = true;
-    if (!canvas && params.canvas) {
-        canvas = params.canvas;
-        melody = params.data;
-        top = params.offsetTop || 0;
-        left = params.offsetLeft || 0;
-        w = params.width || canvas.width;
-        h = params.height || canvas.height;
-        clear = !params.keepCanvasDirty;
-    } else {
-        w = w || canvas.width;
-        h = h || canvas.height;
-    }
+    var canvas = params.canvas;
+    var melody = params.data;
+    var beats = params.beats || 4;
+    var measures = params.measures || 2;
+        
+    top = params.offsetTop || 0;
+    left = params.offsetLeft || 0;
+    var w = params.width || canvas.width;
+    var h = params.height || canvas.height;
+    clear = !params.keepCanvasDirty;
 
     var high;
     var low;
@@ -252,6 +252,8 @@ omg.ui.drawMelodyCanvas = function (params, canvas_p, w, h) {
         var iy;
         var ii;
         var note;
+        var beatsUsed = 0;
+        var pixelsPerBeat = w / (beats * measures);
         for (var i = 0; i < melody.notes.length; i++) {
             note = melody.notes[i];
             noteImage = omg.ui.getImageForNote(note);
@@ -271,7 +273,7 @@ omg.ui.drawMelodyCanvas = function (params, canvas_p, w, h) {
                     iy = ((frets - 1) - (fretNumber - low)) *
                             fretHeight + fretHeight * 0.5 -
                             noteImage.height * 0.25;
-                    context.drawImage(upsideDownNoteImage, left + i * noteWidth + noteWidth, top + iy);
+                    context.drawImage(upsideDownNoteImage, left + beatsUsed * pixelsPerBeat, top + iy);
                 } else {
                     iy2 = ((fretNumber - low)) *
                             fretHeight + fretHeight * 0.5 -
@@ -279,13 +281,14 @@ omg.ui.drawMelodyCanvas = function (params, canvas_p, w, h) {
 
                     context.save();
                     context.scale(1, -1);
-                    context.drawImage(noteImage, left + i * noteWidth + noteWidth, top + iy2 - h);
+                    context.drawImage(noteImage, left + beatsUsed * pixelsPerBeat, top + iy2 - h);
                     context.restore();
                 }
 
             } else {
-                context.drawImage(noteImage, left + i * noteWidth + noteWidth, top + iy);
+                context.drawImage(noteImage, left + beatsUsed * pixelsPerBeat, top + iy);
             }
+            beatsUsed += note.beats;
         }
     };
 
