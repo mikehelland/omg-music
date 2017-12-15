@@ -829,58 +829,15 @@ OMusicPlayer.prototype.getPresetSoundSet = function (preset) {
     var p = this;
 
     var oret;
-    if (preset == "PRESET_KEYBOARD") {
-        oret = {"name": "Keyboard",
-            "id": -101, "bottomNote": 33,
-                "data": [
-                    {"url": "a1", "caption": "A1"}, {"url": "bf1", "caption": "Bb1"}, {"url": "b1", "caption": "B1"}, {"url": "c2", "caption": "C2"}, {"url": "cs2", "caption": "C#2"}, {"url": "d2", "caption": "D2"},
-                    {"url": "ds2", "caption": "D#2"}, {"url": "e2", "caption": "E3"}, {"url": "f2", "caption": "F2"}, {"url": "fs2", "caption": "F#2"}, {"url": "g2", "caption": "G2"}, {"url": "gs2", "caption": "G#2"},
-                    {"url": "a2", "caption": "A2"}, {"url": "bf2", "caption": "Bb2"}, {"url": "b2", "caption": "B2"}, {"url": "c3", "caption": "C3"}, {"url": "cs3", "caption": "C#3"}, {"url": "d3", "caption": "D3"},
-                    {"url": "ds3", "caption": "D#3"}, {"url": "e3", "caption": "E3"}, {"url": "f3", "caption": "F3"}, {"url": "fs3", "caption": "F#3"}, {"url": "g3", "caption": "G3"}, {"url": "gs3", "caption": "G#3"},
-                    {"url": "a3", "caption": "A3"}, {"url": "bf3", "caption": "Bb3"}, {"url": "b3", "caption": "B3"}, {"url": "c4", "caption": "C4"}, {"url": "cs4", "caption": "C#4"}, {"url": "d4", "caption": "D4"},
-                    {"url": "ds4", "caption": "D#4"}, {"url": "e4", "caption": "E4"}, {"url": "f4", "caption": "F4"}, {"url": "fs4", "caption": "F#4"}, {"url": "g4", "caption": "G4"}, {"url": "gs4", "caption": "G#4"},
-                    {"url": "a4", "caption": "A4"}, {"url": "bf4", "caption": "Bb4"}, {"url": "b4", "caption": "B4"}, {"url": "c5", "caption": "C5"}, {"url": "cs5", "caption": "C#5"}, {"url": "d5", "caption": "D5"},
-                    {"url": "ds5", "caption": "D#5"}, {"url": "e5", "caption": "E5"}, {"url": "f5", "caption": "F5"}, {"url": "fs5", "caption": "F#5"}, {"url": "g5", "caption": "G5"}, {"url": "gs5", "caption": "G#5"},
-                    {"url": "a5", "caption": "A5"}, {"url": "bf5", "caption": "Bb5"}, {"url": "b5", "caption": "B5"}, {"url": "c6", "caption": "C6"}, {"url": "cs6", "caption": "C#6"}, {"url": "d6", "caption": "D6"},
-                    {"url": "ds6", "caption": "D#6"}, {"url": "e6", "caption": "E6"}, {"url": "f6", "caption": "F6"}, {"url": "fs6", "caption": "F#6"}, {"url": "g6", "caption": "G6"}, {"url": "gs6", "caption": "G#6"},
-                    {"url": "a6", "caption": "A6"}
-                ],
-                "prefix": "http://mikehelland.com/omg/kb/kb1_",
-                "postfix": ".mp3", "bottomNote": 33};
-        if (p.dev) {
-            oret.data.prefix = "http://localhost/mp3/kb/kb1_";
-        }
-    }
-    if (preset == "PRESET_GUITAR1") {
-        oret = {"name": "Electric Guitar",
-            "id": -201, "bottomNote": 40,
-            "data": [
-                    {"url": "e", "caption": "E2"}, {"url": "f", "caption": "F2"}, {"url": "fs", "caption": "F#2"}, {"url": "g", "caption": "G2"}, {"url": "gs", "caption": "G#2"}, {"url": "a", "caption": "A2"},
-                    {"url": "bf", "caption": "Bb2"}, {"url": "b", "caption": "B2"}, {"url": "c", "caption": "C3"}, {"url": "cs", "caption": "C#3"}, {"url": "d", "caption": "D3"}, {"url": "ds", "caption": "D#3"},
-                    {"url": "e2", "caption": "E3"}, {"url": "f2", "caption": "F3"}, {"url": "fs2", "caption": "F#2"}, {"url": "g2", "caption": "G2"}, {"url": "gs2", "caption": "G#2"}, {"url": "a2", "caption": "A3"},
-                    {"url": "bf2", "caption": "Bb3"}, {"url": "b2", "caption": "B3"}, {"url": "c2", "caption": "C4"}, {"url": "cs2", "caption": "C#4"}, {"url": "d2", "caption": "D4"}, {"url": "ds2", "caption": "D#4"},
-                    {"url": "e3", "caption": "E4"}, {"url": "f3", "caption": "F4"}, {"url": "fs3", "caption": "F#4"}, {"url": "g3", "caption": "G4"}, {"url": "gs3", "caption": "G#4"}, {"url": "a3", "caption": "A4"},
-                    {"url": "bf3", "caption": "Bb4"}, {"url": "b3", "caption": "B4"}, {"url": "c3", "caption": "C5"}, {"url": "cs3", "caption": "C#5"}, {"url": "d3", "caption": "D5"}, {"url": "ds3", "caption": "D#5"},
-                    {"url": "e4", "caption": "E5"}, {"url": "f4", "caption": "F5"}, {"url": "fs4", "caption": "F#5"}, {"url": "g4", "caption": "G5"}, {"url": "gs4", "caption": "G#5"}, {"url": "a4", "caption": "A5"},
-                    {"url": "bf4", "caption": "Bb5"}, {"url": "b4", "caption": "B5"}, {"url": "C4", "caption": "C6"}, {"url": "cs4", "caption": "C#6"}
-                ],
-                "prefix": "http://mikehelland.com/omg/electric/electric_",
-                "postfix": ".mp3", "bottomNote": 40};
-        if (p.dev) {
-//              oret.data.prefix = "http://localhost/mp3/kb/kb1_";
-        }
-    }
     if (preset == "PRESET_BASS") {
-        //why are bottom note 28 and 19?
-        oret = {"name": "Electric Bass", "id": 1540004, "bottomNote": 28,
+        oret = {"name": "Electric Bass", "id": 1540004, "lowNote": 28, "chromatic": true,
             "data": [
                     {"url": "e", "caption": "E2"}, {"url": "f", "caption": "F2"}, {"url": "fs", "caption": "F#2"}, {"url": "g", "caption": "G2"}, {"url": "gs", "caption": "G#2"}, {"url": "a", "caption": "A2"},
                     {"url": "bf", "caption": "Bb2"}, {"url": "b", "caption": "B2"}, {"url": "c", "caption": "C3"}, {"url": "cs", "caption": "C#3"}, {"url": "d", "caption": "D3"}, {"url": "ds", "caption": "Eb3"},
                     {"url": "e2", "caption": "E3"}, {"url": "f2", "caption": "F3"}, {"url": "fs2", "caption": "F#3"}, {"url": "g2", "caption": "G3"}, {"url": "gs2", "caption": "G#3"}, {"url": "a2", "caption": "A3"},
                     {"url": "bf2", "caption": "Bb3"}, {"url": "b2", "caption": "B3"}, {"url": "c2", "caption": "C4"}
                 ], "prefix": "http://mikehelland.com/omg/bass1/bass_",
-                "postfix": ".mp3",
-                "bottomNote": 19};
+                "postfix": ".mp3"};
 
         if (p.dev) {
             oret.data.prefix = "http://localhost/mp3/bass_";
@@ -924,12 +881,6 @@ OMusicPlayer.prototype.playNote = function (note, part, data) {
 
     var audio = p.playSound(note.sound, data.volume);
     var fromNow = (note.beats * 4 * p.subbeatLength) / 1000;
-
-    //setTimeout(function () {
-    //  fadeOut(audio.gain2.gain, function () {
-    //      audio.stop(0);
-    //  });
-    //}, fromNow - 100);
 
     if (audio) {
         audio.gain2.gain.setValueAtTime(0, p.context.currentTime + fromNow * 0.95);

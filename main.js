@@ -6,7 +6,9 @@ var io = require('socket.io')(http);
 var massive = require("massive");
 var cookieParser = require('cookie-parser');
 var passport = require("passport");
+var cors = require("cors");
 
+app.use(cors());
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true}));
@@ -192,6 +194,6 @@ console.log("ok.");
 
 
 
-http.listen(8080, function () {
-    console.log('port 8080 yo');
+http.listen(80, function () {
+    console.log('port 80 yo');
 });
