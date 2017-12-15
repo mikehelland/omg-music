@@ -58,7 +58,7 @@
 		<option>A4</option>	<option>Bb4</option>	<option>B4</option>	<option>C5</option>
 		<option>C#5</option>	<option>D5</option>	<option>Eb5</option>	<option>E5</option>
 		<option>F5</option>	<option>F#5</option>	<option>G5</option>	<option>G#5</option>
-		<option>A5</option>	<option>Bb5</option>	<option>B5</option>	<option selected="true">C6</option>
+		<option>A5</option>	<option>Bb5</option>	<option>B5</option>	<option selected="selected">C6</option>
 		<option>C#6</option>	<option>D6</option>	<option>Eb6</option>	<option>E6</option>
 		<option>F6</option>	<option>F#6</option>	<option>G6</option>	<option>G#6</option>
 		<option>A6</option>	<option>Bb6</option>	<option>B6</option>	<option>C7</option>
@@ -71,6 +71,7 @@
             URL Prefix <input id="url-prefix">
             URL Postfix <input id="url-postfix">
 
+            <div id="inputs">
             <div class="search-info">
                 Sound 1 Name:
 
@@ -150,7 +151,7 @@
 
                 <input id="sound-8-url" class="url-input">
             </div>
-
+            </div>
 
             <button class="main-create-something" id="submit-button">Submit Sound Set</button>
 
@@ -246,9 +247,19 @@
                 }
                 
                 var lines = input.split("\n");
+                var inputs = document.getElementById("inputs");
                 
                 var cap, url;
                 for (var i = 1; i <= lines.length; i++) {
+                    if (i > 8) {
+                        var newDiv = document.createElement("div");
+                        newDiv.className = "search-info";
+                        newDiv.innerHTML = 'Sound ' +  i + 
+                                ' Name: <input id="sound-' + i + 
+                                '-name">URL:<input id="sound-' + i + 
+                                '-url" class="url-input">';
+                        inputs.appendChild(newDiv);
+                    }
                     document.getElementById("sound-" + i + "-url").value = lines[i - 1];
                     document.getElementById("sound-" + i + "-name").value = lines[i - 1].split("/").pop().split(".")[0];
                 }
