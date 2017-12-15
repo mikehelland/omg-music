@@ -257,7 +257,7 @@ OMusicPlayer.prototype.loadMelody = function (part, section, song) {
     if (typeof data.soundsetURL == "string") {
         p.getSoundSet(data.soundsetURL, function (soundset) {
             console.log(soundset);
-            p.setupPartWithSoundSet(soundset, part);
+            p.setupPartWithSoundSet(soundset, part, true);
         });
     }
     var soundsToLoad = 0;
