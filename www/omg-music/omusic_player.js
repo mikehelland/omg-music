@@ -255,11 +255,10 @@ OMusicPlayer.prototype.loadMelody = function (part) {
         data.ascale = p.splitInts(data.scale);
     }
 
-    p.rescale(data, rootNote, ascale);
+    p.rescale(part, rootNote, ascale);
 
     if (typeof data.soundsetURL == "string") {
         p.getSoundSet(data.soundsetURL, function (soundset) {
-            console.log(soundset);
             p.setupPartWithSoundSet(soundset, part, true);
         });
     }
@@ -661,10 +660,11 @@ OMusicPlayer.prototype.onSoundLoaded = function (success, part) {
     }
 };
 
-OMusicPlayer.prototype.rescale = function (data, rootNote, scale) {
+OMusicPlayer.prototype.rescale = function (part, rootNote, scale) {
     var p = this;
 
-    if (data.notes == undefined) {
+    var data = part.data;
+    if (!data || !data.notes) {
         return;
     }
 
@@ -695,6 +695,9 @@ OMusicPlayer.prototype.rescale = function (data, rootNote, scale) {
         onote.scaledNote = newNote;
     }
 
+    if (part.soundset) {
+        p.setupPartWithSoundSet(part.soundset, part, true);
+    }
 };
 
 OMusicPlayer.prototype.setupPartWithSoundSet = function (ss, part, load) {
@@ -703,7 +706,7 @@ OMusicPlayer.prototype.setupPartWithSoundSet = function (ss, part, load) {
     if (!ss)
         return;
 
-    //part.soundset = ss;
+    part.soundset = ss;
     var note;
     var noteIndex;
 
@@ -1080,7 +1083,7 @@ OMusicPlayer.prototype.rescaleSong = function (rootNote, ascale) {
     }
     this.song.sections.forEach(function (section) {
         section.parts.forEach(function (part) {
-            p.rescale(part.data, song.rootNote || 0,
+            p.rescale(part, song.rootNote || 0,
                     song.ascale || [0, 2, 4, 5, 7, 9, 11]);
         });
     });

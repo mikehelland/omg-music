@@ -59,14 +59,15 @@ omg.server.getHTTP = function (url, callback) {
     xhr.onreadystatechange = function () {
         if (xhr.readyState === 4) {
 
+            var results;
             try {
-                var results = JSON.parse(xhr.responseText);
-                if (callback)
-                    callback(results);                
+                results = JSON.parse(xhr.responseText);
             } catch (exp) {
                 console.log(exp);
                 console.log("could not parse results of url: " + url);
             }
+            if (callback && results)
+                callback(results);                
         }
     };
     xhr.send();

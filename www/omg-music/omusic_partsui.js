@@ -69,7 +69,9 @@ omg.ui.drawDrumCanvas = function (params) {
 
     canvas.omusic_refresh = function (subbeat) {
         try {
-            params.subbeat = subbeat;
+            if (typeof subbeat === "number") {
+                params.subbeat = subbeat;   
+            }
             omg.ui.drawDrumCanvas(params);
         } catch (exp) {
             console.log("error drawing drum canvas");
@@ -556,7 +558,7 @@ function OMGDrumMachine(canvas, part) {
         var column = Math.floor((x - canvas.captionWidth) / canvas.columnWidth);
         var row = Math.floor(y / canvas.rowHeight);
 
-        if (column == 0) {
+        if (column < 0) {
             omgdrums.isTouching = false;
         } else if (lastBox[0] != column || lastBox[1] !== row) {
             // figure out the subbeat this is

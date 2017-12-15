@@ -49,7 +49,7 @@ viewer.loadPlayer = function (dataToPlay) {
 
 
    //maybe
-   var beatsInSection = viewer.player.beats * viewer.player.subbeats;
+   var beatsInSection = viewer.omgsong.data.beats * viewer.omgsong.data.subbeats * viewer.omgsong.data.measures;
    viewer.totalBeatsInSong =  viewer.omgsong.sections.length * beatsInSection;
    var pxPerBeat = viewer.canvas.width / viewer.totalBeatsInSong;
 

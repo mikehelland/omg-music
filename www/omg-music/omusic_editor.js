@@ -113,9 +113,11 @@ OMusicEditor.prototype.setup = function (options) {
                 return;
             bam.song.sections.forEach(function (section) {
                section.parts.forEach(function (part) {
-                   part.controls.selectInstrument.innerHTML = 
-                           bam.getSelectInstrumentOptions(part.data.partType);
-                   part.controls.selectInstrument.value = part.data.soundsetURL;
+                    if (part.controls) {
+                        part.controls.selectInstrument.innerHTML = 
+                                bam.getSelectInstrumentOptions(part.data.partType);
+                        part.controls.selectInstrument.value = part.data.soundsetURL;                       
+                    }
                });
             });
         });
