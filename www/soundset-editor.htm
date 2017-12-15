@@ -169,7 +169,8 @@
 
         <script src="js/omgservice.js"></script>
         <script>
-            for (var i = 1; i < 9; i++) {
+            var lineCount = 8;
+            for (var i = 1; i <= lineCount; i++) {
                 urlElement = document.getElementById("sound-" + i + "-url");
                 urlElement.addEventListener("paste", function (e) {
                     console.log(e.clipboardData.getData("Text"));
@@ -200,7 +201,7 @@
                     newSoundSet.id = params.id;
 
                 var cap, url
-                for (var i = 1; i < 9; i++) {
+                for (var i = 1; i <= lineCount; i++) {
                     url = document.getElementById("sound-" + i + "-url").value;
                     cap = document.getElementById("sound-" + i + "-name").value;
                     if (url.length > 0 && cap.length > 0) {
@@ -247,6 +248,7 @@
                 }
                 
                 var lines = input.split("\n");
+                lineCount = lines.length;
                 var inputs = document.getElementById("inputs");
                 
                 var cap, url;
