@@ -1186,7 +1186,14 @@ OMusicEditor.prototype.loadSection = function (params) {
             if (newPart)
                 fadeIn.push(newPart.div);
         }
-        ;
+        if (bam.section.data.beats)
+            bam.song.data.beats = bam.section.data.beats;
+        if (bam.section.data.subbeats)
+            bam.song.data.subbeats = bam.section.data.subbeats;
+        if (bam.section.data.measures)
+            bam.song.data.measures = bam.section.data.measures;
+        if (bam.section.data.beats)
+            bam.song.data.subbeatMillis = bam.section.data.subbeatMillis;
     } else {
         bam.section = new OMGSection(params.sectionDiv);
     }
@@ -2643,36 +2650,26 @@ OMusicEditor.prototype.showTempoChooser = function (e) {
     chooserDiv.style.borderWidth = "1px";
     chooserDiv.style.borderStyle = "solid";
 
-    var div;
-    for (var i = 20; i <= 220; i += 20) {
-        div = document.createElement("button");
-        div.style.display = "inline-block";
-        div.style.verticalAlign = "top";
-        div.innerHTML = i;
-
-        div.onclick = (function (div, i) {
-            return function () {
-                e.target.innerHTML = i + "bpm";
-                bam.song.data.subbeatMillis =
-                        Math.round(1000 / (i / 60 * (bam.song.data.subbeats || 4)));
-                if (bam.player.playing) {
-                    bam.player.setSubbeatMillis(bam.song.data.subbeatMillis);
-                }
-                if (thing.data) {
-                    thing.data.subbeatMillis = bam.song.data.subbeatMillis;
-                    if (thing == bam.part)
-                        bam.section.data.subbeatMillis = thing.data.subbeatMillis;
-                }
-            };
-        }(div, i));
-
-        div.onmousemove = function (e) {
-        };
-        div.onmouseout = function (e) {
-        };
-        chooserDiv.appendChild(div);
-    }
-
+    var div = document.createElement("input");
+    div.type = "range";
+    div.min = 20;
+    div.max = 220;
+    div.step = 1;
+    div.value = Math.round(1 / bam.song.data.subbeatMillis * 60000 / 4);
+    
+    div.onmousemove = function () {
+        e.target.innerHTML = div.value + "bpm";
+        bam.song.data.subbeatMillis = 
+               Math.round(1000 / (div.value / 60 * (bam.song.data.subbeats || 4)));
+        if (bam.player.playing) {
+            bam.player.setSubbeatMillis(bam.song.data.subbeatMillis);
+        }
+        if (thing.data) {
+            thing.data.subbeatMillis = bam.song.data.subbeatMillis;
+            if (thing == bam.part)
+                bam.section.data.subbeatMillis = thing.data.subbeatMillis;
+        }
+    };
 
     chooserDiv.appendChild(div);
     this.showPopUpWindow(chooserDiv);
@@ -2742,5 +2739,5 @@ OMusicEditor.prototype.setupSelectInstrument = function (part) {
 };
 
 function testData() {
-    return {"tags":"jam power","type":"SECTION","beats":4,"parts":[{"type":"PART","notes":[{"note":0,"rest":false,"beats":0.5},{"note":0,"rest":false,"beats":0.5},{"note":0,"rest":false,"beats":0.5},{"note":0,"rest":false,"beats":0.5},{"note":0,"rest":false,"beats":0.5},{"note":0,"rest":false,"beats":0.5},{"note":0,"rest":false,"beats":0.5},{"note":0,"rest":false,"beats":0.5},{"note":0,"rest":false,"beats":0.5},{"note":0,"rest":false,"beats":0.5},{"note":0,"rest":false,"beats":0.5},{"note":0,"rest":false,"beats":0.5},{"note":0,"rest":false,"beats":0.5},{"note":0,"rest":false,"beats":0.5},{"note":0,"rest":false,"beats":0.5},{"note":0,"rest":false,"beats":0.5}],"scale":"0,3,5,6,7,10","ascale":[0,3,5,6,7,10],"octave":3,"volume":0.97115535,"rootNote":0,"surfaceURL":"PRESET_VERTICAL","soundsetURL":"PRESET_BASS","soundsetName":"Electric Bass"},{"type":"PART","notes":[],"scale":"0,3,5,6,7,10","ascale":[0,3,5,6,7,10],"octave":3,"tracks":[{"data":[1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0],"name":"kick","sound":"PRESET_ROCK_KICK"},{"data":[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0],"name":"snare","sound":"PRESET_ROCK_SNARE"},{"data":[1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0],"name":"hi-hat","sound":"PRESET_ROCK_HIHAT_MED"},{"data":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0],"name":"open hi-hat","sound":"PRESET_ROCK_HIHAT_OPEN"},{"data":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"name":"crash","sound":"PRESET_ROCK_CRASH"},{"data":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"name":"h tom","sound":"PRESET_ROCK_TOM_MH"},{"data":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"name":"m tom","sound":"PRESET_ROCK_TOM_ML"},{"data":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"name":"l tom","sound":"PRESET_ROCK_TOM_L"}],"volume":0.75,"rootNote":0,"surfaceURL":"PRESET_SEQUENCER","soundsetURL":"PRESET_ROCKKIT","soundsetName":"Rock Drum Kit"},{"type":"PART","notes":[],"scale":"0,3,5,6,7,10","ascale":[0,3,5,6,7,10],"octave":3,"tracks":[{"data":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"name":"bongo l","sound":"PRESET_bongol"},{"data":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"name":"bongo l","sound":"PRESET_bongoh"},{"data":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"name":"click l","sound":"PRESET_clickl"},{"data":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"name":"click h","sound":"PRESET_clickh"},{"data":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"name":"shhk","sound":"PRESET_shhk"},{"data":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"name":"scrape","sound":"PRESET_scrape"},{"data":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"name":"whoop","sound":"PRESET_whoop"},{"data":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"name":"chimes","sound":"PRESET_chimes"}],"volume":0.75,"rootNote":0,"surfaceURL":"PRESET_SEQUENCER","soundsetURL":"PRESET_PERCUSSION_SAMPLER","soundsetName":"Percussion Sampler"},{"type":"PART","notes":[{"note":0,"rest":false,"beats":1},{"note":0,"rest":false,"beats":1},{"note":0,"rest":false,"beats":1},{"note":0,"rest":false,"beats":1},{"note":0,"rest":false,"beats":1},{"note":0,"rest":false,"beats":1},{"note":1,"rest":false,"beats":0.5},{"note":1,"rest":false,"beats":0.5},{"note":1,"rest":false,"beats":0.5},{"note":1,"rest":false,"beats":0.25},{"note":1,"rest":false,"beats":0.25}],"scale":"0,3,5,6,7,10","ascale":[0,3,5,6,7,10],"octave":3,"volume":0.5045179,"rootNote":0,"surfaceURL":"PRESET_VERTICAL","soundsetURL":"http://openmusic.gallery/data/401","soundsetName":"Guitar Power Chords"},{"type":"PART","notes":[{"note":2,"rest":false,"beats":0.5},{"note":2,"rest":false,"beats":0.5},{"note":2,"rest":false,"beats":0.5},{"note":2,"rest":false,"beats":0.5},{"note":2,"rest":false,"beats":0.5},{"note":2,"rest":false,"beats":0.5},{"note":2,"rest":false,"beats":0.5},{"note":2,"rest":false,"beats":0.5},{"note":2,"rest":false,"beats":0.5},{"note":2,"rest":false,"beats":0.25},{"note":2,"rest":false,"beats":0.25},{"note":2,"rest":false,"beats":0.25},{"note":2,"rest":false,"beats":0.25},{"note":2,"rest":false,"beats":0.25},{"note":2,"rest":false,"beats":0.25},{"note":2,"rest":false,"beats":0.25},{"note":2,"rest":false,"beats":0.25},{"note":2,"rest":false,"beats":0.25},{"note":2,"rest":false,"beats":0.25},{"note":2,"rest":false,"beats":0.25},{"note":2,"rest":false,"beats":0.25},{"note":2,"rest":false,"beats":0.25}],"scale":"0,3,5,6,7,10","ascale":[0,3,5,6,7,10],"octave":3,"tracks":[{"data":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"name":"A","sound":"http://mikehelland.com/omg/joe/THICKAS/A.mp3"},{"data":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"name":"B","sound":"http://mikehelland.com/omg/joe/THICKAS/B.mp3"},{"data":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"name":"C","sound":"http://mikehelland.com/omg/joe/THICKAS/C.mp3"},{"data":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"name":"D","sound":"http://mikehelland.com/omg/joe/THICKAS/D.mp3"},{"data":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"name":"E","sound":"http://mikehelland.com/omg/joe/THICKAS/E.mp3"},{"data":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"name":"F","sound":"http://mikehelland.com/omg/joe/THICKAS/F.mp3"},{"data":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"name":"G","sound":"http://mikehelland.com/omg/joe/THICKAS/G.mp3"},{"data":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"name":"RIBBIT","sound":"http://mikehelland.com/omg/joe/THICKAS/RIBBIT.mp3"}],"volume":0.91942555,"rootNote":0,"surfaceURL":"PRESET_VERTICAL","soundsetURL":"http://openmusic.gallery/data/62","soundsetName":"THICK"}],"scale":"0,3,5,6,7,10","ascale":[0,3,5,6,7,10],"shuffle":0,"measures":2,"rootNote":0,"subbeats":4,"created_at":1513287123361,"last_modified":1513287123361,"subbeatMillis":125,"chordProgression":[0,1],"id":405};
+    return {"tags":"jam power","type":"SECTION","beats":4,"parts":[{"type":"PART","notes":[{"note":0,"rest":false,"beats":0.5},{"note":0,"rest":false,"beats":0.5},{"note":0,"rest":false,"beats":0.5},{"note":0,"rest":false,"beats":0.5},{"note":0,"rest":false,"beats":0.5},{"note":0,"rest":false,"beats":0.5},{"note":0,"rest":false,"beats":0.5},{"note":0,"rest":false,"beats":0.5},{"note":0,"rest":false,"beats":0.5},{"note":0,"rest":false,"beats":0.5},{"note":0,"rest":false,"beats":0.5},{"note":0,"rest":false,"beats":0.5},{"note":0,"rest":false,"beats":0.5},{"note":0,"rest":false,"beats":0.5},{"note":0,"rest":false,"beats":0.5},{"note":0,"rest":false,"beats":0.5}],"scale":"0,3,5,6,7,10","ascale":[0,3,5,6,7,10],"octave":3,"volume":0.97115535,"rootNote":0,"surfaceURL":"PRESET_VERTICAL","soundsetURL":"PRESET_BASS","soundsetName":"Electric Bass"},{"type":"PART","notes":[],"scale":"0,3,5,6,7,10","ascale":[0,3,5,6,7,10],"octave":3,"tracks":[{"data":[1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0],"name":"kick","sound":"PRESET_ROCK_KICK"},{"data":[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0],"name":"snare","sound":"PRESET_ROCK_SNARE"},{"data":[1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0],"name":"hi-hat","sound":"PRESET_ROCK_HIHAT_MED"},{"data":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0],"name":"open hi-hat","sound":"PRESET_ROCK_HIHAT_OPEN"},{"data":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"name":"crash","sound":"PRESET_ROCK_CRASH"},{"data":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"name":"h tom","sound":"PRESET_ROCK_TOM_MH"},{"data":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"name":"m tom","sound":"PRESET_ROCK_TOM_ML"},{"data":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"name":"l tom","sound":"PRESET_ROCK_TOM_L"}],"volume":0.75,"rootNote":0,"surfaceURL":"PRESET_SEQUENCER","soundsetURL":"PRESET_ROCKKIT","soundsetName":"Rock Drum Kit"},{"type":"PART","notes":[],"scale":"0,3,5,6,7,10","ascale":[0,3,5,6,7,10],"octave":3,"tracks":[{"data":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"name":"bongo l","sound":"PRESET_bongol"},{"data":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"name":"bongo l","sound":"PRESET_bongoh"},{"data":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"name":"click l","sound":"PRESET_clickl"},{"data":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"name":"click h","sound":"PRESET_clickh"},{"data":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"name":"shhk","sound":"PRESET_shhk"},{"data":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"name":"scrape","sound":"PRESET_scrape"},{"data":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"name":"whoop","sound":"PRESET_whoop"},{"data":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"name":"chimes","sound":"PRESET_chimes"}],"volume":0.75,"rootNote":0,"surfaceURL":"PRESET_SEQUENCER","soundsetURL":"PRESET_PERCUSSION_SAMPLER","soundsetName":"Percussion Sampler"},{"type":"PART","notes":[{"note":0,"rest":false,"beats":1},{"note":0,"rest":false,"beats":1},{"note":0,"rest":false,"beats":1},{"note":0,"rest":false,"beats":1},{"note":0,"rest":false,"beats":1},{"note":0,"rest":false,"beats":1},{"note":1,"rest":false,"beats":0.5},{"note":1,"rest":false,"beats":0.5},{"note":1,"rest":false,"beats":0.5},{"note":1,"rest":false,"beats":0.25},{"note":1,"rest":false,"beats":0.25}],"scale":"0,3,5,6,7,10","ascale":[0,3,5,6,7,10],"octave":3,"volume":0.5045179,"rootNote":0,"surfaceURL":"PRESET_VERTICAL","soundsetURL":"http://openmusic.gallery/data/401","soundsetName":"Guitar Power Chords"},{"type":"PART","notes":[{"note":2,"rest":false,"beats":0.5},{"note":2,"rest":false,"beats":0.5},{"note":2,"rest":false,"beats":0.5},{"note":2,"rest":false,"beats":0.5},{"note":2,"rest":false,"beats":0.5},{"note":2,"rest":false,"beats":0.5},{"note":2,"rest":false,"beats":0.5},{"note":2,"rest":false,"beats":0.5},{"note":2,"rest":false,"beats":0.5},{"note":2,"rest":false,"beats":0.25},{"note":2,"rest":false,"beats":0.25},{"note":2,"rest":false,"beats":0.25},{"note":2,"rest":false,"beats":0.25},{"note":2,"rest":false,"beats":0.25},{"note":2,"rest":false,"beats":0.25},{"note":2,"rest":false,"beats":0.25},{"note":2,"rest":false,"beats":0.25},{"note":2,"rest":false,"beats":0.25},{"note":2,"rest":false,"beats":0.25},{"note":2,"rest":false,"beats":0.25},{"note":2,"rest":false,"beats":0.25},{"note":2,"rest":false,"beats":0.25}],"scale":"0,3,5,6,7,10","ascale":[0,3,5,6,7,10],"octave":3,"tracks":[{"data":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"name":"A","sound":"http://mikehelland.com/omg/joe/THICKAS/A.mp3"},{"data":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"name":"B","sound":"http://mikehelland.com/omg/joe/THICKAS/B.mp3"},{"data":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"name":"C","sound":"http://mikehelland.com/omg/joe/THICKAS/C.mp3"},{"data":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"name":"D","sound":"http://mikehelland.com/omg/joe/THICKAS/D.mp3"},{"data":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"name":"E","sound":"http://mikehelland.com/omg/joe/THICKAS/E.mp3"},{"data":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"name":"F","sound":"http://mikehelland.com/omg/joe/THICKAS/F.mp3"},{"data":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"name":"G","sound":"http://mikehelland.com/omg/joe/THICKAS/G.mp3"},{"data":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"name":"RIBBIT","sound":"http://mikehelland.com/omg/joe/THICKAS/RIBBIT.mp3"}],"volume":0.91942555,"rootNote":0,"surfaceURL":"PRESET_VERTICAL","soundsetURL":"http://openmusic.gallery/data/62","soundsetName":"THICK"}],"scale":"0,3,5,6,7,10","ascale":[0,3,5,6,7,10],"shuffle":0,"measures":2,"rootNote":0,"subbeats":4,"created_at":1513287123361,"last_modified":1513287123361,"subbeatMillis":250,"chordProgression":[0,1],"id":405};
 }

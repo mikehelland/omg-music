@@ -195,7 +195,7 @@ OMusicPlayer.prototype.stop = function () {
     }
 };
 
-OMusicPlayer.prototype.loadPart = function (part, section, song) {
+OMusicPlayer.prototype.loadPart = function (part) {
     var p = this;
 
     var type = part.data.type;
@@ -217,7 +217,7 @@ OMusicPlayer.prototype.loadPart = function (part, section, song) {
             this.loadDrumbeat(part);
         } else {
             part.data.soundsetURL = part.data.soundsetURL || "PRESET_OSC_SINE_SOFT_DELAY";
-            this.loadMelody(part, section, song);
+            this.loadMelody(part);
         }
 
     }
@@ -226,13 +226,16 @@ OMusicPlayer.prototype.loadPart = function (part, section, song) {
     }
 };
 
-OMusicPlayer.prototype.loadMelody = function (part, section, song) {
+OMusicPlayer.prototype.loadMelody = function (part) {
     var p = this;
 
     var data = part.data;
 
     var rootNote = 0;
     var ascale = [0, 2, 4, 5, 7, 9, 11];
+    
+    var section = part.section;
+    var song = part.section ? part.section.song : undefined;
 
     if (song && typeof song.data.rootNote == "number") {
         rootNote = song.data.rootNote;
@@ -347,7 +350,7 @@ OMusicPlayer.prototype.prepareSong = function (song) {
         section = song.sections[isection];
         for (var ipart = 0; ipart < section.parts.length; ipart++) {
             part = section.parts[ipart];
-            p.loadPart(part, section, song);
+            p.loadPart(part);
         }
     }
 
@@ -403,7 +406,7 @@ OMusicPlayer.prototype.playBeatForPart = function (iSubBeat, part) {
     }
 
     if (!part.loaded) {
-        p.loadPart(part, part.section, part.section.song);
+        p.loadPart(part);
     }
 
     if (part.data.surfaceURL == "PRESET_SEQUENCER") {
@@ -916,6 +919,7 @@ OMusicPlayer.prototype.playSound = function (sound, volume) {
 OMusicPlayer.prototype.makeOMGSong = function (data) {
     var newSong;
     var newSection;
+    var newPart;
 
     if (!data) {
         return null;
@@ -929,6 +933,25 @@ OMusicPlayer.prototype.makeOMGSong = function (data) {
         newSection = new OMGSection();
         newSection.parts.push(data);
         newSong.sections.push(newSection);
+        newSection.song = newSong;
+        data.section = newSection;
+
+        if (data.data.beats) {
+            newSection.data.beats = data.data.beats;
+            newSong.data.beats = newSection.data.beats;
+        }            
+        if (data.data.subbeats) {
+            newSection.data.subbeats = data.data.subbeats;
+            newSong.data.subbeats = newSection.data.subbeats;
+        }   
+        if (data.data.measures) {
+            newSection.data.measures = data.data.measures;
+            newSong.data.measures = newSection.data.measures;
+        }   
+        if (data.data.subbeatMillis) {
+            newSection.data.subbeatMillis = data.data.subbeatMillis;
+            newSong.data.subbeatMillis = newSection.data.subbeatMillis;
+        }
         return newSong;
     }
 
@@ -936,6 +959,16 @@ OMusicPlayer.prototype.makeOMGSong = function (data) {
 
         newSong = new OMGSong();
         newSong.sections.push(data);
+        if (newSection.data.beats)
+            newSong.data.beats = newSection.data.beats;
+        if (newSection.data.subbeats)
+            newSong.data.subbeats = newSection.data.subbeats;
+        if (newSection.data.measures)
+            newSong.data.measures = newSection.data.measures;
+        if (newSection.data.subbeatMillis)
+            newSong.data.subbeatMillis = newSection.data.subbeatMillis;
+        
+        data.song = newSong;
         return newSong;
     }
 
@@ -953,17 +986,21 @@ OMusicPlayer.prototype.makeOMGSong = function (data) {
         newSong = new OMGSong();
         newSection = new OMGSection(null, data);
         newSong.sections.push(newSection);
+        if (newSection.data.beats)
+            newSong.data.beats = newSection.data.beats;
+        if (newSection.data.subbeats)
+            newSong.data.subbeats = newSection.data.subbeats;
+        if (newSection.data.measures)
+            newSong.data.measures = newSection.data.measures;
+        if (newSection.data.subbeatMillis)
+            newSong.data.subbeatMillis = newSection.data.subbeatMillis;
+
+        newSection.song = newSong;
         return newSong;
     }
 
     if (data.type == "PART") {
         newPart = new OMGPart(null, data);
-        newSong = new OMGSong();
-        newSection = new OMGSection();
-        newSection.parts.push(newPart);
-        newSong.sections.push(newSection);
-
-        return newSong;
     }
 
     //todo this could go away, we only have type = "PART" now
@@ -971,19 +1008,36 @@ OMusicPlayer.prototype.makeOMGSong = function (data) {
     if (data.type == "MELODY" || data.type == "BASSLINE"
             || data.partType == "MELODY" || data.partType == "BASSLINE") {
         newPart = new OMGPart(null, data);
-        newSong = new OMGSong();
-        newSection = new OMGSection();
-        newSection.parts.push(newPart);
-        newSong.sections.push(newSection);
-        return newSong;
     }
     if (data.type == "DRUMBEAT"
             || data.partType == "DRUMBEAT") {
         newPart = new OMGDrumpart(null, data);
+    }
+    
+    if (newPart) {
         newSong = new OMGSong();
         newSection = new OMGSection();
         newSection.parts.push(newPart);
         newSong.sections.push(newSection);
+
+        if (newPart.data.beats) {
+            newSection.data.beats = newPart.data.beats;
+            newSong.data.beats = newSection.data.beats;
+        }            
+        if (newPart.data.subbeats) {
+            newSection.data.subbeats = newPart.data.subbeats;
+            newSong.data.subbeats = newSection.data.subbeats;
+        }   
+        if (newPart.data.measures) {
+            newSection.data.measures = newPart.data.measures;
+            newSong.data.measures = newSection.data.measures;
+        }   
+        if (newPart.data.subbeatMillis) {
+            newSection.data.subbeatMillis = newPart.data.subbeatMillis;
+            newSong.data.subbeatMillis = newSection.data.subbeatMillis;
+        }
+        newPart.section = newSection;
+        newSection.song = newSong;
         return newSong;
     }
 
