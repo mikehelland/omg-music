@@ -1108,7 +1108,7 @@ function OMGSong(div, data, headerOnly) {
             this.saved = true;
         }
     } else {
-        this.data = {type: "SONG", name: "(untitled)",
+        this.data = {type: "SONG", name: "",
             measures: 2, beats: 4, subbeats: 4, subbeatMillis: 125};
     }
 
@@ -1126,7 +1126,7 @@ OMGSong.prototype.setData = function (data) {
     }
 
     if (!this.data.name)
-        this.data.name = "(untitled)";
+        this.data.name = "";
 };
 OMGSong.prototype.setHeaderData = function (data) {
     this.measures = data.measures || this, measures;
@@ -1276,7 +1276,9 @@ function OMGPart(div, data) {
             notes: [], volume: 0.6, pan: 0};
     }
 
-
+    if (this.data.id) {
+        this.saved = true;
+    }
     // key? tempo? we need it here too, I guess
 
 }

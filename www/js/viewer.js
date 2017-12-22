@@ -43,7 +43,7 @@ viewer.loadPlayer = function (dataToPlay) {
    viewer.player.play(viewer.omgsong);
    viewer.playButton.innerHTML = "Stop";
 
-   viewer.titleDiv.innerHTML = dataToPlay.title || "(untitled)";
+   viewer.titleDiv.innerHTML = dataToPlay.name || "(untitled)";
    viewer.userDiv.innerHTML = dataToPlay.username || "(unknown)";
    viewer.datetimeDiv.innerHTML = getTimeCaption(dataToPlay.created_at);
 

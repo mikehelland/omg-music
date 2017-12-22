@@ -479,6 +479,8 @@ OMusicEditor.prototype.setupSectionEditor = function () {
         bam.sectionEditor.hide(function () {
 
             if (!bam.section.saved) {
+                bam.song.saved = false;
+                bam.section.data.previousId = bam.section.data.id;
                 bam.section.data.id = undefined;
                 bam.section.saving = true;
                 bam.omgservice.post(bam.section.getData(), function (response) {
@@ -599,16 +601,22 @@ OMusicEditor.prototype.setupSectionEditor = function () {
 
         if (part.data.surfaceURL !== "PRESET_SEQUENCER") {
             
+            var oldCallback = callback;
+            callback = function () {
+                if (typeof oldCallback === "function") 
+                    oldCallback();
+                bam.mm.ui.setPart(bam.part);
+            };
             bam.part.ui = bam.mm.ui;
             bam.fadeIn([bam.mm], function () {
-                bam.mm.setPart(bam.part);
+                
             });
             fadeList.push(bam.part.controls);
         }
 
         bam.fadeOut(fadeList);
 
-        bam.sectionEditor.growPart(part, callback)
+        bam.sectionEditor.growPart(part, callback);
     };
     
     bam.sectionEditor.growPart = function (part, callback) {
@@ -681,10 +689,11 @@ OMusicEditor.prototype.setupSectionAddButtons = function (buttonGroup) {
 
         bam.fadeOut([bam.sectionEditor]);
         bam.grow(newPart.div, function () {
-            bam.fadeIn([bam.mm]);
-            bam.mm.setPart(newPart);
             newdiv.style.zIndex = "auto";
+            bam.mm.setPart(newPart);
         });
+        bam.fadeIn([bam.mm]);
+
     };
 
     var bassButton = document.createElement("div");
@@ -718,10 +727,11 @@ OMusicEditor.prototype.setupSectionAddButtons = function (buttonGroup) {
 
         bam.fadeOut([bam.sectionEditor]);
         bam.grow(newPart.div, function () {
-            bam.fadeIn([bam.mm]);
-            bam.mm.setPart(newPart);
             newdiv.style.zIndex = "auto";
+            bam.mm.setPart(newPart);
         });
+        bam.fadeIn([bam.mm]);
+
     };
 
     var drumButton = document.createElement("div");
@@ -838,6 +848,7 @@ OMusicEditor.prototype.setupSongEditor = function () {
             bam.player.stop();
 
         if (!bam.song.saved) {
+            bam.song.data.previousId = bam.song.data.id;
             bam.song.data.id = undefined;
             bam.omgservice.post(bam.song.getData(), function (response) {
                 if (response && response.id) {
@@ -1421,6 +1432,9 @@ OMusicEditor.prototype.setupMelodyMaker = function () {
         }
 
         if (!part.saved) {
+            bam.section.saved = false;
+            part.data.previousId = part.data.id;
+            part.data.id = undefined;
             part.saving = true;
             bam.omgservice.post(part.data, function (response) {
                 if (response && response.id) {
@@ -2217,9 +2231,11 @@ OMusicEditor.prototype.setupSectionDiv = function (section) {
 
         if (section.dragging) {
             if (overCopy) {
+                bam.song.saved = false;
                 bam.song.sections.push(bam.copySection(section));
             }
             if (overRemove) {
+                bam.song.saved = false;
                 bam.song.sections.splice(section.position, 1);
                 bam.song.div.removeChild(section.div);
                 bam.arrangeSections();

@@ -4,7 +4,8 @@ var omgbam = new OMusicEditor();
 
 document.getElementsByClassName("omg-music-controls-title")[0].oninput = function (e) {
     if (omgbam.musicMakerZone) {
-        omgbam.musicMakerZone.data.title = e.target.value;
+        omgbam.musicMakerZone.data.name = e.target.value;
+        omgbam.musicMakerZone.saved = false;
     }
 };
 
@@ -43,7 +44,7 @@ omgbam.onzonechange = function (zone, pop) {
         type = zone.data.type;
         omgbam.musicMakerZoneType = type;
         label.innerHTML = type.slice(0, 1).toUpperCase() + type.slice(1).toLowerCase();
-        title.value = zone.data.title || "";
+        title.value = zone.data.name || zone.data.title || "";
 
         var zoneBG = window.getComputedStyle(zone.div, null).backgroundColor;
         var controls = document.getElementsByClassName("omg-music-controls")[0];

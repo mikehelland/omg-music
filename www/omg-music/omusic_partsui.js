@@ -320,7 +320,7 @@ omg.ui.drawMelodyCanvas = function (params) {
             drawNotes();
         } catch (exp) {
             console.log("error drawing melody canvas");
-            console.log(exp);
+            //console.log(exp);
         }
     };
 
@@ -522,17 +522,15 @@ function OMGDrumMachine(canvas, part) {
         var column = Math.floor((x - canvas.captionWidth) / canvas.columnWidth);
         var row = Math.floor(y / canvas.rowHeight);
 
-        console.log({x: x, y: y, column: column, row: row});
-
         if (column < 0) {
         } else {
+            
+            omgdrums.part.saved = false;
+            
             // figure out the subbeat this is
             //var subbeat = column - 1 + row * omgdrums.subbeats;
             var subbeat = column; // - 1 + row * omgdrums.subbeats;
 
-            //var data = omgdrums.part.data.tracks[omgdrums.currentTrack].data;
-            console.log(row);
-            console.log(omgdrums.part.data.tracks);
             var data = omgdrums.part.data.tracks[row].data;
             data[subbeat] = !data[subbeat];
 
@@ -1284,7 +1282,7 @@ OMGMelodyMaker.prototype.onDisplay = function () {
             omgmm.drawCanvas();
         };
 
-        canvas.bottomRow.push({button: true, width: 80, text: "Sine Wave"});
+        //canvas.bottomRow.push({button: true, width: 80, text: "Sine Wave"});
 
         canvas.bottomRow.push({text: "Mode:"});
 
@@ -1308,7 +1306,7 @@ OMGMelodyMaker.prototype.onDisplay = function () {
         var restNoteImage;
         var beats;
         var ib = 0;
-        for (var iimg = 0; iimg < omg.ui.noteImageUrls.length; iimg++) {
+        for (var iimg = 0; iimg < omg.ui.noteImageUrls.length - 1; iimg++) {
             beats = omg.ui.noteImageUrls[iimg][0];
             restNoteImage = omg.ui.getImageForNote({rest: true, beats: beats});
             noteImage = omg.ui.getImageForNote({rest: false, beats: beats});
@@ -1357,14 +1355,7 @@ OMGMelodyMaker.prototype.onDisplay = function () {
             omgmm.autoAddRests = !omgmm.autoAddRests;
         };
         canvas.bottomRow.push(autoButton);
-
-        canvas.bottomRow.push({text: "Key:"});
-
-        var rootNoteButton = {button: true, width: 30, text: "C"};
-        var scaleButton = {button: true, width: 65, text: "Major"};
-        canvas.bottomRow.push(rootNoteButton);
-        canvas.bottomRow.push(scaleButton);
-
+        
         this.redoOffsets = true;
 
         var canvasHeight = canvas.clientHeight; //window.innerHeight - offsetTop - 12 - 38;
@@ -1510,6 +1501,8 @@ OMGMelodyMaker.prototype.onDisplay = function () {
                 return;
             }
 
+            omgmm.part.saved = false;
+            
             if (y > canvas.height - omgmm.bottomFretBottom) {
                 omgmm.touchingBottomRow(x);
                 return;
