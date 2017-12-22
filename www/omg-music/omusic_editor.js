@@ -350,7 +350,7 @@ OMusicEditor.prototype.setupMelodyDiv = function (part) {
     var offsetLeft;
     var width;
     beatMarker.className = "beat-marker";
-    console.log(part.canvas.width);
+    console.log("part.canvas.width " + part.canvas.width);
     //todo really sort out where beats subbeats and measures comes from
     //beatMarker.style.width = part.canvas.noteWidth + "px";
     beatMarker.style.width = part.canvas.clientWidth / 32 + "px";
@@ -598,9 +598,11 @@ OMusicEditor.prototype.setupSectionEditor = function () {
         }
 
         if (part.data.surfaceURL !== "PRESET_SEQUENCER") {
-            bam.mm.setPart(bam.part);
+            
             bam.part.ui = bam.mm.ui;
-            bam.fadeIn([bam.mm]);
+            bam.fadeIn([bam.mm], function () {
+                bam.mm.setPart(bam.part);
+            });
             fadeList.push(bam.part.controls);
         }
 
