@@ -474,7 +474,9 @@ OMusicEditor.prototype.setupSectionEditor = function () {
     };
 
     bam.sectionEditor.nextButtonClick = function () {
-        bam.sectionEditor.endMixerMode();
+        if (bam.sectionEditor.mixerMode) {
+            bam.sectionEditor.endMixerMode();
+        }
         bam.sectionEditor.hide(function () {
 
             if (!bam.section.saved) {
