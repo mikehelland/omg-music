@@ -131,7 +131,6 @@ OMusicEditor.prototype.setup = function (options) {
         loadId = loadParams.id || loadParams.song || loadParams.section || loadParams.part;
         
         if (loadParams.testData) {
-            console.log("testData")
             loadParams.song = 1
             loadParams.dataToLoad = testData();
             bam.load(loadParams);
@@ -293,7 +292,6 @@ OMusicEditor.prototype.setupDivForDrumbeat = function (part) {
     part.controls.appendChild(canvas);
 
     canvas.height = 80; //canvas.parentElement.clientHeight - canvas.offsetTop - 4;
-    var rowHeight = canvas.height / part.data.tracks.length;
     canvas.style.height = canvas.height + "px";
     canvas.style.width = canvas.parentElement.clientWidth - 8 + "px";
     canvas.width = canvas.clientWidth;
@@ -354,12 +352,9 @@ OMusicEditor.prototype.setupMelodyDiv = function (part) {
     var offsetLeft;
     var width;
     beatMarker.className = "beat-marker";
-    console.log("part.canvas.width " + part.canvas.width);
-    //todo really sort out where beats subbeats and measures comes from
     //beatMarker.style.width = part.canvas.noteWidth + "px";
+    //todo hardcoded 32! really sort out where beats subbeats and measures comes from
     beatMarker.style.width = part.canvas.clientWidth / 32 + "px";
-    console.log("beatMarker.style.width");
-    console.log(beatMarker.style.width);
     beatMarker.style.height = part.canvas.height + "px";
     beatMarker.style.top = part.canvas.offsetTop + "px";
     div.appendChild(beatMarker);
@@ -1484,6 +1479,8 @@ OMusicEditor.prototype.setupMelodyMaker = function () {
 
         if (surface == "PRESET_SEQUENCER") {
             bam.part.ui.readOnly = true;
+            bam.part.canvas.omgdata.selectedTrack = -1;
+            
             shrinkPart();
         } else {
             //todo not fade out the whole melody maker, just the edit parts
