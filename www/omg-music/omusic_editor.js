@@ -475,7 +475,7 @@ OMusicEditor.prototype.setupSectionEditor = function () {
     };
 
     bam.sectionEditor.nextButtonClick = function () {
-
+        bam.sectionEditor.endMixerMode();
         bam.sectionEditor.hide(function () {
 
             if (!bam.section.saved) {
@@ -1253,7 +1253,8 @@ OMusicEditor.prototype.toggleMute = function (part, newMute) {
     if (newMute) {
         part.muted = true;
 
-        part.controls.style.backgroundColor = "#FF8888";
+        //part.controls.style.backgroundColor = "#FF8888";
+        part.div.style.backgroundColor = "#FF8888";
 
         if (part.gain) {
             part.preMuteGain = part.gain.gain.value;
@@ -1262,7 +1263,8 @@ OMusicEditor.prototype.toggleMute = function (part, newMute) {
     } else {
         part.muted = false;
 
-        part.controls.style.backgroundColor = "";
+        //part.controls.style.backgroundColor = "";
+        part.div.style.backgroundColor = "#FFFF99";
 
         if (part.gain && part.preMuteGain) {
             part.gain.gain.value = part.preMuteGain;

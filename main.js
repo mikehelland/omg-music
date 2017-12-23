@@ -117,15 +117,20 @@ app.get('/user', function (req, res) {
 
 app.get('/data/', function (req, res) {
     var db = app.get('db');
-    var options = {limit : 20, order : "created_at desc"};
+    var perPage = 50;
+    var options = {limit : perPage, order : "created_at desc"};
     var find = "*";
     if (req.query.user_id) {
         //find = {user_id: parseInt(req.query.user_id)};
         find = {user_id: req.query.user_id};
     }
     if (req.query.type) {
-		find = {type: req.query.type};
-	}
+        find = {type: req.query.type};
+    }
+
+    if (req.query.page) {
+        options.offset = (parseInt(req.query.page) - 1) * perPage;
+    }
 
     db.things.findDoc(find, options, function (err, docs) {
         if (err) {

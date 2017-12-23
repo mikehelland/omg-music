@@ -52,7 +52,8 @@ var loadSearchResults = function (results) {
 
       resultData = document.createElement("div");
       resultData.className = "search-thing-created-at";
-      resultData.innerHTML = getTimeCaption(parseInt(result.created_at));
+      //resultData.innerHTML = getTimeCaption(parseInt(result.created_at));
+      resultData.innerHTML = getTimeCaption(parseInt(result.last_modified));
       rightData.appendChild(resultData);
 
       resultDiv.onclick = function () {
@@ -68,12 +69,16 @@ var loadSearchResults = function (results) {
    });
 };
 
-var search = function () {
+var search = function (params) {
 	var xhr = new XMLHttpRequest();
-	var url = "data/?q=" + (parameters.q || "");
-	if (type) {
-		url = url + "&type=" + type;
+	var url = "data/?q=" + (params.q || "");
+	if (params.type) {
+            url = url + "&type=" + params.type;
 	}
+	if (params.page) {
+            url = url + "&page=" + params.page;
+	}
+        
 	xhr.open("GET", url);
 	xhr.onreadystatechange = function () {
 	   var results;
@@ -92,7 +97,7 @@ var search = function () {
 	xhr.send();
 };
 
-search();
+search(parameters);
 
 function getQueryParameters() {
 

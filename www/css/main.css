@@ -16,7 +16,7 @@ body {
 }
 
 .main-title-bar-content {
-   max-width:80%;   /*950px;*/
+   max-width:90%;   /*950px;*/
    margin:auto;
    padding:10px;   
    position:relative;
@@ -47,7 +47,7 @@ body {
 }
 
 .main-body {
-   max-width:850px;
+   max-width:85%;
    margin:auto;
    position:relative;
 }
