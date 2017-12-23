@@ -1017,7 +1017,7 @@ OMGMelodyMaker.prototype.drawCanvas = function () {
     var note;
     var y;
 
-    var playingI = this.part.playingI;
+    var playingI = this.part.currentI - 1;
     var notes = this.part.data.notes;
     if (playingI > -1 && playingI < notes.length) {
         context.fillStyle = "#4fa5d5";
@@ -1198,31 +1198,30 @@ OMGMelodyMaker.prototype.drawButtons = function (context, buttonRow, x, y, width
 
 OMGMelodyMaker.prototype.setupFretBoard = function () {
 
-    //var rootNote = this.selectRootNote.selectedIndex;
-    var rootNote = 0;
+    var rootNote = this.data.rootNote;
+    //var rootNote = 0;
 
     var bottomNote;
     var topNote;
     var octaveShift;
-    if (this.advanced) {
-        //bottomNote = this.selectBottomNote.selectedIndex + 9;
-        //topNote = this.selectTopNote.selectedIndex + 9;
-        //octaveShift = this.selectOctaveShift.selectedIndex;
-    } else {
-        octaveShift = this.data.type == "BASSLINE" ? 3 : 5;
-        rootNote += octaveShift * 12;
-        bottomNote = rootNote - 12;
-        topNote = rootNote + +12;
+    console.log("rootNote " + rootNote);
+    if (rootNote <= 12) {
+        octaveShift = this.data.partType == "BASSLINE" ? 3 : 5;
+        rootNote = rootNote % 12 + octaveShift * 12;
+        //rootNote += octaveShift * 12;        
     }
 
+    bottomNote = rootNote - 12;
+    topNote = rootNote + 12;
+    
     var fretCount = topNote - bottomNote + 1;
 
     this.data.bottomNote = bottomNote;
     this.data.rootNote = rootNote;
     this.data.topNote = topNote;
     this.data.octaveShift = octaveShift;
-    this.data.scale = "0,2,4,5,7,9,11"; //this.selectScale.value;
-    this.data.ascale = omg.ui.splitInts(this.data.scale);
+    //this.data.scale = "0,2,4,5,7,9,11"; //this.selectScale.value;
+    //this.data.ascale = omg.ui.splitInts(this.data.scale);
 
     var scale = this.data.ascale;
 

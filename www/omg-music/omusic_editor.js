@@ -354,7 +354,7 @@ OMusicEditor.prototype.setupMelodyDiv = function (part) {
     beatMarker.className = "beat-marker";
     //beatMarker.style.width = part.canvas.noteWidth + "px";
     //todo hardcoded 32! really sort out where beats subbeats and measures comes from
-    beatMarker.style.width = part.canvas.clientWidth / 32 + "px";
+    beatMarker.style.width = part.canvas.clientWidth / 32 * 2 + "px";
     beatMarker.style.height = part.canvas.height + "px";
     beatMarker.style.top = part.canvas.offsetTop + "px";
     div.appendChild(beatMarker);
@@ -368,7 +368,7 @@ OMusicEditor.prototype.setupMelodyDiv = function (part) {
         }
         if (part.currentI - 1 < part.data.notes.length
                 && part.currentI >= 0) {
-            offsetLeft = part.canvas.offsetLeft;
+            offsetLeft = part.canvas.offsetLeft + 5;
             //width = part.canvas.noteWidth;
             width = part.canvas.width;
             //todo hardcoded total subbeats!!
@@ -670,11 +670,11 @@ OMusicEditor.prototype.setupSectionAddButtons = function (buttonGroup) {
 
         var newdiv = bam.createElementOverElement("part2", melodyButton, bam.bbody);
 
-        var newPart = new OMGPart(newdiv);
-        newPart.section = bam.section;
+        var newPart = new OMGPart(newdiv, null, bam.section);
+        //newPart.section = bam.section;
         newPart.data.partType = "MELODY";
-        newPart.position = bam.section.parts.length;
-        bam.section.parts.push(newPart);
+        //newPart.position = bam.section.parts.length;
+        //bam.section.parts.push(newPart);
 
         var otherParts = [];
         var otherPartsList = bam.section.div.getElementsByClassName("part2");
@@ -817,9 +817,6 @@ OMusicEditor.prototype.setupSongEditor = function () {
 
         var lastSection = bam.song.sections[bam.song.sections.length - 1] || new OMGSection();
         bam.copySection(lastSection);
-        bam.song.sections.push(bam.section);
-        bam.section.song = bam.song;
-        bam.section.position = bam.song.sections.length - 1;
         bam.player.loopSection = bam.section.position;
 
         bam.songEditor.hide(bam.section, function () {
@@ -1061,9 +1058,7 @@ OMusicEditor.prototype.load = function (params) {
         return;
     }
 
-    bam.section = new OMGSection(newDiv);
-    bam.section.song = bam.song;
-    bam.song.sections.push(bam.section);
+    bam.section = new OMGSection(newDiv, null, bam.song);
 
     sectionBG = window.getComputedStyle(bam.section.div, null).backgroundColor;
     bam.section.div.style.backgroundColor = "white";
@@ -1134,18 +1129,18 @@ OMusicEditor.prototype.loadSong = function (params) {
     if (params.dataToLoad) {
         bam.song = new OMGSong(params.songDiv, params.dataToLoad);
         var newSection;
-        var newSections = [];
+        var fadeInList = [];
         bam.song.sections.forEach(function (section) {
-            newSections.push(bam.makeSectionDiv(section));
+            fadeInList.push(bam.makeSectionDiv(section));
             section.parts.forEach(function (part) {
                 bam.setupPartDiv(part);
                 part.controls.rightBar.style.display = "none";
                 part.controls.selectInstrument.style.display = "none";
-                newSections.push(part.controls);
+                fadeInList.push(part.controls);
             });
         });
         bam.player.prepareSong(bam.song);
-        bam.fadeIn(newSections);
+        bam.fadeIn(fadeInList);
         bam.arrangeSections(function () {
             if (params.section) {
                 bam.editSectionOnLoad(params);
@@ -1196,7 +1191,7 @@ OMusicEditor.prototype.loadSection = function (params) {
     var newPart;
     var fadeIn = [params.sectionDiv, bam.sectionEditor];
     if (params.dataToLoad) {
-        bam.section = new OMGSection(params.sectionDiv, params.dataToLoad);
+        bam.section = new OMGSection(params.sectionDiv, params.dataToLoad, bam.song);
         for (var ip = 0; ip < bam.section.parts.length; ip++) {
             newPart = bam.makePartDiv(bam.section.parts[ip]);
             if (newPart)
@@ -1211,11 +1206,9 @@ OMusicEditor.prototype.loadSection = function (params) {
         if (bam.section.data.beats)
             bam.song.data.subbeatMillis = bam.section.data.subbeatMillis;
     } else {
-        bam.section = new OMGSection(params.sectionDiv);
+        bam.section = new OMGSection(params.sectionDiv, null, bam.song);
     }
     bam.fadeIn(fadeIn, params.callback);
-    bam.section.song = bam.song;
-    bam.song.sections.push(bam.section);
     bam.arrangeParts(function () {
         if (params.part) {
             bam.editPartOnLoad(params);
@@ -2001,7 +1994,7 @@ OMusicEditor.prototype.copySection = function (section) {
 
     var newDiv = bam.createElementOverElement("section",
             bam.songEditor.addSectionButton, bam.bbody);
-    var newSection = new OMGSection(newDiv);
+    var newSection = new OMGSection(newDiv, null, bam.song);
     bam.song.div.appendChild(newDiv);
 
     newDiv.style.left = bam.songEditor.addSectionButton.offsetLeft + //bam.offsetLeft + 
@@ -2236,7 +2229,7 @@ OMusicEditor.prototype.setupSectionDiv = function (section) {
         if (section.dragging) {
             if (overCopy) {
                 bam.song.saved = false;
-                bam.song.sections.push(bam.copySection(section));
+                bam.copySection(section);
             }
             if (overRemove) {
                 bam.song.saved = false;
@@ -2425,10 +2418,8 @@ OMusicEditor.prototype.songZoneBeatPlayed = function (isubbeat, isection) {
     if (isubbeat == 0 && isection > 0) {
         bam.song.sections[isection - 1].beatmarker.style.width = "100%";
     }
-    //section.beatmarker.style.width = isubbeat / this.player.getTotalSubbeats() * 100 + "%";
-    if (isubbeat % 4 == 0) {
-        //if we wanted to do it only the downbeats
-    }
+    section.beatmarker.style.width = isubbeat / 
+            (bam.song.data.measures * bam.song.data.beats * bam.song.data.subbeats) * 100 + "%";
 };
 
 OMusicEditor.prototype.partZoneBeatPlayed = function (isubbeat) {
