@@ -22,6 +22,7 @@ function OMusicEditor() {
         {name: "Pentatonic", value: [0, 2, 5, 7, 9]},
         {name: "Blues", value: [0, 3, 5, 6, 7, 10]}];
 
+    this.mutedPartColor = "#FF8888";
 }
 
 
@@ -217,7 +218,10 @@ OMusicEditor.prototype.setupPartDiv = function (part) {
         debug("setupPartDiv: We are already setup!");
         return;
     }
-
+    part.originalBackgroundColor = window.getComputedStyle(part.div, null).backgroundColor;
+    if (part.data.mute) {
+        part.div.style.backgroundColor = bam.mutedPartColor;
+    }
     part.div.omgpart = part; //maybe not the best design, but helpful for in dragndrop
 
     part.controls = document.createElement("div");
@@ -1248,23 +1252,22 @@ OMusicEditor.prototype.clear = function () {
 
 OMusicEditor.prototype.toggleMute = function (part, newMute) {
     if (newMute == undefined) {
-        newMute = !part.muted;
+        newMute = !part.data.mute;
     }
     if (newMute) {
-        part.muted = true;
+        part.data.mute = true;
 
-        //part.controls.style.backgroundColor = "#FF8888";
-        part.div.style.backgroundColor = "#FF8888";
+        part.div.style.backgroundColor = this.mutedPartColor;
 
         if (part.gain) {
             part.preMuteGain = part.gain.gain.value;
             part.gain.gain.value = 0;
         }
     } else {
-        part.muted = false;
+        part.data.mute = false;
 
         //part.controls.style.backgroundColor = "";
-        part.div.style.backgroundColor = "#FFFF99";
+        part.div.style.backgroundColor = part.originalBackgroundColor;
 
         if (part.gain && part.preMuteGain) {
             part.gain.gain.value = part.preMuteGain;

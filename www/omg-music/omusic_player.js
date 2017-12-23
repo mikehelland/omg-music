@@ -418,7 +418,7 @@ OMusicPlayer.prototype.playBeatForPart = function (iSubBeat, part) {
 OMusicPlayer.prototype.playBeatForDrumPart = function (iSubBeat, part) {
     var tracks = part.data.tracks;
 
-    if (part.muted)
+    if (part.data.mute)
         return;
 
     for (var i = 0; i < tracks.length; i++) {
@@ -461,7 +461,7 @@ OMusicPlayer.prototype.playBeatForMelody = function (iSubBeat, part) {
         }
         var note = data.notes[part.currentI];
 
-        if (part.muted) {
+        if (part.data.mute) {
             //play solo they can't here ya
         }
         else if (note && note.sound) {
@@ -556,7 +556,7 @@ OMusicPlayer.prototype.makeOsc = function (part) {
     if (part.osc.soft) {
         volume = volume * 0.5;
     }
-    if (part.muted) {
+    if (part.data.mute) {
         part.gain.gain.setValueAtTime(0, p.context.currentTime);
         part.gain.gain.preMuteGain = volume;
     } else {
@@ -906,19 +906,19 @@ OMusicPlayer.prototype.playSound = function (sound, part) {
         source.buffer = p.loadedSounds[sound];
         
         //todo really try to reuse these gain and panner nodes
-        part.bufferPanner = p.context.createStereoPanner();
-        part.bufferGain = p.context.createGain();
-        
+        if (!part.bufferPanner) {
+            part.bufferPanner = p.context.createStereoPanner();
+            part.bufferGain = p.context.createGain();
+
+            part.bufferGain.connect(part.bufferPanner)
+            part.bufferPanner.connect(p.compressor);
+        }
         source.connect(part.bufferGain);
-        part.bufferGain.connect(part.bufferPanner)
-        part.bufferPanner.connect(p.compressor);
         
         part.bufferPanner.pan.setValueAtTime(part.data.pan, p.context.currentTime);
         part.bufferGain.gain.setValueAtTime(part.data.volume, p.context.currentTime);
-        console.log("playsound volume" + part.data.volume);
         
         source.start(p.context.currentTime);
-
 
         return source;
     }
