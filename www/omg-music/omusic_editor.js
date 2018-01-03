@@ -1302,7 +1302,11 @@ OMusicEditor.prototype.loadSection = function (params) {
             bam.song.data.subbeats = bam.section.data.subbeats;
         if (bam.section.data.measures)
             bam.song.data.measures = bam.section.data.measures;
-        if (bam.section.data.beats)
+        if (bam.section.data.subbeatMillis)
+            bam.song.data.subbeatMillis = bam.section.data.subbeatMillis;
+        if (bam.section.data.ascale)
+            bam.song.data.ascale = bam.section.data.ascale;
+        if (typeof bam.section.data.rootNote === "number")
             bam.song.data.subbeatMillis = bam.section.data.subbeatMillis;
     } else {
         bam.section = new OMGSection(params.sectionDiv, null, bam.song);
