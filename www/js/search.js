@@ -10,8 +10,26 @@ var type = parameters.type || "";
 filterType.onchange = function () {
 	//todo set the location?
 	parameters.type = filterType.value;
-	search(parameters);
-}
+        window.location = window.location.pathname + getQueryString(parameters);
+
+	//search(parameters);
+};
+
+parameters.page = parameters.page || 1;
+
+var previousButton = document.getElementById("search-previous-button");
+var nextButton = document.getElementById("search-next-button");
+previousButton.onclick = function () {
+    parameters.page--;
+    window.location = window.location.pathname + getQueryString(parameters);
+    //search(parameters);
+};
+nextButton.onclick = function () {
+    parameters.page++;
+    //window.history.pushState(null, "", window.location.pathname + getQueryString(parameters));
+    window.location = window.location.pathname + getQueryString(parameters);
+    //search(parameters);
+};
 
 var loadSearchResults = function (results) {
 	
@@ -114,6 +132,15 @@ function getQueryParameters() {
 	}
 	
    return parsedParams;
+}
+
+function getQueryString(parameters) {
+
+    var string = "?";
+    for (var param in parameters) {
+        string += param + "=" + parameters[param] + "&";
+    }
+    return string.slice(0, string.length - 1);
 }
 
 function getBackgroundColor(type) {
