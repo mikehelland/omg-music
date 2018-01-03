@@ -2133,7 +2133,7 @@ OMusicEditor.prototype.copySection = function (section) {
             bam.songEditor.addSectionButton, bam.bbody);
     var newSection = new OMGSection(newDiv, null, bam.song);
     if (section.data.chordProgression) {
-        newSection.data.chordProgression = section.data.chordProgression;
+        newSection.data.chordProgression = section.data.chordProgression.slice(0);
     }
     bam.makeChordsView(newSection);
     bam.song.div.appendChild(newDiv);
@@ -2944,6 +2944,50 @@ OMusicEditor.prototype.setupSelectInstrument = function (part) {
         }
     };
   
+};
+
+OMusicEditor.prototype.save = function (callback) {
+    var bam = this;
+    
+    var zone = bam.zones[bam.zones.length - 1];
+    var element;
+    if (zone) {
+        if (zone === bam.song.div) {
+            element = bam.song;
+        }
+        if (zone === bam.section.div) {
+            element = bam.section;
+        }
+        if (zone === bam.part.div) {
+            element = bam.part;
+        }
+        if (element) {
+            if (!element.saved) {
+                element.data.previousId = element.data.id;
+                element.data.id = undefined;
+                element.saving = true;
+                var saveData;
+                if (typeof element.getData === "function") {
+                    saveData = element.getData();
+                }
+                else {
+                    saveData = element.data;
+                }
+                bam.omgservice.post(saveData, function (response) {
+                    if (response && response.id) {
+                        element.saved = true;
+                        if (callback) {
+                            callback(response.id);
+                        }
+                    }
+                    element.saving = false;
+                });
+            }
+            else {
+                if (callback) callback();
+            }
+        }
+    }
 };
 
 function testData() {

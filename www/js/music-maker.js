@@ -56,34 +56,6 @@ omgbam.onzonechange = function (zone, pop) {
             return;
         }
 
-        var updateWindowHistory = function () {
-            var queryString = "";
-            if (omgbam.song.data.id || zone.data.type == "SONG") {
-                queryString += "?song=" + (omgbam.song.data.id || 0);
-            }
-            if (zone.data.type == "SECTION"
-                    || (zone.data.type == "PART"
-                            && (omgbam.section.data.id
-                                    || omgbam.song.data.id))) {
-                queryString += queryString.length > 0 ? "&" : "?";
-                queryString += "section=" + (omgbam.section.data.id || 0);
-            }
-            if (zone.data.type == "PART") {
-                queryString += queryString.length > 0 ? "&" : "?";
-                queryString += "part=" + (omgbam.part.data.id || 0);
-            }
-            if (zone.data.type == "CHORDS") {
-                queryString += queryString.length > 0 ? "&" : "?";
-                queryString += "section=" + (omgbam.section.data.id || 0);
-                                    + "&chords=true";
-            }
-
-            if (omgbam.initialized && window.location.search != queryString) {
-                console.log("update window history");
-                window.history.pushState(zone.data, "", window.location.pathname + queryString);
-            }
-        };
-
         if (!zone.saving) {
             updateWindowHistory();
         } else {
@@ -122,7 +94,11 @@ shareButton.onclick = function () {
     if (!omg.shareWindow) {
         omg.setupShareWindow();
     }
-    omg.shareWindow.show();
+    console.log("save1")
+    omgbam.save(function (id) {
+        if (id) updateWindowHistory();
+        omg.shareWindow.show();
+    });
 };
 
 
@@ -147,3 +123,33 @@ var chordsButton = document.getElementById("omg-music-controls-chords-button");
 //chordsButton.onclick = function (e) {
 //   omgbam.showChordChooser(e);
 //};
+
+
+function updateWindowHistory() {
+    var zone = omgbam.musicMakerZone;
+    var queryString = "";
+    if (omgbam.song.data.id || zone.data.type == "SONG") {
+        queryString += "?song=" + (omgbam.song.data.id || 0);
+    }
+    if (zone.data.type == "SECTION"
+            || (zone.data.type == "PART"
+                    && (omgbam.section.data.id
+                            || omgbam.song.data.id))) {
+        queryString += queryString.length > 0 ? "&" : "?";
+        queryString += "section=" + (omgbam.section.data.id || 0);
+    }
+    if (zone.data.type == "PART") {
+        queryString += queryString.length > 0 ? "&" : "?";
+        queryString += "part=" + (omgbam.part.data.id || 0);
+    }
+    if (zone.data.type == "CHORDS") {
+        queryString += queryString.length > 0 ? "&" : "?";
+        queryString += "section=" + (omgbam.section.data.id || 0);
+                            + "&chords=true";
+    }
+
+    if (omgbam.initialized && window.location.search != queryString) {
+        console.log("update window history");
+        window.history.pushState(zone.data, "", window.location.pathname + queryString);
+    }
+};
