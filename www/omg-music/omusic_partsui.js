@@ -491,6 +491,20 @@ omg.ui.getChordText = function (chord, ascale) {
     return "?";
 }
 
+omg.ui.getChordProgressionText = function (section) {
+    var chordsText = "";
+    if (section.data.chordProgression) {
+        var chords = section.data.chordProgression;
+        for (var i = 0; i < chords.length; i++) {
+            if (i > 0) {
+                chordsText += " - ";
+            }
+            chordsText += omg.ui.getChordText(chords[i], section.data.ascale);
+        }
+    }  
+    return chordsText;
+};
+
 
 //omg.ui.setupNoteImages();
 

@@ -198,6 +198,8 @@ OMusicEditor.prototype.nextButtonClick = function (callback) {
         bam.mm.nextButtonClick(callback);
     } else if (bam.section && bam.zones[bam.zones.length - 1] == bam.section.div) {
         bam.sectionEditor.nextButtonClick(callback);
+    } else if (bam.section && bam.zones[bam.zones.length - 1] == bam.section.chordsView) {
+        bam.sectionEditor.chordsNextButtonClick(callback);
     }
 
 };
@@ -504,6 +506,47 @@ OMusicEditor.prototype.setupSectionEditor = function () {
             bam.setupSectionDiv(bam.section);
         });
     };
+    
+    bam.sectionEditor.chordsNextButtonClick = function () {
+
+        if (bam.sectionEditor.mixerMode) {
+            bam.sectionEditor.dragAndDrop.setupChildDiv(part.div);
+        }
+
+        //if (!part.saved) 
+            bam.section.saved = false;
+        bam.section.chordsView.editting = false;
+
+        var shrinkPart = function () {
+            if (typeof bam.onzonechange == "function") {
+                bam.onzonechange(bam.section);
+            }
+            bam.section.chordsView.style.zIndex = "1";
+
+            bam.popZone(bam.section.chordsView);
+
+            var otherParts = [];
+            //if (part.data.partType !== "DRUMBEAT")
+            //    otherParts.push(part.controls);
+            var otherPart;
+            var otherPartsList = bam.section.div
+                    .getElementsByClassName("part2");
+            for (var ii = 0; ii < otherPartsList.length; ii++) {
+                otherPart = otherPartsList.item(ii)
+                otherParts.push(otherPart);
+            }
+
+            otherParts.push(bam.sectionEditor);
+            //otherParts.push(bam.section.chordsView);
+            bam.fadeIn(otherParts);
+
+            bam.arrangeParts();
+            bam.section.chordsView.removeChild(bam.section.chordsView.buttonGroup);
+        };
+
+        shrinkPart();
+    };
+
 
     bam.sectionEditor.hide = function (callback) {
         var fadeOutList = [bam.sectionEditor];
@@ -672,6 +715,7 @@ OMusicEditor.prototype.makeChordsDialog = function () {
     buttonGroup.className = "section-chords-dialog";
     //bam.section.chordsView.innerHTML = "";
     bam.section.chordsView.appendChild(buttonGroup);
+    bam.section.chordsView.buttonGroup = buttonGroup;
     
     //todo song or section ascale
     var ascale = bam.section.data.ascale || bam.song.data.ascale;
@@ -681,6 +725,16 @@ OMusicEditor.prototype.makeChordsDialog = function () {
         chordDiv.className = "remixer-add-button";
         chordDiv.innerHTML = omg.ui.getChordText(i, ascale);
         buttonGroup.appendChild(chordDiv);
+        
+        chordDiv.onclick = (function (i2) {
+            return function () {
+                if (!bam.section.data.chordProgression) {
+                    bam.section.data.chordProgression = [];
+                }
+                bam.section.data.chordProgression.push(i2);
+                bam.setChordsText(bam.section);
+            }
+        }(i));
     }
 
     var mixerButton = document.createElement("span");
@@ -688,13 +742,8 @@ OMusicEditor.prototype.makeChordsDialog = function () {
     mixerButton.innerHTML = "Clear";
     buttonGroup.appendChild(mixerButton);
     mixerButton.onclick = function () {
-        if (bam.sectionEditor.mixerMode) {
-            bam.sectionEditor.endMixerMode();
-            mixerButton.innerHTML = "Mixer <br/>View";
-        } else {
-            bam.sectionEditor.startMixerMode();
-            mixerButton.innerHTML = "Standard <br/>View";
-        }
+        bam.section.data.chordProgression = undefined;
+        bam.setChordsText(bam.section);
     };
 
 };
@@ -1125,9 +1174,9 @@ OMusicEditor.prototype.load = function (params) {
     if (params.type == "DRUMBEAT" ||
             (params.dataToLoad && params.dataToLoad.partType == "DRUMBEAT")) {
         if (params.dataToLoad) {
-            bam.part = new OMGDrumpart(newDiv, params.dataToLoad);
+            bam.part = new OMGDrumpart(newDiv, params.dataToLoad, bam.section);
         } else {
-            bam.part = new OMGDrumpart(newDiv);
+            bam.part = new OMGDrumpart(newDiv, null, bam.section);
             var ppart = bam.part;
             if (params.soundset) {
                 bam.getSoundSet(params.soundset, function (ss) {
@@ -2481,9 +2530,34 @@ OMusicEditor.prototype.makeChordsView = function (section) {
     var bam = this;
     section.chordsView = document.createElement("div");
     section.chordsView.className = "section-chords-view";
-    section.chordsView.innerHTML = "I";
-    var chordsText = "";
+    var chordsDiv = document.createElement("div");
+    chordsDiv.className = "section-chords-text";
+    chordsDiv.innerHTML = "I";
+
+    section.chordsView.chordsText = chordsDiv;
+
+    bam.setChordsText(section);
+    section.chordsView.appendChild(chordsDiv);
+    
+    section.chordsView.onclick = function () {
+        if (bam.zones[bam.zones.length - 1] === bam.section.div
+                && !bam.section.chordsView.editting) {
+            bam.section.chordsView.editting = true;
+            bam.sectionEditor.editChords();   
+        }
+    };
+    
+    section.chordsView.style.position = "absolute";
+    section.div.appendChild(section.chordsView);
+    
+
+}
+
+OMusicEditor.prototype.setChordsText = function (section) {
+    var chordsDiv = section.chordsView.chordsText;
+    var chordsText = "(no chords)";
     if (section.data.chordProgression) {
+        chordsText = "";
         var chords = section.data.chordProgression;
         for (var i = 0; i < chords.length; i++) {
             if (i > 0) {
@@ -2491,15 +2565,8 @@ OMusicEditor.prototype.makeChordsView = function (section) {
             }
             chordsText += omg.ui.getChordText(chords[i], section.data.ascale);
         }
-        section.chordsView.innerHTML = chordsText;
     }
-    
-    section.chordsView.onclick = function () {
-        bam.sectionEditor.editChords();
-    };
-    
-    section.chordsView.style.position = "absolute";
-    section.div.appendChild(section.chordsView);
+    chordsDiv.innerHTML = chordsText;
 };
 
 OMusicEditor.prototype.songZoneBeatPlayed = function (isubbeat, isection) {

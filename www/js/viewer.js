@@ -4,7 +4,8 @@ viewer.div = document.getElementById("omgviewer");
 viewer.canvas = document.createElement("canvas");
 viewer.div.appendChild(viewer.canvas);
 viewer.canvas.style.width = "100%";
-viewer.canvas.style.height = viewer.div.clientHeight - 20 + "px";
+//viewer.canvas.style.height = viewer.div.clientHeight - 20 + "px";
+viewer.canvas.style.height = viewer.div.clientHeight -5 + "px";
 viewer.canvas.width = viewer.canvas.clientWidth
 viewer.canvas.height = viewer.canvas.clientHeight
 
@@ -33,9 +34,9 @@ omg.ui.omgUrl = "omg-music/";
 omg.ui.setupNoteImages();
 
 viewer.loadPlayer = function (dataToPlay) {
-   viewer.player = new OMusicPlayer();
+   viewer.player = new OMusicPlayer(); console.log(dataToPlay);
    viewer.omgsong = viewer.player.makeOMGSong(dataToPlay);
-
+console.log(viewer.omgsong);
    viewer.sectionWidth = Math.max(viewer.sectionWidth, 
 		viewer.div.clientWidth / viewer.omgsong.sections.length);
    viewer.drawSong(viewer.omgsong);
@@ -69,7 +70,7 @@ viewer.loadPlayer = function (dataToPlay) {
 
 viewer.drawSong = function (song) {
 
-   var height = viewer.canvas.height;
+   var height = viewer.canvas.height;       
    var partHeight;
    var params;
 
@@ -80,6 +81,8 @@ viewer.drawSong = function (song) {
 
       partHeight = height / section.parts.length;
       var currentMargin = viewer.partMargin / section.parts.length; 
+      var offsetLeft = viewer.leftOffset + isection * (viewer.sectionWidth + viewer.sectionMargin);
+      viewer.context.fillText(omg.ui.getChordProgressionText(section), offsetLeft, height);
 
       section.parts.forEach(function (part, ipart) {
 
@@ -88,7 +91,7 @@ viewer.drawSong = function (song) {
          params.keepCanvasDirty = true; // so each part doesn't clear the rest
          params.data = part.data;
          params.offsetTop = ipart * partHeight + currentMargin;
-         params.offsetLeft = viewer.leftOffset + isection * (viewer.sectionWidth + viewer.sectionMargin);
+         params.offsetLeft = offsetLeft;
          params.height = partHeight - currentMargin * 2;
          params.width = viewer.sectionWidth;
          params.part = part;

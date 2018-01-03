@@ -331,10 +331,7 @@
    text-align:center;
    padding:20px;
    position:relative;
-   width:100px;
-   border:1px dotted #808080;
-   cursor:pointer;
-   background-color:#FFFF99;
+   width:100%;
 }
 
 

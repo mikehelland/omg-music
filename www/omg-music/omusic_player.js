@@ -1025,9 +1025,6 @@ OMusicPlayer.prototype.makeOMGSong = function (data) {
 
     newSong = new OMGSong();
     newSection = new OMGSection(null, null, newSong);
-    if (data.type == "PART") {
-        newPart = new OMGPart(null, data, newSection);
-    }
 
     //todo this could go away, we only have type = "PART" now
     //its for back compat with pre-launch data
@@ -1035,10 +1032,14 @@ OMusicPlayer.prototype.makeOMGSong = function (data) {
             || data.partType == "MELODY" || data.partType == "BASSLINE") {
         newPart = new OMGPart(null, data, newSection);
     }
-    if (data.type == "DRUMBEAT"
+    else if (data.type == "DRUMBEAT"
             || data.partType == "DRUMBEAT") {
         newPart = new OMGDrumpart(null, data, newSection);
     }
+    else if (data.type == "PART") {
+        newPart = new OMGPart(null, data, newSection);
+    }
+
     
     if (newPart) {
         if (newPart.data.beats) {
