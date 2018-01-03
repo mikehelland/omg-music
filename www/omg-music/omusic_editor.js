@@ -720,7 +720,7 @@ OMusicEditor.prototype.makeChordsDialog = function () {
     //todo song or section ascale
     var ascale = bam.section.data.ascale || bam.song.data.ascale;
     var chordDiv;
-    for (var i = 0; i < ascale.length; i++) {
+    for (var i = -2; i < ascale.length; i++) {
         chordDiv = document.createElement("span");
         chordDiv.className = "remixer-add-button";
         chordDiv.innerHTML = omg.ui.getChordText(i, ascale);
