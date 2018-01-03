@@ -470,6 +470,27 @@ omg.ui.splitInts = function (string) {
     return ints;
 };
 
+omg.ui.getChordText = function (chord, ascale) {
+    while (chord < 0) {
+        chord += ascale.length;
+    }
+    while (chord >=  ascale.length) {
+        chord -= ascale.length;
+    }
+    var chordInterval = ascale[chord];
+    if (chordInterval === 0) {
+        return "I";
+    }
+    else if (chordInterval === 2) return "II";
+    else if (chordInterval === 3 || chordInterval === 4) return "III";
+    else if (chordInterval === 5) return "IV";
+    else if (chordInterval === 6) return "Vb";
+    else if (chordInterval === 7) return "V";
+    else if (chordInterval === 8 || chordInterval === 9) return "VI";
+    else if (chordInterval === 10 || chordInterval === 11) return "VII";
+    return "?";
+}
+
 
 //omg.ui.setupNoteImages();
 

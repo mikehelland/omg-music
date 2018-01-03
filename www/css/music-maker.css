@@ -315,6 +315,27 @@
    background-color:#FFFF99;
 }
 
+.section-chords-view {
+   /*margin:5px;*/
+   text-align:center;
+   /*padding:12px;*/
+   padding-top:5px;
+   width:100px;
+   border:1px dotted #808080;
+   cursor:pointer;
+   background-color:#FFFF99;
+}
+
+.section-chords-dialog {
+   /*margin:5px;*/
+   text-align:center;
+   padding:20px;
+   position:relative;
+   width:100px;
+   border:1px dotted #808080;
+   cursor:pointer;
+   background-color:#FFFF99;
+}
 
 
 

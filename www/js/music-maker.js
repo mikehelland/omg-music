@@ -72,6 +72,11 @@ omgbam.onzonechange = function (zone, pop) {
                 queryString += queryString.length > 0 ? "&" : "?";
                 queryString += "part=" + (omgbam.part.data.id || 0);
             }
+            if (zone.data.type == "CHORDS") {
+                queryString += queryString.length > 0 ? "&" : "?";
+                queryString += "section=" + (omgbam.section.data.id || 0);
+                                    + "&chords=true";
+            }
 
             if (omgbam.initialized && window.location.search != queryString) {
                 console.log("update window history");

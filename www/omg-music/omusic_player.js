@@ -82,6 +82,7 @@ OMusicPlayer.prototype.play = function (song) {
 
     var lastSection;
     var nextSection;
+    var currentChordI = 0;
 
     var play = function () {
 
@@ -106,10 +107,25 @@ OMusicPlayer.prototype.play = function (song) {
         p.iSubBeat++;
         if (p.iSubBeat == beatsPerSection) {
 
-            lastSection = p.song.sections[p.song.playingSection];
-
             p.iSubBeat = 0;
             p.loopStarted = Date.now();
+
+            if (p.song.sections[p.song.playingSection].data.chordProgression) {
+                currentChordI++;
+                if (currentChordI < p.song.sections[p.song.playingSection].data.chordProgression.length) {
+                    p.rescaleSong(null, null,
+                                p.song.sections[p.song.playingSection].data.chordProgression[currentChordI]);
+                    return;
+                }
+                else {
+                    currentChordI = 0;
+                    p.rescaleSong(null, null,
+                                p.song.sections[p.song.playingSection].data.chordProgression[currentChordI]);
+                }
+            }
+
+            lastSection = p.song.sections[p.song.playingSection];
+
             if (p.loopSection == -1) {
                 p.song.playingSection++;
             }
@@ -255,7 +271,7 @@ OMusicPlayer.prototype.loadMelody = function (part) {
         data.ascale = p.splitInts(data.scale);
     }
 
-    p.rescale(part, rootNote, ascale);
+    p.rescale(part, rootNote, ascale, 0);
 
     if (typeof data.soundsetURL == "string") {
         p.getSoundSet(data.soundsetURL, function (soundset) {
@@ -660,7 +676,7 @@ OMusicPlayer.prototype.onSoundLoaded = function (success, part) {
     }
 };
 
-OMusicPlayer.prototype.rescale = function (part, rootNote, scale) {
+OMusicPlayer.prototype.rescale = function (part, rootNote, scale, chord) {
     var p = this;
 
     var data = part.data;
@@ -680,7 +696,7 @@ OMusicPlayer.prototype.rescale = function (part, rootNote, scale) {
         octaves2 = 0;
 
         onote = data.notes[i];
-        newNote = onote.note;
+        newNote = onote.note + chord;
         while (newNote >= scale.length) {
             newNote = newNote - scale.length;
             octaves2++;
@@ -1078,7 +1094,7 @@ OMusicPlayer.prototype.getTotalSubbeats = function () {
     return this.beats * this.subbeats * this.measures;
 };
 
-OMusicPlayer.prototype.rescaleSong = function (rootNote, ascale) {
+OMusicPlayer.prototype.rescaleSong = function (rootNote, ascale, chord) {
     var p = this;
     var song = this.song.data;
     if (rootNote != undefined) {
@@ -1090,7 +1106,8 @@ OMusicPlayer.prototype.rescaleSong = function (rootNote, ascale) {
     this.song.sections.forEach(function (section) {
         section.parts.forEach(function (part) {
             p.rescale(part, song.rootNote || 0,
-                    song.ascale || [0, 2, 4, 5, 7, 9, 11]);
+                    song.ascale || [0, 2, 4, 5, 7, 9, 11],
+                    chord || 0);
         });
     });
 }
