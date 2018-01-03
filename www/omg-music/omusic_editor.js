@@ -117,7 +117,7 @@ OMusicEditor.prototype.setup = function (options) {
                section.parts.forEach(function (part) {
                     if (part.controls) {
                         part.controls.selectInstrument.innerHTML = 
-                                bam.getSelectInstrumentOptions(part.data.partType);
+                                bam.getSelectInstrumentOptions(part.data);
                         part.controls.selectInstrument.value = part.data.soundsetURL;                       
                     }
                });
@@ -1435,7 +1435,8 @@ OMusicEditor.prototype.drawDrumCanvas = function (part, subbeat) {
 
 }
 
-OMusicEditor.prototype.getSelectInstrumentOptions = function (type) {
+OMusicEditor.prototype.getSelectInstrumentOptions = function (partData) {
+    var type = partData;
     var select = "";
     if (type == "BASSLINE") {
         select += "<option value='DEFAULT'>Saw Wave</option>";
@@ -1446,10 +1447,17 @@ OMusicEditor.prototype.getSelectInstrumentOptions = function (type) {
         select += "<option value='PRESET_ROCKKIT'>Rock Drum Kit</option>";
     }
 
+    var hasThisSoundSet = false;
     this.soundsets.forEach(function (soundset) {
         select += "<option value='" + soundset.url + "'>" +
                 soundset.name + "</option>";
+        if (soundset.url === partData.soundsetURL)
+            hasThisSoundSet = true;
     });
+    if (!hasThisSoundSet && partData.soundsetURL) {
+        select += "<option value='" + partData.soundsetURL + "'>" +
+                partData.soundsetName + "</option>";        
+    }
 
     return select;
 
