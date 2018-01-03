@@ -931,6 +931,7 @@ OMusicEditor.prototype.setupSongEditor = function () {
     bam.songEditor.addSectionButton.id = "add-section";
     bam.songEditor.addSectionButton.innerHTML = "+ Add Section";
     bam.songEditor.addSectionButton.style.top = "0px";
+    bam.songEditor.addSectionButton.style.opacity = 0;
     bam.songEditor.appendChild(bam.songEditor.addSectionButton);
     if (bam.songEditor.addSectionButton) {
         bam.songEditor.addSectionButton.onclick = bam.songEditor.addSectionButtonClick;
@@ -1130,9 +1131,9 @@ OMusicEditor.prototype.load = function (params) {
     bam.zones.push(songDiv);
 
     if (params.type == "SONG") {
-        bam.fadeIn([songDiv, bam.songEditor, bam.songEditor.addSectionButton], restoreColors);
+        //bam.fadeIn([songDiv, bam.songEditor, bam.songEditor.addSectionButton], restoreColors);
         params.songDiv = songDiv;
-        bam.loadSong(params);
+        bam.loadSong(params, restoreColors);
         return;
     }
 
@@ -1220,12 +1221,14 @@ OMusicEditor.prototype.load = function (params) {
     bam.refreshKeyTempoChordsButtons();
 };
 
-OMusicEditor.prototype.loadSong = function (params) {
+OMusicEditor.prototype.loadSong = function (params, callback) {
     var bam = this;
     if (params.dataToLoad) {
         bam.song = new OMGSong(params.songDiv, params.dataToLoad);
         var newSection;
-        var fadeInList = [];
+        //var fadeInList = [bam.songEditor.addSectionButton];
+        //var fadeInList = [];
+        var fadeInList = [params.songDiv, bam.songEditor, bam.songEditor.addSectionButton];
         bam.song.sections.forEach(function (section) {
             fadeInList.push(bam.makeSectionDiv(section));
             section.parts.forEach(function (part) {
@@ -1236,14 +1239,14 @@ OMusicEditor.prototype.loadSong = function (params) {
             });
         });
         bam.player.prepareSong(bam.song);
-        bam.fadeIn(fadeInList);
         bam.arrangeSections(function () {
             if (params.section) {
                 bam.editSectionOnLoad(params);
             } else {
                 bam.initialized = true;
             }
-        });
+        }, 1); //last parameter makes it super fast
+        bam.fadeIn(fadeInList);
     }
     bam.player.loopSection = -1;
 
@@ -1888,7 +1891,8 @@ OMusicEditor.prototype.arrangeSections = function (callback, animLength) {
 
     var windowHeight = bam.windowHeight || window.innerHeight;
 
-    var height = Math.min(300, windowHeight - top - 100);
+    //var height = Math.min(300, windowHeight - top - 50);
+    var height = windowHeight - top - 100;
 
     var sectionWidth = bam.songEditor.sectionWidth;
 
@@ -2188,16 +2192,21 @@ OMusicEditor.prototype.setTargetsSmallParts = function (targets, partNo, partCou
     //imma just do this
     w = sectionWidth || 100;
     h = h || 300;
+    
+    var marginY = h / partCount * 0.1;
 
     targets.targetX = 15;
     targets.targetW = w - 30 - 4; // margin and padding
     if (partNo === -1) {
-        targets.targetY = 10; // + partNo * (h - 15) / partCount;
+        //targets.targetY = 10; // + partNo * (h - 15) / partCount;
+        targets.targetY = marginY;
         targets.targetH = bam.chordsViewHeight - 8; //8px margin-top; //(h - 15) / partCount - 15;
     }
     else {
-        targets.targetY = 20 + bam.chordsViewHeight + partNo * (h - 20 - bam.chordsViewHeight) / partCount;
-        targets.targetH = (h - 20 - bam.chordsViewHeight) / partCount - 15;        
+        //targets.targetY = 20 + bam.chordsViewHeight + partNo * (h - 20 - bam.chordsViewHeight) / partCount;
+        //targets.targetH = (h - 20 - bam.chordsViewHeight) / partCount - 10;        
+        targets.targetY = marginY * 2 + bam.chordsViewHeight + partNo * (h - marginY * 2 - bam.chordsViewHeight) / partCount;
+        targets.targetH = (h - marginY * 2 - bam.chordsViewHeight) / partCount - marginY;        
     }
     return targets;
 }
@@ -2303,6 +2312,8 @@ OMusicEditor.prototype.setupSectionDiv = function (section) {
                     e.targetTouches[0].pageY]);
             };
 
+            var addOffsets = omg.ui.totalOffsets(addButton);
+            var removeOffsets = omg.ui.totalOffsets(removeButton);
 
             bam.song.div.onmove = function (xy) {
 
@@ -2319,17 +2330,17 @@ OMusicEditor.prototype.setupSectionDiv = function (section) {
                             + xy[1] - lastXY[1] + "px";
                     lastXY = xy;
 
+                    var sectionOffsets = omg.ui.totalOffsets(section.div);
+                    
                     var centerX = section.div.clientWidth / 2
-                            + section.div.offsetLeft;
+                            + sectionOffsets.left;
                     var centerY = section.div.clientHeight / 2
-                            + section.div.offsetTop;
+                            + sectionOffsets.top;
 
-                    var addOffsets = omg.ui.totalOffsets(addButton);
-                    var removeOffsets = omg.ui.totalOffsets(removeButton);
                     var slidLeft = bam.song.slidLeft;
-                    if (centerX > addOffsets.left + slidLeft
+                    if (centerX > addOffsets.left //+ slidLeft
                             && centerX < addOffsets.left
-                            + addButton.clientWidth + slidLeft
+                            + addButton.clientWidth //+ slidLeft
                             && centerY > addOffsets.top
                             && centerY < addOffsets.top
                             + addButton.clientHeight) {
@@ -2339,9 +2350,9 @@ OMusicEditor.prototype.setupSectionDiv = function (section) {
                         addButton.style.backgroundColor = section.div.style.backgroundColor;
                         overCopy = false;
                     }
-                    if (centerX > removeOffsets.left + slidLeft
+                    if (centerX > removeOffsets.left //+ slidLeft
                             && centerX < removeOffsets.left
-                            + removeButton.clientWidth + slidLeft
+                            + removeButton.clientWidth //+ slidLeft
                             && centerY > removeOffsets.top
                             && centerY < removeOffsets.top
                             + removeButton.clientHeight * 2) {
