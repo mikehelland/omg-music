@@ -5,7 +5,7 @@ viewer.canvas = document.createElement("canvas");
 viewer.div.appendChild(viewer.canvas);
 viewer.canvas.style.width = "100%";
 //viewer.canvas.style.height = viewer.div.clientHeight - 20 + "px";
-viewer.canvas.style.height = viewer.div.clientHeight -5 + "px";
+viewer.canvas.style.height = viewer.div.clientHeight - 5 + "px";
 viewer.canvas.width = viewer.canvas.clientWidth
 viewer.canvas.height = viewer.canvas.clientHeight
 
@@ -14,7 +14,7 @@ viewer.editButton = document.getElementById("edit-button");
 viewer.shareButton = document.getElementById("share-button");
 viewer.tipButton = document.getElementById("tip-button");
 viewer.shareButton.onclick = function () {
-   omg.shareWindow.show();
+    omg.shareWindow.show();
 };
 
 viewer.titleDiv = document.getElementById("viewer-title");
@@ -34,132 +34,143 @@ omg.ui.omgUrl = "omg-music/";
 omg.ui.setupNoteImages();
 
 viewer.loadPlayer = function (dataToPlay) {
-   viewer.player = new OMusicPlayer(); console.log(dataToPlay);
-   viewer.omgsong = viewer.player.makeOMGSong(dataToPlay);
-console.log(viewer.omgsong);
-   viewer.sectionWidth = Math.max(viewer.sectionWidth, 
-		viewer.div.clientWidth / viewer.omgsong.sections.length);
-   viewer.drawSong(viewer.omgsong);
+    viewer.player = new OMusicPlayer();
+    console.log(dataToPlay);
+    viewer.omgsong = viewer.player.makeOMGSong(dataToPlay);
+    console.log(viewer.omgsong);
+    viewer.sectionWidth = Math.max(viewer.sectionWidth,
+            viewer.div.clientWidth / viewer.omgsong.sections.length);
+    viewer.drawSong(viewer.omgsong);
 
-   viewer.player.play(viewer.omgsong);
-   viewer.playButton.innerHTML = "Stop";
+    viewer.player.play(viewer.omgsong);
+    viewer.playButton.innerHTML = "Stop";
 
-   viewer.titleDiv.innerHTML = dataToPlay.name || "(untitled)";
-   viewer.userDiv.innerHTML = dataToPlay.username || "(unknown)";
-   viewer.datetimeDiv.innerHTML = getTimeCaption(dataToPlay.created_at);
+    viewer.titleDiv.innerHTML = dataToPlay.name || "(untitled)";
+    viewer.userDiv.innerHTML = dataToPlay.username || "(unknown)";
+    viewer.datetimeDiv.innerHTML = getTimeCaption(dataToPlay.created_at);
 
 
-   //maybe
-   var beatsInSection = viewer.omgsong.data.beats * viewer.omgsong.data.subbeats * viewer.omgsong.data.measures;
-   viewer.totalBeatsInSong =  viewer.omgsong.sections.length * beatsInSection;
-   var pxPerBeat = viewer.canvas.width / viewer.totalBeatsInSong;
+    //maybe
+    var beatsInSection = viewer.omgsong.data.beats * viewer.omgsong.data.subbeats * viewer.omgsong.data.measures;
+    viewer.totalBeatsInSong = viewer.omgsong.sections.length * beatsInSection;
+    var pxPerBeat = viewer.canvas.width / viewer.totalBeatsInSong;
 
-   viewer.player.onBeatPlayedListeners.push(function(isubbeat, isection) {
-      viewer.beatMarker.style.width = pxPerBeat * (1 + isubbeat + isection * beatsInSection) + "px";
-   });
+    viewer.player.onBeatPlayedListeners.push(function (isubbeat, isection) {
+        viewer.beatMarker.style.width = pxPerBeat * (1 + isubbeat + isection * beatsInSection) + "px";
+    });
 
-   viewer.editButton.onclick = function () {
-      window.location = "music-maker.htm?" + 
-			dataToPlay.type.toLowerCase() + "=" + dataToPlay.id;
-   };
-   
-   viewer.tipButton.onclick = function () {
-      window.location = "bitcoin:1Jdam2fBZxfhWLB8yP69Zbw6fLzRpweRjc?amount=0.004";
-   };
+    viewer.editButton.onclick = function () {
+        window.location = "music-maker.htm?" +
+                dataToPlay.type.toLowerCase() + "=" + dataToPlay.id;
+    };
+
+    viewer.tipButton.onclick = function () {
+        window.location = "bitcoin:1Jdam2fBZxfhWLB8yP69Zbw6fLzRpweRjc?amount=0.004";
+    };
 };
 
 viewer.drawSong = function (song) {
 
-   var height = viewer.canvas.height;       
-   var partHeight;
-   var params;
+    var height = viewer.canvas.height;
+    var partHeight;
+    var params;
 
-   viewer.canvas.style.width = viewer.sectionMargin + song.sections.length * (viewer.sectionWidth + viewer.sectionMargin) + "px";
-   viewer.canvas.width = viewer.canvas.clientWidth;
+    viewer.canvas.style.width = viewer.sectionMargin + song.sections.length * (viewer.sectionWidth + viewer.sectionMargin) + "px";
+    viewer.canvas.width = viewer.canvas.clientWidth;
 
-   song.sections.forEach(function (section, isection) {
+    song.sections.forEach(function (section, isection) {
 
-      partHeight = height / section.parts.length;
-      var currentMargin = viewer.partMargin / section.parts.length; 
-      var offsetLeft = viewer.leftOffset + isection * (viewer.sectionWidth + viewer.sectionMargin);
-      viewer.context.fillText(omg.ui.getChordProgressionText(section), offsetLeft, height);
+        var partCount = 0;
+        section.parts.forEach(function (part) {
+           if (!part.data.mute) {
+               partCount++;
+           } 
+        });
 
-      section.parts.forEach(function (part, ipart) {
+        partHeight = height / partCount;
+        var currentMargin = viewer.partMargin / partCount;
+        var offsetLeft = viewer.leftOffset + isection * (viewer.sectionWidth + viewer.sectionMargin);
+        viewer.context.fillText(omg.ui.getChordProgressionText(section), offsetLeft, height);
 
-         params = {};
-         params.canvas = viewer.canvas;
-         params.keepCanvasDirty = true; // so each part doesn't clear the rest
-         params.data = part.data;
-         params.offsetTop = ipart * partHeight + currentMargin;
-         params.offsetLeft = offsetLeft;
-         params.height = partHeight - currentMargin * 2;
-         params.width = viewer.sectionWidth;
-         params.part = part;
+        var partI = 0;
+        section.parts.forEach(function (part, ipart) {
+            if (part.data.mute)
+                return;
 
-		 if (part.data.type == "CHORDPROGERSSION") {
-			//TODO draw chord progression and all that 
-		 }
-         else if (part.data.surfaceURL == "PRESET_SEQUENCER") {
-            params.captionWidth = 0;
-            omg.ui.drawDrumCanvas(params)
-            //omg.ui.draw(params);
-         } else if (part.data.surfaceURL) {
-            omg.ui.drawMelodyCanvas(params);
-         }
+            params = {};
+            params.canvas = viewer.canvas;
+            params.keepCanvasDirty = true; // so each part doesn't clear the rest
+            params.data = part.data;
+            params.offsetTop = partI * partHeight + currentMargin;
+            params.offsetLeft = offsetLeft;
+            params.height = partHeight - currentMargin * 2;
+            params.width = viewer.sectionWidth;
+            params.part = part;
 
-         viewer.drawPartBorder(params);
-      });
-   });
+            if (part.data.type == "CHORDPROGERSSION") {
+                //TODO draw chord progression and all that 
+            } else if (part.data.surfaceURL == "PRESET_SEQUENCER") {
+                params.captionWidth = 0;
+                omg.ui.drawDrumCanvas(params)
+                //omg.ui.draw(params);
+            } else if (part.data.surfaceURL) {
+                omg.ui.drawMelodyCanvas(params);
+            }
+
+            viewer.drawPartBorder(params);
+            partI++;
+        });
+    });
 };
 
 
 viewer.drawPartBorder = function (params) {
-   viewer.context.strokeStyle = "#808080";
-   viewer.context.strokeRect(params.offsetLeft, params.offsetTop, params.width, params.height);   
+    viewer.context.strokeStyle = "#808080";
+    viewer.context.strokeRect(params.offsetLeft, params.offsetTop, params.width, params.height);
 };
 
 viewer.queryStringParameters = (function () {
-   var loadParams = {};
-   var params = document.location.search;
-   var nvp;
+    var loadParams = {};
+    var params = document.location.search;
+    var nvp;
 
-   if (params.length > 1) {
-      params = params.slice(1).split("&");
-      for (var ip = 0; ip < params.length; ip++) {
-         nvp = params[ip].split("=");
-         loadParams[nvp[0]] = nvp[1];
-      }
-   }
-   return loadParams;
+    if (params.length > 1) {
+        params = params.slice(1).split("&");
+        for (var ip = 0; ip < params.length; ip++) {
+            nvp = params[ip].split("=");
+            loadParams[nvp[0]] = nvp[1];
+        }
+    }
+    return loadParams;
 })();
 
 viewer.getDataById = function (id, callback, errorCallback) {
-   var xhr = new XMLHttpRequest();
-   xhr.open("GET", "/data/" + id, true);
-   xhr.onreadystatechange = function() {
-      if (xhr.readyState == 4) {
-         var ojson = JSON.parse(xhr.responseText);
-         callback(ojson);
-      }
-   };
-   xhr.send();
+    var xhr = new XMLHttpRequest();
+    xhr.open("GET", "/data/" + id, true);
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState == 4) {
+            var ojson = JSON.parse(xhr.responseText);
+            callback(ojson);
+        }
+    };
+    xhr.send();
 };
 
 viewer.playButton.onclick = function () {
-   if (viewer.player.playing) {
-      viewer.player.stop();
-      viewer.beatMarker.style.width = "0px";
-      viewer.playButton.innerHTML = "Play";
-   } else {
-      viewer.player.play();
-      viewer.playButton.innerHTML = "Stop";
-   }
+    if (viewer.player.playing) {
+        viewer.player.stop();
+        viewer.beatMarker.style.width = "0px";
+        viewer.playButton.innerHTML = "Play";
+    } else {
+        viewer.player.play();
+        viewer.playButton.innerHTML = "Stop";
+    }
 };
 
 viewer.getDataById(viewer.queryStringParameters.id, function (dataToPlay) {
-   viewer.loadPlayer(dataToPlay);
+    viewer.loadPlayer(dataToPlay);
 }, function () {
-   //error
+    //error
 });
 
 
@@ -170,25 +181,30 @@ function getTimeCaption(timeMS) {
     }
 
     var seconds = Math.round((Date.now() - timeMS) / 1000);
-    if (seconds < 60) return seconds + " sec ago";
+    if (seconds < 60)
+        return seconds + " sec ago";
 
     var minutes = Math.floor(seconds / 60);
-    if (minutes < 60) return minutes + " min ago";    
-   
+    if (minutes < 60)
+        return minutes + " min ago";
+
     var hours = Math.floor(minutes / 60);
-    if (hours < 24) return hours + " hr ago";    
+    if (hours < 24)
+        return hours + " hr ago";
 
     var days = Math.floor(hours / 24);
-    if (days < 7) return days + " days ago";
+    if (days < 7)
+        return days + " days ago";
 
-    var date  = new Date(timeMS);
+    var date = new Date(timeMS);
     var months = ["Jan", "Feb", "Mar", "Apr", "May",
-                "Jun", "Jul", "Aug", "Sep", "Oct", 
-                "Nov", "Dec"];
+        "Jun", "Jul", "Aug", "Sep", "Oct",
+        "Nov", "Dec"];
     var monthday = months[date.getMonth()] + " " + date.getDate();
     if (days < 365) {
-	    return monthday;
+        return monthday;
     }
     return monthday + " " + date.getYear();
-};
+}
+;
 

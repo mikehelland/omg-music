@@ -9,8 +9,8 @@ var filterType = document.getElementById("filter-type");
 var type = parameters.type || "";
 filterType.onchange = function () {
 	//todo set the location?
-	type = filterType.value;
-	search();
+	parameters.type = filterType.value;
+	search(parameters);
 }
 
 var loadSearchResults = function (results) {

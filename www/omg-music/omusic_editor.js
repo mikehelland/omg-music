@@ -2913,7 +2913,7 @@ OMusicEditor.prototype.getSoundSets = function (type, callback) {
 
 OMusicEditor.prototype.setupSelectInstrument = function (part) {
     var bam = this;
-    part.controls.selectInstrument.innerHTML = bam.getSelectInstrumentOptions(part.data.partType);
+    part.controls.selectInstrument.innerHTML = bam.getSelectInstrumentOptions(part.data);
     part.controls.selectInstrument.onchange = function () {
         var soundsetURL = part.controls.selectInstrument.value;
 

@@ -106,16 +106,24 @@ function omg_embedded_viewer_loadData(div, data) {
 
 	   song.sections.forEach(function (section, isection) {
 
-		  partHeight = height / section.parts.length;
-		  var currentMargin = viewer.partMargin / section.parts.length; 
+                  var partCount = 0;
+                  section.parts.forEach(function (part, ipart) {
+                      if (!part.data.mute)
+                          partCount++;
+                  });
+		  partHeight = height / partCount;
+		  var currentMargin = viewer.partMargin / partCount; 
 
+                  var partI = 0;
 		  section.parts.forEach(function (part, ipart) {
+                        if (part.data.mute)
+                            return;
 
 			 params = {};
 			 params.canvas = viewer.canvas;
 			 params.keepCanvasDirty = true; // so each part doesn't clear the rest
 			 params.data = part.data;
-			 params.offsetTop = ipart * partHeight + currentMargin;
+			 params.offsetTop = partI * partHeight + currentMargin;
 			 params.offsetLeft = viewer.leftOffset + isection * (viewer.sectionWidth + viewer.sectionMargin);
 			 params.height = partHeight - currentMargin * 2;
 			 params.width = viewer.sectionWidth;
@@ -131,6 +139,7 @@ function omg_embedded_viewer_loadData(div, data) {
 			 }
 
 			 viewer.drawPartBorder(params);
+                         partI++;
 		  });
 	   });
 	};
