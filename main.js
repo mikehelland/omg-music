@@ -193,12 +193,12 @@ app.delete('/data/:id', function (req, res) {
 
 console.log("Connecting to database...");
 var massiveInstance = massive.connectSync({connectionString: 
-       "postgres://omusic_db:Ursa5830@localhost/omusic_db"});
+       "postgres://omusic_db:" + process.env.OMG_DB_PW + "@localhost/omusic_db"});
 app.set('db', massiveInstance);
 console.log("ok.");
 
 
 
-http.listen(80, function () {
-    console.log('port 80 yo');
+http.listen(process.env.OMG_PORT, function () {
+    console.log(`port ${process.env.OMG_PORT} yo`);
 });
