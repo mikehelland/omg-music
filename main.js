@@ -207,11 +207,11 @@ http.listen(process.env.OMG_PORT, function () {
 
 try {
     var options = {
-       key: fs.readFileSync('/etc/letsencrypt/live/openmusic.gallery/privkey.pem'),
-        cert: fs.readFileSync('/etc/letsencrypt/live/openmusic.gallery/fullchain.pem')
+        key: fs.readFileSync('privkey.pem'),
+        cert: fs.readFileSync('fullchain.pem')
     };
     https.createServer(options, app).listen(8081, function () {
-        console.log("https port 88081");
+        console.log("https port 8081");
     });
 }
 catch (excp) {
