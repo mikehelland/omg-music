@@ -134,14 +134,21 @@ app.get('/data/', function (req, res) {
         options.offset = (parseInt(req.query.page) - 1) * perPage;
     }
 
-    db.things.findDoc(find, options, function (err, docs) {
+    var callback = function (err, docs) {
         if (err) {
             res.send(err);
         }
         else {
             res.send(docs);
         }
-    });
+    };
+    if (req.query.q) {
+        find = {keys:["tags", "name"], term: req.query.q};
+        db.things.searchDoc(find, options, callback);
+    }
+    else {
+        db.things.findDoc(find, options, callback);        
+    }
 });
 app.get('/data/:id', function (req, res) {
     var db = app.get('db');
@@ -195,7 +202,7 @@ app.delete('/data/:id', function (req, res) {
 try {
     console.log("Connecting to database...");
     var massiveInstance = massive.connectSync({connectionString: 
-           "postgres://omusic_db:" + process.env.OMG_DB_PW + "@localhost/omusic_db"});
+           `postgres://omusic_db:${process.env.OMG_DB_PW}@localhost/omusic_db`});
     app.set('db', massiveInstance);
     console.log("ok.");    
 }
@@ -226,5 +233,6 @@ try {
     });
 }
 catch (excp) {
+    console.log(excp);
     console.log("did not create https server");
 }

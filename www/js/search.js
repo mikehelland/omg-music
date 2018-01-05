@@ -51,7 +51,7 @@ var loadSearchResults = function (results) {
 
       resultData = document.createElement("div");
       resultData.className = "search-thing-title";
-      resultData.innerHTML = result.name || result.tags || "";
+      resultData.innerHTML = result.tags || result.name || "";
       resultDiv.appendChild(resultData);
 
       resultData = document.createElement("div");
