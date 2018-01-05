@@ -17,39 +17,33 @@ That means that with a few taps of your finger, you can remix the music in OpenM
 
 ----
 
-## Setup
+## Installation
 
 This is a node.js web app. You can see in action at https://openmusic.gallery.
 
-CD to the directory with the project files and run:
+CD to the directory with the project files and edit `install.sh`. At the top it says:
 
-    npm install
+    ## IMPORANT! Set the password for the database in this environment variable
+    ## It is used by the app and by the ./create_database.sh
 
-## Database
+    export OMG_DB_PW=password_here
 
-### Requires OMG_DB_PW environment variable to access the database
+Change `password_here` to something better than that. Save the script and run it:
 
-* You can run **export OMG_DB_PW=password** to set it
+    ./install.sh
 
-### Requires Postgresql 9.4 or later)
+**IMPORTANT!:** This requires Postgresql 9.4 or later!
+`install.sh` will install Postgresql only if there isn't another version installed, so you should check to see if it's 9.4 or later, and if not run `./install_database.sh`.
 
-* You can install Postgres with the included script **./install_postgres.sh**
-
-### Needs omusic_db in Postgres
-
-* With the Postgres installed and the *OMG_DB_PW* env variable set run **./create_database.sh**
-
-### You're setup!
-
-Now just run:
+The last line of the `install.sh` runs the app by doing this:
 
     node main.js
 
-And browse to localhost:8080 (8080 is the default, you can also set environment variable *OMG_PORT*).
+Now browse to localhost:8080 and make music!
 
 ## Other
 
-
+* (8080 is the default, you can also set environment variable *OMG_PORT*) 
 * [OMG Basics](https://openmusic.gallery/omg_basics.htm)
 * [OMG Data Formats](https://openmusic.gallery/omg_formats.htm)
 * [What is Open Music?](https://openmusic.gallery/what_is_open_music.htm)
