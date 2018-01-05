@@ -2,11 +2,13 @@ var express = require('express');
 var app = express();
 var bodyParser = require('body-parser');
 var http = require('http').Server(app);
+var https = require('https');
 var io = require('socket.io')(http);
 var massive = require("massive");
 var cookieParser = require('cookie-parser');
 var passport = require("passport");
 var cors = require("cors");
+var fs = require("fs");
 
 app.use(cors());
 
@@ -202,3 +204,16 @@ console.log("ok.");
 http.listen(process.env.OMG_PORT, function () {
     console.log(`port ${process.env.OMG_PORT} yo`);
 });
+
+try {
+    var options = {
+       key: fs.readFileSync('/etc/letsencrypt/live/openmusic.gallery/privkey.pem'),
+        cert: fs.readFileSync('/etc/letsencrypt/live/openmusic.gallery/fullchain.pem')
+    };
+    https.createServer(options, app).listen(8081, function () {
+        console.log("https port 88081");
+    });
+}
+catch (excp) {
+    console.log("did not create https server");
+}
