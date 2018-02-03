@@ -10,6 +10,8 @@ var passport = require("passport");
 var cors = require("cors");
 var fs = require("fs");
 
+var viewer = require("./viewer.js");
+
 app.use(cors());
 
 app.use(bodyParser.json());
@@ -34,7 +36,6 @@ passport.deserializeUser(function(id, done) {
         done(err, user);
     });
 });
-app.use(express.static('www', {index: "index.htm"}));
 
 
 var LocalStrategy = require("passport-local").Strategy;
@@ -205,6 +206,19 @@ app.delete('/data/:id', function (req, res) {
         }
     }); 
 });
+
+app.get('/viewer.htm', function (req, res) {
+    var db = app.get('db');
+    db.things.findDoc({id: req.query.id}, function (err, docs) {
+        if (err) {
+           res.send(err);
+        } else {http://openmusic.gallery/viewer.htm
+           res.send(viewer(docs));
+        }
+    });
+});
+
+app.use(express.static('www', {index: "index.htm"}));
 
 try {
     console.log("Connecting to database...");

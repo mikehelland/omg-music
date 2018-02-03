@@ -6,7 +6,7 @@ is...
 * An audio workstation
 * A distribution platform
 
-all-in-one, based on **open music**.
+all-in-one, for **open music**.
 
 **Open music** is like open source software:
 

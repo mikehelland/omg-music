@@ -8,25 +8,6 @@ function setupUserControls(div, successCallback) {
 
    if (!div.omg) {
       div.omg = {};
-      div.omg.username = document.createElement("a");
-      div.omg.username.href = "user.htm";
-      div.appendChild(div.omg.username);
-
-      var el = document.createElement("div");
-      el.style.display = "none";
-      el.style.position = "relative";
-      //el.style.width = "2em";
-      div.appendChild(el);
-      div.omg.dropDownContainer = el;
-
-      var downEl = document.createElement("div");
-      downEl.style.display = "inline-block";
-      downEl.style.border = "4px solid black";
-      downEl.style.position = "relative";
-      downEl.style.borderLeftColor = "transparent";
-      downEl.style.borderRightColor = "transparent";
-      downEl.style.borderBottomColor = "transparent";
-      el.appendChild(downEl);
    }
 
    var onNotLoggedIn = function () {
@@ -45,6 +26,24 @@ function setupUserControls(div, successCallback) {
    };
 
    var onLoggedIn = function () {
+
+	  div.innerHTML = "<a href='user.htm'>" + div.omg.username + "</a>";
+
+      var el = document.createElement("div");
+      el.style.display = "none";
+      el.style.position = "relative";
+      //el.style.width = "2em";
+      div.appendChild(el);
+      div.omg.dropDownContainer = el;
+
+      var downEl = document.createElement("div");
+      downEl.style.display = "inline-block";
+      downEl.style.border = "4px solid black";
+      downEl.style.position = "relative";
+      downEl.style.borderLeftColor = "transparent";
+      downEl.style.borderRightColor = "transparent";
+      downEl.style.borderBottomColor = "transparent";
+      el.appendChild(downEl);
       div.omg.username.innerHTML = user.username;
       div.omg.dropDownContainer.style.display = "inline-block";
 
