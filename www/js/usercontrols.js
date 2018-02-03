@@ -27,7 +27,7 @@ function setupUserControls(div, successCallback) {
 
    var onLoggedIn = function () {
 
-	  div.innerHTML = "<a href='user.htm'>" + div.omg.username + "</a>";
+	  div.innerHTML = "<a href='user.htm'>" + user.username + "</a>";
 
       var el = document.createElement("div");
       el.style.display = "none";
@@ -44,7 +44,6 @@ function setupUserControls(div, successCallback) {
       downEl.style.borderRightColor = "transparent";
       downEl.style.borderBottomColor = "transparent";
       el.appendChild(downEl);
-      div.omg.username.innerHTML = user.username;
       div.omg.dropDownContainer.style.display = "inline-block";
 
       omg.user = user;
