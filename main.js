@@ -127,7 +127,14 @@ app.get('/data/', function (req, res) {
         find = {user_id: req.query.user_id};
     }
     if (req.query.type) {
-        find = {type: req.query.type};
+		if (req.query.type === "MELODY" || 
+				req.query.type === "BASSLINE" ||
+				req.query.type === "DRUMBEAT") {
+			find = {partType: req.query.type};
+		}
+		else {
+			find = {type: req.query.type};
+		}
     }
 
     if (req.query.page) {

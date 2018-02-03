@@ -9,14 +9,12 @@
     <meta property="og:description" content="Basic overview of making music with OpenMusic.Gallery"/>
     <meta property="og:title" content="OpenMusic.Gallery Basics"/>
     <title>OpenMusic.Gallery Basics</title>
-	<style>
-		.fake-song {border-spacing:10px; font-size:1.5em; 
-			background-color:#99FF99; border-radius:8px; padding:4px;}
-		.fake-section {background-color:#99AAFF; border-radius:8px;
-			display:table-cell; padding:4px; width:18%; margin:8px;}
-		.fake-part {background-color:#FFFF99; border-radius:8px; 
-			margin:4px; padding:4px; }
-	</style>
+    
+    <style>
+    #overview-visual .omg-song {padding: 8px;}
+    #overview-visual .omg-section {padding: 8px;}
+    #overview-visual .omg-part {padding: 8px;}
+    </style>
 </head>
 <body>
 
@@ -43,30 +41,31 @@
 	<em>Parts</em>.</p>
 
 
-<div class="fake-song">
+<div id="overview-visual" class="omg-song">
 	Song
-	<br>
-	<div class="fake-section">
+	<div class="omg-song-data">
+	<div class="omg-section">
 		Section 
-		<div class="fake-part">Part</div>
-		<div class="fake-part">Part</div>
+		<div class="omg-part">Part</div>
+		<div class="omg-part">Part</div>
 	</div>
-	<div class="fake-section">
+	<div class="omg-section">
 		Section
-		<div class="fake-part">Part</div>
-		<div class="fake-part">Part</div>
+		<div class="omg-part">Part</div>
+		<div class="omg-part">Part</div>
 	</div>
-	<div class="fake-section">
+	<div class="omg-section">
 		Section
-		<div class="fake-part">Part</div>
-		<div class="fake-part">Part</div>
-		<div class="fake-part">Part</div>
+		<div class="omg-part">Part</div>
+		<div class="omg-part">Part</div>
+		<div class="omg-part">Part</div>
 	</div>
-	<div class="fake-section">
+	<div class="omg-section">
 		Section
-		<div class="fake-part">Part</div>
-		<div class="fake-part">Part</div>
-		<div class="fake-part">Part</div>
+		<div class="omg-part">Part</div>
+		<div class="omg-part">Part</div>
+		<div class="omg-part">Part</div>
+	</div>
 	</div>
 </div>
 
@@ -85,7 +84,7 @@ Part: Drumbeat
    <script src="js/embedded_viewer.js"></script>
 
 <script>
-omg_embedded_viewer_loadId(document.getElementById("drum-example"), 316);
+omg_embedded_viewer_loadId({div: document.getElementById("drum-example"), id: 316});
 </script>
 
 <hr>
@@ -96,7 +95,7 @@ Part: Melody/Bassline
 <div id="melody-example" class="omgviewer"><div class="beat-marker"></div></div>
 
 <script>
-omg_embedded_viewer_loadId(document.getElementById("melody-example"), 317);
+omg_embedded_viewer_loadId({div: document.getElementById("melody-example"), id: 317});
 </script>
 
 <hr>
@@ -108,7 +107,7 @@ omg_embedded_viewer_loadId(document.getElementById("melody-example"), 317);
 <div id="section-example" class="omgviewer"><div class="beat-marker"></div></div>
 
 <script>
-omg_embedded_viewer_loadId(document.getElementById("section-example"), 284);
+omg_embedded_viewer_loadId({div: document.getElementById("section-example"), id: 284});
 </script>
 
 
@@ -121,7 +120,7 @@ omg_embedded_viewer_loadId(document.getElementById("section-example"), 284);
 <div id="song-example" class="omgviewer"><div class="beat-marker"></div></div>
 
 <script>
-omg_embedded_viewer_loadId(document.getElementById("song-example"), 318);
+omg_embedded_viewer_loadId({div: document.getElementById("song-example"), id: 318});
 </script>
 
 <hr>
@@ -140,6 +139,15 @@ omg_embedded_viewer_loadId(document.getElementById("song-example"), 318);
       </a>
       
    </div>
+
+	<hr>
+	<h3>See Also</h3>
+	<h2>- <a href="what_is_open_music.htm">What is open music?</a></h2>
+	<h2>- Check Out the OMG <a target="_blank" href="https://play.google.com/store/apps/details?id=com.mikehelland.omgtechnogauntlet">
+		  Mobile App: Techno GAUNTLET</a></h2>
+	
+	<hr>
+	<h3>Back to <a href="/">OpenMusic.Gallery</a> home</h3>
 
    <script src="js/usercontrols.js"></script>
    <script>

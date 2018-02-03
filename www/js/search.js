@@ -10,80 +10,59 @@ var type = parameters.type || "";
 filterType.onchange = function () {
 	//todo set the location?
 	parameters.type = filterType.value;
-        window.location = window.location.pathname + getQueryString(parameters);
+    //    window.location = window.location.pathname + getQueryString(parameters);
 
-	//search(parameters);
+	search(parameters);
 };
+
+function newSearch() {
+
+	var query = document.getElementById("query");
+	parameters.q = query.value;
+	search(parameters);
+	
+}
 
 parameters.page = parameters.page || 1;
 
 var previousButton = document.getElementById("search-previous-button");
 var nextButton = document.getElementById("search-next-button");
-previousButton.onclick = function () {
-    parameters.page--;
-    window.location = window.location.pathname + getQueryString(parameters);
-    //search(parameters);
-};
-nextButton.onclick = function () {
-    parameters.page++;
-    //window.history.pushState(null, "", window.location.pathname + getQueryString(parameters));
-    window.location = window.location.pathname + getQueryString(parameters);
-    //search(parameters);
-};
-
+if (previousButton) {
+	previousButton.onclick = function () {
+		parameters.page--;
+		//window.location = window.location.pathname + getQueryString(parameters);
+		search(parameters);
+	};
+}
+if (nextButton) {
+	nextButton.onclick = function () {
+		parameters.page++;
+		//window.history.pushState(null, "", window.location.pathname + getQueryString(parameters));
+		//window.location = window.location.pathname + getQueryString(parameters);
+		search(parameters);
+	};
+}
 var loadSearchResults = function (results) {
 	
-   resultList.innerHTML = "";
-   results.forEach(function (result) {
-      var resultDiv = document.createElement("div");
-      resultDiv.className = "search-thing";
-
-      var resultData = document.createElement("div");
-      resultData.className = "search-thing-image";
-      resultData.innerHTML = "&nbsp;"
-      resultData.style.backgroundColor = getBackgroundColor(result.type);
-      resultDiv.appendChild(resultData);
-
-      resultData = document.createElement("div");
-      resultData.className = "search-thing-type";
-      resultData.innerHTML = result.partType || result.type;
-      resultDiv.appendChild(resultData);
-
-      resultData = document.createElement("div");
-      resultData.className = "search-thing-title";
-      resultData.innerHTML = result.tags || result.name || "";
-      resultDiv.appendChild(resultData);
-
-      resultData = document.createElement("div");
-      resultData.className = "search-thing-user";
-      resultData.innerHTML = result.username ? "by " + result.username : "";
-      resultDiv.appendChild(resultData);
-
-      var rightData = document.createElement("div");
-      rightData.className = "search-thing-right-data";
-      resultDiv.appendChild(rightData);
-
-      resultData = document.createElement("div");
-      resultData.className = "search-thing-votes";
-      resultData.innerHTML = (result.votes || "0") + " votes";
-      rightData.appendChild(resultData);
-
-      resultData = document.createElement("div");
-      resultData.className = "search-thing-created-at";
-      //resultData.innerHTML = getTimeCaption(parseInt(result.created_at));
-      resultData.innerHTML = getTimeCaption(parseInt(result.last_modified));
-      rightData.appendChild(resultData);
-
-      resultDiv.onclick = function () {
-		 var page;
-		 if (result.type == "SOUNDSET")
-		    page = "soundset.htm";
-		 else
-		    page = "viewer.htm";
-		    
-         window.location = page + "?id=" + result.id;
-      };
-      resultList.appendChild(resultDiv);
+	resultList.innerHTML = "";
+	results.forEach(function (result) {
+		var resultDiv = document.createElement("div");
+		
+		resultDiv.className = "omgviewer";
+		resultDiv.innerHTML = '<div class="beat-marker"></div>';
+		resultList.appendChild(resultDiv);
+		omg_embedded_viewer_loadData({div: resultDiv, data: result,
+									height: 80});
+		
+		resultList.appendChild(document.createElement("br"));
+	   	   
+		resultDiv.onclick = function () {
+			var page;
+			if (result.type == "SOUNDSET") {
+				page = "soundset.htm";
+				window.location = page + "?id=" + result.id;
+			}
+		};
    });
 };
 
@@ -101,7 +80,7 @@ var search = function (params) {
 	xhr.onreadystatechange = function () {
 	   var results;
 	   if (xhr.readyState == 4) {
-		  console.log(xhr.responseText);
+		  //console.log(xhr.responseText);
 		  try {
 			 results = JSON.parse(xhr.responseText);
 		  }
@@ -115,7 +94,7 @@ var search = function (params) {
 	xhr.send();
 };
 
-search(parameters);
+//search(parameters);
 
 function getQueryParameters() {
 

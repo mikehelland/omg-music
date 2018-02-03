@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta property="og:image" content="http://openmusic.gallery/img/overview.png"/>
+    <meta property="og:description" content="Tools and Platform for making Open Music"/>
+    <meta property="og:title" content="OpenMusic.Gallery"/>
+    <title>OpenMusic.Gallery</title>
+   <link rel="stylesheet" type="text/css" href="css/main.css">
+</head>
+
+<body>
+
+<div class="main-title-bar">
+   <div class="main-title-bar-content">
+   <span class="main-title-open">Open</span><span class="main-title-media">Music</span><span class="main-title-gallery">.Gallery</span>
+
+      <div class="main-title-bar-right">
+         <div class="title-bar-user-controls"></div>
+      </div>
+
+   </div>
+</div>
+
+<div class="main-body">
+
+   <div class="main-description">
+      Find, create, and customize music for your project.
+   </div>
+
+   <div class="main-search-area">
+      <form action="search.htm">
+         <input class="main-search-input" name="q" placeholder="Enter Search terms here"></input>
+         <input class="main-search-submit" type="submit" value="OMG!"></input> <!--<button>OMG!</button>-->
+      </form>
+   </div>
+
+   <div class="main-separator">
+   </div>
+
+   <div class="main-invitation">
+      Making music is easier than you think! 
+   </div>   
+
+   <div class="main-create-area">
+	   
+      <a href="music-maker.htm" class="main-create-something">
+         Start with a Melody
+      </a>
+      <a href="music-maker.htm?type=drumbeat" class="main-create-something">
+         Start with a Beat
+      </a>
+      
+   </div>
+
+
+   <div class="main-separator">
+   </div>
+
+   <!--<div class="main-featured">
+      Featured Music:
+   </div>
+-->
+   <div class="main-learn-more">
+      You can also: 
+      <ul>
+		  <li><a href="https://play.google.com/store/apps/details?id=com.mikehelland.omgtechnogauntlet">
+			  Create with the Mobile App</a></li>
+		  <li><a href="soundset-editor.htm">Make your own Sound Sets for the sampler</a></li>
+      </ul>
+   </div>
+   <div class="main-learn-more">
+      Learn More: 
+      <ul>
+		  <li><a href="omg_basics.htm">OMG Basics</a></li>
+		  <li><a href="what_is_open_music.htm">What is open music?</a></li>
+		  <li><a href="omg_formats.htm">OMG Data Formats</a></li>
+      </ul>
+   </div>
+
+</div> <!--main-body-->
+
+<script src="js/usercontrols.js"></script>
+<script>
+setupUserControls(document.getElementsByClassName("title-bar-user-controls")[0]);
+</script>
+</body>
+
+</html>

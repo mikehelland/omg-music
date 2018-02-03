@@ -2,7 +2,12 @@
    position:relative;
 }
 
+.main-title-bar {
+	/*position:relative;*/
+}
+body {background:white;}
 .main-body {
+   padding-top:0px;
    width:100%;
    max-width:100%;
 /*   max-width:80%; /* or 800px? */
@@ -11,6 +16,7 @@
 }
 
 .omg-music-controls {
+   margin-top:44px;
    /*padding:1em;*/
    position:relative;
    padding:0.8em 10%;

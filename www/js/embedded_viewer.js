@@ -1,47 +1,80 @@
 "use strict";
-function omg_embedded_viewer_loadData(div, data) {
+function omg_embedded_viewer_loadData(params) {
+	var div = params.div;
+	var data = params.data;
 	var viewer = {};	
 	viewer.div = div;
 	div.style.position = "relative";
-	div.style.overflowX = "scroll";
+	//div.style.overflowX = "scroll";
 
+	var padding = 8;
+	   
 	viewer.playButton = document.createElement("div");
 	viewer.editButton = document.createElement("div");
 	viewer.shareButton = document.createElement("div");
 	viewer.tipButton = document.createElement("div");
+	viewer.voteButton = document.createElement("div");
 	viewer.titleDiv = document.createElement("div");
 	viewer.userDiv = document.createElement("div");
 	viewer.datetimeDiv = document.createElement("div");
 
-	viewer.playButton.innerHTML = "Play";
-	viewer.editButton.innerHTML = "Edit";
+	viewer.playButton.innerHTML = "&#9654";
+	viewer.editButton.innerHTML = "ReMix";
 	viewer.shareButton.innerHTML = "Share";
 	viewer.tipButton.innerHTML = "Tip";
+	viewer.voteButton.innerHTML = "&#x2B06";
+	viewer.voteButton.title = "Upvote";
 
-	viewer.playButton.className = "omg-music-controls-button";
-	viewer.editButton.className = "omg-music-controls-button";
+	viewer.playButton.className = "omg-music-controls-play-button";
+	viewer.editButton.className = "omg-music-controls-edit-button";
 	viewer.shareButton.className = "omg-music-controls-button";
 	viewer.tipButton.className = "omg-music-controls-button";
-	//viewer.titleDiv.className = "omg-music-controls-button";
-	//viewer.userDiv.className = "omg-music-controls-button";
-	//viewer.datetimeDiv.className = "omg-music-controls-button";
+	viewer.voteButton.className = "omg-music-controls-button";
 
 	viewer.div.appendChild(viewer.playButton);
 	if (data.id) viewer.div.appendChild(viewer.editButton);
 	//viewer.div.appendChild(viewer.shareButton);
-	viewer.div.appendChild(viewer.tipButton);
-	//viewer.div.appendChild(viewer.titleDiv);
-	//viewer.div.appendChild(viewer.userDiv);
-	//viewer.div.appendChild(viewer.datetimeDiv);
 
+	var result = data;
+	var resultDiv = viewer.div;
+	var resultCaption = result.tags || result.name || "";
+	var type = result.partType || result.type || "";
+	if (resultCaption.length === 0) {
+		resultCaption = "(" + type.substring(0, 1).toUpperCase() + 
+			type.substring(1).toLowerCase() + ")";
+	}
+	
+	var resultData = document.createElement("div");
+	resultData.className = "omg-thing-title";
+	resultData.innerHTML = resultCaption;
+	resultDiv.appendChild(resultData);
 
-	viewer.canvas = document.createElement("canvas");
-	viewer.canvas.style.height = "150px";
-	viewer.div.appendChild(viewer.canvas);
-	viewer.canvas.style.width = "100%";
-	viewer.canvas.style.height = viewer.div.clientHeight - 20 + "px";
-	viewer.canvas.width = viewer.canvas.clientWidth
-	viewer.canvas.height = viewer.canvas.clientHeight
+	resultData = document.createElement("div");
+	resultData.className = "omg-thing-user";
+	resultData.innerHTML = result.username ? "by " + result.username : "";
+	resultDiv.appendChild(resultData);
+
+	var rightData = document.createElement("div");
+	rightData.className = "omg-thing-right-data";
+	resultDiv.appendChild(rightData);
+
+	rightData.appendChild(viewer.tipButton);
+	//rightData.appendChild(viewer.voteButton);
+	
+	resultData = document.createElement("span");
+	resultData.className = "omg-thing-votes";
+	resultData.innerHTML = (result.votes || "0") + " votes";
+	//rightData.appendChild(resultData);
+
+	resultData = document.createElement("span");
+	resultData.className = "omg-thing-created-at";
+	//resultData.innerHTML = getTimeCaption(parseInt(result.created_at));
+	resultData.innerHTML = getTimeCaption(parseInt(result.last_modified));
+	rightData.appendChild(resultData);
+
+	var height = params.height || 150;
+
+	console.log("var height = " + height);
 
 	viewer.shareButton.onclick = function () {
 	   omg.shareWindow.show();
@@ -52,104 +85,144 @@ function omg_embedded_viewer_loadData(div, data) {
 	viewer.sectionWidth = 200;
 	viewer.leftOffset = viewer.sectionMargin;
 
-	viewer.context = viewer.canvas.getContext("2d");
-
 	viewer.beatMarker = viewer.div.getElementsByClassName("beat-marker")[0];
-	viewer.beatMarker.style.marginTop = viewer.canvas.offsetTop + "px";
-	viewer.beatMarker.style.height = viewer.canvas.height + "px";
+	viewer.beatMarker.style.marginTop = viewer.playButton.clientHeight + 8 + "px";
+	viewer.beatMarker.style.height = height + "px";
+	viewer.beatMarker.style.marginLeft = padding / 2 + "px";
+	
 
 	omg.ui.omgUrl = "omg-music/";
 	omg.ui.setupNoteImages();
+
+	viewer.loadSong = function (data) {
+		viewer.omgsong = viewer.player.makeOMGSong(data);
+		
+		var flexDiv = document.createElement("div");
+		flexDiv.className = "omg-song-data";
+		flexDiv.style.height  = height + "px";
+		viewer.div.appendChild(flexDiv);
+
+		viewer.omgsong.sections.forEach(function (section, isection) {
+			var sectionDiv = document.createElement("div");
+			sectionDiv.className = "omg-section-data";
+			flexDiv.appendChild(sectionDiv);
+			section.div = sectionDiv;
+			viewer.loadSection(sectionDiv, section);
+		});
+		viewer.drawSectionCanvases();
+	};
+	viewer.drawSectionCanvases = function () {
+		viewer.omgsong.sections.forEach(function (section, isection) {
+			viewer.drawPartsCanvases(section);
+		});
+	};
+	viewer.drawPartsCanvases = function (section) {
+		var height = section.parts[0].div.clientHeight;
+		var width = section.parts[0].div.clientWidth;
+		section.parts.forEach(function (part) {
+			viewer.drawPart(part, width, height);
+		});
+	};
+	viewer.loadSection = function (div, section) {
+		section.parts.forEach(function (part) {
+			viewer.loadPart(div, part);
+		});
+	};
+	viewer.loadPart = function (div, part) {
+			var partDiv = document.createElement("canvas");
+			partDiv.height = 1;
+			partDiv.width = 1;
+			partDiv.className = "omg-part";
+			part.div = partDiv;
+			
+			div.appendChild(partDiv);
+		
+	};
+	viewer.drawPart = function (part, width, height) {
+		var partDiv = part.div;
+		partDiv.height = partDiv.clientHeight
+		partDiv.width = partDiv.clientWidth - 16;
+		
+		params = {};
+		params.canvas = partDiv;
+		params.keepCanvasDirty = true; // so each part doesn't clear the rest
+		params.data = part.data;
+
+		if (part.data.surfaceURL == "PRESET_SEQUENCER") {
+			params.captionWidth = 0;
+			omg.ui.drawDrumCanvas(params)
+		} else if (part.data.surfaceURL) {
+			omg.ui.drawMelodyCanvas(params);
+		}
+	};
 
 	viewer.loadPlayer = function (dataToPlay) {
 	   viewer.player = new OMusicPlayer();
 	   viewer.omgsong = viewer.player.makeOMGSong(dataToPlay);
 
-	   viewer.sectionWidth = Math.max(viewer.sectionWidth, 
-			viewer.div.clientWidth / viewer.omgsong.sections.length);
-	   viewer.drawSong(viewer.omgsong);
+	   var soundSet = false;
+	   if (dataToPlay && dataToPlay.type) {
+		   if (dataToPlay.type === "SOUNDSET") {
+			   soundSet = true;
+			   viewer.div.className = "omg-soundset";
+			   //viewer.loadSoundSet(dataToPlay);
+		   }
+		   if (dataToPlay.type === "SONG") {
+			   viewer.div.className = "omg-song";
+			   viewer.loadSong(dataToPlay);
+		   }
+		   if (dataToPlay.type === "SECTION") {
+			   viewer.div.className = "omg-section";
+			   var section = viewer.omgsong.sections[0];
 
-	   //viewer.player.play(viewer.omgsong);
-	   //viewer.playButton.innerHTML = "Stop";
+			   var flexDiv = document.createElement("div");
+			   flexDiv.className = "omg-section-data";
+			   flexDiv.style.height  = height + "px";
+			   viewer.div.appendChild(flexDiv);
+
+			   viewer.loadSection(flexDiv, section);
+			   viewer.drawPartsCanvases(section);
+
+		   }
+		   if (dataToPlay.type === "PART" || 
+				dataToPlay.type === "MELODY" || dataToPlay.type === "BASSLINE" ||
+				dataToPlay.type === "DRUMBEAT") {
+			   viewer.div.className = "omg-part-data";
+			   var part = viewer.omgsong.sections[0].parts[0];
+			   viewer.loadPart(viewer.div, part);
+			   part.div.style.width = viewer.div.clientWidth - 16 + "px";
+			   part.div.style.height = height + "px";
+			   viewer.drawPart(part);
+		   }
+	   }
 
 	   viewer.titleDiv.innerHTML = dataToPlay.title || "(untitled)";
 	   viewer.userDiv.innerHTML = dataToPlay.username || "(unknown)";
 	   viewer.datetimeDiv.innerHTML = getTimeCaption(dataToPlay.created_at);
 
+		if (soundSet) {
+			
+		}
+		else {
+			var beatsInSection = viewer.omgsong.data.beats * viewer.omgsong.data.subbeats * viewer.omgsong.data.measures;
+			viewer.totalBeatsInSong =  viewer.omgsong.sections.length * beatsInSection;
+			var pxPerBeat = (viewer.div.clientWidth - padding) / viewer.totalBeatsInSong;
 
-	   //maybe
-           var beatsInSection = viewer.omgsong.data.beats * viewer.omgsong.data.subbeats * viewer.omgsong.data.measures;
-	   viewer.totalBeatsInSong =  viewer.omgsong.sections.length * beatsInSection;
-	   var pxPerBeat = viewer.canvas.width / viewer.totalBeatsInSong;
+			viewer.player.onBeatPlayedListeners.push(function(isubbeat, isection) {
+				viewer.beatMarker.style.width = pxPerBeat * (1 + isubbeat + isection * beatsInSection) + "px";
+			});
 
-	   viewer.player.onBeatPlayedListeners.push(function(isubbeat, isection) {
-		  viewer.beatMarker.style.width = pxPerBeat * (1 + isubbeat + isection * beatsInSection) + "px";
-	   });
+			viewer.editButton.onclick = function () {
+				window.location = "music-maker.htm?id=" + dataToPlay.id;
+			};
 
-	   viewer.editButton.onclick = function () {
-		  window.location = "music-maker.htm?id=" + dataToPlay.id;
-	   };
-	   
-	   viewer.tipButton.onclick = function () {
-		  window.location = "bitcoin:1Jdam2fBZxfhWLB8yP69Zbw6fLzRpweRjc?amount=0.004";
-	   };
+		}
+		viewer.tipButton.onclick = function () {
+			window.location = "bitcoin:1Jdam2fBZxfhWLB8yP69Zbw6fLzRpweRjc?amount=0.004";
+		};
 	};
 
-	viewer.drawSong = function (song) {
-
-	   var height = viewer.canvas.height;
-	   var partHeight;
-	   var params;
-
-	   viewer.canvas.style.width = viewer.sectionMargin + song.sections.length * (viewer.sectionWidth + viewer.sectionMargin) + "px";
-	   viewer.canvas.width = viewer.canvas.clientWidth;
-
-	   song.sections.forEach(function (section, isection) {
-
-                  var partCount = 0;
-                  section.parts.forEach(function (part, ipart) {
-                      if (!part.data.mute)
-                          partCount++;
-                  });
-		  partHeight = height / partCount;
-		  var currentMargin = viewer.partMargin / partCount; 
-
-                  var partI = 0;
-		  section.parts.forEach(function (part, ipart) {
-                        if (part.data.mute)
-                            return;
-
-			 params = {};
-			 params.canvas = viewer.canvas;
-			 params.keepCanvasDirty = true; // so each part doesn't clear the rest
-			 params.data = part.data;
-			 params.offsetTop = partI * partHeight + currentMargin;
-			 params.offsetLeft = viewer.leftOffset + isection * (viewer.sectionWidth + viewer.sectionMargin);
-			 params.height = partHeight - currentMargin * 2;
-			 params.width = viewer.sectionWidth;
-
-			 if (part.data.type == "CHORDPROGERSSION") {
-				//TODO draw chord progression and all that 
-			 }
-			 else if (part.data.surfaceURL == "PRESET_SEQUENCER") {
-				params.captionWidth = 0;
-				omg.ui.drawDrumCanvas(params)
-			 } else if (part.data.surfaceURL) {
-				omg.ui.drawMelodyCanvas(params);
-			 }
-
-			 viewer.drawPartBorder(params);
-                         partI++;
-		  });
-	   });
-	};
-
-
-	viewer.drawPartBorder = function (params) {
-	   viewer.context.strokeStyle = "#808080";
-	   viewer.context.strokeRect(params.offsetLeft, params.offsetTop, params.width, params.height);   
-	};
-
+	
 	viewer.queryStringParameters = (function () {
 	   var loadParams = {};
 	   var params = document.location.search;
@@ -181,25 +254,27 @@ function omg_embedded_viewer_loadData(div, data) {
 	   if (viewer.player.playing) {
 		  viewer.player.stop();
 		  viewer.beatMarker.style.width = "0px";
-		  viewer.playButton.innerHTML = "Play";
+		  viewer.playButton.innerHTML = "&#9654;";
 	   } else {
 		  viewer.player.play(viewer.omgsong);
-		  viewer.playButton.innerHTML = "Stop";
+		  viewer.playButton.innerHTML = "&#9642;";
 	   }
 	};
 	
 	viewer.loadPlayer(data);
 }
 
-function omg_embedded_viewer_loadURL(div, url) {
-	omg.server.getHTTP(url, function (result) {
+function omg_embedded_viewer_loadURL(params) {
+	omg.server.getHTTP(params.url, function (result) {
+		params.data = result;
 		omg_embedded_viewer_loadData(div, result);
 	});
 }
 
-function omg_embedded_viewer_loadId(div, id) {
-	omg.server.getId(id, function (result) {
-		omg_embedded_viewer_loadData(div, result);
+function omg_embedded_viewer_loadId(params) {
+	omg.server.getId(params.id, function (result) {
+		params.data = result;
+		omg_embedded_viewer_loadData(params);
 	});
 }
 
@@ -240,4 +315,3 @@ function getTimeCaption(timeMS) {
     }
     return monthday + " " + date.getYear();
 };
-

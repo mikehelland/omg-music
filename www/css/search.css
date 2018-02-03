@@ -22,21 +22,5 @@
    display:inline-block;
 }
 
-.search-thing-user {
-   font-size:0.8em;
-   text-decoration:italic;
-}
-
-.search-thing-right-data {
-   position:absolute;
-   right:12px; /*12 not 16 because of margin*/
-   top:12px;
-}
-
-.search-thing-created-at {
-   width:80px;
-   font-size:0.8em;
-   text-align:right;
-}
-
+#search-next-button {float: right; text-align:right;}
 

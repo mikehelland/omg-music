@@ -1,16 +1,21 @@
 body {
    margin:0px;
+   /*background:#D9DBDE;*/
 }
 
 .main-title-bar {
    font-size: 1.25em;
    background-image: linear-gradient(#888888, #333);
+   top:0px;
+   width:100%;
+   position:fixed;
+   z-index:1;
 }
 
 .main-title-bar-right {
-   position:absolute;
+   /*position:absolute;
    top:10px;
-   right:10px;
+   right:10px;*/
    font-size: 0.8em;
    color:white;
 }
@@ -20,6 +25,8 @@ body {
    margin:auto;
    padding:10px;   
    position:relative;
+   display:flex;
+   justify-content: space-between;
 }
 
 .main-page-link {
@@ -39,6 +46,7 @@ body {
 .title-bar-user-controls {
    border:0px solid #888888;
    padding:3px;
+   width:136px;
 }
 
 .title-bar-user-controls a {
@@ -47,44 +55,50 @@ body {
 }
 
 .main-body {
-   max-width:85%;
+   max-width:90%;
    margin:auto;
    position:relative;
+   padding-top:44px;
 }
 
 .main-description {
-   font-size: 1.5em;
-   padding:18px;
+   font-size: 0.7em;
+   padding-top:0.3em;
    text-align:center;   
+   color:#F8F8F8;
+   font-style:italic; 
 }
 
 .main-search-area {
-   padding:10px;
+   padding:12px;
    width:90%;
    margin:auto;
    margin-top:10px;
 }
 
 .main-search-input {
-   font-size:16pt;
-   width:62%;
+   font-size:12pt;
+   width:90px;
    margin:0%;
    padding:0%;
 }
-
+form {
+	padding:0px;
+	margin:0px;
+	text-align:center;
+	display:inline-block;
+}
 .main-search-area {
 	text-align:center;
 }
 .main-search-submit {
-  font-size:16pt;
-  width:32%;
+  font-size:12pt;
   margin:0%;
   padding:0%;
 }
 
 .main-learn-more {
    font-size:1em;
-   text-align:center;
 }
 
 .toc {
@@ -97,7 +111,7 @@ body {
 }
 
 .main-invitation {
-   font-size: 1.4em;
+   font-size: 1em;
    padding:8px;
    text-align:center;   
    color:#505050;
@@ -106,7 +120,7 @@ body {
 
 .main-separator {
    text-align:center;
-   margin:30px auto;
+   margin:10px auto;
    height:1px;
    width:70%;
    background-color:#CCCCCC;
@@ -187,3 +201,162 @@ body {
    border:1px solid #808080;
 }
 
+
+
+.left-column {
+	/*float:left;*/
+	width:16%;
+	background:#F8F8F8;
+	margin-top:0px;
+	font-family: Helvetica, Arial, sans-serif;
+	font-size: 12px;
+	margin-top:39px;
+	padding:1%;
+	position:fixed;
+}
+
+.main-column {
+	/*float:left;*/
+	width:78%;
+	margin-left:21%;
+}
+
+.left-column ul {
+	list-style-type:none;
+	padding:5px;
+	margin:0px;
+	font-size:11pt;
+}
+.nav {
+	margin:0px;
+	padding:4px;
+}
+
+
+.nav:hover {
+	background:#FCFCFC;
+	border:1px solid #888888;
+	border-radius:3px;
+	padding:3px;
+}
+
+.nav-selected {
+	margin:0px;
+	background:#FCFCFC;
+	border:1px solid #888888;
+	border-radius:3px;
+	padding:3px;
+}
+
+.site-tools img, .left-column img {
+	height:20px;
+	width:20px;
+	vertical-align:middle;
+	margin-right:5px;
+}
+
+.site-tools a, .left-column a {
+	text-decoration:none;
+	color:black;
+}
+
+.site-tools .tools-seperator {
+	padding:0 1em;
+	color:#888888;
+}
+
+h3 {
+	text-align:center;
+	/*margin:0.4em;*/
+}
+
+.omg-soundset {border-spacing:10px; 
+	background-color:#FF9999; 
+}
+
+.omg-song {border-spacing:10px; 
+	background-color:#99FF99; 
+}
+.omg-soundset, .omg-part-data,.omg-section, .omg-song {
+	font-size:1em; 
+	border-radius:8px; padding:4px;
+	border:1px solid #808080;
+	opacity:0.6;
+	transition: opacity 0.3s ease-in-out;	
+}
+
+.omg-soundset:hover, .omg-part-data:hover,.omg-section:hover, .omg-song:hover {
+	opacity:1;
+}
+
+.omg-section-data, .omg-section {background-color:#99AAFF; border-radius:8px;
+	font-size:1em; 
+	padding:3px; margin:3px;}
+
+.omg-section {border:1px solid #808080;
+	opacity:0.6;
+}
+
+.omg-part-data, .omg-part {background-color:#FFFF99; border-radius:8px; 
+	margin:2px; 
+	flex-grow:1;	
+	font-size:1em; 
+	}
+	
+.omg-part-data {
+}
+
+.omg-song-data {
+	display:flex; 
+	flex-direction:row;
+	flex-wrap: nowrap;
+
+}
+
+.omg-section-data {
+	display:flex; 
+	flex: 1 1 0;
+	flex-direction:column; 
+	align-content:stretch;
+}
+
+.select-area-bar {
+	font-family: "Interstate","Lucida Grande","Lucida Sans Unicode","Lucida Sans",Garuda,Verdana,Tahoma,sans-serif;
+	font-size: 24px;
+	line-height: 1.6;
+	display:flex;
+	justify-content:center;
+	border-bottom:2px solid #f2f2f2;
+	margin:20px;
+}
+
+ .select-area-button {
+	margin-left:10px;
+	margin-right:10px;
+	border-bottom:2px solid transparent;
+	text-decoration:none;
+	color:black;
+ }
+
+ .select-area-button:hover {
+	border-bottom:2px solid black;
+	cursor:pointer;
+ }
+
+ .current-select-area-button {
+	margin-left:10px;
+	margin-right:10px;
+	border-bottom:2px solid black;
+	cursor:default;
+	text-decoration:none;
+	color:black;
+}
+
+
+.frontpage-area {
+	display:none;
+}
+
+#featured-area {
+	display:block;
+}

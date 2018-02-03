@@ -31,15 +31,16 @@ function setupUserControls(div, successCallback) {
 
    var onNotLoggedIn = function () {
       if (!div.omg.notLoggedIn) {
-         div.omg.notLoggedIn = document.createElement("span");
-         div.omg.notLoggedIn.className = "omg-user-controls-not-logged-in";
+         //div.omg.notLoggedIn = document.createElement("span");
+         //div.omg.notLoggedIn.className = "omg-user-controls-not-logged-in";
          var httpsURL = "";
          if (window.location.protocol !== "https:") {
              httpsURL = "https://" + window.location.host + "/";
          }
-         div.omg.notLoggedIn.innerHTML = "<a href='" + httpsURL + 
-                 "login.htm'>Log In</a> | <a href='" + httpsURL + "signup.htm'>Sign up.</a>";
-         div.appendChild(div.omg.notLoggedIn);
+         //div.omg.notLoggedIn.innerHTML = "<a href='" + httpsURL + 
+         div.innerHTML = "<a href='" + httpsURL + 
+                 "login.htm'>Log in</a> | <a href='" + httpsURL + "signup.htm'>Sign up</a>";
+         //div.appendChild(div.omg.notLoggedIn);
       }
    };
 

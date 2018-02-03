@@ -1,15 +1,16 @@
 #omgviewer {
    width:100%;
-   height:320px;
+   height:66%;
    position:relative;
    border:1px solid #808080;
-   overflow-x:scroll;
 }
 
 #viewer-title {
    display:inline-block;
    font-size:1.5em;
    margin:0.8em;
+   
+
 }
 
 #viewer-user {
@@ -23,20 +24,56 @@
 
 .omg-music-controls-right {
    right:0;
-   top:0.8em;
+   top:0;
+   /*top:0.8em;*/
    position:absolute;
 }
-.omg-music-controls-button {
+.omg-music-controls-edit-button, .omg-music-controls-button {
+   
    cursor:pointer;
    display:inline-block;
-   padding:0.8em;
-   border:1px solid #808080;   
-   border:1px solid black;
-   border-radius:2px;
+   padding:0.4em;
    font-family: Helvetica;
-   background-image: linear-gradient(#EEEEEE, #BBBBBB);
+   font-size: 0.8em;
+   border:1px solid transparent;
+   text-decoration:underline;
+   margin:0 5px;
+
+}
+.omg-music-controls-edit-button:hover, .omg-music-controls-button:hover {
+   border:1px solid #808080;
+   border-radius:100%;
+   	
 }
 
+.omg-music-controls-play-button {  
+    text-align:center;
+	position:relative;
+	display:inline-block;
+	height:38px;
+	width:38px;
+	border:2px solid #888888;
+	border-radius:100%;
+	font-size:1.7em;
+	font-style:bold;
+	cursor:pointer;
+}
+
+.omg-music-controls-play-button:hover {
+	border:2px solid black;
+}
+
+.omg-music-controls-edit-button:active, .omg-music-controls-button:active {
+	border:1px solid white;
+	color:white;
+	background:black;
+}
+
+.omg-music-controls-play-button:active {
+	border:2px solid white;
+	color:white;
+	background:black;
+}
 
 .omg-music-controls-button-blink {
    cursor:pointer;
@@ -61,4 +98,54 @@
 #play-button {
    min-width:40px;
    text-align:center;
+}
+
+.omg-thing-title {
+   display:inline-block;
+   margin:0 5px;
+   top:-6px;
+   position:relative;
+}
+
+.omg-thing-votes {
+   margin:0 5px;
+}
+
+.omg-thing-user {
+   display:inline-block;
+   font-size:0.8em;
+   font-style:italic;
+   margin:0 5px;
+   top:-6px;
+   position:relative;
+}
+
+.omg-thing-right-data {
+   position:absolute;
+   right:8px; 
+   top:6px;
+}
+
+.omg-thing-created-at {
+   margin-left:10px;
+   position:relative;
+   width:90px;
+   font-size:0.8em;
+   font-family: Helvetica;
+   text-align:right;
+   font-style:italic;
+}
+
+.omg-music-controls-edit-button {
+   top:-6px;
+   position:relative;
+   
+}
+
+
+.site-tools {
+	background:#F8F8F8;
+	font-family: Helvetica, Arial, sans-serif;
+	font-size: 12px;
+	padding:1%;
 }

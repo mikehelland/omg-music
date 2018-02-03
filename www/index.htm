@@ -7,16 +7,24 @@
     <meta property="og:title" content="OpenMusic.Gallery"/>
     <title>OpenMusic.Gallery</title>
    <link rel="stylesheet" type="text/css" href="css/main.css">
+   <link rel="stylesheet" type="text/css" href="css/search.css">
+   <link rel="stylesheet" href="css/viewer.css" type="text/css" />
 </head>
 
 <body>
 
 <div class="main-title-bar">
    <div class="main-title-bar-content">
-   <span class="main-title-open">Open</span><span class="main-title-media">Music</span><span class="main-title-gallery">.Gallery</span>
+	   <div>
+	   <span class="main-title-open">Open</span><span class="main-title-media">Music</span><span class="main-title-gallery">.Gallery</span>
+	   </div>
+
+	   <div class="main-description">
+		  Find, create, and customize music for your project.
+	   </div>
 
       <div class="main-title-bar-right">
-         <div class="title-bar-user-controls"></div>
+         <div class="title-bar-user-controls">Log in | Sign up</div>
       </div>
 
    </div>
@@ -24,65 +32,147 @@
 
 <div class="main-body">
 
-   <div class="main-description">
-      Find, create, and customize music for your project.
-   </div>
 
-   <div class="main-search-area">
-      <form action="search.htm">
-         <input class="main-search-input" name="q" placeholder="Enter Search terms here"></input>
-         <input class="main-search-submit" type="submit" value="OMG!"></input> <!--<button>OMG!</button>-->
-      </form>
-   </div>
+	<div class="left-column">
+		
+		My Projects
+		<ul>
+			<!--<li class="nav"><img src="favicon.ico">(Not Logged In)</li>-->
+			<a href="music-maker.htm?type=drumbeat"><li class="nav"><img src="img/beat.png">Create a Beat</li></a>
+			<a href="music-maker.htm"><li class="nav"><img src="img/melody.png">Create a Melody</li></a>
+		</ul>
 
-   <div class="main-separator">
-   </div>
+		<div class="main-separator">
+		</div>
 
-   <div class="main-invitation">
-      Making music is easier than you think! 
-   </div>   
+		Get the Mobile App:
+		  <ul>
+			  <a target="_blank" href="https://play.google.com/store/apps/details?id=com.mikehelland.omgtechnogauntlet">
+				  <li class="nav"><img src="img/technogauntlet.png">Techno GAUNTLET</li>
+			  </a>
+		  </ul>
 
-   <div class="main-create-area">
-	   
-      <a href="music-maker.htm" class="main-create-something">
-         Start with a Melody
-      </a>
-      <a href="music-maker.htm?type=drumbeat" class="main-create-something">
-         Start with a Beat
-      </a>
-      
-   </div>
+		<div class="main-separator">
+		</div>
+
+		Learn More:
+		  <ul>
+			  <a href="omg_basics.htm"><li class="nav"><img src="favicon.ico">OMG Basics</li></a>
+			  <a href="what_is_open_music.htm"><li class="nav"><img src="favicon.ico">What is open music?</li></a>
+			  <a href="omg_formats.htm"><li class="nav"><img src="favicon.ico">OMG Data Formats</li></a>
+		  </ul>
+		
+	</div>
+	
+	
+	<div class="main-column">
+		
+		
+		<div class="select-area-bar">
+			<a href="#featured" id="select-featured-area-button" class="current-select-area-button">Featured</a>
+			<!--<div id="select-popular-area-button" class="select-area-button">Most Popular</div>-->
+			<a href="#most-recent" id="select-recent-area-button" class="select-area-button">Most Recent</a>
+		</div>
+		
+		<script src="omg-music/omusic_partsui.js"></script>
+		<script src="omg-music/omusic_player.js"></script>
+		<script src="js/omgservice.js"></script>
+		<script src="js/embedded_viewer.js"></script>
+		
+		<div id="featured-area" class="frontpage-area">
+
+			<div id="song-example" class="omgviewer"><div class="beat-marker"></div></div>
+
+			<br>
+			<div id="drumbeat-example" class="omgviewer"><div class="beat-marker"></div></div>
+			
+			<br>
+			<div id="melody-example" class="omgviewer"><div class="beat-marker"></div></div>
+			
+		</div>
+		
+	
+		<div id="most-recent-area" class="frontpage-area">
+		  <div id="search-info" class="search-info">
+			<select id="filter-type">
+				 <option value="">All Types</option>
+				 <option value="SONG">Songs</option>
+				 <option value="SECTION">Sections</option>
+				 <option value="MELODY">Melodies</option>
+				 <option value="BASSLINE">Basslines</option>
+				 <option value="DRUMBEAT">Drumbeats</option>
+				 <option value="SOUNDSET">SoundSets</option>
+			</select>
+
+			<form onsubmit="return newSearch(),false;">
+			 <input class="main-search-input" id="query" name="q" placeholder="Search"></input>
+			 <input class="main-search-submit" type="submit" value="OMG!"></input>
+			</form>
+
+			 <span class="search-info-terms">search terms</span>
+		</div>
+
+		<a name="most-recent"></a>
+		<div class="search-things"></div>
+
+	  </div>
 
 
-   <div class="main-separator">
-   </div>
-
-   <!--<div class="main-featured">
-      Featured Music:
-   </div>
--->
-   <div class="main-learn-more">
-      You can also: 
-      <ul>
-		  <li><a href="https://play.google.com/store/apps/details?id=com.mikehelland.omgtechnogauntlet">
-			  Create with the Mobile App</a></li>
-		  <li><a href="soundset-editor.htm">Make your own Sound Sets for the sampler</a></li>
-      </ul>
-   </div>
-   <div class="main-learn-more">
-      Learn More: 
-      <ul>
-		  <li><a href="omg_basics.htm">OMG Basics</a></li>
-		  <li><a href="what_is_open_music.htm">What is open music?</a></li>
-		  <li><a href="omg_formats.htm">OMG Data Formats</a></li>
-      </ul>
-   </div>
+	</div>
 
 </div> <!--main-body-->
 
 <script src="js/usercontrols.js"></script>
+<script src="js/search.js"></script>
 <script>
 setupUserControls(document.getElementsByClassName("title-bar-user-controls")[0]);
+
+var fpa = {};
+fpa.featureArea = document.getElementById("featured-area");
+fpa.mostRecentArea = document.getElementById("most-recent-area");
+
+fpa.featuredButton = document.getElementById("select-featured-area-button");
+fpa.recentButton = document.getElementById("select-recent-area-button");
+
+fpa.showFeatureArea = function () {
+	fpa.featuredButton.className = "current-select-area-button";
+	fpa.recentButton.className = "select-area-button";
+
+	fpa.mostRecentArea.style.display = "none";
+	fpa.featureArea.style.display = "block";
+
+	if (!fpa.loadedFeaturedArea) {
+		omg_embedded_viewer_loadId({div: document.getElementById("song-example"), id: 817,
+							height: 80});
+		omg_embedded_viewer_loadId({div: document.getElementById("drumbeat-example"), id: 842,
+							height: 80});
+		omg_embedded_viewer_loadId({div: document.getElementById("melody-example"), id: 843,
+							height: 80});
+		fpa.loadedFeaturedArea = true;
+	}
+};
+fpa.showRecentArea = function () {
+	fpa.recentButton.className = "current-select-area-button";
+	fpa.featuredButton.className = "select-area-button";
+
+	fpa.mostRecentArea.style.display = "block";
+	fpa.featureArea.style.display = "none";
+	search(parameters);
+};
+fpa.featuredButton.onclick = function () {
+	fpa.showFeatureArea();
+};
+fpa.recentButton.onclick = function () {
+	fpa.showRecentArea();
+};
+
+if (window.location.hash.length === 0 || window.location.hash === "#featured") {
+	fpa.showFeatureArea();
+}
+console.log(window.location.hash);
+if (window.location.hash === "#most-recent") {
+	fpa.showRecentArea();
+}
 </script>
 </body>
 

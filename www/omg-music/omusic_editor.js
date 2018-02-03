@@ -1010,11 +1010,6 @@ OMusicEditor.prototype.setupSongEditor = function () {
             });
         });
     };
-
-    /*bam.songEditor.songName.onchange = function () {
-     bam.song.data.name = bam.songEditor.songName.value;
-     };*/
-
 };
 
 OMusicEditor.prototype.cancelPart = function (part) {
@@ -2553,6 +2548,7 @@ OMusicEditor.prototype.makeChordsView = function (section) {
     var bam = this;
     section.chordsView = document.createElement("div");
     section.chordsView.className = "section-chords-view";
+    section.chordsView.style.top = "-100px";
     var chordsDiv = document.createElement("div");
     chordsDiv.className = "section-chords-text";
     chordsDiv.innerHTML = "I";
