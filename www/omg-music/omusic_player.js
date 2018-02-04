@@ -1002,11 +1002,12 @@ OMusicPlayer.prototype.makeOMGSong = function (data) {
         newSong = new OMGSong(null, data);
         return newSong;
     }
-
+console.log("makeomgsong")
+console.log(data);
     if (data.type == "SECTION") {
         newSong = new OMGSong();
         newSection = new OMGSection(null, data, newSong);
-
+console.log(data == newSection.data);
         if (newSection.data.beats)
             newSong.data.beats = newSection.data.beats;
         if (newSection.data.subbeats)
@@ -1019,7 +1020,7 @@ OMusicPlayer.prototype.makeOMGSong = function (data) {
             newSong.data.rootNote = newSection.data.rootNote;
         if (newSection.data.ascale)
             newSong.data.ascale = newSection.data.ascale;
-        
+console.log("song data"); console.log(newSong.data);        
         return newSong;
     }
 
@@ -1173,10 +1174,25 @@ function OMGSection(div, data, song) {
 
     this.parts = [];
     if (!song || !song.data) {
-        console.log("new OMGSection() called without a song. Not good.");
-        try {throw new Exception();}
-        catch (e) {console.log(e);}
         song = new OMGSong();
+        if (this.data.beats) {
+            song.data.beats = this.data.beats;
+        }
+        if (this.data.subbeats) {
+            song.data.subbeats = this.data.subbeats;
+        }
+        if (this.data.measures) {
+            song.data.measures = this.data.measures;
+        }
+        if (this.data.subbeatMillis) {
+            song.data.subbeatMillis = this.data.subbeatMillis;
+        }
+        if (typeof this.data.rootNote === "number") {
+            song.data.rootNote = this.data.rootNote;
+        }
+        if (this.data.ascale) {
+            song.data.ascale = this.data.ascale;
+        }
     }
     this.song = song;
     this.position = song.sections.length;
@@ -1190,24 +1206,6 @@ function OMGSection(div, data, song) {
     } else {
         this.data = {type: "SECTION", parts: []};
     }
-    if (!this.data.overrideSongBeats) {
-        this.data.beats = song.data.beats || this.data.beats || 4;
-        this.data.subbeats = song.data.subbeats || this.data.subbeats || 4;
-        this.data.measures = song.data.measures || this.data.measures || 2;
-        this.data.subbeatMillis = song.data.subbeatMillis || 
-                this.data.subbeatMillis || 125;
-    }
-
-    if (!this.data.overrideSongKey) {        
-        this.data.rootNote = (typeof song.data.rootNote === "number") ?
-                        song.data.rootNote : 
-                            (typeof this.data.rootNote === "number") ?
-                                this.data.rootNote : 0;
-                            
-        this.data.ascale = song.data.ascale || 
-                this.data.ascale || [0,2,4,5,7,9,11];                            
-    }
-
 
     for (var ip = 0; ip < this.data.parts.length; ip++) {
         partData = this.data.parts[ip];

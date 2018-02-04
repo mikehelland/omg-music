@@ -2756,6 +2756,9 @@ OMusicEditor.prototype.showKeyChooser = function (e) {
                 }
                 selectedKeyDiv = keyDiv;
                 bam.song.data.rootNote = i;
+                thing.data.rootNote = i;
+                bam.song.saved = false;
+                thing.saved = false;
                 bam.player.rescaleSong(i)
                 keyDiv.style.backgroundColor = "lightgreen";
                 e.target.innerHTML = bam.getKeyCaption();
@@ -2787,6 +2790,9 @@ OMusicEditor.prototype.showKeyChooser = function (e) {
             }
             selectedScaleDiv = scaleDiv;
             bam.song.data.ascale = scale.value;
+            thing.data.ascale = scale.value;
+            bam.song.saved = false;
+            thing.saved = false;
             bam.player.rescaleSong(undefined, scale.value)
             scaleDiv.style.backgroundColor = "lightgreen";
             e.target.innerHTML = bam.getKeyCaption();
@@ -2876,13 +2882,15 @@ OMusicEditor.prototype.showTempoChooser = function (e) {
         e.target.innerHTML = div.value + "bpm";
         bam.song.data.subbeatMillis = 
                Math.round(1000 / (div.value / 60 * (bam.song.data.subbeats || 4)));
+        bam.song.saved = false;
         if (bam.player.playing) {
             bam.player.setSubbeatMillis(bam.song.data.subbeatMillis);
         }
         if (thing.data) {
             thing.data.subbeatMillis = bam.song.data.subbeatMillis;
-            if (thing == bam.part)
-                bam.section.data.subbeatMillis = thing.data.subbeatMillis;
+            //if (thing == bam.part)
+            //    bam.section.data.subbeatMillis = thing.data.subbeatMillis;
+            thing.saved = false;
         }
     };
 
