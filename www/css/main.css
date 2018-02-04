@@ -210,13 +210,13 @@ form {
 
 .left-column {
 	/*float:left;*/
-	width:16%;
-	background:#F8F8F8;
+	width:18%;
+	background-image:linear-gradient(to right, #FFFFFF, #F8F8F8);
 	margin-top:0px;
 	font-family: Helvetica, Arial, sans-serif;
 	font-size: 12px;
 	margin-top:59px;
-	padding:1%;
+	padding:0%;
 	position:fixed;
 }
 
