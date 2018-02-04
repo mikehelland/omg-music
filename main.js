@@ -120,22 +120,27 @@ app.get('/user', function (req, res) {
 
 app.get('/data/', function (req, res) {
     var db = app.get('db');
-    var perPage = 50;
+    var perPage = req.query.perPage || 20;
     var options = {limit : perPage, order : "created_at desc"};
-    var find = "*";
+    var find = {};
     if (req.query.user_id) {
         //find = {user_id: parseInt(req.query.user_id)};
-        find = {user_id: req.query.user_id};
+        find.user_id = req.query.user_id;
     }
     if (req.query.type) {
-		if (req.query.type === "MELODY" || 
-				req.query.type === "BASSLINE" ||
-				req.query.type === "DRUMBEAT") {
-			find = {partType: req.query.type};
-		}
-		else {
-			find = {type: req.query.type};
-		}
+        if (req.query.type === "MELODY" || 
+                        req.query.type === "BASSLINE" ||
+                        req.query.type === "DRUMBEAT") {
+            find.partType = req.query.type;
+        }
+        else {
+            find.type = req.query.type;
+        }
+        
+        if (req.query.type === "SOUNDSET") {
+            find.approved  = true;
+            options.limit = 100;
+        }
     }
 
     if (req.query.page) {
@@ -150,6 +155,9 @@ app.get('/data/', function (req, res) {
             res.send(docs);
         }
     };
+    if (JSON.stringify(find) == "{}") {
+        find = "*";
+    }
     if (req.query.q) {
         find = {keys:["tags", "name"], term: req.query.q};
         db.things.searchDoc(find, options, callback);

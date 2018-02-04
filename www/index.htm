@@ -10,6 +10,17 @@
    <link rel="stylesheet" type="text/css" href="css/main.css">
    <link rel="stylesheet" type="text/css" href="css/search.css">
    <link rel="stylesheet" href="css/viewer.css" type="text/css" />
+   <style>
+       @media (max-width:750px){
+            .title-bar-user-controls {
+                 display:none;
+             }
+             .title-bar-user-menu {
+                 margin-top:-5px;
+                 display:block;
+             }
+       }
+   </style>
 </head>
 
 <body>
@@ -26,6 +37,7 @@
 
       <div class="main-title-bar-right">
          <div class="title-bar-user-controls">Log in | Sign up</div>
+         <div class="title-bar-user-menu">&#9776;</div>
       </div>
 
    </div>
@@ -174,6 +186,13 @@ console.log(window.location.hash);
 if (window.location.hash === "#most-recent") {
 	fpa.showRecentArea();
 }
+
+var menuVisible = false;
+document.getElementsByClassName("title-bar-user-menu")[0].onclick = function () {
+    document.getElementsByClassName("left-column")[0].style.display = menuVisible ? 
+            "" : "block";
+    menuVisible = !menuVisible;
+};
 </script>
 </body>
 
