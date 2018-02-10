@@ -1,17 +1,21 @@
 var viewer = function (result) {
 
-	var resultCaption = result.tags || result.name || "";
-	var type = result.partType || result.type || "";
-	if (resultCaption.length === 0) {
-		resultCaption = "(" + type.substring(0, 1).toUpperCase() + 
-			type.substring(1).toLowerCase() + ")";
+	var resultCaption = "OpenMusic.Gallery";
+	if (result) {
+
+		resultCaption = result.tags || result.name || "";
+		var type = result.partType || result.type || "";
+		if (resultCaption.length === 0) {
+			resultCaption = "(" + type.substring(0, 1).toUpperCase() + 
+				type.substring(1).toLowerCase() + ")";
+		}
+		
+		if (result.username) {
+			resultCaption += " by " + result.username;
+		}
+		
+		resultCaption += " on OpenMusic.Gallery";
 	}
-	
-	if (result.username) {
-		resultCaption += " by " + result.username;
-	}
-	
-	resultCaption += " on OpenMusic.Gallery";
 
 return `<!DOCTYPE html>
 <html>
@@ -64,7 +68,7 @@ return `<!DOCTYPE html>
    </div>
 
    <script src="omg-music/omusic_partsui.js"></script>
-   <script src="omg-music/omusic_player.js"></script>
+   <script src="omg-music/omusic_player_new.js"></script>
    <script src="js/omgservice.js"></script>
    <script src="js/embedded_viewer.js"></script>
 

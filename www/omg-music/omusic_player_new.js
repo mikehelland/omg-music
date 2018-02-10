@@ -61,6 +61,10 @@ OMusicPlayer.prototype.play = function (song) {
         console.log("no sections to play()");
         return -1;
     }
+    
+    p.playing = true;
+    p.playSection(p.song.playingSection);
+    return;
 
     p.playing = true;
     p.loopStarted = Date.now();
@@ -190,6 +194,116 @@ OMusicPlayer.prototype.play = function (song) {
     return p.playingIntervalHandle;
 };
 
+OMusicPlayer.prototype.getSectionToPlayNext = function () {
+    
+};
+
+OMusicPlayer.prototype.playSection = function (isection) {
+    var p = this;
+    var section = p.song.sections[isection];
+    if (!section || !section.data) {
+        console.log("can't play section, no data");
+        return;
+    }
+    
+    var info = {};
+    //get the tempo from the song
+    //todo have a way to override this for section's to have individual tempo
+    info.subbeatMillis = p.song.data.subbeatMillis;
+    //same here
+    info.beats = p.song.data.beats;
+    info.subbeats = p.song.data.subbeats;
+    
+    //let the section choose the measures
+    info.measures = section.data.measures || p.song.data.measures;
+    info.totalSubbeats = info.beats * info.beats * info.measures;
+    
+    var p = this;
+    var offset = 0.001;
+    info.startTime = p.context.currentTime + offset;
+    
+    p.song.sections[isection].parts.forEach(function (part) {
+		part.audioBuffers = [];
+        if (part.data.surfaceURL === "PRESET_SEQUENCER") {
+            p.scheduleSequencerPart(part, info); 
+        }
+        else {
+            p.schedulePart(part, info);
+        }
+    });
+};
+
+OMusicPlayer.prototype.scheduleSequencerPart = function (part, info) {
+    var subbeatTimeInLoop;
+    for (var i = 0; i < part.data.tracks.length; i++) {
+        for (var iSubbeat = 0; iSubbeat < info.totalSubbeats; iSubbeat++) {
+            if (part.data.tracks[i].data[iSubbeat]) {
+                subbeatTimeInLoop = iSubbeat * info.subbeatMillis / 1000;
+                this.scheduleSoundAtTime(part.data.tracks[i].sound, 
+					part, info.startTime + subbeatTimeInLoop);
+            }
+        } 
+    }
+};
+
+OMusicPlayer.prototype.schedulePart = function (part, info) {
+    var p = this;
+    if (!part || !part.data || !part.data.notes) {
+		console.log(part);
+        console.log("can't play part, no notes data");
+    }
+    
+    var startTime = info.startTime;
+    var beatsSoFar = 0;
+    part.data.notes.forEach(function (note, i) {
+        var playTime = info.startTime + (beatsSoFar * info.subbeats * info.subbeatMillis) / 1000;
+        var duration = (note.beats * info.subbeats * info.subbeatMillis) / 1000;
+        if (!note.rest) {
+            var audio = p.scheduleSoundAtTime(note.sound, part, playTime, duration);
+        }
+        beatsSoFar += note.beats;
+    });
+};
+
+OMusicPlayer.prototype.scheduleSoundAtTime = function (sound, part, startTime, duration) {
+    var p = this;
+    console.log(p.loadedSounds[sound]);
+    if (p.loadedSounds[sound] &&
+            p.loadedSounds[sound] !== "loading") {
+
+        var source = p.context.createBufferSource();
+        source.buffer = p.loadedSounds[sound];
+        part.audioBuffers.push(source);
+        
+        if (!part.bufferPanner) {
+            part.bufferPanner = p.context.createStereoPanner();
+            part.bufferGain = p.context.createGain();
+
+            part.bufferGain.connect(part.bufferPanner)
+            part.bufferPanner.connect(p.compressor);
+        }
+        source.connect(part.bufferGain);
+        
+        part.bufferPanner.pan.setValueAtTime(part.data.pan, p.context.currentTime);
+        part.bufferGain.gain.setValueAtTime(part.data.volume, p.context.currentTime);
+        
+        console.log("playing sound " + sound + " at " + startTime + " for " + duration);
+        source.start(startTime);
+        
+        if (duration) {
+			//linearRampToValueAtTime starts at the previous event
+			//so this next line is a dummy set to move the event pointer forward to here
+			part.bufferGain.gain.linearRampToValueAtTime(part.data.volume, 
+					startTime + duration * 0.995);
+			part.bufferGain.gain.linearRampToValueAtTime(0, startTime + duration);
+			source.stop(startTime + duration);			
+		}
+
+        //return source;
+    }
+};
+
+
 OMusicPlayer.prototype.stop = function () {
     var p = this;
 
@@ -206,7 +320,12 @@ OMusicPlayer.prototype.stop = function () {
             if (parts[ip].osc) {
                 parts[ip].osc.finishPart();
             }
-
+            if (parts[ip].audioBuffers) {
+				parts[ip].audioBuffers.forEach(function (audioBuffer) {
+					audioBuffer.stop();
+				});
+				parts[ip].audioBuffers = [];
+			}
         }
     }
 };
@@ -1005,12 +1124,11 @@ OMusicPlayer.prototype.makeOMGSong = function (data) {
         newSong = new OMGSong(null, data);
         return newSong;
     }
-console.log("makeomgsong")
-console.log(data);
+
     if (data.type == "SECTION") {
         newSong = new OMGSong();
         newSection = new OMGSection(null, data, newSong);
-console.log(data == newSection.data);
+
         if (newSection.data.beats)
             newSong.data.beats = newSection.data.beats;
         if (newSection.data.subbeats)
@@ -1023,7 +1141,7 @@ console.log(data == newSection.data);
             newSong.data.rootNote = newSection.data.rootNote;
         if (newSection.data.ascale)
             newSong.data.ascale = newSection.data.ascale;
-console.log("song data"); console.log(newSong.data);        
+
         return newSong;
     }
 
