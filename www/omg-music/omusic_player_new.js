@@ -217,20 +217,33 @@ OMusicPlayer.prototype.playSection = function (isection) {
     //let the section choose the measures
     info.measures = section.data.measures || p.song.data.measures;
     info.totalSubbeats = info.beats * info.beats * info.measures;
-    
-    var p = this;
+
+	if (!section.data.chordProgression || !section.data.chordProgression.length) {
+		section.data.chordProgression = [0];
+	}
+
     var offset = 0.001;
     info.startTime = p.context.currentTime + offset;
-    
-    p.song.sections[isection].parts.forEach(function (part) {
-		part.audioBuffers = [];
-        if (part.data.surfaceURL === "PRESET_SEQUENCER") {
-            p.scheduleSequencerPart(part, info); 
-        }
-        else {
-            p.schedulePart(part, info);
-        }
-    });
+
+	section.data.chordProgression.forEach(function (chord) {
+		p.applyChordToSection(chord, section);
+
+		section.parts.forEach(function (part) {
+			part.audioBuffers = [];
+			if (part.data.mute) {
+				//not playing nothing
+			}
+			else if (part.data.surfaceURL === "PRESET_SEQUENCER") {
+				p.scheduleSequencerPart(part, info); 
+			}
+			else {
+				p.schedulePart(part, info);
+			}
+		});
+		
+		info.startTime += (info.totalSubbeats * info.subbeatMillis) / 1000;
+		console.log(info.startTime);
+	});
 };
 
 OMusicPlayer.prototype.scheduleSequencerPart = function (part, info) {
@@ -258,15 +271,34 @@ OMusicPlayer.prototype.schedulePart = function (part, info) {
     part.data.notes.forEach(function (note, i) {
         var playTime = info.startTime + (beatsSoFar * info.subbeats * info.subbeatMillis) / 1000;
         var duration = (note.beats * info.subbeats * info.subbeatMillis) / 1000;
-        if (!note.rest) {
-            var audio = p.scheduleSoundAtTime(note.sound, part, playTime, duration);
+		if (note.sound && !note.rest) {
+            p.scheduleSoundAtTime(note.sound, part, playTime, duration);
         }
+        else {
+			p.scheduleOscAtTime(note, part, playTime, duration);
+		}
         beatsSoFar += note.beats;
     });
 };
 
+OMusicPlayer.prototype.scheduleOscAtTime = function (note, part, startTime, duration) {
+	if (!part.osc) {
+		this.makeOsc(part);
+	}
+	
+	if (!note || note.rest)
+		part.osc.frequency.setValueAtTime(0, startTime);
+	else {
+
+		var freq = this.makeFrequency(note.scaledNote);
+		part.osc.frequency.setValueAtTime(freq, startTime);
+		part.osc.frequency.setValueAtTime(0, startTime + duration * 0.995);
+	}
+};
+
 OMusicPlayer.prototype.scheduleSoundAtTime = function (sound, part, startTime, duration) {
     var p = this;
+
     console.log(p.loadedSounds[sound]);
     if (p.loadedSounds[sound] &&
             p.loadedSounds[sound] !== "loading") {
@@ -1233,7 +1265,17 @@ OMusicPlayer.prototype.rescaleSong = function (rootNote, ascale, chord) {
                     chord || 0);
         });
     });
-}
+};
+
+OMusicPlayer.prototype.applyChordToSection = function (chord, section) {
+    var p = this;
+    var song = this.song.data;
+	section.parts.forEach(function (part) {
+		p.rescale(part, song.rootNote || 0,
+				song.ascale || [0, 2, 4, 5, 7, 9, 11],
+				chord || 0);
+    });	
+};
 
 OMusicPlayer.prototype.setSubbeatMillis = function (subbeatMillis) {
     this.newSubbeatMillis = subbeatMillis;
