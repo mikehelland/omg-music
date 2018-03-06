@@ -1,6 +1,6 @@
 function OMusicPlayer() {
 
-    this.dev = typeof (omg) == "object" && omg.dev;
+    this.dev = typeof (omg) === "object" && omg.dev;
 
     var p = this;
 
@@ -66,128 +66,9 @@ OMusicPlayer.prototype.play = function (song) {
     p.playSection(p.song.playingSection);
     return;
 
-    p.playing = true;
-    p.loopStarted = Date.now();
-    p.iSubBeat = 0;
-
-    //todo this bpm thing isn't consistent
-    var beatsPerSection = p.song.data.beats * p.song.data.subbeats * 
-                                        p.song.data.measures;
-    if (p.song.data && p.song.data.subbeatMillis) {
-        p.subbeatLength = p.song.data.subbeatMillis;
-    }
-    else if (p.song.sections[0].data &&
-            p.song.sections[0].data.subbeatMillis) {
-        p.subbeatLength = p.song.sections[0].data.subbeatMillis
-    } 
-    else {
-        p.subbeatLength = 125;
-    }
-
-    var lastSection;
-    var nextSection;
-    var currentChordI = 0;
-
-    var play = function () {
-
-        if (!p.playing)
-            return;
-
-        if (p.loopSection > -1 && p.loopSection < p.song.sections.length) {
-            p.song.playingSection = p.loopSection;
-        }
-
-        p.playBeat(p.song.sections[p.song.playingSection],
-                p.iSubBeat);
-
-        for (var il = 0; il < p.onBeatPlayedListeners.length; il++) {
-            try {
-                p.onBeatPlayedListeners[il].call(null, p.iSubBeat, p.song.playingSection);
-            } catch (ex) {
-                console.log(ex);
-            }
-        }
-
-        p.iSubBeat++;
-        if (p.iSubBeat == beatsPerSection) {
-
-            p.iSubBeat = 0;
-            p.loopStarted = Date.now();
-
-            if (p.song.sections[p.song.playingSection].data.chordProgression) {
-                currentChordI++;
-                if (currentChordI < p.song.sections[p.song.playingSection].data.chordProgression.length) {
-                    p.rescaleSong(null, null,
-                                p.song.sections[p.song.playingSection].data.chordProgression[currentChordI]);
-                    return;
-                }
-                else {
-                    currentChordI = 0;
-                    p.rescaleSong(null, null,
-                                p.song.sections[p.song.playingSection].data.chordProgression[currentChordI]);
-                }
-            }
-
-            lastSection = p.song.sections[p.song.playingSection];
-
-            if (p.loopSection == -1) {
-                p.song.playingSection++;
-            }
-
-            if (p.nextUp) {
-                p.song = p.nextUp;
-                p.song.playingSection = 0;
-                p.nextUp = null;
-            }
-
-            nextSection = p.song.sections[p.song.playingSection];
-
-            if (p.song.playingSection >= p.song.sections.length) {
-                if (p.song.loop) {
-                    p.song.playingSection = 0;
-                    nextSection = p.song.sections[p.song.playingSection];
-                } else {
-                    p.stop();
-                    nextSection = undefined;
-                }
-            }
-
-            //cancel all oscilators that aren't used next section
-            //TODO make this work right
-            var usedAgain;
-            for (var ils = 0; ils < lastSection.parts.length; ils++) {
-                if (!lastSection.parts[ils].osc)
-                    continue;
-
-                usedAgain = false;
-                if (nextSection) {
-                    for (var ins = 0; ins < nextSection.parts.length; ins++) {
-                        if (lastSection.parts[ils] == nextSection.parts[ins]) {
-                            usedAgain = true;
-                            break;
-                        }
-                    }
-                }
-                if (!usedAgain) {
-                    lastSection.parts[ils].osc.finishPart();
-                }
-            }
-        }
-
-        if (p.newSubbeatMillis) {
-            clearInterval(p.playingIntervalHandle);
-            p.subbeatLength = p.newSubbeatMillis;
-            p.playingIntervalHandle = setInterval(play, p.subbeatLength);
-            p.newSubbeatMillis = undefined;
-        }
-    };
-
-    p.playingIntervalHandle = setInterval(play, p.subbeatLength);
-
-    // ??
     p.songStarted = p.loopStarted;
 
-    if (typeof (p.onPlay) == "function") {
+    if (typeof (p.onPlay) === "function") {
         p.onPlay();
     }
 
@@ -311,7 +192,7 @@ OMusicPlayer.prototype.scheduleSoundAtTime = function (sound, part, startTime, d
             part.bufferPanner = p.context.createStereoPanner();
             part.bufferGain = p.context.createGain();
 
-            part.bufferGain.connect(part.bufferPanner)
+            part.bufferGain.connect(part.bufferPanner);
             part.bufferPanner.connect(p.compressor);
         }
         source.connect(part.bufferGain);
@@ -339,7 +220,7 @@ OMusicPlayer.prototype.scheduleSoundAtTime = function (sound, part, startTime, d
 OMusicPlayer.prototype.stop = function () {
     var p = this;
 
-    if (typeof (p.onStop) == "function") {
+    if (typeof (p.onStop) === "function") {
         p.onStop();
     }
 
@@ -388,7 +269,7 @@ OMusicPlayer.prototype.loadPart = function (part) {
         }
 
     }
-    if (type == "CHORDPROGRESSION") {
+    if (type==="CHORDPROGRESSION") {
         part.loaded = true;
     }
 };
@@ -404,17 +285,17 @@ OMusicPlayer.prototype.loadMelody = function (part) {
     var section = part.section;
     var song = part.section ? part.section.song : undefined;
 
-    if (song && typeof song.data.rootNote == "number") {
+    if (song && typeof song.data.rootNote==="number") {
         rootNote = song.data.rootNote;
-    } else if (section && typeof section.data.rootNote == "number") {
+    } else if (section && typeof section.data.rootNote==="number") {
         rootNote = section.data.rootNote;
-    } else if (typeof data.rootNote == "number") {
+    } else if (typeof data.rootNote === "number") {
         rootNote = data.rootNote % 12;
     }
 
-    if (song && song.data.ascale != undefined) {
+    if (song && song.data.ascale !== undefined) {
         ascale = song.data.ascale;
-    } else if (section && section.data.ascale != undefined) {
+    } else if (section && section.data.ascale !== undefined) {
         ascale = section.data.ascale;
     } else if (data.ascale) {
         ascale = data.ascale;
@@ -424,7 +305,7 @@ OMusicPlayer.prototype.loadMelody = function (part) {
 
     p.rescale(part, rootNote, ascale, 0);
 
-    if (typeof data.soundsetURL == "string") {
+    if (typeof data.soundsetURL === "string") {
         p.getSoundSet(data.soundsetURL, function (soundset) {
             p.setupPartWithSoundSet(soundset, part, true);
         });
@@ -447,7 +328,7 @@ OMusicPlayer.prototype.loadMelody = function (part) {
         p.loadSound(note.sound, part);
     }
 
-    if (soundsToLoad == 0) {
+    if (soundsToLoad === 0) {
         part.loaded = true;
     }
 
@@ -468,7 +349,7 @@ OMusicPlayer.prototype.loadDrumbeat = function (part) {
             this.loadSound(tracks[i].sound, part);
         }
     }
-    if (soundsAlreadyLoaded == tracks.length) {
+    if (soundsAlreadyLoaded === tracks.length) {
         part.loaded = true;
     }
 
@@ -529,139 +410,6 @@ OMusicPlayer.prototype.prepareSong = function (song) {
     return true;
 };
 
-/*p.prepareArrangementData = function (arrangement) {
- var rawSection;
- var section;
- var rawPart;
- var part;
- 
- var parrangement = {raw: arrangement, sections: []};
- 
- for (var isection = 0; isection < arrangement.sections.length; isection++) {
- 
- rawSection = arrangement.sections[isection];
- section = {raw: rawSection, parts: []};
- 
- for (var ipart = 0; ipart < rawSection.parts.length; ipart++) {
- rawPart = rawSection.parts[ipart];
- part = {raw: rawPart, nextBeat: 0, currentI: -1};
- section.parts.push(part);
- 
- p.loadPart(part, rawPart);
- }
- parrangement.sections.push(section);
- }
- parrangement.prepared = true;
- return parrangement;
- };*/
-
-OMusicPlayer.prototype.playBeat = function (section, iSubBeat) {
-    var p = this;
-    for (var ip = 0; ip < section.parts.length; ip++) {
-        p.playBeatForPart(iSubBeat, section.parts[ip]);
-    }
-
-
-};
-
-OMusicPlayer.prototype.playBeatForPart = function (iSubBeat, part) {
-    var p = this;
-    if (part.data.type == "CHORDPROGRESSION") {
-        //TODO should this really be in here? As a part that is?
-        return;
-    }
-
-    if (!part.loaded) {
-        p.loadPart(part);
-    }
-
-    if (part.data.surfaceURL == "PRESET_SEQUENCER") {
-        p.playBeatForDrumPart(iSubBeat, part);
-    } else {
-        p.playBeatForMelody(iSubBeat, part);
-    }
-};
-
-OMusicPlayer.prototype.playBeatForDrumPart = function (iSubBeat, part) {
-    var tracks = part.data.tracks;
-
-    if (part.data.mute)
-        return;
-
-    for (var i = 0; i < tracks.length; i++) {
-        if (tracks[i].data[iSubBeat]) {
-            this.playSound(tracks[i].sound, part);
-        }
-    }
-};
-
-OMusicPlayer.prototype.playBeatForMelody = function (iSubBeat, part) {
-    var p = this;
-
-    var data = part.data;
-    var beatToPlay = iSubBeat;
-    if (iSubBeat == 0) {
-        // this sort of works, for playing melodies longer than 
-        // the section goes, but taking it solves problems
-        // the one I'm solving now is putting currentI in the right state
-        // every time, so it doesn't stop the current section if the same
-        // melody is in upnext play list
-        //if (part.currentI === -1 || part.currentI === data.notes.length) {
-        part.currentI = 0;
-        part.nextBeat = 0;
-        part.loopedBeats = 0;
-        //}
-        //else {
-        //  if (!part.loopedBeats) part.loopedBeats = 0;
-        //  part.loopedBeats += 32;
-        //}
-    }
-
-    if (part.loopedBeats) {
-        beatToPlay += part.loopedBeats;
-    }
-
-    if (beatToPlay == part.nextBeat) {
-        if (data.notes == undefined) {
-            console.log("something wrong here");
-            return;
-        }
-        var note = data.notes[part.currentI];
-
-        if (part.data.mute) {
-            //play solo they can't here ya
-        }
-        else if (note && note.sound) {
-            p.playNote(note, part, data);
-        } else {
-            if (!part.osc) {
-                p.makeOsc(part);
-            }
-
-            if (!note || note.rest)
-                part.osc.frequency.setValueAtTime(0, p.context.currentTime);
-            else {
-
-                var freq = p.makeFrequency(note.scaledNote);
-                part.osc.frequency.setValueAtTime(freq, p.context.currentTime);
-                part.playingI = part.currentI;
-                var playingI = part.playingI;
-                setTimeout(function () {
-                    if (part.osc && part.playingI == playingI) {
-                        part.osc.frequency.setValueAtTime(0,
-                                //p.subbeats * note.beats * p.subbeatLength * 0.85)
-                                p.context.currentTime);
-                    }
-                }, p.song.data.subbeats * note.beats * p.subbeatLength * 0.85);
-            }
-        }
-
-        if (note) {
-            part.nextBeat += p.song.data.subbeats * note.beats;
-            part.currentI++;
-        }
-    }
-};
 
 OMusicPlayer.prototype.makeOsc = function (part) {
     var p = this;
@@ -785,7 +533,7 @@ OMusicPlayer.prototype.loadSound = function (sound, part) {
 
     var key = sound;
     var url = sound;
-    if (sound.indexOf("PRESET_") == 0) {
+    if (sound.indexOf("PRESET_") === 0) {
         var preseturl;
         if (!p.dev) {
             preseturl = "http://mikehelland.com/omg/drums/";
@@ -803,7 +551,7 @@ OMusicPlayer.prototype.loadSound = function (sound, part) {
     request.responseType = 'arraybuffer';
 
     part.soundsLoading++;
-
+    console.log(part.soundsLoading + " sounds to load now");
     // Decode asynchronously
     request.onload = function () {
         p.context.decodeAudioData(request.response, function (buffer) {
@@ -813,15 +561,15 @@ OMusicPlayer.prototype.loadSound = function (sound, part) {
             console.log("error loading sound url: " + url);
             p.onSoundLoaded(false, part);
         });
-    }
+    };
     request.send();
 
 };
 
 OMusicPlayer.prototype.onSoundLoaded = function (success, part) {
     var p = this;
-
     part.soundsLoading--;
+    console.log(`onSoundLoaded ${part.soundsLoading} left` );
     if (part.soundsLoading < 1) {
         part.loaded = true;
     }
@@ -838,7 +586,7 @@ OMusicPlayer.prototype.rescale = function (part, rootNote, scale, chord) {
     var octaveShift = data.octave || data.octaveShift;
     var octaves2;
     if (isNaN(octaveShift))
-        octaveShift = data.type == "BASSLINE" ? 3 : 5;
+        octaveShift = data.type === "BASSLINE" ? 3 : 5;
     var newNote;
     var onote;
     var note;
@@ -957,7 +705,7 @@ OMusicPlayer.prototype.setupDrumPartWithSoundSet = function (ss, part, load) {
 OMusicPlayer.prototype.getSoundSet = function (url, callback) {
     var p = this;
 
-    if (typeof url != "string") {
+    if (typeof url !== "string") {
         return;
     }
 
@@ -967,11 +715,11 @@ OMusicPlayer.prototype.getSoundSet = function (url, callback) {
 
     var dl = p.downloadedSoundSets[url];
     if (dl) {
-        callback(dl)
+        callback(dl);
         return;
     }
 
-    if (url.indexOf("PRESET_") == 0) {
+    if (url.indexOf("PRESET_") === 0) {
         dl = p.getPresetSoundSet(url);
         p.downloadedSoundSets[url] = dl;
         callback(dl);
@@ -979,10 +727,10 @@ OMusicPlayer.prototype.getSoundSet = function (url, callback) {
     }
 
     var xhr2 = new XMLHttpRequest();
-    xhr2.open("GET", url, true)
+    xhr2.open("GET", url, true);
     xhr2.onreadystatechange = function () {
 
-        if (xhr2.readyState == 4) {
+        if (xhr2.readyState === 4) {
             var ojson = JSON.parse(xhr2.responseText);
             if (ojson) {
                 p.downloadedSoundSets[url] = ojson;
@@ -1002,7 +750,7 @@ OMusicPlayer.prototype.getPresetSoundSet = function (preset) {
     var p = this;
 
     var oret;
-    if (preset == "PRESET_BASS") {
+    if (preset === "PRESET_BASS") {
         oret = {"name": "Electric Bass", "id": 1540004, "lowNote": 28, "chromatic": true,
             "data": [
                     {"url": "e", "caption": "E2"}, {"url": "f", "caption": "F2"}, {"url": "fs", "caption": "F#2"}, {"url": "g", "caption": "G2"}, {"url": "gs", "caption": "G#2"}, {"url": "a", "caption": "A2"},
@@ -1016,7 +764,7 @@ OMusicPlayer.prototype.getPresetSoundSet = function (preset) {
             oret.data.prefix = "http://localhost/mp3/bass_";
         }
     }
-    if (preset == "PRESET_HIP") {
+    if (preset === "PRESET_HIP") {
         oret = {"name": "PRESET_HIP", "id": 0,
             "data": {"name": "PRESET_HIP", "data": [
                     {"url": "PRESET_HH_KICK", "caption": "kick"},
@@ -1030,7 +778,7 @@ OMusicPlayer.prototype.getPresetSoundSet = function (preset) {
                 ]}};
 
     }
-    if (preset == "PRESET_ROCK") {
+    if (preset === "PRESET_ROCK") {
         oret = {"name": "PRESET_ROCK", "id": 0,
             "data": {"name": "PRESET_ROCK", "data": [
                     {"url": "PRESET_ROCK_KICK", "caption": "kick"},
@@ -1079,7 +827,7 @@ OMusicPlayer.prototype.playSound = function (sound, part) {
             part.bufferPanner = p.context.createStereoPanner();
             part.bufferGain = p.context.createGain();
 
-            part.bufferGain.connect(part.bufferPanner)
+            part.bufferGain.connect(part.bufferPanner);
             part.bufferPanner.connect(p.compressor);
         }
         source.connect(part.bufferGain);
@@ -1104,7 +852,7 @@ OMusicPlayer.prototype.makeOMGSong = function (data) {
 
     var className = data.constructor.name;
 
-    if (className == "OMGPart" || className == "OMGDrumpart") {
+    if (className === "OMGPart" || className === "OMGDrumpart") {
 
         newSong = new OMGSong();
         newSection = new OMGSection(null, null, newSong);
@@ -1130,7 +878,7 @@ OMusicPlayer.prototype.makeOMGSong = function (data) {
         return newSong;
     }
 
-    if (className == "OMGSection") {
+    if (className === "OMGSection") {
 
         newSong = new OMGSong();
         newSong.sections.push(data);
@@ -1152,12 +900,12 @@ OMusicPlayer.prototype.makeOMGSong = function (data) {
     }
 
     var newSong;
-    if (data.type == "SONG") {
+    if (data.type === "SONG") {
         newSong = new OMGSong(null, data);
         return newSong;
     }
 
-    if (data.type == "SECTION") {
+    if (data.type === "SECTION") {
         newSong = new OMGSong();
         newSection = new OMGSection(null, data, newSong);
 
@@ -1182,15 +930,15 @@ OMusicPlayer.prototype.makeOMGSong = function (data) {
 
     //todo this could go away, we only have type = "PART" now
     //its for back compat with pre-launch data
-    if (data.type == "MELODY" || data.type == "BASSLINE"
-            || data.partType == "MELODY" || data.partType == "BASSLINE") {
+    if (data.type === "MELODY" || data.type === "BASSLINE"
+            || data.partType === "MELODY" || data.partType === "BASSLINE") {
         newPart = new OMGPart(null, data, newSection);
     }
-    else if (data.type == "DRUMBEAT"
-            || data.partType == "DRUMBEAT") {
+    else if (data.type === "DRUMBEAT"
+            || data.partType === "DRUMBEAT") {
         newPart = new OMGDrumpart(null, data, newSection);
     }
-    else if (data.type == "PART") {
+    else if (data.type === "PART") {
         newPart = new OMGPart(null, data, newSection);
     }
 
@@ -1252,10 +1000,10 @@ OMusicPlayer.prototype.getTotalSubbeats = function () {
 OMusicPlayer.prototype.rescaleSong = function (rootNote, ascale, chord) {
     var p = this;
     var song = this.song.data;
-    if (rootNote != undefined) {
+    if (rootNote !== undefined) {
         song.rootNote = rootNote;
     }
-    if (ascale != undefined) {
+    if (ascale !== undefined) {
         song.ascale = ascale;
     }
     this.song.sections.forEach(function (section) {
@@ -1372,8 +1120,8 @@ function OMGSection(div, data, song) {
 
     for (var ip = 0; ip < this.data.parts.length; ip++) {
         partData = this.data.parts[ip];
-        if (partData.type == "DRUMBEAT" ||
-                partData.partType == "DRUMBEAT") {
+        if (partData.type === "DRUMBEAT" ||
+                partData.partType === "DRUMBEAT") {
             part = new OMGDrumpart(null, partData, this);
         } else {
             part = new OMGPart(null, partData, this);

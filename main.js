@@ -138,7 +138,9 @@ app.get('/data/', function (req, res) {
         }
         
         if (req.query.type === "SOUNDSET") {
-            find.approved  = true;
+            if (!req.user || !req.user.admin) {
+                find.approved  = true;                
+            }
             options.limit = 100;
         }
     }
@@ -180,6 +182,9 @@ app.post('/data/', function (req, res) {
     if (req.user) {
         req.body.user_id = req.user.id;
         req.body.username = req.user.username;
+    }
+    if (req.body.approved && (!req.user || !req.user.admin)) {
+        delete req.body.approved;
     }
 
     if (!req.body.created_at) {
