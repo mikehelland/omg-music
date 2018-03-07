@@ -1,12 +1,23 @@
+if (typeof (omg) !== "object") {
+    omg = {};
+}
+if (!omg.loadedSounds) {
+    omg.loadedSounds = {};
+}
+if (!omg.downloadedSoundSets) {
+    omg.downloadedSoundSets = [];
+}
+
 function OMusicPlayer() {
 
-    this.dev = typeof (omg) === "object" && omg.dev;
+    this.dev = omg.dev;
 
     var p = this;
 
     p.playing = false;
-    p.loadedSounds = {};
-    p.downloadedSoundSets = [];
+    p.soundsLoading = 0;
+    p.loadedSounds = omg.loadedSounds;
+    p.downloadedSoundSets = omg.downloadedSoundSets;
 
     if (!window.AudioContext)
         window.AudioContext = window.webkitAudioContext;
@@ -53,8 +64,6 @@ OMusicPlayer.prototype.play = function (song) {
         }
     }
 
-    // if there is no song already here, this'll blow
-
     p.song.playingSection = 0;
 
     if (!p.song.sections || !p.song.sections.length) {
@@ -62,22 +71,25 @@ OMusicPlayer.prototype.play = function (song) {
         return -1;
     }
     
-    p.playing = true;
-    p.playSection(p.song.playingSection);
+    var goTime = function () {
+        p.playing = true;
+        p.playSection(p.song.playingSection);        
+        if (typeof (p.onPlay) === "function") {
+            p.onPlay();
+        }
+    };
+    if (p.soundsLoading < 1) {
+        goTime();
+    }
+    else {
+        p.goTime = goTime;
+    }
     return;
 
     p.songStarted = p.loopStarted;
-
-    if (typeof (p.onPlay) === "function") {
-        p.onPlay();
-    }
-
     return p.playingIntervalHandle;
 };
 
-OMusicPlayer.prototype.getSectionToPlayNext = function () {
-    
-};
 
 OMusicPlayer.prototype.playSection = function (isection) {
     var p = this;
@@ -123,7 +135,6 @@ OMusicPlayer.prototype.playSection = function (isection) {
 		});
 		
 		info.startTime += (info.totalSubbeats * info.subbeatMillis) / 1000;
-		console.log(info.startTime);
 	});
 };
 
@@ -180,7 +191,6 @@ OMusicPlayer.prototype.scheduleOscAtTime = function (note, part, startTime, dura
 OMusicPlayer.prototype.scheduleSoundAtTime = function (sound, part, startTime, duration) {
     var p = this;
 
-    console.log(p.loadedSounds[sound]);
     if (p.loadedSounds[sound] &&
             p.loadedSounds[sound] !== "loading") {
 
@@ -200,7 +210,6 @@ OMusicPlayer.prototype.scheduleSoundAtTime = function (sound, part, startTime, d
         part.bufferPanner.pan.setValueAtTime(part.data.pan, p.context.currentTime);
         part.bufferGain.gain.setValueAtTime(part.data.volume, p.context.currentTime);
         
-        console.log("playing sound " + sound + " at " + startTime + " for " + duration);
         source.start(startTime);
         
         if (duration) {
@@ -550,6 +559,7 @@ OMusicPlayer.prototype.loadSound = function (sound, part) {
     request.open('GET', url, true);
     request.responseType = 'arraybuffer';
 
+    p.soundsLoading++;
     part.soundsLoading++;
     console.log(part.soundsLoading + " sounds to load now");
     // Decode asynchronously
@@ -568,10 +578,17 @@ OMusicPlayer.prototype.loadSound = function (sound, part) {
 
 OMusicPlayer.prototype.onSoundLoaded = function (success, part) {
     var p = this;
+    p.soundsLoading--;
     part.soundsLoading--;
+    console.log(`onSoundLoaded ${p.soundsLoading} left` );
     console.log(`onSoundLoaded ${part.soundsLoading} left` );
     if (part.soundsLoading < 1) {
         part.loaded = true;
+    }
+    if (p.soundsLoading < 1) {
+        if (p.goTime) {
+            p.goTime();
+        }
     }
 };
 
@@ -797,49 +814,6 @@ OMusicPlayer.prototype.getPresetSoundSet = function (preset) {
     return oret;
 };
 
-OMusicPlayer.prototype.playNote = function (note, part) {
-    var p = this;
-    
-    var fromNow = (note.beats * 4 * p.subbeatLength) / 1000;
-
-    var audio = p.playSound(note.sound, part);
-    if (audio) {
-        part.bufferGain.gain.linearRampToValueAtTime(part.data.volume, 
-            p.context.currentTime + fromNow * 0.995);
-	part.bufferGain.gain.linearRampToValueAtTime(0, p.context.currentTime + fromNow);
-	audio.stop(p.context.currentTime + fromNow);
-
-    }
-
-};
-
-
-
-OMusicPlayer.prototype.playSound = function (sound, part) {
-    var p = this;
-    if (p.loadedSounds[sound] &&
-            p.loadedSounds[sound] !== "loading") {
-
-        var source = p.context.createBufferSource();
-        source.buffer = p.loadedSounds[sound];
-        
-        if (!part.bufferPanner) {
-            part.bufferPanner = p.context.createStereoPanner();
-            part.bufferGain = p.context.createGain();
-
-            part.bufferGain.connect(part.bufferPanner);
-            part.bufferPanner.connect(p.compressor);
-        }
-        source.connect(part.bufferGain);
-        
-        part.bufferPanner.pan.setValueAtTime(part.data.pan, p.context.currentTime);
-        part.bufferGain.gain.setValueAtTime(part.data.volume, p.context.currentTime);
-        
-        source.start(p.context.currentTime);
-
-        return source;
-    }
-};
 
 OMusicPlayer.prototype.makeOMGSong = function (data) {
     var newSong;

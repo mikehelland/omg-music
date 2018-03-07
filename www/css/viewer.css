@@ -52,7 +52,7 @@
 	display:inline-block;
 	height:38px;
 	width:38px;
-	border:2px solid #888888;
+	border:3px solid #888888;
 	border-radius:100%;
 	font-size:1.7em;
 	font-style:bold;
@@ -60,7 +60,7 @@
 }
 
 .omg-music-controls-play-button:hover {
-	border:2px solid black;
+	border:3px solid black;
 }
 
 .omg-music-controls-edit-button:active, .omg-music-controls-button:active {
@@ -70,7 +70,7 @@
 }
 
 .omg-music-controls-play-button:active {
-	border:2px solid white;
+	border:3px solid white;
 	color:white;
 	background:black;
 }
@@ -148,4 +148,23 @@
 	font-family: Helvetica, Arial, sans-serif;
 	font-size: 12px;
 	padding:1%;
+}
+
+
+.loader {
+    -webkit-animation: spin 1s linear infinite;
+    animation: spin 1s linear infinite;
+    border: 3px solid #ddd;
+    border-top: 3px solid #42a5f5;
+    border-radius: 50%;
+    height: 38px;
+    width: 38px;
+}
+   
+@keyframes spin {
+    to {
+        border-top-color: #FFFF88;
+        -webkit-transform: rotate(360deg);
+        transform: rotate(360deg);
+    }
 }

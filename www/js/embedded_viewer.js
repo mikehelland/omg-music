@@ -250,14 +250,20 @@ function omg_embedded_viewer_loadData(params) {
 	   xhr.send();
 	};
 
+        var pbClass = viewer.playButton.className;
 	viewer.playButton.onclick = function () {
 	   if (viewer.player.playing) {
 		  viewer.player.stop();
 		  viewer.beatMarker.style.width = "0px";
+                  viewer.playButton.className = pbClass;
 		  viewer.playButton.innerHTML = "&#9654;";
 	   } else {
+                  viewer.player.onPlay = function () {
+                    viewer.playButton.className = pbClass;
+                    viewer.playButton.innerHTML = "&#9642;";
+                  }
+                  viewer.playButton.className = pbClass + " loader";
 		  viewer.player.play(viewer.omgsong);
-		  viewer.playButton.innerHTML = "&#9642;";
 	   }
 	};
 	
