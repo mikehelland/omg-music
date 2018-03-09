@@ -121,11 +121,14 @@ function omg_embedded_viewer_loadData(params) {
         });
     };
     viewer.drawPartsCanvases = function (section) {
-        var height = section.parts[0].div.clientHeight;
-        var width = section.parts[0].div.clientWidth;
-        section.parts.forEach(function (part) {
-                viewer.drawPart(part, width, height);
-        });
+        try {
+            var height = section.parts[0].div.clientHeight;
+            var width = section.parts[0].div.clientWidth;
+            section.parts.forEach(function (part) {
+                    viewer.drawPart(part, width, height);
+            });
+        }
+        catch (e) {console.log(e);}
     };
     viewer.loadSection = function (div, section) {
         section.parts.forEach(function (part) {
