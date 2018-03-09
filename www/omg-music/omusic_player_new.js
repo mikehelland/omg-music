@@ -109,13 +109,12 @@ OMusicPlayer.prototype.prepareSection = function (holder, info) {
     holder.parts = [];
 
     var chords = holder.data.chordProgression || [0];
-    chords.forEach(function (chord) {
-        data.parts.forEach(function (part) {
-            p.rescale(part, info.data.rootNote, info.data.ascale, chord);
-
-            partHolder = {data: part};
+    data.parts.forEach(function (part) {
+        partHolder = {data: part};
+        holder.parts.push(partHolder);
+        chords.forEach(function (chord) {
+            p.rescale(partHolder, info.data.rootNote, info.data.ascale, chord);
             p.preparePart(partHolder, info);
-            holder.parts.push(partHolder);
         });
     });
     //times chords.length?
@@ -150,14 +149,15 @@ OMusicPlayer.prototype.prepareDrumbeat = function (holder, info) {
         }
     }
 };
+var ooxx = 0;
 OMusicPlayer.prototype.prepareMelody = function (holder, info) {
     var p = this;
     var data = holder.data;
+    var notesCopy = JSON.parse(JSON.stringify(data.notes));
     
     var whenHasSoundset = function () {
-    
-        for (var ii = 0; ii < data.notes.length; ii++) {
-            var note = data.notes[ii];
+        for (var ii = 0; ii < notesCopy.length; ii++) {
+            var note = notesCopy[ii];
 
             if (note.rest)
                 continue;
@@ -172,7 +172,8 @@ OMusicPlayer.prototype.prepareMelody = function (holder, info) {
 
     if (typeof data.soundsetURL === "string") {
         p.getSoundSet(data.soundsetURL, function (soundset) {
-            p.setupPartWithSoundSet(soundset, holder, whenHasSoundset);
+            holder.soundset = soundset;
+            p.setupNotesWithSoundSet(soundset, notesCopy, whenHasSoundset);
         });
     }
 };
@@ -306,7 +307,7 @@ OMusicPlayer.prototype.scheduleSection = function (holder, info) {
     
     var data = holder.data;
     (data.chordProgression || [0]).forEach(function (chord) {
-        console.log("applying chord " + chord);
+        //todo I don't think we need this!
         p.applyChordToSection(chord, holder, info);
 
         data.parts.forEach(function (part) {
@@ -350,7 +351,6 @@ OMusicPlayer.prototype.scheduleSequencerPart = function (part, info) {
 OMusicPlayer.prototype.scheduleNotesPart = function (part, info) {
     var p = this;
     if (!part || !part.data || !part.data.notes) {
-		console.log(part);
         console.log("can't play part, no notes data");
     }
     
@@ -565,12 +565,10 @@ OMusicPlayer.prototype.initSound = function () {
 
 OMusicPlayer.prototype.rescale = function (part, rootNote, scale, chord) {
     var p = this;
-
     var data = part.data;
     if (!data || !data.notes) {
         return;
     }
-
     var octaveShift = data.octave || data.octaveShift;
     var octaves2;
     if (isNaN(octaveShift))
@@ -594,28 +592,26 @@ OMusicPlayer.prototype.rescale = function (part, rootNote, scale, chord) {
         }
 
         newNote = scale[newNote] + octaves2 * 12 + octaveShift * 12 + rootNote;
-
         onote.scaledNote = newNote;
     }
 
     if (part.soundset) {
-        p.setupPartWithSoundSet(part.soundset, part);
+        p.setupNotesWithSoundSet(part.soundset, data.notes);
     }
 };
 
-OMusicPlayer.prototype.setupPartWithSoundSet = function (ss, part, callback) {
+OMusicPlayer.prototype.setupNotesWithSoundSet = function (ss, notes, callback) {
     if (!ss)
         return;
 
-    part.soundset = ss;
     var note;
     var noteIndex;
 
     var prefix = ss.prefix || "";
     var postfix = ss.postfix || "";
 
-    for (var ii = 0; ii < part.data.notes.length; ii++) {
-        note = part.data.notes[ii];
+    for (var ii = 0; ii < notes.length; ii++) {
+        note = notes[ii];
 
         if (note.rest)
             continue;
@@ -783,7 +779,7 @@ OMusicPlayer.prototype.getTotalSubbeats = function () {
 
 OMusicPlayer.prototype.applyChordToSection = function (chord, section, info) {
     var p = this;
-    console.log(section);
+
     section.parts.forEach(function (part) {
         p.rescale(part, info.data.rootNote,
             info.data.ascale,

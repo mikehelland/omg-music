@@ -80,8 +80,6 @@ function omg_embedded_viewer_loadData(params) {
 
     var height = params.height || 150;
 
-    console.log("var height = " + height);
-
     viewer.shareButton.onclick = function () {
        omg.shareWindow.show();
     };
