@@ -2,7 +2,7 @@
 
 if (typeof omg === "undefined") {
     omg = {};
-    console.log("No OMG Obejcts for embedded_viewer.js, not good!")
+    console.log("No OMG Obejcts for embedded_viewer.js, not good!");
 }
 
 function omg_embedded_viewer_loadData(params) {
