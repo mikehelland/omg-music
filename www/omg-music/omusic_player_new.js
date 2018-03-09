@@ -1,12 +1,6 @@
-if (typeof (omg) !== "object") {
-    omg = {};
-}
-if (!omg.loadedSounds) {
-    omg.loadedSounds = {};
-}
-if (!omg.downloadedSoundSets) {
-    omg.downloadedSoundSets = [];
-}
+if (typeof (omg) !== "object") omg = {};
+if (!omg.loadedSounds)         omg.loadedSounds = {};
+if (!omg.downloadedSoundSets)  omg.downloadedSoundSets = [];
 
 function OMusicPlayer() {
 
@@ -52,106 +46,268 @@ function OMusicPlayer() {
     p.loopSection = -1;
 }
 
-
-OMusicPlayer.prototype.play = function (song) {
-    var p = this;
-    if (!p.context)
-        return;
-
-    if (song) {
-        if (!p.prepareSong(song)) {
-            return;
-        }
+OMusicPlayer.prototype.prepare = function (data) {
+    // figure out what this is
+    if (!data || !data.type) {
+        return false;
     }
 
-    p.song.playingSection = 0;
-
-    if (!p.song.sections || !p.song.sections.length) {
-        console.log("no sections to play()");
-        return -1;
+    // type should just be part, makes it easier to deal with
+    if (data.type === "MELODY" || data.type === "BASSLINE" || data.type === "DRUMBEAT") {
+        data.partType = data.type;
+        data.type = "PART";
     }
     
-    var goTime = function () {
-        p.playing = true;
-        p.playSection(p.song.playingSection);        
-        if (typeof (p.onPlay) === "function") {
-            p.onPlay();
-        }
-    };
-    if (p.soundsLoading < 1) {
-        goTime();
+    if (data.type !== "SONG" && data.type !== "SECTION" && data.type !== "PART") {
+        return false;
     }
-    else {
-        p.goTime = goTime;
-    }
-    return;
 
-    p.songStarted = p.loopStarted;
-    return p.playingIntervalHandle;
+    // we need a rootNote, scale, subbeats, beats, measures, and subbeat millis
+    if (!data.rootNote)      data.rootNote = 0;
+    if (!data.ascale)        data.ascale = [0,2,4,5,7,9,11];
+    if (!data.subbeatMillis) data.subbeatMillis = 125;
+    if (!data.subbeats)      data.subbeats = 4;
+    if (!data.beats)         data.beats = 4;
+    if (!data.measures)      data.measures = 2;
+
+    var info = {};
+    info.soundsToLoad = {};
+    info.totalSubbeats = 0;
+    info.data = data;
+
+    if (data.type === "SONG") {
+        this.prepareSong(data, info);
+    }
+    else if (data.type === "SECTION") {
+        this.prepareSection(data, info);
+    }
+    else if (data.type === "PART") {
+        this.preparePart({data: data} , info);
+    }
+    
+    return info;
 };
 
-
-OMusicPlayer.prototype.playSection = function (isection) {
+OMusicPlayer.prototype.prepareSong = function (data, info) {
     var p = this;
-    var section = p.song.sections[isection];
-    if (!section || !section.data) {
-        console.log("can't play section, no data");
+    
+    data.sections.forEach(function (section) {
+        p.prepareSection(section, info);
+    });    
+};
+
+OMusicPlayer.prototype.prepareSection = function (data, info) {
+    var p = this;
+    
+    data.parts.forEach(function (part) {
+        p.preparePart({data: part}, info);
+    });
+    
+    info.totalSubbeats += info.data.subbeats * info.data.beats * info.data.measures;
+};
+
+OMusicPlayer.prototype.preparePart = function (holder, info) {
+    var data = holder.data;
+    
+    // if this is the top level, iow, there is no section, just a solo part
+    if (data === info.data) {
+        info.totalSubbeats += info.data.subbeats * info.data.beats * info.data.measures;
+    }
+    
+    if (data.volume === undefined) data.volume = 0.6;
+    if (data.pan === undefined)    data.pan = 0;
+
+    if (data.surfaceURL === "PRESET_SEQUENCER") {
+        data.soundsetURL = data.soundsetURL || "PRESET_HIPKIT";
+        this.prepareDrumbeat(holder, info);
+    } else {
+        data.soundsetURL = data.soundsetURL || "PRESET_OSC_SINE_SOFT_DELAY";
+        this.prepareMelody(holder, info);
+    }
+};
+
+OMusicPlayer.prototype.prepareDrumbeat = function (holder, info) {
+    var tracks = holder.data.tracks;
+    for (var i = 0; i < tracks.length; i++) {
+        if (tracks[i].sound) {
+            this.prepareSound(tracks[i].sound, info);
+        }
+    }
+};
+OMusicPlayer.prototype.prepareMelody = function (data, info) {
+
+};
+
+OMusicPlayer.prototype.prepareSound = function (sound, info) {
+    var p = this;
+
+    if (!sound || !p.context) {
         return;
     }
     
-    var info = {};
-    //get the tempo from the song
-    //todo have a way to override this for section's to have individual tempo
-    info.subbeatMillis = p.song.data.subbeatMillis;
-    //same here
-    info.beats = p.song.data.beats;
-    info.subbeats = p.song.data.subbeats;
-    
-    //let the section choose the measures
-    info.measures = section.data.measures || p.song.data.measures;
-    info.totalSubbeats = info.beats * info.beats * info.measures;
+    if (!p.loadedSounds[sound] && !info.soundsToLoad[sound]) {
+        info.soundsToLoad[sound] = "load";
+    }
+};
 
-	if (!section.data.chordProgression || !section.data.chordProgression.length) {
-		section.data.chordProgression = [0];
-	}
+OMusicPlayer.prototype.load = function (info, callback) {
+    
+    if (info.loaded) {
+        if (callback) callback(info);
+        return;
+    }
+    
+    // load the sounds determined by the prepare() method
+    var p = this;
+
+    info.onload = callback;
+    info.soundsLoading = 0;
+    for (var sound in info.soundsToLoad)  {
+        
+        if (info.soundsToLoad[sound] !== "load") {
+            continue;
+        }
+        
+        var url = sound;
+        if (sound.indexOf("PRESET_") === 0) {
+            var preseturl = "http://mikehelland.com/omg/drums/";
+            url = preseturl + sound.substring(7).toLowerCase() + ".mp3";
+        }
+        
+        info.soundsLoading++;
+        
+        p.downloadSound(url, sound, info);        
+    }
+};
+
+OMusicPlayer.prototype.downloadSound = function (url, sound, info) {
+    var p = this;
+    
+    var request = new XMLHttpRequest();
+    request.open('GET', url, true);
+    request.responseType = 'arraybuffer';
+
+    // Decode asynchronously
+    request.onload = function () {
+        p.context.decodeAudioData(request.response, function (buffer) {
+            p.loadedSounds[sound] = buffer;
+            p.onSoundLoaded(true, sound, info);
+        }, function () {
+            console.log("error loading sound url: " + url);
+            p.onSoundLoaded(false, sound, info);
+        });
+    };
+    request.send();
+};
+
+OMusicPlayer.prototype.onSoundLoaded = function (success, sound, info) {
+    var p = this;
+    
+    info.soundsLoading--;
+    info.soundsToLoad[sound] = success ? "loaded" : "error";
+
+    if (info.soundsLoading < 1) {
+        info.loaded = true;
+        if (info.onload) {
+            info.onload(info);
+        }
+    }
+};
+
+OMusicPlayer.prototype.play = function (info) {
+    if (!this.context || !info || !info.data)
+        return;
+
+    var p = this;
 
     var offset = 0.001;
     info.startTime = p.context.currentTime + offset;
 
-	section.data.chordProgression.forEach(function (chord) {
-		p.applyChordToSection(chord, section);
+    var type = info.data.type;
+    if (type === "SONG") {
+        this.scheduleSong({data: info.data}, info);
+    }
+    else if (type === "SECTION") {
+        p.scheduleSection({data: info.data}, info);
+    }
+    else if (type === "PART") {
+        p.schedulePart({data: info.data}, info);
+    }
 
-		section.parts.forEach(function (part) {
-			part.audioBuffers = [];
-			if (part.data.mute) {
-				//not playing nothing
-			}
-			else if (part.data.surfaceURL === "PRESET_SEQUENCER") {
-				p.scheduleSequencerPart(part, info); 
-			}
-			else {
-				p.schedulePart(part, info);
-			}
-		});
-		
-		info.startTime += (info.totalSubbeats * info.subbeatMillis) / 1000;
-	});
+    p.playing = true;
+    if (typeof (p.onPlay) === "function") {
+        p.onPlay();
+    }
+
+    //leftovers, probably need this tho
+    p.songStarted = p.loopStarted;
+};
+
+OMusicPlayer.prototype.scheduleSong = function (holder, info) {
+    var p = this;
+    
+    if (!holder || !holder.data) {
+        console.log("can't play song, no data");
+        return;
+    }
+    
+    holder.data.sections.forEach(function (section) {
+        p.scheduleSection({data: section}, info); 
+    });   
+ };
+
+OMusicPlayer.prototype.scheduleSection = function (holder, info) {
+    var p = this;
+    
+    if (!holder || !holder.data) {
+        console.log("can't play section, no data");
+        return;
+    }
+    
+    var data = holder.data;
+    (data.chordProgression || [0]).forEach(function (chord) {
+        p.applyChordToSection(chord, data, info);
+
+        data.parts.forEach(function (part) {
+            if (part.mute) {
+                    //not playing nothing
+            }
+            else {
+                p.schedulePart({data: part}, info);
+            }
+        });
+
+        info.startTime += (info.data.subbeatMillis * info.data.subbeats *
+                info.data.beats * info.data.measures) / 1000;
+    });
+};
+
+OMusicPlayer.prototype.schedulePart = function (part, info) {
+    part.audioBuffers = [];
+    if (part.data.surfaceURL === "PRESET_SEQUENCER") {
+        this.scheduleSequencerPart(part, info); 
+    }
+    else {
+        this.scheduleNotesPart(part, info);
+    }  
 };
 
 OMusicPlayer.prototype.scheduleSequencerPart = function (part, info) {
     var subbeatTimeInLoop;
-    for (var i = 0; i < part.data.tracks.length; i++) {
+    var tracks = part.data.tracks;
+    for (var i = 0; i < tracks.length; i++) {
         for (var iSubbeat = 0; iSubbeat < info.totalSubbeats; iSubbeat++) {
-            if (part.data.tracks[i].data[iSubbeat]) {
-                subbeatTimeInLoop = iSubbeat * info.subbeatMillis / 1000;
-                this.scheduleSoundAtTime(part.data.tracks[i].sound, 
+            if (tracks[i].data[iSubbeat]) {
+                subbeatTimeInLoop = iSubbeat * info.data.subbeatMillis / 1000;
+                console.log("startTIme " + info.startTime);
+                this.scheduleSoundAtTime(tracks[i].sound, 
 					part, info.startTime + subbeatTimeInLoop);
             }
         } 
     }
 };
 
-OMusicPlayer.prototype.schedulePart = function (part, info) {
+OMusicPlayer.prototype.scheduleNotesPart = function (part, info) {
     var p = this;
     if (!part || !part.data || !part.data.notes) {
 		console.log(part);
@@ -160,6 +316,7 @@ OMusicPlayer.prototype.schedulePart = function (part, info) {
     
     var startTime = info.startTime;
     var beatsSoFar = 0;
+
     part.data.notes.forEach(function (note, i) {
         var playTime = info.startTime + (beatsSoFar * info.subbeats * info.subbeatMillis) / 1000;
         var duration = (note.beats * info.subbeats * info.subbeatMillis) / 1000;
@@ -167,25 +324,25 @@ OMusicPlayer.prototype.schedulePart = function (part, info) {
             p.scheduleSoundAtTime(note.sound, part, playTime, duration);
         }
         else {
-			p.scheduleOscAtTime(note, part, playTime, duration);
-		}
+            p.scheduleOscAtTime(note, part, playTime, duration);
+        }
         beatsSoFar += note.beats;
     });
 };
 
 OMusicPlayer.prototype.scheduleOscAtTime = function (note, part, startTime, duration) {
-	if (!part.osc) {
-		this.makeOsc(part);
-	}
-	
-	if (!note || note.rest)
-		part.osc.frequency.setValueAtTime(0, startTime);
-	else {
+    if (!part.osc) {
+        this.makeOsc(part);
+    }
 
-		var freq = this.makeFrequency(note.scaledNote);
-		part.osc.frequency.setValueAtTime(freq, startTime);
-		part.osc.frequency.setValueAtTime(0, startTime + duration * 0.995);
-	}
+    if (!note || note.rest)
+        part.osc.frequency.setValueAtTime(0, startTime);
+    else {
+
+        var freq = this.makeFrequency(note.scaledNote);
+        part.osc.frequency.setValueAtTime(freq, startTime);
+        part.osc.frequency.setValueAtTime(0, startTime + duration * 0.995);
+    }
 };
 
 OMusicPlayer.prototype.scheduleSoundAtTime = function (sound, part, startTime, duration) {
@@ -206,20 +363,20 @@ OMusicPlayer.prototype.scheduleSoundAtTime = function (sound, part, startTime, d
             part.bufferPanner.connect(p.compressor);
         }
         source.connect(part.bufferGain);
-        
+
         part.bufferPanner.pan.setValueAtTime(part.data.pan, p.context.currentTime);
         part.bufferGain.gain.setValueAtTime(part.data.volume, p.context.currentTime);
-        
+
         source.start(startTime);
         
         if (duration) {
-			//linearRampToValueAtTime starts at the previous event
-			//so this next line is a dummy set to move the event pointer forward to here
-			part.bufferGain.gain.linearRampToValueAtTime(part.data.volume, 
-					startTime + duration * 0.995);
-			part.bufferGain.gain.linearRampToValueAtTime(0, startTime + duration);
-			source.stop(startTime + duration);			
-		}
+            //linearRampToValueAtTime starts at the previous event
+            //so this next line is a dummy set to move the event pointer forward to here
+            part.bufferGain.gain.linearRampToValueAtTime(part.data.volume, 
+                            startTime + duration * 0.995);
+            part.bufferGain.gain.linearRampToValueAtTime(0, startTime + duration);
+            source.stop(startTime + duration);			
+        }
 
         //return source;
     }
@@ -295,11 +452,11 @@ OMusicPlayer.prototype.loadMelody = function (part) {
     var song = part.section ? part.section.song : undefined;
 
     if (song && typeof song.data.rootNote==="number") {
-        rootNote = song.data.rootNote;
+        rootNote = song.data.rootNote; 
     } else if (section && typeof section.data.rootNote==="number") {
-        rootNote = section.data.rootNote;
+        rootNote = section.data.rootNote; 
     } else if (typeof data.rootNote === "number") {
-        rootNote = data.rootNote % 12;
+        rootNote = data.rootNote % 12; 
     }
 
     if (song && song.data.ascale !== undefined) {
@@ -311,9 +468,9 @@ OMusicPlayer.prototype.loadMelody = function (part) {
     } else if (data.scale) {
         data.ascale = p.splitInts(data.scale);
     }
-
+console.log(part.data.notes);
     p.rescale(part, rootNote, ascale, 0);
-
+console.log(part.data.notes);
     if (typeof data.soundsetURL === "string") {
         p.getSoundSet(data.soundsetURL, function (soundset) {
             p.setupPartWithSoundSet(soundset, part, true);
@@ -385,7 +542,7 @@ OMusicPlayer.prototype.playWhenReady = function (sections) {
     }
 };
 
-OMusicPlayer.prototype.prepareSong = function (song) {
+OMusicPlayer.prototype._OLD_prepareSong = function (song) {
     var p = this;
     
     if (!song.data.beats) {
@@ -561,7 +718,7 @@ OMusicPlayer.prototype.loadSound = function (sound, part) {
 
     p.soundsLoading++;
     part.soundsLoading++;
-    console.log(part.soundsLoading + " sounds to load now");
+    console.log(part.soundsLoading + " sounds to load now " + key);
     // Decode asynchronously
     request.onload = function () {
         p.context.decodeAudioData(request.response, function (buffer) {
@@ -576,21 +733,6 @@ OMusicPlayer.prototype.loadSound = function (sound, part) {
 
 };
 
-OMusicPlayer.prototype.onSoundLoaded = function (success, part) {
-    var p = this;
-    p.soundsLoading--;
-    part.soundsLoading--;
-    console.log(`onSoundLoaded ${p.soundsLoading} left` );
-    console.log(`onSoundLoaded ${part.soundsLoading} left` );
-    if (part.soundsLoading < 1) {
-        part.loaded = true;
-    }
-    if (p.soundsLoading < 1) {
-        if (p.goTime) {
-            p.goTime();
-        }
-    }
-};
 
 OMusicPlayer.prototype.rescale = function (part, rootNote, scale, chord) {
     var p = this;
@@ -814,134 +956,6 @@ OMusicPlayer.prototype.getPresetSoundSet = function (preset) {
     return oret;
 };
 
-
-OMusicPlayer.prototype.makeOMGSong = function (data) {
-    var newSong;
-    var newSection;
-    var newPart;
-
-    if (!data) {
-        return null;
-    }
-
-    var className = data.constructor.name;
-
-    if (className === "OMGPart" || className === "OMGDrumpart") {
-
-        newSong = new OMGSong();
-        newSection = new OMGSection(null, null, newSong);
-        newSection.parts.push(data);
-        data.section = newSection;
-
-        if (data.data.beats) {
-            newSection.data.beats = data.data.beats;
-            newSong.data.beats = newSection.data.beats;
-        }            
-        if (data.data.subbeats) {
-            newSection.data.subbeats = data.data.subbeats;
-            newSong.data.subbeats = newSection.data.subbeats;
-        }   
-        if (data.data.measures) {
-            newSection.data.measures = data.data.measures;
-            newSong.data.measures = newSection.data.measures;
-        }   
-        if (data.data.subbeatMillis) {
-            newSection.data.subbeatMillis = data.data.subbeatMillis;
-            newSong.data.subbeatMillis = newSection.data.subbeatMillis;
-        }
-        return newSong;
-    }
-
-    if (className === "OMGSection") {
-
-        newSong = new OMGSong();
-        newSong.sections.push(data);
-        if (newSection.data.beats)
-            newSong.data.beats = newSection.data.beats;
-        if (newSection.data.subbeats)
-            newSong.data.subbeats = newSection.data.subbeats;
-        if (newSection.data.measures)
-            newSong.data.measures = newSection.data.measures;
-        if (newSection.data.subbeatMillis)
-            newSong.data.subbeatMillis = newSection.data.subbeatMillis;
-        
-        data.song = newSong;
-        return newSong;
-    }
-
-    if (!data.type) {
-        return null;
-    }
-
-    var newSong;
-    if (data.type === "SONG") {
-        newSong = new OMGSong(null, data);
-        return newSong;
-    }
-
-    if (data.type === "SECTION") {
-        newSong = new OMGSong();
-        newSection = new OMGSection(null, data, newSong);
-
-        if (newSection.data.beats)
-            newSong.data.beats = newSection.data.beats;
-        if (newSection.data.subbeats)
-            newSong.data.subbeats = newSection.data.subbeats;
-        if (newSection.data.measures)
-            newSong.data.measures = newSection.data.measures;
-        if (newSection.data.subbeatMillis)
-            newSong.data.subbeatMillis = newSection.data.subbeatMillis;
-        if (newSection.data.rootNote)
-            newSong.data.rootNote = newSection.data.rootNote;
-        if (newSection.data.ascale)
-            newSong.data.ascale = newSection.data.ascale;
-
-        return newSong;
-    }
-
-    newSong = new OMGSong();
-    newSection = new OMGSection(null, null, newSong);
-
-    //todo this could go away, we only have type = "PART" now
-    //its for back compat with pre-launch data
-    if (data.type === "MELODY" || data.type === "BASSLINE"
-            || data.partType === "MELODY" || data.partType === "BASSLINE") {
-        newPart = new OMGPart(null, data, newSection);
-    }
-    else if (data.type === "DRUMBEAT"
-            || data.partType === "DRUMBEAT") {
-        newPart = new OMGDrumpart(null, data, newSection);
-    }
-    else if (data.type === "PART") {
-        newPart = new OMGPart(null, data, newSection);
-    }
-
-    
-    if (newPart) {
-        if (newPart.data.beats) {
-            newSection.data.beats = newPart.data.beats;
-            newSong.data.beats = newSection.data.beats;
-        }            
-        if (newPart.data.subbeats) {
-            newSection.data.subbeats = newPart.data.subbeats;
-            newSong.data.subbeats = newSection.data.subbeats;
-        }   
-        if (newPart.data.measures) {
-            newSection.data.measures = newPart.data.measures;
-            newSong.data.measures = newSection.data.measures;
-        }   
-        if (newPart.data.subbeatMillis) {
-            newSection.data.subbeatMillis = newPart.data.subbeatMillis;
-            newSong.data.subbeatMillis = newSection.data.subbeatMillis;
-        }
-        newPart.section = newSection;
-        newSection.song = newSong;
-        return newSong;
-    }
-
-    return null;
-};
-
 OMusicPlayer.prototype.updatePartVolumeAndPan = function (part) {
 
     if (part.gain && part.osc) {
@@ -989,264 +1003,16 @@ OMusicPlayer.prototype.rescaleSong = function (rootNote, ascale, chord) {
     });
 };
 
-OMusicPlayer.prototype.applyChordToSection = function (chord, section) {
+OMusicPlayer.prototype.applyChordToSection = function (chord, section, info) {
     var p = this;
-    var song = this.song.data;
-	section.parts.forEach(function (part) {
-		p.rescale(part, song.rootNote || 0,
-				song.ascale || [0, 2, 4, 5, 7, 9, 11],
-				chord || 0);
+    console.log(chord, section, info)
+    section.parts.forEach(function (part) {
+        p.rescale(part, info.data.rootNote,
+            info.data.ascale,
+            chord || 0);
     });	
 };
 
 OMusicPlayer.prototype.setSubbeatMillis = function (subbeatMillis) {
     this.newSubbeatMillis = subbeatMillis;
 };
-
-
-
-function OMGSong(div, data, headerOnly) {
-    this.div = div;
-    this.sections = [];
-    this.loop = true;
-
-    if (headerOnly) {
-        this.setHeaderData(data);
-    } else if (data) {
-        this.setData(data);
-        if (data.id) {
-            this.saved = true;
-        }
-    } else {
-        this.data = {type: "SONG", name: "",
-            measures: 2, beats: 4, subbeats: 4, subbeatMillis: 125};
-    }
-
-
-    // key? tempo? yes, we need that shit
-}
-;
-OMGSong.prototype.setData = function (data) {
-    this.data = data;
-
-    for (var i = 0; i < data.sections.length; i++) {
-        var ooo = new OMGSection(null, data.sections[i], this);
-    }
-
-    if (!this.data.name)
-        this.data.name = "";
-};
-/*OMGSong.prototype.setHeaderData = function (data) {
-    this.measures = data.measures || this, measures;
-    this.beats = data.beats || this.beats;
-    this.subbeats = data.subbeats || this.subbeats;
-    this.subbeatMillis = data.subbeatMillis || this.subbeatMillis;
-}*/
-OMGSong.prototype.getData = function () {
-
-    this.data.sections = [];
-    for (var ip = 0; ip < this.sections.length; ip++) {
-        this.data.sections[ip] = this.sections[ip].getData();
-    }
-    return this.data;
-};
-
-function OMGSection(div, data, song) {
-    var partData;
-    var part;
-
-    this.div = div;
-
-    this.parts = [];
-    if (!song || !song.data) {
-        song = new OMGSong();
-        if (this.data.beats) {
-            song.data.beats = this.data.beats;
-        }
-        if (this.data.subbeats) {
-            song.data.subbeats = this.data.subbeats;
-        }
-        if (this.data.measures) {
-            song.data.measures = this.data.measures;
-        }
-        if (this.data.subbeatMillis) {
-            song.data.subbeatMillis = this.data.subbeatMillis;
-        }
-        if (typeof this.data.rootNote === "number") {
-            song.data.rootNote = this.data.rootNote;
-        }
-        if (this.data.ascale) {
-            song.data.ascale = this.data.ascale;
-        }
-    }
-    this.song = song;
-    this.position = song.sections.length;
-    song.sections.push(this);        
-
-    if (data) {
-        this.data = data;
-        if (data.id) {
-            this.saved = true;
-        }
-    } else {
-        this.data = {type: "SECTION", parts: []};
-    }
-
-    for (var ip = 0; ip < this.data.parts.length; ip++) {
-        partData = this.data.parts[ip];
-        if (partData.type === "DRUMBEAT" ||
-                partData.partType === "DRUMBEAT") {
-            part = new OMGDrumpart(null, partData, this);
-        } else {
-            part = new OMGPart(null, partData, this);
-        }
-    }
-}
-
-OMGSection.prototype.getData = function () {
-    this.data.parts = [];
-    for (var ip = 0; ip < this.parts.length; ip++) {
-        this.data.parts[ip] = this.parts[ip].data;
-    }
-    return this.data;
-};
-
-function OMGDrumpart(div, data, section) {
-    this.div = div;
-    if (!section || !section.data) {
-        console.log("new OMGDrumpart() called without a section. Not good.");
-        try {throw new Exception();}
-        catch (e) {console.log(e);}
-        var song = new OMGSong();
-        section = new OMGSection(null, null, song);
-    }
-
-    this.section = section;
-    this.position = section.parts.length;
-    section.parts.push(this);        
-    
-    if (!section.song || !section.song.data) {
-        section.song = new OMGSong();
-        section.song.sections.push(section.song);        
-    }
-    
-    if (data) {
-        this.data = data;
-        if (!data.partType) {
-            data.partType = "DRUMBEAT";
-            data.type = "PART";
-        }
-        if (data.id) {
-            this.saved = true;
-        }
-    } else {
-        this.data = {"type": "PART", "partType": "DRUMBEAT",
-            "surfaceURL": "PRESET_SEQUENCER",
-            "soundsetURL": "PRESET_HIPKIT", "soundsetName": "Hip Hop Drum Kit",
-            "bpm": 120, "kit": 0,
-            isNew: true,
-            "tracks": [{"name": "kick", "sound": "PRESET_HH_KICK",
-                    "data": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]},
-                {"name": "snare", "sound": "PRESET_HH_CLAP",
-                    "data": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]},
-                {"name": "closed hi-hat", "sound": "PRESET_ROCK_HIHAT_CLOSED",
-                    "data": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]},
-                {"name": "open hi-hat", "sound": "PRESET_HH_HIHAT",
-                    "data": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]},
-                {"name": "tambourine", "sound": "PRESET_HH_TAMB",
-                    "data": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]},
-                {"name": "h tom", "sound": "PRESET_HH_TOM_MH",
-                    "data": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]},
-                {"name": "m tom", "sound": "PRESET_HH_TOM_ML",
-                    "data": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]},
-                {"name": "l tom", "sound": "PRESET_HH_TOM_L",
-                    "data": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}
-            ]};
-    }
-    
-
-    if (!this.data.overrideSongBeats) {
-        this.data.beats = section.song.data.beats || 
-                section.data.beats || this.data.beats || 4;
-        this.data.subbeats = section.song.data.subbeats || 
-                section.data.subbeats || this.data.subbeats || 4;
-        this.data.measures = section.song.data.measures || 
-                section.data.measures || this.data.measures || 2;
-        this.data.subbeatMillis = section.song.data.subbeatMillis || 
-                section.data.subbeatMillis || this.data.subbeatMillis || 125;
-    }
-
-}
-
-function OMGPart(div, data, section) {
-    this.div = div;
-    if (!section || !section.data) {
-        console.log("new OMGPart() called without a section. Not good.");
-        try {throw new Exception();}
-        catch (e) {console.log(e);}
-        var song = new OMGSong();
-        section = new OMGSection(null, null, song);
-    }
-
-    this.section = section;
-    this.position = section.parts.length;
-    section.parts.push(this);        
-
-    if (!section.song || !section.song.data) {
-        section.song = new OMGSong();
-        section.song.sections.push(section.song);
-    }
-
-    if (data) {
-        this.data = data;
-        if (!data.partType) {
-            //if type is melody or bassline
-            data.partType = data.type;
-            data.type = "PART";
-        }
-    } else {
-        this.data = {type: "PART",
-            partType: "MELODY", surfaceURL: "PRESET_VERTICAL",
-            soundsetURL: "PRESET_OSC_SINE_SOFT_DELAY",
-            soundsetName: "Osc Soft Sine Delay",
-            notes: [], volume: 0.6, pan: 0, 
-            rootNote: 0, ascale: [0,2,4,5,7,9,11]
-        };
-    }
-
-    if (this.data.id) {
-        this.saved = true;
-    }
-    
-    if (!this.data.overrideSongKey) {        
-        this.data.rootNote = 
-                (typeof section.song.data.rootNote === "number") ?
-                    section.song.data.rootNote : 
-                    (typeof section.data.rootNote === "number") ?
-                        section.data.rootNote : 
-                            (typeof this.data.rootNote === "number") ?
-                                this.data.rootNote : 0;
-                            
-        this.data.ascale = section.song.data.ascale || section.data.ascale || 
-                this.data.ascale || [0,2,4,5,7,9,11];                            
-    }
-    
-    if (!this.data.overrideSongBeats) {
-        this.data.beats = section.song.data.beats || 
-                section.data.beats || this.data.beats || 4;
-        this.data.subbeats = section.song.data.subbeats || 
-                section.data.subbeats || this.data.subbeats || 4;
-        this.data.measures = section.song.data.measures || 
-                section.data.measures || this.data.measures || 2;
-        this.data.subbeatMillis = section.song.data.subbeatMillis || 
-                section.data.subbeatMillis || this.data.subbeatMillis || 125;
-    }
-}
