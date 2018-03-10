@@ -681,7 +681,11 @@ OMusicPlayer.prototype.getSoundSet = function (url, callback) {
     xhr2.onreadystatechange = function () {
 
         if (xhr2.readyState === 4) {
-            var ojson = JSON.parse(xhr2.responseText);
+            var ojson = null;
+            try {
+                ojson = JSON.parse(xhr2.responseText);
+            }
+            catch (e) {}
             if (ojson) {
                 p.downloadedSoundSets[url] = ojson;
                 callback(ojson);
