@@ -392,6 +392,7 @@ OMusicPlayer.prototype.scheduleSoundAtTime = function (sound, part, startTime, d
 
         var source = p.context.createBufferSource();
         source.buffer = p.loadedSounds[sound];
+        source.playbackRate.value = parseFloat(part.data.sampleSpeed) || 1;
         part.audioBuffers.push(source);
         
         if (!part.bufferPanner) {
