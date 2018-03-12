@@ -149,7 +149,7 @@ OMusicPlayer.prototype.prepareDrumbeat = function (holder, info) {
         }
     }
 };
-var ooxx = 0;
+
 OMusicPlayer.prototype.prepareMelody = function (holder, info) {
     var p = this;
     var data = holder.data;
@@ -276,6 +276,7 @@ OMusicPlayer.prototype.play = function (info) {
     }
 
     p.playing = true;
+    p.playingHolder = info.holder;
     if (typeof (p.onPlay) === "function") {
         p.onPlay();
     }
@@ -307,15 +308,12 @@ OMusicPlayer.prototype.scheduleSection = function (holder, info) {
     
     var data = holder.data;
     (data.chordProgression || [0]).forEach(function (chord) {
-        //todo I don't think we need this!
-        p.applyChordToSection(chord, holder, info);
 
-        data.parts.forEach(function (part) {
-            if (part.mute) {
-                    //not playing nothing
-            }
-            else {
-                p.schedulePart({data: part}, info);
+        holder.parts.forEach(function (part) {            
+            p.rescale(part, info.data.rootNote, info.data.ascale, chord);
+            
+            if (!part.mute) {
+                p.schedulePart(part, info);
             }
         });
 
@@ -325,7 +323,7 @@ OMusicPlayer.prototype.scheduleSection = function (holder, info) {
 };
 
 OMusicPlayer.prototype.schedulePart = function (part, info) {
-    part.audioBuffers = [];
+    if (!part.audioBuffers) part.audioBuffers = [];
     if (part.data.surfaceURL === "PRESET_SEQUENCER") {
         this.scheduleSequencerPart(part, info); 
     }
@@ -418,8 +416,6 @@ OMusicPlayer.prototype.scheduleSoundAtTime = function (sound, part, startTime, d
             part.bufferGain.gain.linearRampToValueAtTime(0, startTime + duration);
             source.stop(startTime + duration);			
         }
-
-        //return source;
     }
 };
 
@@ -431,22 +427,40 @@ OMusicPlayer.prototype.stop = function () {
         p.onStop();
     }
 
-    clearInterval(p.playingIntervalHandle);
     p.playing = false;
 
-    if (p.song && p.song.sections[p.song.playingSection]) {
-        var parts = p.song.sections[p.song.playingSection].parts;
-        for (var ip = 0; ip < parts.length; ip++) {
-            if (parts[ip].osc) {
-                parts[ip].osc.finishPart();
-            }
-            if (parts[ip].audioBuffers) {
-				parts[ip].audioBuffers.forEach(function (audioBuffer) {
-					audioBuffer.stop();
-				});
-				parts[ip].audioBuffers = [];
-			}
-        }
+    if (p.playingHolder.data.type === "SONG") {
+        p.stopSong(p.playingHolder);
+    }
+    else if (p.playingHolder.data.type === "SECTION") {
+        p.stopSection(p.playingHolder);
+    }
+    else if (p.playingHolder.data.type === "PART") {
+        p.stopPart(p.playingHolder);
+    }
+};
+
+OMusicPlayer.prototype.stopSong = function (holder) {
+    var p = this;
+    holder.sections.forEach(function (section) {
+       p.stopSection(section); 
+    });
+};
+OMusicPlayer.prototype.stopSection = function (holder) {
+    var p = this;
+    holder.parts.forEach(function (part) {
+       p.stopPart(part); 
+    });
+};
+OMusicPlayer.prototype.stopPart = function (part) {
+    if (part.osc) {
+        part.osc.finishPart();
+    }
+    if (part.audioBuffers) {
+        part.audioBuffers.forEach(function (audioBuffer) {
+                audioBuffer.stop();
+        });
+        part.audioBuffers = [];
     }
 };
 
@@ -464,8 +478,7 @@ OMusicPlayer.prototype.makeOsc = function (part) {
             part.osc.disconnect(part.gain);
             part.gain.disconnect(part.panner);
             part.panner.disconnect(p.compressor);
-        } catch (e) {
-        }
+        } catch (e) { }
     }
 
     part.osc = p.context.createOscillator();
@@ -544,24 +557,6 @@ OMusicPlayer.prototype.makeFrequency = function (mapped) {
     return Math.pow(2, (mapped - 69.0) / 12.0) * 440.0;
 };
 
-OMusicPlayer.prototype.initSound = function () {
-    var p = this;
-    p.playedSound = true;
-    try {
-        var osc = p.context.createOscillator();
-        osc.connect(p.context.destination);
-        osc.frequency.setValueAtTime(0, p.context.currentTime);
-        osc.start(p.context.currentTime);
-
-        setTimeout(function () {
-            osc.stop(p.context.currentTime);
-            osc.disconnect(p.context.destination);
-
-        }, 500);
-    } catch (ex) {
-        console.log("error initializing web audio api");
-    }
-};
 
 OMusicPlayer.prototype.rescale = function (part, rootNote, scale, chord) {
     var p = this;
@@ -698,8 +693,6 @@ OMusicPlayer.prototype.getSoundSet = function (url, callback) {
 
 };
 
-
-
 OMusicPlayer.prototype.getPresetSoundSet = function (preset) {
     var p = this;
 
@@ -721,76 +714,19 @@ OMusicPlayer.prototype.getPresetSoundSet = function (preset) {
     if (preset === "PRESET_HIP") {
         oret = {"name": "PRESET_HIP", "id": 0,
             "data": {"name": "PRESET_HIP", "data": [
-                    {"url": "PRESET_HH_KICK", "caption": "kick"},
-                    {"url": "PRESET_HH_CLAP", "caption": "clap"},
-                    {"url": "PRESET_ROCK_HIHAT_CLOSED", "caption": "hihat closed"},
-                    {"url": "PRESET_HH_HIHAT", "caption": "hihat open"},
-                    {"url": "PRESET_HH_TAMB", "caption": "tambourine"},
-                    {"url": "PRESET_HH_TOM_MH", "caption": "h tom"},
-                    {"url": "PRESET_HH_TOM_ML", "caption": "m tom"},
-                    {"url": "PRESET_HH_TOM_L", "caption": "l tom"}
+                    {"url": "PRESET_HH_KICK", "caption": "kick"},{"url": "PRESET_HH_CLAP", "caption": "clap"},{"url": "PRESET_ROCK_HIHAT_CLOSED", "caption": "hihat closed"},{"url": "PRESET_HH_HIHAT", "caption": "hihat open"},
+                    {"url": "PRESET_HH_TAMB", "caption": "tambourine"},{"url": "PRESET_HH_TOM_MH", "caption": "h tom"},{"url": "PRESET_HH_TOM_ML", "caption": "m tom"},{"url": "PRESET_HH_TOM_L", "caption": "l tom"}
                 ]}};
 
     }
     if (preset === "PRESET_ROCK") {
         oret = {"name": "PRESET_ROCK", "id": 0,
             "data": {"name": "PRESET_ROCK", "data": [
-                    {"url": "PRESET_ROCK_KICK", "caption": "kick"},
-                    {"url": "PRESET_ROCK_SNARE", "caption": "snare"},
-                    {"url": "PRESET_ROCK_HIHAT_CLOSED", "caption": "hihat closed"},
-                    {"url": "PRESET_ROCK_HIHAT_OPEN", "caption": "hihat open"},
-                    {"url": "PRESET_ROCK_CRASH", "caption": "crash"},
-                    {"url": "PRESET_ROCK_TOM_H", "caption": "h tom"},
-                    {"url": "PRESET_ROCK_TOM_ML", "caption": "m tom"},
-                    {"url": "PRESET_ROCK_TOM_L", "caption": "l tom"}
+                    {"url": "PRESET_ROCK_KICK", "caption": "kick"},{"url": "PRESET_ROCK_SNARE", "caption": "snare"},{"url": "PRESET_ROCK_HIHAT_CLOSED", "caption": "hihat closed"},{"url": "PRESET_ROCK_HIHAT_OPEN", "caption": "hihat open"},
+                    {"url": "PRESET_ROCK_CRASH", "caption": "crash"},{"url": "PRESET_ROCK_TOM_H", "caption": "h tom"},{"url": "PRESET_ROCK_TOM_ML", "caption": "m tom"},{"url": "PRESET_ROCK_TOM_L", "caption": "l tom"}
                 ]}};
 
     }
 
-
     return oret;
-};
-
-OMusicPlayer.prototype.updatePartVolumeAndPan = function (part) {
-
-    if (part.gain && part.osc) {
-        var oscGain = (part.osc.soft ? 1 : 2) * part.data.volume / 10;
-        part.gain.gain.setValueAtTime(oscGain, this.context.currentTime);
-    }
-    if (part.bufferGain) {
-        part.bufferGain.gain.setValueAtTime(part.data.volume, this.context.currentTime);
-    }
-    if (part.panner) {
-        part.panner.pan.setValueAtTime(part.data.pan, this.context.currentTime);
-    }
-
-};
-
-
-OMusicPlayer.prototype.splitInts = function (input) {
-    var newInts = [];
-    var elements = input.split(",");
-    elements.forEach(function (el) {
-        newInts.push(parseInt(el));
-    });
-    return newInts;
-};
-
-OMusicPlayer.prototype.getTotalSubbeats = function () {
-    return this.beats * this.subbeats * this.measures;
-};
-
-
-OMusicPlayer.prototype.applyChordToSection = function (chord, section, info) {
-    var p = this;
-
-    section.parts.forEach(function (part) {
-        p.rescale(part, info.data.rootNote,
-            info.data.ascale,
-            chord || 0);
-    });	
-};
-
-OMusicPlayer.prototype.setSubbeatMillis = function (subbeatMillis) {
-    this.newSubbeatMillis = subbeatMillis;
 };
