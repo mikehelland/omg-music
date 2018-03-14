@@ -153,11 +153,12 @@ function omg_embedded_viewer_loadData(params) {
             params.keepCanvasDirty = true; // so each part doesn't clear the rest
             params.data = part; //part.data;
 
-            if (params.data.surfaceURL === "PRESET_SEQUENCER") {
-                    params.captionWidth = 0;
-                    omg.ui.drawDrumCanvas(params);
+            if (params.data.surfaceURL === "PRESET_SEQUENCER" ||
+                    params.data.surface.url === "PRESET_SEQUENCER") {
+                params.captionWidth = 0;
+                omg.ui.drawDrumCanvas(params);
             } else if (params.data.surfaceURL) {
-                    omg.ui.drawMelodyCanvas(params);
+                omg.ui.drawMelodyCanvas(params);
             }
     };
 
