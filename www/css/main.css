@@ -302,13 +302,17 @@ h3 {
 	opacity:0.6;
 }
 
-.omg-part-data, .omg-part {background-color:#FFFF99; border-radius:8px; 
+.omg-part-data, .omg-part-muted, .omg-part {background-color:#FFFF99; border-radius:8px; 
 	margin:2px; 
 	flex-grow:1;	
 	font-size:1em; 
 	}
 	
 .omg-part-data {
+}
+
+.omg-part-muted {
+    background-color:#FF8888;
 }
 
 .omg-song-data {

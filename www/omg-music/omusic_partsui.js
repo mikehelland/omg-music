@@ -187,14 +187,18 @@ omg.ui.drawDrumCanvas = function (params) {
         }
 
         context.fillStyle = "black";
-        context.fillText(drumbeat.tracks[i].name, left, top + trackHeight * (i + 0.5) + 6);
+        if (captionWidth > 0) {
+            context.fillText(drumbeat.tracks[i].name, left, top + trackHeight * (i + 0.5) + 6);
+        }
         
         if (i === canvas.omgdata.selectedTrack) {
             context.strokeRect(left, top + i * trackHeight, captionWidth, trackHeight);
         }
     }
+    context.globalAlpha = 0.5;
     context.fillStyle = "white";
     context.fillRect(left + captionWidth, top, width - captionWidth, height);
+    context.globalAlpha = 1;
 
     if (canvas.omgdata.selectedTrack > -1) {
         omg.ui.drawDrumCanvasForTrack(params);

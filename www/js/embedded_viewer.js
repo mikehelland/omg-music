@@ -135,11 +135,17 @@ function omg_embedded_viewer_loadData(params) {
     };
     viewer.loadPart = function (div, part) {
         var partDiv = document.createElement("canvas");
-        partDiv.height = 1;
-        partDiv.width = 1;
-        partDiv.className = "omg-part";
         part.div = partDiv;
-
+        if (!part.mute) {
+            partDiv.height = 1;
+            partDiv.width = 1;
+            partDiv.className = "omg-part";
+        }
+        else {
+            partDiv.height = 1;
+            partDiv.width = 1;
+            partDiv.className = "omg-part-muted";
+        }
         div.appendChild(partDiv);
 
     };
