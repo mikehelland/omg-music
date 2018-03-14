@@ -209,7 +209,10 @@ OMusicEditor.prototype.setupPartDiv = function (part) {
     var bam = this;
 
     var type = part.data.type;
-    var surface = part.data.surfaceURL;
+    if (!part.data.surface) {
+        part.data.surface = {url: part.data.surfaceURL || "PRESET_VERTICAL"};
+    }
+    var surface = part.data.surface.url;
 
     if (type == "CHORDPROGRESSION") {
         //todo might show this thing?
@@ -1685,7 +1688,9 @@ OMusicEditor.prototype.grow = function (div, callback, children) {
                     child.canvas.style.height = child.height + "px";
                     child.canvas.width = child.width;
                     child.canvas.height = child.height;
-                    child.canvas.omusic_refresh();
+                    if (child.canvas.omusic_refresh) {
+                        child.canvas.omusic_refresh();
+                    }
                 }
             });
         }
