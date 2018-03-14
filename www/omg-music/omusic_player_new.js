@@ -320,7 +320,7 @@ OMusicPlayer.prototype.scheduleSection = function (holder, info) {
         holder.parts.forEach(function (part) {            
             p.rescale(part, info.data.rootNote, info.data.ascale, chord);
             
-            if (!part.mute) {
+            if (!part.data.mute) {
                 p.schedulePart(part, info);
             }
         });
