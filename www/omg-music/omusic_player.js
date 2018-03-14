@@ -1330,9 +1330,12 @@ function OMGPart(div, data, section) {
             data.partType = data.type;
             data.type = "PART";
         }
+        if (!data.surface) {
+            data.surface = {url: data.surfaceURL || "PRESET_VERTICAL"};
+        }
     } else {
         this.data = {type: "PART",
-            partType: "MELODY", surfaceURL: "PRESET_VERTICAL",
+            partType: "MELODY", surface: {url: "PRESET_VERTICAL"},
             soundsetURL: "PRESET_OSC_SINE_SOFT_DELAY",
             soundsetName: "Osc Soft Sine Delay",
             notes: [], volume: 0.6, pan: 0, 
