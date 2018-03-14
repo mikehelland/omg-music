@@ -332,7 +332,7 @@ OMusicPlayer.prototype.scheduleSection = function (holder, info) {
 
 OMusicPlayer.prototype.schedulePart = function (part, info) {
     if (!part.audioBuffers) part.audioBuffers = [];
-    if (part.data.surfaceURL === "PRESET_SEQUENCER") {
+    if (part.data.surface.url === "PRESET_SEQUENCER") {
         this.scheduleSequencerPart(part, info); 
     }
     else {
