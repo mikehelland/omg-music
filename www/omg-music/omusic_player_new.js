@@ -132,7 +132,11 @@ OMusicPlayer.prototype.preparePart = function (holder, info) {
     if (data.volume === undefined) data.volume = 0.6;
     if (data.pan === undefined)    data.pan = 0;
 
-    if (data.surfaceURL === "PRESET_SEQUENCER") {
+    if (data.surfaceURL && !data.surface) {
+        data.surface = {url: data.surfaceURL};
+    }
+
+    if (data.surface.url === "PRESET_SEQUENCER") {
         data.soundsetURL = data.soundsetURL || "PRESET_HIPKIT";
         this.prepareDrumbeat(holder, info);
     } else {
@@ -143,6 +147,8 @@ OMusicPlayer.prototype.preparePart = function (holder, info) {
 
 OMusicPlayer.prototype.prepareDrumbeat = function (holder, info) {
     var tracks = holder.data.tracks;
+    if (!tracks) return;
+    
     for (var i = 0; i < tracks.length; i++) {
         if (tracks[i].sound) {
             this.prepareSound(tracks[i].sound, info);
@@ -153,6 +159,8 @@ OMusicPlayer.prototype.prepareDrumbeat = function (holder, info) {
 OMusicPlayer.prototype.prepareMelody = function (holder, info) {
     var p = this;
     var data = holder.data;
+    if (!data.notes) return;
+    
     var notesCopy = JSON.parse(JSON.stringify(data.notes));
     
     var whenHasSoundset = function () {
