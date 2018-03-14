@@ -154,10 +154,10 @@ function omg_embedded_viewer_loadData(params) {
             params.data = part; //part.data;
 
             if (params.data.surfaceURL === "PRESET_SEQUENCER" ||
-                    params.data.surface.url === "PRESET_SEQUENCER") {
+                    (params.data.surface && params.data.surface.url === "PRESET_SEQUENCER")) {
                 params.captionWidth = 0;
                 omg.ui.drawDrumCanvas(params);
-            } else if (params.data.surfaceURL) {
+            } else {
                 omg.ui.drawMelodyCanvas(params);
             }
     };
