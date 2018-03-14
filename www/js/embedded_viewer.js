@@ -7,7 +7,7 @@ if (typeof omg === "undefined") {
 
 function omg_embedded_viewer_loadData(params) {
     var div = params.div;
-    var data = params.data;
+    var data = testData(); //params.data;
     var viewer = {};	
     viewer.div = div;
     div.style.position = "relative";
@@ -327,3 +327,5 @@ function getTimeCaption(timeMS) {
     }
     return monthday + " " + date.getYear();
 };
+
+function testData() {return {"pan":0,"type":"PART","beats":4,"notes":[{"note":5,"rest":false,"beats":0.25},{"note":5,"rest":false,"beats":0.25},{"note":-1,"rest":false,"beats":0.25},{"note":-10,"rest":false,"beats":0.25},{"note":5,"rest":false,"beats":0.25},{"note":6,"rest":false,"beats":0.25},{"note":-2,"rest":false,"beats":0.25},{"note":-10,"rest":false,"beats":0.25},{"note":5,"rest":false,"beats":0.25},{"note":5,"rest":false,"beats":0.25},{"note":-1,"rest":false,"beats":0.25},{"note":-10,"rest":false,"beats":0.25},{"note":5,"rest":false,"beats":0.25},{"note":5,"rest":false,"beats":0.25},{"note":-10,"rest":false,"beats":0.25},{"note":-1,"rest":false,"beats":0.25},{"note":-10,"rest":false,"beats":0.25},{"note":5,"rest":false,"beats":0.25},{"note":-2,"rest":false,"beats":0.25},{"note":-10,"rest":false,"beats":0.25},{"note":5,"rest":false,"beats":0.25},{"note":5,"rest":false,"beats":0.25},{"note":-2,"rest":false,"beats":0.25},{"note":-10,"rest":false,"beats":0.25},{"note":5,"rest":false,"beats":0.25},{"note":5,"rest":false,"beats":0.25},{"note":-1,"rest":false,"beats":0.25},{"note":-10,"rest":false,"beats":0.25},{"note":5,"rest":false,"beats":0.25},{"note":5,"rest":false,"beats":0.25},{"note":-2,"rest":false,"beats":0.25},{"note":-10,"rest":false,"beats":0.25}],"scale":"0,3,5,6,7,10","ascale":[0,3,5,6,7,10],"octave":5,"volume":0.75,"surface":{"url":"PRESET_VERTICAL","name":"","skipTop":0,"skipBottom":0},"topNote":72,"measures":2,"partType":"PART","rootNote":60,"subbeats":4,"soundFont":false,"bottomNote":48,"created_at":1521008158670,"octaveShift":5,"sampleSpeed":1,"soundsetURL":"PRESET_OSC_SINE_SOFT_DELAY","soundsetName":"Osc Soft Sine Delay","last_modified":1521008158670,"subbeatMillis":125,"id":1025};}

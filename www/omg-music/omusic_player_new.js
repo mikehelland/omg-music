@@ -332,6 +332,11 @@ OMusicPlayer.prototype.scheduleSection = function (holder, info) {
 
 OMusicPlayer.prototype.schedulePart = function (part, info) {
     if (!part.audioBuffers) part.audioBuffers = [];
+    
+    if (part === info.holder) {
+        this.rescale(part, info.data.rootNote, info.data.ascale, 0);
+    }
+    
     if (part.data.surface.url === "PRESET_SEQUENCER") {
         this.scheduleSequencerPart(part, info); 
     }
@@ -385,7 +390,6 @@ OMusicPlayer.prototype.scheduleOscAtTime = function (note, part, startTime, dura
     if (!note || note.rest)
         part.osc.frequency.setValueAtTime(0, startTime);
     else {
-
         var freq = this.makeFrequency(note.scaledNote);
         part.osc.frequency.setValueAtTime(freq, startTime);
         part.osc.frequency.setValueAtTime(0, startTime + duration * 0.995);
@@ -595,7 +599,7 @@ OMusicPlayer.prototype.rescale = function (part, rootNote, scale, chord) {
             octaves2--;
         }
 
-        newNote = scale[newNote] + octaves2 * 12 + octaveShift * 12 + rootNote;
+        newNote = scale[newNote] + octaves2 * 12 + octaveShift * 12 + (rootNote % 12);
         onote.scaledNote = newNote;
     }
 
