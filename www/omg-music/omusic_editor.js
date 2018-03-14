@@ -647,7 +647,7 @@ OMusicEditor.prototype.setupSectionEditor = function () {
                 part.position = ii;
         }
 
-        if (part.data.surfaceURL !== "PRESET_SEQUENCER") {
+        if (part.data.surface.url !== "PRESET_SEQUENCER") {
             
             var oldCallback = callback;
             callback = function () {
@@ -1532,7 +1532,7 @@ OMusicEditor.prototype.setupMelodyMaker = function () {
         var part = bam.part;
 
         var type = bam.part.data.type;
-        var surface = bam.part.data.surfaceURL;
+        var surface = bam.part.data.surface.url;
 
         if (bam.sectionEditor.mixerMode) {
             bam.sectionEditor.dragAndDrop.setupChildDiv(part.div);
