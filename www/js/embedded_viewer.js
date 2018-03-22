@@ -6,9 +6,11 @@ if (typeof omg === "undefined") {
 }
 
 function omg_embedded_viewer_loadData(params) {
+    console.log("starting")
+    console.log(params);
     var div = params.div;
     var data = params.data;
-    var viewer = {};	
+    var viewer = {};
     viewer.div = div;
     div.style.position = "relative";
     //div.style.overflowX = "scroll";
@@ -38,7 +40,8 @@ function omg_embedded_viewer_loadData(params) {
     viewer.voteButton.className = "omg-music-controls-button";
 
     viewer.div.appendChild(viewer.playButton);
-    if (data.id) viewer.div.appendChild(viewer.editButton);
+    if (data.id)
+        viewer.div.appendChild(viewer.editButton);
     //viewer.div.appendChild(viewer.shareButton);
 
     var result = data;
@@ -46,8 +49,8 @@ function omg_embedded_viewer_loadData(params) {
     var resultCaption = result.tags || result.name || "";
     var type = result.partType || result.type || "";
     if (resultCaption.length === 0) {
-            resultCaption = "(" + type.substring(0, 1).toUpperCase() + 
-                    type.substring(1).toLowerCase() + ")";
+        resultCaption = "(" + type.substring(0, 1).toUpperCase() +
+                type.substring(1).toLowerCase() + ")";
     }
 
     var resultData = document.createElement("div");
@@ -81,7 +84,7 @@ function omg_embedded_viewer_loadData(params) {
     var height = params.height || 150;
 
     viewer.shareButton.onclick = function () {
-       omg.shareWindow.show();
+        omg.shareWindow.show();
     };
 
     viewer.partMargin = 20;
@@ -101,7 +104,7 @@ function omg_embedded_viewer_loadData(params) {
     viewer.loadSong = function (data) {
         var flexDiv = document.createElement("div");
         flexDiv.className = "omg-song-data";
-        flexDiv.style.height  = height + "px";
+        flexDiv.style.height = height + "px";
         viewer.div.appendChild(flexDiv);
 
         data.sections.forEach(function (section, isection) {
@@ -115,7 +118,7 @@ function omg_embedded_viewer_loadData(params) {
     };
     viewer.drawSectionCanvases = function (data) {
         data.sections.forEach(function (section, isection) {
-                viewer.drawPartsCanvases(section);
+            viewer.drawPartsCanvases(section);
         });
     };
     viewer.drawPartsCanvases = function (section) {
@@ -123,14 +126,15 @@ function omg_embedded_viewer_loadData(params) {
             var height = section.parts[0].div.clientHeight;
             var width = section.parts[0].div.clientWidth;
             section.parts.forEach(function (part) {
-                    viewer.drawPart(part, width, height);
+                viewer.drawPart(part, width, height);
             });
+        } catch (e) {
+            console.log(e);
         }
-        catch (e) {console.log(e);}
     };
     viewer.loadSection = function (div, section) {
         section.parts.forEach(function (part) {
-                viewer.loadPart(div, part);
+            viewer.loadPart(div, part);
         });
     };
     viewer.loadPart = function (div, part) {
@@ -140,8 +144,7 @@ function omg_embedded_viewer_loadData(params) {
             partDiv.height = 1;
             partDiv.width = 1;
             partDiv.className = "omg-part";
-        }
-        else {
+        } else {
             partDiv.height = 1;
             partDiv.width = 1;
             partDiv.className = "omg-part-muted";
@@ -150,22 +153,22 @@ function omg_embedded_viewer_loadData(params) {
 
     };
     viewer.drawPart = function (part, width, height) {
-            var partDiv = part.div;
-            partDiv.height = partDiv.clientHeight;
-            partDiv.width = partDiv.clientWidth - 16;
+        var partDiv = part.div;
+        partDiv.height = partDiv.clientHeight;
+        partDiv.width = partDiv.clientWidth - 16;
 
-            params = {};
-            params.canvas = partDiv;
-            params.keepCanvasDirty = true; // so each part doesn't clear the rest
-            params.data = part; //part.data;
+        var params = {};
+        params.canvas = partDiv;
+        params.keepCanvasDirty = true; // so each part doesn't clear the rest
+        params.data = part; //part.data;
 
-            if (params.data.surfaceURL === "PRESET_SEQUENCER" ||
-                    (params.data.surface && params.data.surface.url === "PRESET_SEQUENCER")) {
-                params.captionWidth = 0;
-                omg.ui.drawDrumCanvas(params);
-            } else {
-                omg.ui.drawMelodyCanvas(params);
-            }
+        if (params.data.surfaceURL === "PRESET_SEQUENCER" ||
+                (params.data.surface && params.data.surface.url === "PRESET_SEQUENCER")) {
+            params.captionWidth = 0;
+            omg.ui.drawDrumCanvas(params);
+        } else {
+            omg.ui.drawMelodyCanvas(params);
+        }
     };
 
     viewer.loadPlayer = function (dataToPlay) {
@@ -177,14 +180,13 @@ function omg_embedded_viewer_loadData(params) {
         if (dataToPlay.type === "SOUNDSET") {
             soundSet = true;
             viewer.div.className = "omg-soundset";
-        }
-        else {        
+        } else {
             viewer.player = new OMusicPlayer();
             var info = viewer.player.prepare(dataToPlay);
             if (!info) {
-               console.log("couldn't prepare data");
-               console.log(dataToPlay);
-               return false;
+                console.log("couldn't prepare data");
+                console.log(dataToPlay);
+                return false;
             }
             viewer.info = info;
         }
@@ -195,20 +197,20 @@ function omg_embedded_viewer_loadData(params) {
         }
         if (dataToPlay.type === "SECTION") {
             viewer.div.className = "omg-section";
-            var section = dataToPlay; 
+            var section = dataToPlay;
 
             var flexDiv = document.createElement("div");
             flexDiv.className = "omg-section-data";
-            flexDiv.style.height  = height + "px";
+            flexDiv.style.height = height + "px";
             viewer.div.appendChild(flexDiv);
 
             viewer.loadSection(flexDiv, section);
             viewer.drawPartsCanvases(section);
 
         }
-        if (dataToPlay.type === "PART" || 
-                     dataToPlay.type === "MELODY" || dataToPlay.type === "BASSLINE" ||
-                     dataToPlay.type === "DRUMBEAT") {
+        if (dataToPlay.type === "PART" ||
+                dataToPlay.type === "MELODY" || dataToPlay.type === "BASSLINE" ||
+                dataToPlay.type === "DRUMBEAT") {
             viewer.div.className = "omg-part-data";
             var part = dataToPlay; //viewer.omgsong.sections[0].parts[0];
             viewer.loadPart(viewer.div, part);
@@ -223,17 +225,16 @@ function omg_embedded_viewer_loadData(params) {
 
         if (soundSet) {
 
-        }
-        else {
-            viewer.totalBeatsInSong =  info.totalSubbeats; 
+        } else {
+            viewer.totalBeatsInSong = info.totalSubbeats;
             var pxPerBeat = (viewer.div.clientWidth - padding) / viewer.totalBeatsInSong;
 
-            viewer.player.onBeatPlayedListeners.push(function(isubbeat, isection) {
-                    viewer.beatMarker.style.width = pxPerBeat * (1 + isubbeat + isection * beatsInSection) + "px";
+            viewer.player.onBeatPlayedListeners.push(function (isubbeat, isection) {
+                viewer.beatMarker.style.width = pxPerBeat * (1 + isubbeat + isection * beatsInSection) + "px";
             });
 
             viewer.editButton.onclick = function () {
-                    window.location = "music-maker.htm?id=" + dataToPlay.id;
+                window.location = "music-maker.htm?id=" + dataToPlay.id;
             };
 
         }
@@ -244,66 +245,78 @@ function omg_embedded_viewer_loadData(params) {
 
 
     viewer.queryStringParameters = (function () {
-       var loadParams = {};
-       var params = document.location.search;
-       var nvp;
+        var loadParams = {};
+        var params = document.location.search;
+        var nvp;
 
-       if (params.length > 1) {
-              params = params.slice(1).split("&");
-              for (var ip = 0; ip < params.length; ip++) {
-                     nvp = params[ip].split("=");
-                     loadParams[nvp[0]] = nvp[1];
-              }
-       }
-       return loadParams;
+        if (params.length > 1) {
+            params = params.slice(1).split("&");
+            for (var ip = 0; ip < params.length; ip++) {
+                nvp = params[ip].split("=");
+                loadParams[nvp[0]] = nvp[1];
+            }
+        }
+        return loadParams;
     })();
 
     viewer.getDataById = function (id, callback, errorCallback) {
-       var xhr = new XMLHttpRequest();
-       xhr.open("GET", "/data/" + id, true);
-       xhr.onreadystatechange = function() {
-              if (xhr.readyState === 4) {
-                     var ojson = JSON.parse(xhr.responseText);
-                     callback(ojson);
-              }
-       };
-       xhr.send();
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET", "/data/" + id, true);
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4) {
+                var ojson = JSON.parse(xhr.responseText);
+                callback(ojson);
+            }
+        };
+        xhr.send();
     };
 
-    var pbClass = viewer.playButton.className;
     viewer.playButton.onclick = function () {
-       if (viewer.player.playing) {
-              viewer.player.stop();
-              viewer.beatMarker.style.width = "0px";
-              viewer.playButton.className = pbClass;
-              viewer.playButton.innerHTML = "&#9654;";
-       } else {
-              viewer.player.onPlay = function () {
-                viewer.playButton.className = pbClass;
-                viewer.playButton.innerHTML = "&#9642;";
-              };
-              viewer.playButton.className = pbClass + " loader";
-              viewer.player.load(viewer.info, function (info) {
-                  viewer.player.play(info);
-              });
-       }
+        var pbClass = viewer.playButton.className;
+        viewer.player.onStop = function () {
+            viewer.playButton.className = pbClass;
+            viewer.playButton.innerHTML = "&#9654;";        
+            if (typeof params.onStop === "function") {
+                params.onStop();
+            }
+        };
+        viewer.player.onPlay = function (info) {
+            viewer.playButton.className = pbClass;
+            viewer.playButton.innerHTML = "&#9642;";        
+            if (typeof params.onPlay === "function") {
+                params.onPlay(viewer.player, info);
+            }
+        };
+
+        if (viewer.player.playing) {
+            viewer.player.stop();
+            viewer.beatMarker.style.width = "0px";
+
+        } else {
+            viewer.playButton.className = pbClass + " loader";
+            viewer.player.load(viewer.info, function (info) {
+                viewer.player.play(info);
+            });
+        }
     };
 
+    console.log("loading player")
+    console.log(data);
     viewer.loadPlayer(data);
 }
 
 function omg_embedded_viewer_loadURL(params) {
-	omg.server.getHTTP(params.url, function (result) {
-		params.data = result;
-		omg_embedded_viewer_loadData(div, result);
-	});
+    omg.server.getHTTP(params.url, function (result) {
+        params.data = result;
+        omg_embedded_viewer_loadData(div, result);
+    });
 }
 
 function omg_embedded_viewer_loadId(params) {
-	omg.server.getId(params.id, function (result) {
-		params.data = result;
-		omg_embedded_viewer_loadData(params);
-	});
+    omg.server.getId(params.id, function (result) {
+        params.data = result;
+        omg_embedded_viewer_loadData(params);
+    });
 }
 
 
@@ -314,24 +327,28 @@ function getTimeCaption(timeMS) {
     }
 
     var seconds = Math.round((Date.now() - timeMS) / 1000);
-    if (seconds < 60) return seconds + " sec ago";
+    if (seconds < 60)
+        return seconds + " sec ago";
 
     var minutes = Math.floor(seconds / 60);
-    if (minutes < 60) return minutes + " min ago";    
-   
+    if (minutes < 60)
+        return minutes + " min ago";
+
     var hours = Math.floor(minutes / 60);
-    if (hours < 24) return hours + " hr ago";    
+    if (hours < 24)
+        return hours + " hr ago";
 
     var days = Math.floor(hours / 24);
-    if (days < 7) return days + " days ago";
+    if (days < 7)
+        return days + " days ago";
 
-    var date  = new Date(timeMS);
+    var date = new Date(timeMS);
     var months = ["Jan", "Feb", "Mar", "Apr", "May",
-                "Jun", "Jul", "Aug", "Sep", "Oct", 
-                "Nov", "Dec"];
+        "Jun", "Jul", "Aug", "Sep", "Oct",
+        "Nov", "Dec"];
     var monthday = months[date.getMonth()] + " " + date.getDate();
     if (days < 365) {
-	    return monthday;
+        return monthday;
     }
     return monthday + " " + date.getYear();
 };

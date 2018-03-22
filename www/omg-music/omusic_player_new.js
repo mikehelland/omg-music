@@ -298,7 +298,7 @@ OMusicPlayer.prototype.play = function (info) {
     }, duration * 0.9);
 
     if (typeof (p.onPlay) === "function") {
-        p.onPlay();
+        p.onPlay(info);
     }
 
     //leftovers, probably need this tho

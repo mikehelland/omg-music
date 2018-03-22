@@ -44,7 +44,27 @@
 
    </div>
 </div>
+<div class="main-footer-bar">
+   <div class="main-title-bar-content">
+	   <div>
+               <span class="main-title-open">Now Playing: <span class="play-button">&#9642</span> 
+                   <span id="deckA"></span>
+                   <!--Deck A:<span id="deckA"></span>
+                   . . . , , , : : : ; ; ; | ; ; ; : : : , , , . . .
+                   Deck B:<span id="deckB"></span>-->
+               </span>
+               
+	   </div>
 
+	   <!--<div class="main-description">
+		  Find, create, and customize music for your project.
+	   </div>-->
+
+
+   </div>
+</div>
+
+    
 <div class="main-body">
 
 
@@ -172,8 +192,82 @@ fpa.showRecentArea = function () {
 
 	fpa.mostRecentArea.style.display = "block";
 	fpa.featureArea.style.display = "none";
-	search(parameters);
+        
+        fpa.search();
+	//search(parameters);
 };
+
+fpa.globalPlayer = {
+    deckA: {
+        div: document.getElementById("deckA"),
+        setCaption: function (caption) {
+            fpa.globalPlayer.deckA.div.innerHTML = caption;
+        }
+    }
+};
+fpa.globalPlayer.playerArea = document.getElementsByClassName("main-footer-bar")[0];
+fpa.globalPlayer.playButton = fpa.globalPlayer.playerArea.getElementsByClassName("play-button")[0];
+
+fpa.onPlay = function (player, params) {
+    fpa.showPlayerBar();
+    if (fpa.globalPlayer.currentPlayer) {
+        fpa.globalPlayer.currentPlayer.stop();
+    }
+ 
+    var result = params.data;
+    var resultCaption = result.tags || result.name || "";
+    var type = result.partType || result.type || "";
+    if (resultCaption.length === 0) {
+            resultCaption = "(" + type.substring(0, 1).toUpperCase() + 
+                    type.substring(1).toLowerCase() + ")";
+    }
+    fpa.globalPlayer.deckA.setCaption(resultCaption);
+    fpa.globalPlayer.playButton.innerHTML = "&#9642;";
+    fpa.globalPlayer.currentPlayer = player;
+    
+    fpa.globalPlayer.playButton.onclick = function () {
+        if (player.playing) {
+            player.stop();
+        }
+        else {
+            player.play(params);
+        }
+    };
+};
+
+fpa.onStop = function () {
+    fpa.globalPlayer.playButton.innerHTML = "&#9654;";
+};
+
+fpa.showPlayerBar = function () {
+    fpa.globalPlayer.playerArea.style.display = "block";
+    
+}
+
+fpa.search = function () {
+    var parameters = omg.util.getPageParams();
+
+    var searchTermsDiv = document.getElementsByClassName("search-info-terms")[0];
+    searchTermsDiv.innerHTML = parameters.q || "";
+
+    parameters.resultList = document.getElementsByClassName("search-things")[0];
+    parameters.onPlay = fpa.onPlay;
+    parameters.onStop = fpa.onStop;
+
+    var filterType = document.getElementById("filter-type");
+    var type = parameters.type || "";
+    filterType.onchange = function () {
+	//todo set the location?
+	parameters.type = filterType.value;
+
+	search(parameters);
+    };
+    
+    omg.search(parameters);
+
+};
+
+
 fpa.featuredButton.onclick = function () {
 	fpa.showFeatureArea();
 };

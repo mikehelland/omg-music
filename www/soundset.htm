@@ -62,7 +62,7 @@
 var soundsetName = document.getElementById("soundset-name");
 var soundList = document.getElementById("sound-list");
 
-var params = omg.server.getQueryString();
+var params = omg.util.getPageParams();
 if (!params.id) {
     soundsetName.innerText = "(Invalid ID)";
 } else {

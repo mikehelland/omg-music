@@ -268,7 +268,7 @@
 
             };
 
-            var params = omg.server.getQueryString();
+            var params = omg.util.getPageParams();
             if (params.id) {
 
                 omg.server.getId(params.id, function (response) {
