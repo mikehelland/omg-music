@@ -169,74 +169,76 @@ function omg_embedded_viewer_loadData(params) {
     };
 
     viewer.loadPlayer = function (dataToPlay) {
-       viewer.player = new OMusicPlayer();
-       var info = viewer.player.prepare(dataToPlay);
-       if (!info) {
-           //todo show a message or something?
-           alert("couldn't prepare data");
-           console.log("couldn't prepare data");
-           console.log(dataToPlay);
-           return;
-       }
-       viewer.info = info;
+        if (!dataToPlay || !dataToPlay.type) {
+            return false;
+        }
 
-       var soundSet = false;
-       if (dataToPlay && dataToPlay.type) {
-            if (dataToPlay.type === "SOUNDSET") {
-                soundSet = true;
-                viewer.div.className = "omg-soundset";
+        var soundSet = false;
+        if (dataToPlay.type === "SOUNDSET") {
+            soundSet = true;
+            viewer.div.className = "omg-soundset";
+        }
+        else {        
+            viewer.player = new OMusicPlayer();
+            var info = viewer.player.prepare(dataToPlay);
+            if (!info) {
+               console.log("couldn't prepare data");
+               console.log(dataToPlay);
+               return false;
             }
-            if (dataToPlay.type === "SONG") {
-                viewer.div.className = "omg-song";
-                viewer.loadSong(dataToPlay);
-            }
-            if (dataToPlay.type === "SECTION") {
-                viewer.div.className = "omg-section";
-                var section = dataToPlay; 
+            viewer.info = info;
+        }
 
-                var flexDiv = document.createElement("div");
-                flexDiv.className = "omg-section-data";
-                flexDiv.style.height  = height + "px";
-                viewer.div.appendChild(flexDiv);
+        if (dataToPlay.type === "SONG") {
+            viewer.div.className = "omg-song";
+            viewer.loadSong(dataToPlay);
+        }
+        if (dataToPlay.type === "SECTION") {
+            viewer.div.className = "omg-section";
+            var section = dataToPlay; 
 
-                viewer.loadSection(flexDiv, section);
-                viewer.drawPartsCanvases(section);
+            var flexDiv = document.createElement("div");
+            flexDiv.className = "omg-section-data";
+            flexDiv.style.height  = height + "px";
+            viewer.div.appendChild(flexDiv);
 
-            }
-            if (dataToPlay.type === "PART" || 
-                         dataToPlay.type === "MELODY" || dataToPlay.type === "BASSLINE" ||
-                         dataToPlay.type === "DRUMBEAT") {
-                viewer.div.className = "omg-part-data";
-                var part = dataToPlay; //viewer.omgsong.sections[0].parts[0];
-                viewer.loadPart(viewer.div, part);
-                part.div.style.width = viewer.div.clientWidth - 16 + "px";
-                part.div.style.height = height + "px";
-                viewer.drawPart(part);
-            }
-       }
+            viewer.loadSection(flexDiv, section);
+            viewer.drawPartsCanvases(section);
 
-       viewer.titleDiv.innerHTML = dataToPlay.title || "(untitled)";
-       viewer.userDiv.innerHTML = dataToPlay.username || "(unknown)";
-       viewer.datetimeDiv.innerHTML = getTimeCaption(dataToPlay.created_at);
+        }
+        if (dataToPlay.type === "PART" || 
+                     dataToPlay.type === "MELODY" || dataToPlay.type === "BASSLINE" ||
+                     dataToPlay.type === "DRUMBEAT") {
+            viewer.div.className = "omg-part-data";
+            var part = dataToPlay; //viewer.omgsong.sections[0].parts[0];
+            viewer.loadPart(viewer.div, part);
+            part.div.style.width = viewer.div.clientWidth - 16 + "px";
+            part.div.style.height = height + "px";
+            viewer.drawPart(part);
+        }
 
-            if (soundSet) {
+        viewer.titleDiv.innerHTML = dataToPlay.title || "(untitled)";
+        viewer.userDiv.innerHTML = dataToPlay.username || "(unknown)";
+        viewer.datetimeDiv.innerHTML = getTimeCaption(dataToPlay.created_at);
 
-            }
-            else {
-                viewer.totalBeatsInSong =  info.totalSubbeats; 
-                var pxPerBeat = (viewer.div.clientWidth - padding) / viewer.totalBeatsInSong;
+        if (soundSet) {
 
-                viewer.player.onBeatPlayedListeners.push(function(isubbeat, isection) {
-                        viewer.beatMarker.style.width = pxPerBeat * (1 + isubbeat + isection * beatsInSection) + "px";
-                });
+        }
+        else {
+            viewer.totalBeatsInSong =  info.totalSubbeats; 
+            var pxPerBeat = (viewer.div.clientWidth - padding) / viewer.totalBeatsInSong;
 
-                viewer.editButton.onclick = function () {
-                        window.location = "music-maker.htm?id=" + dataToPlay.id;
-                };
+            viewer.player.onBeatPlayedListeners.push(function(isubbeat, isection) {
+                    viewer.beatMarker.style.width = pxPerBeat * (1 + isubbeat + isection * beatsInSection) + "px";
+            });
 
-            }
-            viewer.tipButton.onclick = function () {
-                window.location = "bitcoin:1Jdam2fBZxfhWLB8yP69Zbw6fLzRpweRjc?amount=0.004";
+            viewer.editButton.onclick = function () {
+                    window.location = "music-maker.htm?id=" + dataToPlay.id;
+            };
+
+        }
+        viewer.tipButton.onclick = function () {
+            window.location = "bitcoin:1Jdam2fBZxfhWLB8yP69Zbw6fLzRpweRjc?amount=0.004";
         };
     };
 

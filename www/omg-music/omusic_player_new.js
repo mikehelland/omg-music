@@ -242,7 +242,7 @@ OMusicPlayer.prototype.downloadSound = function (url, sound, info) {
             p.loadedSounds[sound] = buffer;
             p.onSoundLoaded(true, sound, info);
         }, function () {
-            console.log("error loading sound url: " + url);
+            console.error("error loading sound url: " + url);
             p.onSoundLoaded(false, sound, info);
         });
     };
@@ -270,21 +270,33 @@ OMusicPlayer.prototype.play = function (info) {
     var p = this;
 
     var offset = 0.001;
-    info.startTime = p.context.currentTime + offset;
+    var startTime = p.context.currentTime + offset;
+    info.startTime = startTime;
 
-    var type = info.data.type;
-    if (type === "SONG") {
-        this.scheduleSong(info.holder, info);
-    }
-    else if (type === "SECTION") {
-        p.scheduleSection(info.holder, info);
-    }
-    else if (type === "PART") {
-        p.schedulePart(info.holder, info);
-    }
+    var playOnce = function () {
+        var type = info.data.type;
+        if (type === "SONG") {
+            p.scheduleSong(info.holder, info);
+        }
+        else if (type === "SECTION") {
+            p.scheduleSection(info.holder, info);
+        }
+        else if (type === "PART") {
+            p.schedulePart(info.holder, info);
+        }
+    };
 
+    playOnce();
     p.playing = true;
     p.playingHolder = info.holder;
+
+    var duration = (info.startTime - startTime) * 1000;
+    
+    info.holder.loopIntervalHandle = setTimeout(function () {
+        playOnce();
+        info.holder.loopIntervalHandle = setInterval(playOnce, duration);
+    }, duration * 0.9);
+
     if (typeof (p.onPlay) === "function") {
         p.onPlay();
     }
@@ -297,7 +309,7 @@ OMusicPlayer.prototype.scheduleSong = function (holder, info) {
     var p = this;
     
     if (!holder || !holder.data) {
-        console.log("can't play song, no data");
+        console.error("can't play song, no data");
         return;
     }
     
@@ -310,7 +322,7 @@ OMusicPlayer.prototype.scheduleSection = function (holder, info) {
     var p = this;
     
     if (!holder || !holder.data) {
-        console.log("can't play section, no data");
+        console.error("can't play section, no data");
         return;
     }
     
@@ -333,6 +345,7 @@ OMusicPlayer.prototype.scheduleSection = function (holder, info) {
 OMusicPlayer.prototype.schedulePart = function (part, info) {
     if (!part.audioBuffers) part.audioBuffers = [];
     
+    //we're playing the part independent of a section
     if (part === info.holder) {
         this.rescale(part, info.data.rootNote, info.data.ascale, 0);
     }
@@ -343,6 +356,11 @@ OMusicPlayer.prototype.schedulePart = function (part, info) {
     else {
         this.scheduleNotesPart(part, info);
     }  
+    
+    if (part === info.holder) {
+        info.startTime += (info.data.subbeatMillis * info.data.subbeats *
+                info.data.beats * info.data.measures) / 1000;
+    }
 };
 
 OMusicPlayer.prototype.scheduleSequencerPart = function (part, info) {
@@ -362,12 +380,16 @@ OMusicPlayer.prototype.scheduleSequencerPart = function (part, info) {
 OMusicPlayer.prototype.scheduleNotesPart = function (part, info) {
     var p = this;
     if (!part || !part.data || !part.data.notes) {
-        console.log("can't play part, no notes data");
+        console.error("can't play part, no notes data");
     }
     
     var beatsSoFar = 0;
 
     part.data.notes.forEach(function (note, i) {
+        if (beatsSoFar >= info.data.beats * info.data.measures) {
+            return;
+        }
+        
         var playTime = info.startTime + (beatsSoFar * info.data.subbeats * 
                 info.data.subbeatMillis) / 1000;
         var duration = (note.beats * info.data.subbeats * 
@@ -440,6 +462,7 @@ OMusicPlayer.prototype.stop = function () {
         p.onStop();
     }
 
+    clearInterval(p.playingHolder.loopIntervalHandle);
     p.playing = false;
 
     if (p.playingHolder.data.type === "SONG") {

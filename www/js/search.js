@@ -51,9 +51,10 @@ var loadSearchResults = function (results) {
 		resultDiv.className = "omgviewer";
 		resultDiv.innerHTML = '<div class="beat-marker"></div>';
 		resultList.appendChild(resultDiv);
-		omg_embedded_viewer_loadData({div: resultDiv, data: result,
-									height: 80});
-		
+                
+                omg_embedded_viewer_loadData({div: resultDiv, data: result,
+                                                                height: 80});
+                
 		resultList.appendChild(document.createElement("br"));
 	   	   
 		resultDiv.onclick = function () {
