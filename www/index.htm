@@ -177,12 +177,15 @@ fpa.showFeatureArea = function () {
 	fpa.featureArea.style.display = "block";
 
 	if (!fpa.loadedFeaturedArea) {
-		omg_embedded_viewer_loadId({div: document.getElementById("song-example"), id: 570,
-							height: 80});
-		omg_embedded_viewer_loadId({div: document.getElementById("drumbeat-example"), id: 622,
-							height: 80});
-		omg_embedded_viewer_loadId({div: document.getElementById("melody-example"), id: 791,
-							height: 80});
+		omg_embedded_viewer_loadId({id: 570, height: 80,
+                        div: document.getElementById("song-example"), 
+                        onPlay: fpa.onPlay, onStop: fpa.onStop});
+		omg_embedded_viewer_loadId({id: 622, height: 80,
+                        div: document.getElementById("drumbeat-example"), 
+                        onPlay: fpa.onPlay, onStop: fpa.onStop});
+		omg_embedded_viewer_loadId({id: 791, height: 80,
+                        div: document.getElementById("melody-example"), 
+                        onPlay: fpa.onPlay, onStop: fpa.onStop});
 		fpa.loadedFeaturedArea = true;
 	}
 };
@@ -210,7 +213,7 @@ fpa.globalPlayer.playButton = fpa.globalPlayer.playerArea.getElementsByClassName
 
 fpa.onPlay = function (player, params) {
     fpa.showPlayerBar();
-    if (fpa.globalPlayer.currentPlayer) {
+    if (fpa.globalPlayer.currentPlayer && fpa.globalPlayer.currentPlayer != player) {
         fpa.globalPlayer.currentPlayer.stop();
     }
  
