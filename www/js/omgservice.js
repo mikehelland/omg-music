@@ -1,4 +1,3 @@
-"use strict";
 /**
  * create these objects:
  *     omg.server -  for server stuff
