@@ -424,7 +424,8 @@ OMusicPlayer.prototype.playBeatForPart = function (iSubBeat, part) {
         p.loadPart(part);
     }
 
-    if (part.data.surfaceURL == "PRESET_SEQUENCER") {
+    var surface = part.data.surface ? part.data.surface.url : part.data.surfaceURL;
+    if (surface === "PRESET_SEQUENCER") {
         p.playBeatForDrumPart(iSubBeat, part);
     } else {
         p.playBeatForMelody(iSubBeat, part);
