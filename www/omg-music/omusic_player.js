@@ -215,7 +215,7 @@ OMusicPlayer.prototype.loadPart = function (part) {
     var p = this;
 
     var type = part.data.type;
-    var surface = part.data.surfaceURL;
+    var surface = part.data.surface ? part.data.surface.url : part.data.surfaceURL;
 
     part.soundsLoading = 0;
     part.loaded = false;
