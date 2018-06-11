@@ -34,7 +34,7 @@
       </a>
 
 	   <div class="main-description">
-		  Find, create, and customize music for your project.
+		  Find, create, and customize music for your project.??
 	   </div>
 
          <div class="main-title-bar-right">
@@ -45,16 +45,17 @@
    </div>
 
    <script src="omg-music/omusic_partsui.js"></script>
-   <script src="omg-music/omusic_player.js"></script>
+   <script src="omg-music/omusic_player_new.js"></script>
    <script src="js/omgservice.js"></script>
    <script src="js/embedded_viewer.js"></script>
 
    <script src="js/usercontrols.js"></script>
    <script src="js/sharecontrols.js"></script>
    <script>
+       console.log("test test testxxx")
    setupUserControls(document.getElementsByClassName("title-bar-user-controls")[0]);
    omg.setupShareWindow();
-   var id = omg.server.getQueryString().id
+   var id = omg.util.getPageParams().id;
    omg_embedded_viewer_loadId({div: document.getElementById("omgviewer"), id: id,
 		height: window.innerHeight - 44 - 250});
    </script>

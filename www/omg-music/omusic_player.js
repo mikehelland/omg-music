@@ -1129,6 +1129,18 @@ function OMGSong(div, data, headerOnly) {
     this.sections = [];
     this.loop = true;
 
+    //backwards compatibility
+    if (data) {
+        if (data.beats && !data.beatParameters) {
+            data.beatParameters = {"beats": data.beats, "subbeats": data.subbeats,
+                        "measures": data.measures || 1, "shuffle": data.shuffle || 0};
+        }
+        if (data.rootNote && !data.keyParameters) {
+            data.keyParameters = {"rootNote": data.rootNote, 
+                        "scale": data.ascale || data.scale.split(",")};
+        }
+    }
+
     if (headerOnly) {
         this.setHeaderData(data);
     } else if (data) {
@@ -1173,12 +1185,27 @@ OMGSong.prototype.getData = function () {
 function OMGSection(div, data, song) {
     var partData;
     var part;
+    
+    //backwards compatibility
+    if (data) {
+        if (data.beats && !data.beatParameters) {
+            data.beatParameters = {"beats": data.beats, "subbeats": data.subbeats,
+                        "measures": data.measures || 1, "shuffle": data.shuffle || 0};
+        }
+        if (data.rootNote && !data.keyParameters) {
+            data.keyParameters = {"rootNote": data.rootNote, 
+                        "scale": data.ascale || data.scale.split(",")};
+        }
+        console.log("backwards compat section data");
+        console.log(data);
+    }
 
     this.div = div;
 
     this.parts = [];
     if (!song || !song.data) {
         song = new OMGSong();
+        //does this even ever get called? Why would there be a this.data?
         if (this.data.beats) {
             song.data.beats = this.data.beats;
         }
@@ -1191,8 +1218,8 @@ function OMGSection(div, data, song) {
         if (this.data.subbeatMillis) {
             song.data.subbeatMillis = this.data.subbeatMillis;
         }
-        if (typeof this.data.rootNote === "number") {
-            song.data.rootNote = this.data.rootNote;
+        if (typeof this.data.keyParameters.rootNote === "number") {
+            song.data.keyParameters.rootNote = this.data.keyParameters.rootNote;
         }
         if (this.data.ascale) {
             song.data.ascale = this.data.ascale;
