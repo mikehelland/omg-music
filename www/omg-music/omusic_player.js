@@ -395,7 +395,7 @@ OMusicPlayer.prototype.playBeatForDrumPart = function (iSubBeat, part) {
 
 OMusicPlayer.prototype.playBeatForMelody = function (iSubBeat, part) {
     var p = this;
-
+console.log("playBeatForMelody")
     var data = part.data;
     var beatToPlay = iSubBeat;
     if (iSubBeat == 0) {
@@ -450,12 +450,13 @@ OMusicPlayer.prototype.playBeatForMelody = function (iSubBeat, part) {
                                 //p.subbeats * note.beats * p.subbeatLength * 0.85)
                                 p.context.currentTime);
                     }
-                }, p.song.data.subbeats * note.beats * p.subbeatLength * 0.85);
+                }, p.song.data.beatParameters.subbeats * note.beats * p.subbeatLength * 0.85);
             }
         }
 
         if (note) {
-            part.nextBeat += p.song.data.subbeats * note.beats;
+            part.nextBeat += p.song.data.beatParameters.subbeats * note.beats;
+            console.log("nextBeat is: " + part.nextBeat)
             part.currentI++;
         }
     }
@@ -1131,10 +1132,10 @@ function OMGSection(div, data, song) {
             if (data.beatParameters.subbeats) {
                 song.data.beatParameters.subbeats = data.beatParameters.subbeats;
             }
-            if (data.measures) {
+            if (data.beatParameters.measures) {
                 song.data.beatParameters.measures = data.beatParameters.measures;
             }
-            if (this.data.subbeatMillis) {
+            if (data.beatParameters.subbeatMillis) {
                 song.data.beatParameters.subbeatMillis = data.beatParameters.subbeatMillis;
             }
         }
