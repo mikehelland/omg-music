@@ -1297,18 +1297,23 @@ OMusicEditor.prototype.loadSection = function (params) {
             if (newPart)
                 fadeIn.push(newPart.div);
         }
-        if (bam.section.data.beats)
-            bam.song.data.beats = bam.section.data.beats;
-        if (bam.section.data.subbeats)
-            bam.song.data.subbeats = bam.section.data.subbeats;
-        if (bam.section.data.measures)
-            bam.song.data.measures = bam.section.data.measures;
-        if (bam.section.data.subbeatMillis)
-            bam.song.data.subbeatMillis = bam.section.data.subbeatMillis;
-        if (bam.section.data.ascale)
-            bam.song.data.ascale = bam.section.data.ascale;
-        if (typeof bam.section.data.rootNote === "number")
-            bam.song.data.rootNote = bam.section.data.rootNote;
+        var sectionBeats = bam.section.data.beatParameters;
+        var songBeats = bam.song.data.beatParameters;
+        if (sectionBeats.beats)
+            songBeats.beats = sectionBeats.beats;
+        if (sectionBeats.subbeats)
+            songBeats.subbeats = sectionBeats.subbeats;
+        if (sectionBeats.measures)
+            songBeats.measures = sectionBeats.measures;
+        if (sectionBeats.subbeatMillis)
+            songBeats.subbeatMillis = sectionBeats.subbeatMillis;
+        
+        var sectionKey = bam.section.data.keyParameters;
+        var songKey = bam.song.data.keyParameters;
+        if (sectionKey.scale)
+            songKey.scale = sectionKey.scale;
+        if (typeof sectionKey.rootNote === "number")
+            songKey.rootNote = sectionKey.rootNote;
     } else {
         bam.section = new OMGSection(params.sectionDiv, null, bam.song);
     }
@@ -2837,13 +2842,13 @@ OMusicEditor.prototype.showPopUpWindow = function (popup) {
 OMusicEditor.prototype.getKeyCaption = function () {
     var bam = this;
     var scaleName = "Major";
-    if (bam.song.data.ascale) {
+    if (bam.song.data.keyParameters.scale) {
         this.scales.forEach(function (scale) {
-            if (scale.value.join() == bam.song.data.ascale.join())
+            if (scale.value.join() == bam.song.data.keyParameters.scale.join())
                 scaleName = scale.name;
         });
     }
-    return this.keys[(this.song.data.rootNote || 0)] + " " + scaleName;
+    return this.keys[(this.song.data.keyParameters.rootNote || 0)] + " " + scaleName;
 };
 
 OMusicEditor.prototype.refreshKeyTempoChordsButtons = function () {
@@ -2905,8 +2910,8 @@ OMusicEditor.prototype.showTempoChooser = function (e) {
 };
 
 OMusicEditor.prototype.getBPM = function () {
-    return Math.round(60000 / ((this.song.data.subbeatMillis || 125) *
-            (this.song.data.subbeats || 4)));
+    return Math.round(60000 / ((this.song.data.beatParameters.subbeatMillis || 125) *
+            (this.song.data.beatParameters.subbeats || 4)));
 };
 
 OMusicEditor.prototype.getSoundSets = function (type, callback) {
