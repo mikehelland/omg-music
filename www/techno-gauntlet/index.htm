@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<style>
+html,
+body {
+	height:100%;
+	width:100%;
+	background-color:black;
+	padding:0px;
+	margin:0px;
+	color:white;
+}
+
+#main-fragment {
+	display:flex;
+	flex-direction: column;
+	height:100%;
+	width:49.9%;
+}
+
+#detail-fragment {
+        position:absolute;
+	height:100%;
+	width:49.9%;
+        top:0px;
+        right:0px;
+}
+
+#play-button {
+	/*background-color:#800000;*/
+	font-size:1.5em;
+	text-align:center;
+	/*padding:10px;*/
+        height:49px;
+}
+#save-button, #mixer-button, #warp-button {
+	display:inline-block;
+	padding:15px;
+}
+
+#warp-button, #key-button, #chords-button {
+	border-left:1px solid #AAAAAA;
+}
+
+#save-button {
+	float:right;
+}
+
+.part, #song-controls {
+	right:2px;
+	display:flex;
+	border:1px solid blue;
+	border-radius:5px;
+	margin:1px;
+}
+
+.part {
+	flex-grow:1;
+}
+
+#song-controls div {
+	float:clear;
+	padding:10px;
+	flex-grow:1;
+	text-align:center;
+}
+
+#part-list {
+	flex-grow:1;
+	display:flex;
+	flex-direction:column;
+}
+
+.part-button, .part-mute-button, .part-options-button {
+    padding-left: 20px;
+    padding-right: 20px;
+    display: flex;
+    justify-content:center;
+    align-content:center;
+    flex-direction:column; /* column | row */
+
+}
+
+.part-button {
+	flex-grow:8;
+	text-align:center;
+	background-color:#888888;
+	padding:20px;
+}
+
+.part-mute-button {
+	background-color:green;
+}
+
+#add-part-button {
+	text-align:center;
+	padding:20px;
+}
+
+#instrument-surface {
+    height:99%;
+    width:100%;
+    display:none;
+}
+#beats-fragment {
+    width:100%;
+    text-align:center;
+    font-size: 1.5em;
+    display:none;
+}
+
+#beats-fragment input {
+    width:60%;
+}
+</style>
+
+</head>
+<body>
+
+<div id="main-fragment">
+
+	<canvas id="play-button">PLAY</canvas>
+	<div id="tool-bar">
+		<div id="mixer-button">Mix</div>
+		<div id="warp-button">Warp</div>
+		<div id="save-button">Save</div>
+	</div>
+
+	<div id="song-controls">
+		<div id="beats-button">120 BPM</div>
+		<div id="key-button">C Major</div>
+		<div id="chords-button">I</div>
+	</div>
+
+	<div id="part-list">
+		<!--<div class="part">
+			<div class="part-options-button">|||</div>
+			<div class="part-button">Hip Hop Drumkit</div>
+			<div class="part-mute-button">M</div>
+		</div>-->
+	</div>
+	
+	<div id="add-part-button">Add Part</div>
+</div>
+    
+    <div id="detail-fragment">
+        <canvas id="instrument-surface"></canvas>
+        <div id="beats-fragment">
+            <h1></h1>
+            <div><span id="subbeats-label">X</span> Subbeats</div>
+            <input id="subbeats-range" min="1" max="8" value="4" type="range">
+            <div><span id="beats-label">X</span> Beats</div>
+            <input id="beats-range" min="1" max="8" value="4" type="range">
+            <div><span id="measures-label">X</span> Measures</div>
+            <input id="measures-range" min="1" max="8" value="2" type="range">
+            <div><span id="bpm-label">X</span> bpm</div>
+            <input id="bpm-range" min="20" max="220" value="120" type="range">
+            <div><span id="shuffle-label">X</span>% Shuffle</div>
+            <input id="shuffle-range" min="0" max="100" value="0" type="range">
+        </div>
+        <div id="key-fragment">
+            <div id="key-list">
+            </div>
+            <div id="scale-list">
+            </div>
+        </div>
+        <div id="chords-fragment"></div>
+        <div id="add-part-fragment"></div>
+    </div>
+    
+    <script src="omusic_player.js"></script>
+    <script src="sequencer_surface.js"></script>
+    <script src="vertical_surface.js"></script>
+    <script src="tg.js"></script>
+    
+</body>
+</html>
