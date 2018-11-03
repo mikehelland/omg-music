@@ -480,11 +480,13 @@ OMGMelodyMaker.prototype.drawButtons = function (context, buttonRow, x, y, width
 };
 
 OMGMelodyMaker.prototype.setupFretBoard = function () {
-
     var keyParameters = this.part.section.song.data.keyParameters;
     var rootNote = keyParameters.rootNote;
     var bottomNote = this.data.soundSet.lowNote;
     var topNote = this.data.soundSet.highNote;
+    if (!topNote && this.data.soundSet.data.length) {
+        topNote = bottomNote + this.data.soundSet.data.length - 1;
+    }
     var octave = this.data.soundSet.octave;
     var fretCount = topNote - bottomNote + 1;
 
@@ -504,6 +506,10 @@ OMGMelodyMaker.prototype.setupFretBoard = function () {
                 caption: omg.ui.noteNames[i]
             });
         }
+    }
+
+    if (frets.rootNote === undefined) {
+        frets.rootNote = 0;
     }
 
     frets.height = (this.canvas.height - this.topFretTop - this.bottomFretBottom) / frets.length;

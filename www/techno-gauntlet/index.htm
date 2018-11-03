@@ -34,14 +34,17 @@ body {
 	text-align:center;
 	/*padding:10px;*/
         height:49px;
+    cursor: pointer;
 }
-#save-button, #mixer-button, #warp-button {
+#save-button, #mix-button, #warp-button {
 	display:inline-block;
 	padding:15px;
+        cursor: pointer;
 }
 
 #warp-button, #key-button, #chords-button {
 	border-left:1px solid #AAAAAA;
+        cursor: pointer;
 }
 
 #save-button {
@@ -51,20 +54,25 @@ body {
 .part, #song-controls {
 	right:2px;
 	display:flex;
-	border:1px solid blue;
+	border:1px solid #000088;
 	border-radius:5px;
 	margin:1px;
 }
 
 .part {
 	flex-grow:1;
+        cursor: pointer;
 }
 
 #song-controls div {
 	float:clear;
 	padding:10px;
-	flex-grow:1;
+	flex:1 1 0;
 	text-align:center;
+}
+
+#key-button {
+    flex-grow:1.5 !important;
 }
 
 #part-list {
@@ -114,6 +122,56 @@ body {
 #beats-fragment input {
     width:60%;
 }
+
+#mix-fragment, #warp-fragment {
+	display:none;
+	flex-direction:column;
+        height:100%;
+        
+}
+.mixer-part {
+    flex-grow:1;
+    height:5px;
+    border:1px solid #000088;
+    border-radius:5px;
+    margin:1px;
+}
+
+#key-fragment {
+    display:none;
+    flex-direction:row;
+    width:100%;
+    height:100%;
+}
+#key-fragment > div {
+    
+    
+}
+#key-list {
+    
+    flex-grow:1;
+    display:flex;
+    flex-direction: column;
+    
+}
+#scale-list {
+    flex-grow: 1;
+    display:flex;
+    flex-direction: column;    
+}
+
+#scale-list div:hover, #key-list div:hover {
+    background-color:#808080;
+}
+#scale-list div, #key-list div {
+    flex:auto;
+    cursor:pointer;
+    border-radius: 5px;
+    border:1px solid #000088;
+    display:flex;
+    justify-content: center;
+    padding-top: 10px;
+}
 </style>
 
 </head>
@@ -123,14 +181,14 @@ body {
 
 	<canvas id="play-button">PLAY</canvas>
 	<div id="tool-bar">
-		<div id="mixer-button">Mix</div>
+		<div id="mix-button">Mix</div>
 		<div id="warp-button">Warp</div>
 		<div id="save-button">Save</div>
 	</div>
 
 	<div id="song-controls">
-		<div id="beats-button">120 BPM</div>
-		<div id="key-button">C Major</div>
+		<div id="beats-button"></div>
+		<div id="key-button"></div>
 		<div id="chords-button">I</div>
 	</div>
 
@@ -168,6 +226,8 @@ body {
         </div>
         <div id="chords-fragment"></div>
         <div id="add-part-fragment"></div>
+        <div id="mix-fragment"></div>
+        <div id="warp-fragment"></div>
     </div>
     
     <script src="omusic_player.js"></script>

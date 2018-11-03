@@ -150,6 +150,7 @@ omg.ui.drawDrumCanvas = function (params) {
 
     if (!params.keepCanvasDirty) {
         canvas.width = params.width || canvas.clientWidth;
+        canvas.height = params.height || canvas.clientHeight;
     }
 
     context.fillStyle = "#C0C0FF";
@@ -197,8 +198,8 @@ omg.ui.drawDrumCanvas = function (params) {
             //context.fillStyle = "black";
             //context.fillText(drumbeat.tracks[i].name, left, top + rowHeight * (ii + 1) - 2);
 
-            for (var j = 0; j < drumbeat.tracks[i].data.length; j++) {
-
+            //for (var j = 0; j < drumbeat.tracks[i].data.length; j++) {
+            for (var j = 0; j < canvas.omgdata.totalSubbeats; j++) {
                 context.fillStyle = drumbeat.tracks[i].data[j] ? "black" :
                         (j % canvas.omgdata.subbeats == 0) ? "#C0C0C0" : "#E0E0E0";
 
@@ -433,6 +434,7 @@ OMGDrumMachine.prototype.drawLargeCanvas = function (iSubBeat) {
     var width = this.canvas.clientWidth;
     var height = this.canvas.clientHeight;
     this.canvas.width = width;
+    this.canvas.height = height;
 
     ctx.fillStyle = "black";
     ctx.fillRect(0, 0, width, height);
