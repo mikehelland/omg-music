@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head>
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
 html,
 body {
@@ -36,17 +37,19 @@ body {
         height:49px;
     cursor: pointer;
 }
-#save-button, #mix-button, #warp-button {
+#save-button, #mix-button {
 	display:inline-block;
 	padding:15px;
         cursor: pointer;
 }
 
-#warp-button, #key-button, #chords-button {
+#key-button, #chords-button {
 	border-left:1px solid #AAAAAA;
         cursor: pointer;
 }
-
+#beats-button {
+        cursor: pointer;
+}
 #save-button {
 	float:right;
 }
@@ -112,7 +115,7 @@ body {
     width:100%;
     display:none;
 }
-#beats-fragment {
+#beats-fragment, #save-fragment {
     width:100%;
     text-align:center;
     font-size: 1.5em;
@@ -123,7 +126,7 @@ body {
     width:60%;
 }
 
-#mix-fragment, #warp-fragment {
+#mix-fragment {
 	display:none;
 	flex-direction:column;
         height:100%;
@@ -134,18 +137,39 @@ body {
     height:5px;
     border:1px solid #000088;
     border-radius:5px;
-    margin:1px;
+    margin:4px;
+    position:relative;
+    padding:4px;
 }
+
+.mixer-part-volume {
+    width:100%;
+    height:65%;
+    display:block;
+    border-bottom: 1px solid #AAAAAA;
+}
+.mixer-part-warp {
+    width:50%;
+    height:35%;
+    border-right: 1px solid #AAAAAA;
+    display:block;
+}
+.mixer-part-pan {
+    width:50%;
+    height:35%;
+    display:block;
+    right:0px;
+    bottom:-1px;
+    position:absolute;
+    
+}
+
 
 #key-fragment {
     display:none;
     flex-direction:row;
     width:100%;
     height:100%;
-}
-#key-fragment > div {
-    
-    
 }
 #key-list {
     
@@ -172,6 +196,10 @@ body {
     justify-content: center;
     padding-top: 10px;
 }
+
+#saved-url {
+    width:90%;
+}
 </style>
 
 </head>
@@ -182,7 +210,6 @@ body {
 	<canvas id="play-button">PLAY</canvas>
 	<div id="tool-bar">
 		<div id="mix-button">Mix</div>
-		<div id="warp-button">Warp</div>
 		<div id="save-button">Save</div>
 	</div>
 
@@ -227,9 +254,14 @@ body {
         <div id="chords-fragment"></div>
         <div id="add-part-fragment"></div>
         <div id="mix-fragment"></div>
-        <div id="warp-fragment"></div>
+        <div id="save-fragment">
+            <h3>Saved to OpenMusic.Gallery</h3>
+            <p>Your song can be accessed at this URL:</p>
+            <input id="saved-url">
+        </div>
     </div>
     
+    <script src="../js/omgservice.js"></script>
     <script src="omusic_player.js"></script>
     <script src="sequencer_surface.js"></script>
     <script src="vertical_surface.js"></script>
