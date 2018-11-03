@@ -338,7 +338,7 @@ tg.hideDetails = function () {
     if (tg.addPartFragment) tg.addPartFragment.style.display = "none";
     if (tg.surface) tg.surface.style.display = "none";
     if (tg.mixFragment) tg.mixFragment.style.display = "none";
-    if (tg.warpFragment) tg.mixFragment.style.display = "none";
+    if (tg.warpFragment) tg.warpFragment.style.display = "none";
   
   
 };
