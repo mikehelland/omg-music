@@ -3,205 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<style>
-html,
-body {
-	height:100%;
-	width:100%;
-	background-color:black;
-	padding:0px;
-	margin:0px;
-	color:white;
-}
-
-#main-fragment {
-	display:flex;
-	flex-direction: column;
-	height:100%;
-	width:49.9%;
-}
-
-#detail-fragment {
-        position:absolute;
-	height:100%;
-	width:49.9%;
-        top:0px;
-        right:0px;
-}
-
-#play-button {
-	/*background-color:#800000;*/
-	font-size:1.5em;
-	text-align:center;
-	/*padding:10px;*/
-        height:49px;
-    cursor: pointer;
-}
-#save-button, #mix-button {
-	display:inline-block;
-	padding:15px;
-        cursor: pointer;
-}
-
-#key-button, #chords-button {
-	border-left:1px solid #AAAAAA;
-        cursor: pointer;
-}
-#beats-button {
-        cursor: pointer;
-}
-#save-button {
-	float:right;
-}
-
-.part, #song-controls {
-	right:2px;
-	display:flex;
-	border:1px solid #000088;
-	border-radius:5px;
-	margin:1px;
-}
-
-.part {
-	flex-grow:1;
-        cursor: pointer;
-}
-
-#song-controls div {
-	float:clear;
-	padding:10px;
-	flex:1 1 0;
-	text-align:center;
-}
-
-#key-button {
-    flex-grow:1.5 !important;
-}
-
-#part-list {
-	flex-grow:1;
-	display:flex;
-	flex-direction:column;
-}
-
-.part-button, .part-mute-button, .part-options-button {
-    padding-left: 20px;
-    padding-right: 20px;
-    display: flex;
-    justify-content:center;
-    align-content:center;
-    flex-direction:column; /* column | row */
-
-}
-
-.part-button {
-	flex-grow:8;
-	text-align:center;
-	background-color:#888888;
-	padding:20px;
-}
-
-.part-mute-button {
-	background-color:green;
-}
-
-#add-part-button {
-	text-align:center;
-	padding:20px;
-}
-
-#instrument-surface {
-    height:99%;
-    width:100%;
-    display:none;
-}
-#beats-fragment, #save-fragment {
-    width:100%;
-    text-align:center;
-    font-size: 1.5em;
-    display:none;
-}
-
-#beats-fragment input {
-    width:60%;
-}
-
-#mix-fragment {
-	display:none;
-	flex-direction:column;
-        height:100%;
-        
-}
-.mixer-part {
-    flex-grow:1;
-    height:5px;
-    border:1px solid #000088;
-    border-radius:5px;
-    margin:4px;
-    position:relative;
-    padding:4px;
-}
-
-.mixer-part-volume {
-    width:100%;
-    height:65%;
-    display:block;
-    border-bottom: 1px solid #AAAAAA;
-}
-.mixer-part-warp {
-    width:50%;
-    height:35%;
-    border-right: 1px solid #AAAAAA;
-    display:block;
-}
-.mixer-part-pan {
-    width:50%;
-    height:35%;
-    display:block;
-    right:0px;
-    bottom:-1px;
-    position:absolute;
-    
-}
-
-
-#key-fragment {
-    display:none;
-    flex-direction:row;
-    width:100%;
-    height:100%;
-}
-#key-list {
-    
-    flex-grow:1;
-    display:flex;
-    flex-direction: column;
-    
-}
-#scale-list {
-    flex-grow: 1;
-    display:flex;
-    flex-direction: column;    
-}
-
-#scale-list div:hover, #key-list div:hover {
-    background-color:#808080;
-}
-#scale-list div, #key-list div {
-    flex:auto;
-    cursor:pointer;
-    border-radius: 5px;
-    border:1px solid #000088;
-    display:flex;
-    justify-content: center;
-    padding-top: 10px;
-}
-
-#saved-url {
-    width:90%;
-}
-</style>
-
+    <link rel="stylesheet" type="text/css" href="tg.css">
+    <title>Techno GAUNTLET</title>
 </head>
 <body>
 
@@ -252,12 +55,49 @@ body {
             </div>
         </div>
         <div id="chords-fragment"></div>
-        <div id="add-part-fragment"></div>
+        <div id="add-part-fragment">
+            To add an Oscillator choose a wave:
+            <div id="osc-buttons">
+                <span id="add-sine-osc-button">Sine</span>
+                <span id="add-square-osc-button">Square</span>
+                <span id="add-saw-osc-button">Sawtooth</span>
+                <span id="add-triangle-osc-button">Triangle</span>
+            </div>
+            <hr>
+            Or add a sound using a URL:
+            <br>
+            <input id="add-part-url-input" placeholder="Web address to sound">
+            <hr>
+            Or browse the gallery:
+            <div id="omg-soundset-list"></div>
+        </div>
         <div id="mix-fragment"></div>
         <div id="save-fragment">
             <h3>Saved to OpenMusic.Gallery</h3>
             <p>Your song can be accessed at this URL:</p>
             <input id="saved-url">
+        </div>
+        <div id="part-options-fragment">
+            <h2>Part Options</h2>
+            Choose a surface:<br>
+            <input type="radio" name="surface">Vertical<br>
+            <input type="radio" name="surface">Sequencer
+            <hr>
+            Delay Time:
+            <br>
+            <canvas id="part-options-delay-time"></canvas>
+            <br>
+            Delay Level:
+            <br>
+            <canvas id="part-options-delay-level"></canvas>
+            <hr>
+            <button>Tracks Sub Mixer</button>
+            <hr>
+            Clear or Remove<br>
+            <button>Clear Part Data</button><br>
+            <button>Remove Part</button>
+            
+                   
         </div>
     </div>
     

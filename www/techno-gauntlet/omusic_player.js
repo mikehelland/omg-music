@@ -507,8 +507,8 @@ OMusicPlayer.prototype.makeOsc = function (part) {
 
     part.osc = p.context.createOscillator();
 
-    var soundsetURL = part.data.soundsetURL ||
-            "PRESET_OSC_SINE_SOFT_DELAY";
+    var soundsetURL = part.data.soundSet.url ||
+            "PRESET_OSC_TRIANGLE_SOFT_DELAY";
     if (soundsetURL.indexOf("SAW") > -1) {
         part.osc.type = "sawtooth";
     } else if (soundsetURL.indexOf("SINE") > -1) {
@@ -516,38 +516,30 @@ OMusicPlayer.prototype.makeOsc = function (part) {
     } else if (soundsetURL.indexOf("SQUARE") > -1) {
         part.osc.type = "square";
     }
-
-    if (soundsetURL.indexOf("SOFT") > -1) {
-        part.osc.soft = true;
-    }
-    if (soundsetURL.indexOf("DELAY") > -1) {
-        part.osc.delay = true;
+    else if (soundsetURL.indexOf("TRIANGLE") > -1) {
+        part.osc.type = "triangle";
     }
 
     part.gain = p.context.createGain();
-    part.osc.connect(part.gain);
-
+    part.delay = p.context.createDelay();
     part.panner = p.context.createStereoPanner();
-
+    part.feedback = p.context.createGain();
+    
+    part.osc.connect(part.gain);
     part.gain.connect(part.panner);
-    if (part.osc.delay) {
-        part.delay = p.context.createDelay();
-        part.delay.delayTime.value = 0.5;
-        part.feedback = p.context.createGain();
-        part.feedback.gain.value = 0.3;
-        part.gain.connect(part.delay);
-        part.delay.connect(part.feedback);
-        part.feedback.connect(part.delay);
-        part.feedback.connect(p.compressor);
-    }
-    part.panner.connect(p.compressor);
 
+    part.gain.connect(part.delay);
+    part.delay.connect(part.feedback);
+    part.feedback.connect(part.delay);
+    part.feedback.connect(part.panner);
+    
+    part.panner.connect(p.compressor);
+    
+    part.delay.delayTime.value = part.data.audioParameters.delayTime || 0;
+    part.feedback.gain.value = part.data.audioParameters.delayLevel || 0;
     part.panner.pan.setValueAtTime(part.data.audioParameters.pan, p.context.currentTime);
 
-    var volume = part.data.audioParameters.volume / 10;
-    if (part.osc.soft) {
-        volume = volume * 0.5;
-    }
+    var volume = part.data.audioParameters.volume;
     if (part.data.audioParameters.mute) {
         part.gain.gain.setValueAtTime(0, p.context.currentTime);
         part.gain.gain.preMuteGain = volume;
@@ -911,6 +903,8 @@ OMusicPlayer.prototype.playNote = function (note, part) {
 
     if (part.osc) {
         var freq = p.makeFrequency(note.scaledNote) * part.data.audioParameters.warp;
+        part.panner.pan.setValueAtTime(part.data.audioParameters.pan, p.context.currentTime);
+        part.gain.gain.setValueAtTime(part.data.audioParameters.volume, p.context.currentTime);
         part.osc.frequency.setValueAtTime(freq, p.context.currentTime);
         part.playingI = part.currentI;
         var playingI = part.playingI;

@@ -20,7 +20,7 @@ tg.getSong = function (callback) {
     
     var id = omg.util.getPageParams().id;
     if (!id) {
-        var defaultSong = {"name":"","type":"SONG","sections":[{"id":1202,"tags":"t","type":"SECTION","parts":[{"type":"PART","uuid":"52457792-cf35-4fef-8105-e91b14fbc326","notes":[],"octave":3,"surface":{"url":"PRESET_VERTICAL","name":"","skipTop":0,"skipBottom":0},"partType":"PART","soundSet":{"url":"PRESET_OSC_SINE_SOFT_DELAY","name":"Osc Soft Sine Delay","type":"SOUNDSET","octave":5,"lowNote":0,"highNote":108,"chromatic":true},"audioParameters":{"pan":0,"mute":false,"warp":1,"speed":1,"volume":0.75}}],"keyParameters":{"scale":[0,3,5,6,7,10],"rootNote":0},"last_modified":1540221610328,"beatParameters":{"beats":4,"shuffle":0,"measures":2,"subbeats":4,"subbeatMillis":125},"chordProgression":[0]}],"created_at":1541261597433,"keyParameters":{"scale":[0,3,5,6,7,10],"rootNote":0},"last_modified":1541261597433,"beatParameters":{"bpm":120,"beats":4,"shuffle":0,"measures":2,"subbeats":4,"subbeatMillis":125}};
+        var defaultSong = {"name":"","type":"SONG","sections":[{"id":1202,"tags":"t","type":"SECTION","parts":[{"type":"PART","uuid":"52457792-cf35-4fef-8105-e91b14fbc326","notes":[],"octave":3,"surface":{"url":"PRESET_VERTICAL","name":"","skipTop":0,"skipBottom":0},"partType":"PART","soundSet":{"url":"PRESET_OSC_SINE_SOFT_DELAY","name":"Osc Soft Sine Delay","type":"SOUNDSET","octave":5,"lowNote":0,"highNote":108,"chromatic":true},"audioParameters":{"pan":1,"mute":false,"warp":1,"speed":1,"volume":1}}],"keyParameters":{"scale":[0,3,5,6,7,10],"rootNote":0},"last_modified":1540221610328,"beatParameters":{"beats":4,"shuffle":0,"measures":2,"subbeats":4,"subbeatMillis":125},"chordProgression":[0]}],"created_at":1541261597433,"keyParameters":{"scale":[0,3,5,6,7,10],"rootNote":0},"last_modified":1541261597433,"beatParameters":{"bpm":120,"beats":4,"shuffle":0,"measures":2,"subbeats":4,"subbeatMillis":125}};
         callback(defaultSong);
     }    
     else {
@@ -79,6 +79,9 @@ tg.setupPartButton = function (omgpart) {
     button.className = "part-options-button";
     button.innerHTML = "|||";
     partDiv.appendChild(button);
+    button.onclick = function () {
+        tg.showPartOptionsFragment(omgpart);
+    }
     
     button = document.createElement("div");
     button.className = "part-button";
@@ -339,6 +342,15 @@ tg.showChordsFragment = function () {
 tg.showAddPartFragment = function () {
     if (!tg.addPartFragment) {
         tg.addPartFragment = document.getElementById("add-part-fragment");
+  
+        var addOscButtonClick = function (e) {
+          tg.addOsc(e.target.innerHTML);  
+        };
+        document.getElementById("add-sine-osc-button").onclick = addOscButtonClick;
+        document.getElementById("add-saw-osc-button").onclick = addOscButtonClick;
+        document.getElementById("add-square-osc-button").onclick = addOscButtonClick;
+        document.getElementById("add-triangle-osc-button").onclick = addOscButtonClick;
+        
         fetch("http://openmusic.gallery/data/?type=SOUNDSET").then(function (e) {return e.json();}).then(function (json) {
             json.forEach(function (soundSet) {
                 var newDiv = document.createElement("div");
@@ -362,7 +374,7 @@ tg.hideDetails = function () {
     if (tg.surface) tg.surface.style.display = "none";
     if (tg.mixFragment) tg.mixFragment.style.display = "none";
     if (tg.saveFragment) tg.saveFragment.style.display = "none";
-    
+    if (tg.partOptionsFragment) tg.partOptionsFragment.style.display = "none";
   
 };
 
@@ -373,6 +385,12 @@ tg.addPart = function (soundSet) {
     console.log(omgpart);
     tg.player.loadPart(omgpart);
     tg.setupPartButton(omgpart);
+};
+
+tg.addOsc = function (type) {
+  var soundSet = {"url":"PRESET_OSC_" + type.toUpperCase(),"name": type + " Oscillator",
+      "type":"SOUNDSET","octave":5,"lowNote":0,"highNote":108,"chromatic":true};
+  tg.addPart(soundSet);
 };
 
 tg.showMixFragment = function () {
@@ -451,7 +469,9 @@ MixerVolumeCanvas.prototype.drawCanvas = function () {
     this.ctx.fillStyle = this.part.data.audioParameters.mute ? "#880000" : "#008800";
     this.ctx.fillRect(0, 0, this.part.data.audioParameters.volume * this.div.clientWidth, this.div.height);
     this.ctx.fillStyle = "white";
-    this.ctx.fillText(this.part.data.soundSet.name, 10, 10);
+    this.ctx.fillText("volume", 10, this.div.height / 2);
+    var nameLength = this.ctx.measureText(this.part.data.soundSet.name).width;
+    this.ctx.fillText(this.part.data.soundSet.name, this.div.width / 2 - nameLength / 2, 10);
 };
 
 function MixerWarpCanvas(part, canvas) {
@@ -577,6 +597,75 @@ tg.showSaveFragment = function () {
             //    callback(response.id);
             //}
     });
+};
+
+tg.showPartOptionsFragment = function (part) {
+    tg.hideDetails();
+    tg.partOptionsFragment = document.getElementById("part-options-fragment");
+    tg.partOptionsFragment.style.display = "block";
+    
+    new SliderCanvas(document.getElementById("part-options-delay-time"),
+        function (percent) {
+            part.delay.delayTime.value = percent;
+            part.data.audioParameters.delayTime = percent;
+        },
+        function () {
+            return part.data.audioParameters.delayTime || 0;
+        }
+    );
+    new SliderCanvas(document.getElementById("part-options-delay-level"),
+        function (percent) {
+            part.feedback.gain.value = percent;
+            part.data.audioParameters.delayLevel = percent;
+        },
+        function () {
+            return part.data.audioParameters.delayLevel || 0;
+        }
+    );
+};
+
+function SliderCanvas(canvas, onchange, ongetdata) {
+    var m = this;
+    if (!canvas) {
+        canvas = document.createElement("canvas");
+    }
+    canvas.onmousedown = function (e) {
+        m.onmousedown(e);
+    }
+    canvas.onmousemove = function (e) {
+        m.onmousemove(e);
+    }
+    canvas.onmouseup = function (e) {
+        m.onmouseup(e);
+    }
+    this.div = canvas;
+    this.ctx = canvas.getContext("2d");
+    this.onchange = onchange;
+    this.ongetdata = ongetdata;
+}
+
+SliderCanvas.prototype.onmousedown = function (e) {
+    this.isTouching = true;
+    var percent = (e.layerX - this.div.offsetLeft) / this.div.clientWidth;
+    if (this.onchange) this.onchange(percent);
+    this.drawCanvas(this.div);
+};
+SliderCanvas.prototype.onmousemove = function (e) {
+    if (this.isTouching) {
+        var percent = (e.layerX - this.div.offsetLeft) / this.div.clientWidth;
+        if (this.onchange) this.onchange(percent);
+        this.drawCanvas(this.div);
+    }
+};
+SliderCanvas.prototype.onmouseup = function (e) {
+    this.isTouching = false;
+};
+SliderCanvas.prototype.drawCanvas = function () {
+    this.div.width = this.div.clientWidth;
+    this.div.height = this.div.clientHeight;
+    this.ctx.fillStyle = "#008800";
+    var percent = this.ongetdata ? this.ongetdata() : 0;
+    this.ctx.fillRect(0, 0, percent * this.div.clientWidth, this.div.height);
 };
 
 
