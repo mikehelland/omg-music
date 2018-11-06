@@ -943,12 +943,23 @@ OMusicPlayer.prototype.playSound = function (sound, part) {
         
         if (!part.bufferPanner) {
             part.bufferPanner = p.context.createStereoPanner();
+            part.delay = p.context.createDelay();
+            part.feedback = p.context.createGain();
+
+            part.delay.connect(part.feedback);
+            part.feedback.connect(part.delay);
+            part.feedback.connect(part.bufferPanner);
+
             part.bufferPanner.connect(p.compressor);
             
-            
+            part.delay.delayTime.value = part.data.audioParameters.delayTime || 0;
+            part.feedback.gain.value = part.data.audioParameters.delayLevel || 0;
+            part.bufferPanner.pan.setValueAtTime(part.data.audioParameters.pan, p.context.currentTime);
         }
+        
         source.bufferGain = p.context.createGain();
         source.bufferGain.connect(part.bufferPanner)
+        source.bufferGain.connect(part.delay)
         source.connect(source.bufferGain);
         
         part.bufferPanner.pan.setValueAtTime(part.data.audioParameters.pan, p.context.currentTime);

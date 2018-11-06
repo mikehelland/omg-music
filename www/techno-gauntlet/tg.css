@@ -217,3 +217,7 @@ body {
     height:40px;
     background-color: #444444;
 }
+
+.small-link {
+    font-size:0.6em !important;
+}
