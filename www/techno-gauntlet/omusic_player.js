@@ -489,7 +489,7 @@ OMusicPlayer.prototype.extendNote = function (part, note) {
 
 OMusicPlayer.prototype.makeOsc = function (part) {
     var p = this;
-
+console.log("makeosc")
     if (!p.context) {
         return;
     }
@@ -1154,9 +1154,11 @@ OMusicPlayer.prototype.playLiveNotes = function (notes, part) {
         if (part.data.soundSet.url.startsWith("PRESET_OSC")) {
             if (!part.osc)
                 this.makeOsc(part);
-            if (part.osc)
+            if (part.osc) {
+                console.log(this.makeFrequency(notes[0].scaledNote))
                 part.osc.frequency.setValueAtTime(this
-                        .makeFrequency(notes[0].scaledNote) * part.data.audioParameters.warp, 0);
+                        .makeFrequency(notes[0].scaledNote) * part.data.audioParameters.warp, this.context.currentTime);
+            }
         }
         else {
             //var sound = this.getSound(part.data.soundSet, notes[0]);
