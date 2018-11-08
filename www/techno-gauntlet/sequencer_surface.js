@@ -74,7 +74,8 @@ omg.ui.drawDrumCanvasForTrack = function (params) {
 
 omg.ui.drawDrumCanvas = function (params) {
 
-    var drumbeat = params.drumbeat || params.data;
+    var part = params.part;
+    var drumbeat = part.data;
     var canvas = params.canvas;
     var captionWidth = params.captionWidth;
     var subbeat = params.subbeat;
@@ -84,12 +85,9 @@ omg.ui.drawDrumCanvas = function (params) {
         canvas.omgdata = {};
         canvas.omgdata.selectedTrack = -1;
     }    
-        canvas.omgdata.subbeats = (params.songData && params.songData.subbeats) ? 
-            params.songData.subbeats : 4;
-        canvas.omgdata.beats = (params.songData && params.songData.beats) ? 
-            params.songData.beats : 4;
-        canvas.omgdata.measures = (params.songData && params.songData.measures) ? 
-            params.songData.measures : 2;
+        canvas.omgdata.subbeats = part.section.song.data.beatParameters.subbeats;
+        canvas.omgdata.beats = part.section.song.data.beatParameters.beats;
+        canvas.omgdata.measures = part.section.song.data.beatParameters.measures;
         canvas.omgdata.totalSubbeats = canvas.omgdata.subbeats * 
                 canvas.omgdata.beats * canvas.omgdata.measures;
         canvas.omgdata.drumbeat = drumbeat;

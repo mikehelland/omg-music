@@ -12,7 +12,6 @@
 
 	<canvas id="play-button">PLAY</canvas>
 	<div id="tool-bar">
-		<div id="mix-button">Mix</div>
 		<div id="save-button">Save</div>
 	</div>
 
@@ -30,21 +29,24 @@
 		</div>-->
 	</div>
 	
-	<div id="add-part-button">Add Part</div>
+        <div id="main-fragment-bottom-row">
+            <div id="add-part-button">Add Part</div>
+            <div id="mix-button">Mix</div>
+        </div>
 </div>
     
     <div id="detail-fragment">
         <canvas id="instrument-surface"></canvas>
         <div id="beats-fragment">
             <h1></h1>
-            <div><span id="subbeats-label">X</span> Subbeats</div>
-            <input id="subbeats-range" min="1" max="8" value="4" type="range">
-            <div><span id="beats-label">X</span> Beats</div>
-            <input id="beats-range" min="1" max="8" value="4" type="range">
-            <div><span id="measures-label">X</span> Measures</div>
-            <input id="measures-range" min="1" max="8" value="2" type="range">
             <div><span id="bpm-label">X</span> bpm</div>
             <input id="bpm-range" min="20" max="220" value="120" type="range">
+            <div><span id="measures-label">X</span> Measures</div>
+            <input id="measures-range" min="1" max="8" value="2" type="range">
+            <div><span id="beats-label">X</span> Beats</div>
+            <input id="beats-range" min="1" max="8" value="4" type="range">
+            <div><span id="subbeats-label">X</span> Subbeats</div>
+            <input id="subbeats-range" min="1" max="8" value="4" type="range">
             <div><span id="shuffle-label">X</span>% Shuffle</div>
             <input id="shuffle-range" min="0" max="100" value="0" type="range">
         </div>
@@ -54,7 +56,14 @@
             <div id="scale-list">
             </div>
         </div>
-        <div id="chords-fragment"></div>
+        <div id="chords-fragment">
+            <div id="chords-fragment-buttons">
+                <div id="chords-fragment-append-button">Append</div>
+                <div id="chords-fragment-chords-view">I</div>
+                <div id="chords-fragment-clear-button">Clear</div>
+            </div>
+            <div id="chords-fragment-list"></div>
+        </div>
         <div id="add-part-fragment">
             To add an Oscillator choose a wave:
             <div id="osc-buttons">

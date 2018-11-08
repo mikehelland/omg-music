@@ -1,5 +1,6 @@
 html,
 body {
+    font-family:sans-serif;
 	height:100%;
 	width:100%;
 	background-color:black;
@@ -98,10 +99,8 @@ body {
 .part-mute-button {
 	background-color:green;
 }
-
-#add-part-button {
-	text-align:center;
-	padding:20px;
+#main-fragment-bottom-row div:hover, #song-controls div:hover, .part div:hover {
+	opacity:0.65;
 }
 
 #instrument-surface {
@@ -178,7 +177,7 @@ body {
     flex-direction: column;    
 }
 
-#scale-list div:hover, #key-list div:hover {
+#scale-list div:hover, #key-list div:hover, .chord-select-button:hover {
     background-color:#808080;
 }
 #scale-list div, #key-list div {
@@ -220,4 +219,61 @@ body {
 
 .small-link {
     font-size:0.6em !important;
+}
+
+#chords-fragment {
+    flex-direction: column;
+    height:100%;
+    display:none;
+}
+
+.chord-select-button {
+    flex-grow:1;
+    text-align:center;
+    border:1px solid #000088;
+    cursor:pointer;
+}
+
+#chords-fragment-buttons {
+    display:flex;
+    text-align: center;
+}
+
+#chords-fragment-buttons div {
+    padding:1em;
+}
+
+#chords-fragment-chords-view {
+    flex-grow: 2;
+    border-left:1px solid #888888;
+    border-right:1px solid #888888;
+}
+
+#chords-fragment-append-button, #chords-fragment-clear-button {
+    cursor:pointer;
+}
+#chords-fragment-append-button:hover, #chords-fragment-clear-button:hover {
+    background-color: #888888;
+}
+
+#chords-fragment-list {
+    flex-grow:2;
+    display:flex;
+    flex-direction: column;
+}
+
+.selected-option {
+    background-color:#444444;
+}
+
+#main-fragment-bottom-row {
+    display:flex;
+}
+
+#main-fragment-bottom-row div {
+    flex-grow:1;
+    cursor:pointer;
+    text-align:center;
+    padding:20px;
+
 }
