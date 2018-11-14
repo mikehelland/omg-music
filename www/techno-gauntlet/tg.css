@@ -32,10 +32,27 @@ body {
         height:49px;
     cursor: pointer;
 }
-#save-button, #mix-button {
-	display:inline-block;
-	padding:15px;
-        cursor: pointer;
+#tool-bar {
+    display:flex;
+}
+
+#tool-bar > div {
+    flex-grow: 1;
+    padding:15px;
+    cursor: pointer;
+    border:1px solid #444444;
+    font-size:0.8em;
+    opacity:0.65;
+}
+.tool-bar-caption {
+    font-size:0.6em;
+}
+
+#tool-bar div:hover {
+    opacity:1;
+}
+#save-button {	
+       	flex-grow:0 !important;
 }
 
 #key-button, #chords-button {
@@ -44,9 +61,6 @@ body {
 }
 #beats-button {
         cursor: pointer;
-}
-#save-button {
-	float:right;
 }
 
 .part, #song-controls {
@@ -67,6 +81,7 @@ body {
 	padding:10px;
 	flex:1 1 0;
 	text-align:center;
+        opacity:0.65;
 }
 
 #key-button {
@@ -98,9 +113,16 @@ body {
 
 .part-mute-button {
 	background-color:green;
+        opacity:1 !important;
+}
+.part-mute-button:hover {
+	opacity:0.65 !important;
+}
+#main-fragment-bottom-row div, #song-controls div, .part div {
+	opacity:0.65;
 }
 #main-fragment-bottom-row div:hover, #song-controls div:hover, .part div:hover {
-	opacity:0.65;
+	opacity:1;
 }
 
 #instrument-surface {
@@ -276,4 +298,36 @@ body {
     text-align:center;
     padding:20px;
 
+}
+
+#main-fragment-user-button {
+    flex-grow:0 !important;
+}
+
+#user-fragment, #song-fragment {
+    display:none;
+}
+
+#user-login-signup {
+    margin-left:2em;
+}
+
+#user-login-invalid {color:red; display:none;}
+
+#user-info {
+    display:none;
+}
+
+.soundset-list-item {
+    text-align: left;
+    border-top: 1px solid #888888;
+    cursor:pointer;
+    padding:0.4em;
+    font-size: 0.7em;
+    opacity:0.8;
+    
+}
+.soundset-list-item:hover {
+    opacity:1;
+    background-color:#444444;
 }

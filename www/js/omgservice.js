@@ -15,33 +15,11 @@ if (!omg.util)
 omg.server.url = "";
 omg.server.dev = window.location.href.indexOf("localhost") > 0;
 
-omg.server.post = function (data, callback) {
+omg.server.http = function (params) {
+    var method = params.method || "GET";
 
     var xhr = new XMLHttpRequest();
-    xhr.open("POST", this.url + "/data/", true);
-    xhr.onreadystatechange = function () {
-        if (xhr.readyState === 4) {
-
-            var results = JSON.parse(xhr.responseText);
-            if (results.id) {
-                console.log("post omg good id= " + results.id);
-                data.id = results.id;
-                if (callback)
-                    callback(results);
-            } else {
-                console.log(results);
-            }
-        }
-    };
-
-    xhr.setRequestHeader("Content-type", "application/json");
-    xhr.send(JSON.stringify(data));
-};
-
-omg.server.getHTTP = function (url, callback) {
-
-    var xhr = new XMLHttpRequest();
-    xhr.open("GET", url, true);
+    xhr.open(method, params.url, true);
     xhr.onreadystatechange = function () {
         if (xhr.readyState === 4) {
 
@@ -50,13 +28,32 @@ omg.server.getHTTP = function (url, callback) {
                 results = JSON.parse(xhr.responseText);
             } catch (exp) {
                 console.log(exp);
-                console.log("could not parse results of url: " + url);
+                console.log("could not parse results of url: " + params.url);
+                console.log(xhr.responseText);
             }
-            if (callback && results)
-                callback(results);                
+            if (params.callback) {
+                params.callback(results);    
+            }
         }
     };
-    xhr.send();
+
+    if (params.data) {
+        xhr.setRequestHeader("Content-type", "application/json");
+        xhr.send(JSON.stringify(params.data));
+    }
+    else {
+        xhr.send();
+    }
+};
+
+omg.server.post = function (data, callback) {
+    omg.server.http({method: "POST", 
+            url: this.url + "/data/", 
+            data: data, callback: callback});
+};
+
+omg.server.getHTTP = function (url, callback) {
+    omg.server.http({url: url, callback: callback});
 };
 
 omg.server.getId = function (id, callback) {
@@ -65,19 +62,19 @@ omg.server.getId = function (id, callback) {
 };
 
 omg.server.deleteId = function (id, callback) {
+    var url = this.url + "/data/" + id;
+    omg.server.http({method: "DELETE", url: url, callback: callback});
+};
 
-    var xhr = new XMLHttpRequest();
-    xhr.open("DELETE", this.url + "/data/" + id, true);
-    xhr.onreadystatechange = function () {
-        if (xhr.readyState === 4) {
-
-            var results = JSON.parse(xhr.responseText);
-            console.log(results);
-            if (callback)
-                callback(results);
-        }
-    };
-    xhr.send();
+omg.server.login = function (username, password, callback) {
+    var data = {username: username, password: password};
+    omg.server.http({method: "POST", data: data, url : this.url + "/api-login",
+            callback: callback});
+};
+omg.server.signup = function (username, password, callback) {
+    var data = {username: username, password: password};
+    omg.server.http({method: "POST", data: data, url : this.url + "/api-signup",
+            callback: callback});
 };
 
 

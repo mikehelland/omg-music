@@ -12,7 +12,15 @@
 
 	<canvas id="play-button">PLAY</canvas>
 	<div id="tool-bar">
-		<div id="save-button">Save</div>
+            <div id="main-fragment-user-button">
+                <span class="tool-bar-caption">User</span>
+                <span id="tool-bar-user-button">Log in | Sign up</span>
+            </div>
+            <div id="main-fragment-song-button">
+                <span class="tool-bar-caption">Song</span>
+                <span id="tool-bar-song-button">(Untitled)</span>
+            </div>
+            <div id="save-button">Save</div>
 	</div>
 
 	<div id="song-controls">
@@ -106,12 +114,46 @@
             Clear or Remove<br>
             <button id="part-options-clear-button">Clear Part Data</button><br>
             <button>Remove Part</button>
-            
-                   
+        </div>
+        <div id="user-fragment">
+            <h2>User</h2>
+            <div id="user-login-signup">
+                <h3>You are not logged in. <span id="user-login-invalid">Invalid login</span>
+                </h3>
+                Login:
+                <br>
+                <input placeholder="username" id="user-login-username">
+                <br>
+                <input type="password" placeholder="password" id="user-login-password">
+                <br>
+                <button id="user-login-button">Login</button>
+                <hr>
+                -or- Create an account:
+                <br>
+                <input placeholder="username" id="user-signup-username">
+                <br>
+                <input type="password" placeholder="password" id="user-signup-password">
+                <br>
+                <button id="user-signup-button">Create an Account</button>
+            </div>
+            <div id="user-info">
+                Username: <span id="user-info-username"></span>
+            </div>
+            <div id="user-fragment-detail-list">
+                
+            </div>
+        </div>
+        <div id="song-fragment">
+            <h2>Song</h2>
+            Song name:
+            <br>
+            <input id="song-info-name" placeholder="(Untitled)">
+            <button id="song-info-update">Update</button>
         </div>
     </div>
     
     <script src="../js/omgservice.js"></script>
+    <script src="../js/usercontrols.js"></script>
     <script src="omusic_player.js"></script>
     <script src="sequencer_surface.js"></script>
     <script src="vertical_surface.js"></script>

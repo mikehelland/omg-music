@@ -47,6 +47,7 @@ passport.use("login", new LocalStrategy(
 
             console.log("login user:"); console.log(user);
             if (user && user.password.trim() === password) {
+                delete user.password;
                 return done(null, user);
             }
 
@@ -109,8 +110,35 @@ app.post('/signup',
                                    failureRedirect: "/signup.htm?invalid"})
 );
 
+app.post("/api-login",
+   passport.authenticate("login"),
+   function (req, res) {
+        if (req.user) {
+            res.send(req.user);
+        } else {
+            res.send(false);
+        }       
+   });
+
+app.get("/logout", function (req, res) {
+      req.logout();
+      res.redirect("/");
+   }
+);
+app.post('/api-signup', 
+   passport.authenticate("signup"), 
+      function (req, res) {
+        if (req.user) {
+            res.send(req.user);
+        } else {
+            res.send(false);
+        }       
+   });
+
+
 app.get('/user', function (req, res) {
     if (req.user) {
+        delete req.user.password;
         res.send(req.user);
     } else {
         res.send(false);
