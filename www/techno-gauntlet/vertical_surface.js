@@ -514,7 +514,7 @@ OMGMelodyMaker.prototype.setupFretBoard = function () {
         if (!chromatic || scale.indexOf((i - rootNote % 12) % 12) > -1) {
             frets.push({
                 note: i,
-                caption: chromatic ? omg.ui.noteNames[i] : this.data.soundSet.data[i].caption
+                caption: chromatic ? omg.ui.noteNames[i] : this.data.soundSet.data[i].name
             });
         }
     }
