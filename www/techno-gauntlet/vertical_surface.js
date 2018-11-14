@@ -481,18 +481,29 @@ OMGMelodyMaker.prototype.drawButtons = function (context, buttonRow, x, y, width
 
 OMGMelodyMaker.prototype.setupFretBoard = function () {
     var keyParameters = this.part.section.song.data.keyParameters;
-    var rootNote = keyParameters.rootNote;
-    var bottomNote = this.data.soundSet.lowNote;
-    var topNote = this.data.soundSet.highNote;
-    if (!topNote && this.data.soundSet.data.length) {
-        topNote = bottomNote + this.data.soundSet.data.length - 1;
+    var rootNote;
+    var bottomNote;
+    var topNote;
+    var octave;
+    var chromatic = this.data.soundSet.chromatic;
+    if (chromatic) {
+        rootNote = keyParameters.rootNote;
+        bottomNote = this.data.soundSet.lowNote;
+        topNote = this.data.soundSet.highNote;
+        if (!topNote && this.data.soundSet.data.length) {
+            topNote = bottomNote + this.data.soundSet.data.length - 1;
+        }
+        octave = this.data.soundSet.octave;
     }
-    var octave = this.data.soundSet.octave;
-    var fretCount = topNote - bottomNote + 1;
+    else {
+        rootNote = 0;
+        bottomNote = 0;
+        topNote = this.data.soundSet.data.length - 1;
+        octave = 0;
+    }
 
-    var scale = keyParameters.scale; //this.data.ascale;
+    var scale = keyParameters.scale; 
 
-    var noteInScale;
     var frets = [];
 
     for (var i = bottomNote; i <= topNote; i++) {
@@ -500,10 +511,10 @@ OMGMelodyMaker.prototype.setupFretBoard = function () {
         if (i == rootNote + octave * 12)
             frets.rootNote = frets.length;
 
-        if (scale.indexOf((i - rootNote % 12) % 12) > -1) {
+        if (!chromatic || scale.indexOf((i - rootNote % 12) % 12) > -1) {
             frets.push({
                 note: i,
-                caption: omg.ui.noteNames[i]
+                caption: chromatic ? omg.ui.noteNames[i] : this.data.soundSet.data[i].caption
             });
         }
     }
@@ -754,6 +765,7 @@ OMGMelodyMaker.prototype.onDisplay = function () {
                         scaledNote: noteNumber,
                         beats: 0.25
                     };
+
                     var notes = [note];
                     notes.autobeat = xsection == 1 ? 4 : xsection == 3 ? 1 : xsection;
                     omgmm.player.playLiveNotes(notes, omgmm.part);
