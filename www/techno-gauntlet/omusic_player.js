@@ -1513,7 +1513,7 @@ OMGPart.prototype.makeTracks = function () {
         this.data.soundSet.data.forEach(function (sound) {
             that.data.tracks.push(sound);
             sound.sound = (that.data.soundSet.prefix || "") +
-                    sound.url + (that.data.soundSet.postFix || "");
+                    sound.url + (that.data.soundSet.postfix || "");
             sound.data = [];
         });
     }
