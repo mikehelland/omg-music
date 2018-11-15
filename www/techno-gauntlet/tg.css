@@ -14,6 +14,7 @@ body {
 	flex-direction: column;
 	height:100%;
 	width:49.9%;
+        overflow-y: auto;
 }
 
 #detail-fragment {
@@ -22,6 +23,38 @@ body {
 	width:49.9%;
         top:0px;
         right:0px;
+        overflow-y: auto;
+}
+
+#back-button {
+    display:none;
+}
+
+@media all and (orientation:portrait) {
+    #main-fragment {
+        width:100%;
+    }
+    #detail-fragment {
+        width:100%;
+        left:0px;
+        display:none;
+        background-color:black;
+    }
+    #back-button {
+        display:block;
+        position:absolute;
+        bottom:0px;
+        left:0px;
+        width:100%;
+        text-align:center;
+        padding:0.3em;
+        opacity:0.65;
+        background-color:#19469D;
+        cursor:pointer;
+    }
+    #back-button:hover {
+        opacity:1;
+    }
 }
 
 #play-button {
@@ -308,8 +341,9 @@ body {
     display:none;
 }
 
-#user-login-signup {
+.detail-fragment-body {
     margin-left:2em;
+    margin-right:2em;
 }
 
 #user-login-invalid {color:red; display:none;}

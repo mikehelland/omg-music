@@ -1489,16 +1489,7 @@ function OMGPart(div, data, section) {
     }
     else {
         if (!this.data.tracks) {
-            this.data.tracks = [];
-            if (this.data.soundSet && this.data.soundSet.data) {
-                var that = this;
-                this.data.soundSet.data.forEach(function (sound) {
-                    that.data.tracks.push(sound);
-                    sound.sound = (that.data.soundSet.prefix || "") +
-                            sound.url + (that.data.soundSet.postFix || "");
-                    sound.data = [];
-                });
-            }
+            this.makeTracks();
         }
     }
     if (!this.data.audioParameters) this.data.audioParameters = {};
@@ -1514,3 +1505,16 @@ function OMGPart(div, data, section) {
     }
     
 }
+
+OMGPart.prototype.makeTracks = function () {
+    this.data.tracks = [];
+    if (this.data.soundSet && this.data.soundSet.data) {
+        var that = this;
+        this.data.soundSet.data.forEach(function (sound) {
+            that.data.tracks.push(sound);
+            sound.sound = (that.data.soundSet.prefix || "") +
+                    sound.url + (that.data.soundSet.postFix || "");
+            sound.data = [];
+        });
+    }
+};

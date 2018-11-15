@@ -423,7 +423,7 @@ tg.showAddPartFragment = function () {
     tg.newChosenButton(tg.addPartButton);
 };
 
-tg.hideDetails = function () {
+tg.hideDetails = function (hideFragment) {
     if (tg.beatsFragment) tg.beatsFragment.style.display = "none";
     if (tg.keyFragment) tg.keyFragment.style.display = "none";
     if (tg.chordsFragment) tg.chordsFragment.style.display = "none";
@@ -434,6 +434,13 @@ tg.hideDetails = function () {
     if (tg.partOptionsFragment) tg.partOptionsFragment.style.display = "none";
     if (tg.userFragment) tg.userFragment.style.display = "none";
     if (tg.songFragment) tg.songFragment.style.display = "none";
+    
+    if (hideFragment) {
+        tg.detailFragment.style.display = "none";
+    }
+    else {
+        tg.detailFragment.style.display = "block";
+    }
 };
 
 
@@ -664,6 +671,32 @@ tg.showPartOptionsFragment = function (part) {
     tg.partOptionsFragment = document.getElementById("part-options-fragment");
     tg.partOptionsFragment.style.display = "block";
     
+    var submixerButton = document.getElementById("part-options-submixer-button");
+    var verticalRadio = document.getElementById("part-options-vertical-surface");
+    var sequencerRadio = document.getElementById("part-options-sequencer-surface");
+    if (part.data.surface.url === "PRESET_VERTICAL") {
+        verticalRadio.checked = true;
+        submixerButton.style.display = "none";
+    }
+    else {
+        sequencerRadio.checked = true;
+        submixerButton.style.display = "block";
+    }
+    verticalRadio.onchange = function () {
+        part.data.surface.url = "PRESET_VERTICAL";
+        submixerButton.style.display = "none";
+        if (!part.data.notes) {
+            part.data.notes = [];
+        }
+    };
+    sequencerRadio.onchange = function () {
+        submixerButton.style.display = "block";
+        part.data.surface.url = "PRESET_SEQUENCER";
+        if (!part.data.tracks) {
+            part.makeTracks();
+        }
+    };
+    
     document.getElementById("part-options-clear-button").onclick = function () {
         if (part.data.notes) {
             part.data.notes = [];
@@ -675,6 +708,15 @@ tg.showPartOptionsFragment = function (part) {
                 }
             }
         }
+    };
+    document.getElementById("part-options-remove-button").onclick = function () {
+        var i = tg.song.sections[0].parts.indexOf(part);
+        if (i > -1) {
+            tg.song.sections[0].parts.splice(i, 1)
+            tg.song.sections[0].data.parts.splice(i, 1)
+            tg.partList.removeChild(tg.partList.children[i])
+        }
+        tg.hideDetails();
     }
     
     new SliderCanvas(document.getElementById("part-options-delay-time"),
@@ -804,9 +846,12 @@ tg.showSongFragment = function () {
         tg.songFragment = document.getElementById("song-fragment");
         var nameInput = document.getElementById("song-info-name");
         nameInput.value = tg.song.data.name || "";
+        var tagsInput = document.getElementById("song-info-tags");
+        tagsInput.value = tg.song.data.tags || "";
         document.getElementById("song-info-update").onclick = function () {
             tg.song.data.name = nameInput.value;
             document.getElementById("tool-bar-song-button").innerHTML = nameInput.value;
+            tg.song.data.tags = tagsInput.value;
         };
     }
     tg.songFragment.style.display = "block";
@@ -818,6 +863,11 @@ tg.onlogin = function (user) {
     document.getElementById("user-login-signup").style.display = "none";
     document.getElementById("user-info").style.display = "block";
     document.getElementById("user-info-username").innerHTML = user.username;
+};
+
+tg.backButton = document.getElementById("back-button");
+tg.backButton.onclick = function () {
+    tg.hideDetails(true);
 };
 
 // away we go

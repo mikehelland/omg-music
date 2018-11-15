@@ -97,9 +97,12 @@
         </div>
         <div id="part-options-fragment">
             <h2>Part Options</h2>
+            <div class="detail-fragment-body">
             Choose a surface:<br>
-            <input type="radio" name="surface">Vertical<br>
-            <input type="radio" name="surface">Sequencer
+            <input type="radio" name="surface" id="part-options-vertical-surface">Vertical<br>
+            <input type="radio" name="surface" id="part-options-sequencer-surface">Sequencer
+            <br>
+            <button id="part-options-submixer-button">Tracks Sub Mixer</button>
             <hr>
             Delay Time:
             <br>
@@ -109,14 +112,14 @@
             <br>
             <canvas id="part-options-delay-level"></canvas>
             <hr>
-            <button>Tracks Sub Mixer</button>
-            <hr>
             Clear or Remove<br>
             <button id="part-options-clear-button">Clear Part Data</button><br>
-            <button>Remove Part</button>
+            <button id="part-options-remove-button">Remove Part</button>
+            </div>
         </div>
         <div id="user-fragment">
             <h2>User</h2>
+            <div class="detail-fragment-body">
             <div id="user-login-signup">
                 <h3>You are not logged in. <span id="user-login-invalid">Invalid login</span>
                 </h3>
@@ -142,14 +145,23 @@
             <div id="user-fragment-detail-list">
                 
             </div>
+            </div>
         </div>
         <div id="song-fragment">
             <h2>Song</h2>
+            <div class="detail-fragment-body">
             Song name:
             <br>
             <input id="song-info-name" placeholder="(Untitled)">
+            <br>
+            Tags:
+            <br>
+            <input id="song-info-tags" placeholder="no tags">
+            <br>
             <button id="song-info-update">Update</button>
+            </div>
         </div>
+        <div id="back-button">&lt; Back</div>
     </div>
     
     <script src="../js/omgservice.js"></script>
