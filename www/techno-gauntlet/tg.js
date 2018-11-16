@@ -511,8 +511,11 @@ function MixerVolumeCanvas(part, canvas) {
     if (!canvas) {
         canvas = document.createElement("canvas");
         var offsets = omg.ui.totalOffsets(canvas);;
-        canvas.onmousedown = function (e) {m.ondown(e.layerX - m.div.offsetLeft);};
-        canvas.onmousemove = function (e) {m.onmove(e.layerX - m.div.offsetLeft);};
+        canvas.onmousedown = function (e) {
+            offsets = omg.ui.totalOffsets(canvas);;
+            m.ondown(e.clientX - offsets.left);
+        };
+        canvas.onmousemove = function (e) {m.onmove(e.clientX - offsets.left);};
         canvas.onmouseup = function (e) {m.onup();};
         canvas.ontouchstart = function (e) {
             offsets = omg.ui.totalOffsets(canvas);
@@ -560,8 +563,11 @@ function MixerWarpCanvas(part, canvas) {
     if (!canvas) {
         canvas = document.createElement("canvas");
         var offsets = omg.ui.totalOffsets(canvas);;
-        canvas.onmousedown = function (e) {m.ondown(e.layerX - m.div.offsetLeft);};
-        canvas.onmousemove = function (e) {m.onmove(e.layerX - m.div.offsetLeft);};
+        canvas.onmousedown = function (e) {
+            offsets = omg.ui.totalOffsets(canvas);;
+            m.ondown(e.clientX - offsets.left);
+        };
+        canvas.onmousemove = function (e) {m.onmove(e.clientX - offsets.left);};
         canvas.onmouseup = function (e) {m.onup();};
         canvas.ontouchstart = function (e) {
             offsets = omg.ui.totalOffsets(canvas);
@@ -606,9 +612,12 @@ function MixerPanCanvas(part, canvas) {
     var m = this;
     if (!canvas) {
         canvas = document.createElement("canvas");
-        var offsets = omg.ui.totalOffsets(canvas);;
-        canvas.onmousedown = function (e) {m.ondown(e.layerX);};
-        canvas.onmousemove = function (e) {m.onmove(e.layerX);};
+        var offsets = omg.ui.totalOffsets(canvas);
+        canvas.onmousedown = function (e) {
+            offsets = omg.ui.totalOffsets(canvas);
+            m.ondown(e.clientX - offsets.left);
+        };
+        canvas.onmousemove = function (e) {m.onmove(e.clientX - offsets.left);};
         canvas.onmouseup = function (e) {m.onup();};
         canvas.ontouchstart = function (e) {
             offsets = omg.ui.totalOffsets(canvas);
@@ -765,8 +774,12 @@ function SliderCanvas(canvas, onchange, ongetdata) {
         canvas = document.createElement("canvas");
     }
     var offsets = omg.ui.totalOffsets(canvas);;
-    canvas.onmousedown = function (e) {m.ondown(e.layerX - m.div.offsetLeft);};
-    canvas.onmousemove = function (e) {m.onmove(e.layerX - m.div.offsetLeft);};
+    canvas.onmousedown = function (e) {
+        offsets = omg.ui.totalOffsets(canvas);
+        m.ondown(e.clientX - offsets.left);
+    };
+    canvas.onmousemove = function (e) {
+        m.onmove(e.clientX - offsets.left);};
     canvas.onmouseup = function (e) {m.onup();};
     canvas.ontouchstart = function (e) {
         offsets = omg.ui.totalOffsets(canvas);
