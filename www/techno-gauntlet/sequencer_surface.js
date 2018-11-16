@@ -55,8 +55,10 @@ omg.ui.drawDrumCanvasForTrack = function (params) {
         for (var j = 0; j < canvas.omgdata.subbeats; j++) {
 
             subbeatIndex = j + i * canvas.omgdata.subbeats;
-            context.fillStyle = drumbeat.tracks[canvas.omgdata.selectedTrack].data[subbeatIndex] ? "black" :
-                    (j == 0) ? "#C0C0C0" : "#E0E0E0";
+            //context.fillStyle = drumbeat.tracks[canvas.omgdata.selectedTrack].data[subbeatIndex] ? "black" :
+            //        (j == 0) ? "#C0C0C0" : "#E0E0E0";
+            context.fillStyle = drumbeat.tracks[canvas.omgdata.selectedTrack].data[subbeatIndex] ? "white" :
+                    (j == 0) ? "#333333" : "#111111";
 
             context.fillRect(left + captionWidth + columnWidth * j + 1, top + rowHeight * i + 1,
                     columnWidth - 2, rowHeight - 2);
@@ -79,6 +81,9 @@ omg.ui.drawDrumCanvas = function (params) {
     var canvas = params.canvas;
     var captionWidth = params.captionWidth;
     var subbeat = params.subbeat;
+    
+    var foreColor = params.foreColor || "white";
+    var backgroundColor = params.backgroundColor || "black";
     
     //maybe that other stuff above should be in here
     if (!canvas.omgdata) {
@@ -151,27 +156,29 @@ omg.ui.drawDrumCanvas = function (params) {
         canvas.height = params.height || canvas.clientHeight;
     }
 
-    context.fillStyle = "#C0C0FF";
-    context.fillRect(0, 0, captionWidth, canvas.height);
-
+   
     var captionPixels;
     for (var i = 0; i < drumbeat.tracks.length; i++) {
         if (!drumbeat.tracks[i].sound) {
             continue;
         }
+        
+        if (i === canvas.omgdata.selectedTrack) {
+            //context.strokeRect(left, top + i * trackHeight, captionWidth - 1, trackHeight);
+            context.fillStyle = "#000044";
+            context.fillRect(left, top + i * trackHeight, captionWidth, trackHeight);
 
-        context.fillStyle = "black";
+        }
+        
+        context.fillStyle = foreColor;
         if (captionWidth > 0) {
             captionPixels = context.measureText(drumbeat.tracks[i].name).width;
             context.fillText(drumbeat.tracks[i].name, left + captionWidth / 2 - captionPixels / 2, top + trackHeight * (i + 0.5) + 6);
         }
-        
-        if (i === canvas.omgdata.selectedTrack) {
-            context.strokeRect(left, top + i * trackHeight, captionWidth - 1, trackHeight);
-        }
+
     }
     context.globalAlpha = 0.5;
-    context.fillStyle = "white";
+    context.fillStyle = backgroundColor;
     context.fillRect(left + captionWidth, top, width - captionWidth, height);
     context.globalAlpha = 1;
 
@@ -198,8 +205,10 @@ omg.ui.drawDrumCanvas = function (params) {
 
             //for (var j = 0; j < drumbeat.tracks[i].data.length; j++) {
             for (var j = 0; j < canvas.omgdata.totalSubbeats; j++) {
-                context.fillStyle = drumbeat.tracks[i].data[j] ? "black" :
-                        (j % canvas.omgdata.subbeats == 0) ? "#C0C0C0" : "#E0E0E0";
+                //context.fillStyle = drumbeat.tracks[i].data[j] ? "black" :
+                //        (j % canvas.omgdata.subbeats == 0) ? "#C0C0C0" : "#E0E0E0";
+                context.fillStyle = drumbeat.tracks[i].data[j] ? "white" :
+                        (j % canvas.omgdata.subbeats == 0) ? "#333333" : "#111111";
 
                 context.fillRect(left + captionWidth + columnWidth * j + 1, top + rowHeight * ii + 1,
                         columnWidth - 2, rowHeight - 2);

@@ -1365,6 +1365,10 @@ function OMGSection(div, data, song) {
     } else {
         this.data = {type: "SECTION", parts: []};
     }
+    
+    if (!this.data.chordProgression) {
+        this.data.chordProgression = [0];
+    }
 
     for (var ip = 0; ip < this.data.parts.length; ip++) {
         partData = this.data.parts[ip];

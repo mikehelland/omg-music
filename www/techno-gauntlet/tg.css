@@ -62,7 +62,7 @@ body {
 	font-size:1.5em;
 	text-align:center;
 	/*padding:10px;*/
-        height:49px;
+        height:1.7em;
     cursor: pointer;
 }
 #tool-bar {
@@ -140,7 +140,7 @@ body {
 .part-button {
 	flex-grow:8;
 	text-align:center;
-	background-color:#888888;
+	background-color:#444444;
 	padding:20px;
 }
 
@@ -318,7 +318,7 @@ body {
 }
 
 .selected-option {
-    background-color:#444444;
+    background-color:#808080;
 }
 
 #main-fragment-bottom-row {
