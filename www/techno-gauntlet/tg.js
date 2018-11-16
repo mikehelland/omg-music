@@ -214,33 +214,43 @@ tg.showBeatsFragment = function () {
         bf.bpmRange = document.getElementById("bpm-range");
         bf.shuffleRange = document.getElementById("shuffle-range");
         
-        bf.subbeatsRange.onmousemove = function (e) {
-            console.log(e);
+        var onSubeatsChange = function (e) {
             bf.subbeatsLabel.innerHTML = bf.subbeatsRange.value;
             tg.song.data.beatParameters.subbeats = bf.subbeatsRange.value;
         };
-        bf.beatsRange.onmousemove = function (e) {
-            console.log(e);
+        bf.subbeatsRange.onmousemove = onSubeatsChange;
+        bf.subbeatsRange.onmousedown = onSubeatsChange;
+        bf.subbeatsRange.onchange = onSubeatsChange;
+        var onBeatsChange = function (e) {
             bf.beatsLabel.innerHTML = bf.beatsRange.value;
             tg.song.data.beatParameters.beats = bf.beatsRange.value;
         };
-        bf.measuresRange.onmousemove = function (e) {
-            console.log(e);
+        bf.beatsRange.onmousemove = onBeatsChange;
+        bf.beatsRange.onmousedown = onBeatsChange;
+        bf.beatsRange.onchange = onBeatsChange;
+        var onMeasuresChange = function (e) {
             bf.measuresLabel.innerHTML = bf.measuresRange.value;
             tg.song.data.beatParameters.measures = bf.measuresRange.value;
         };
-        bf.bpmRange.onmousemove = function (e) {
-            console.log(e);
+        bf.measuresRange.onmousemove = onMeasuresChange;
+        bf.measuresRange.onmousedown = onMeasuresChange;
+        bf.measuresRange.onchange = onMeasuresChange;
+        var onBpmChange = function (e) {
             bf.bpmLabel.innerHTML = bf.bpmRange.value;
             tg.song.data.beatParameters.bpm = bf.bpmRange.value;
             tg.player.newBPM = bf.bpmRange.value;
             tg.setSongControlsUI();
         };
-        bf.shuffleRange.onmousemove = function (e) {
-            console.log(e);
+        bf.bpmRange.onmousemove = onBpmChange;
+        bf.bpmRange.onmousedown = onBpmChange;
+        bf.bpmRange.onchange = onBpmChange;
+        var onShuffleChange = function (e) {
             bf.shuffleLabel.innerHTML = bf.shuffleRange.value;
             tg.song.data.beatParameters.shuffle = bf.shuffleRange.value;
         };
+        bf.shuffleRange.onmousemove = onShuffleChange;
+        bf.shuffleRange.onmousedown = onShuffleChange;
+        bf.shuffleRange.onchange = onShuffleChange;
     }
     tg.refreshBeatsFragment();
     tg.beatsFragment.style.display = "block";
@@ -500,36 +510,38 @@ function MixerVolumeCanvas(part, canvas) {
     var m = this;
     if (!canvas) {
         canvas = document.createElement("canvas");
-        canvas.onmousedown = function (e) {
-            m.onmousedown(e);
-        }
-        canvas.onmousemove = function (e) {
-            m.onmousemove(e);
-        }
-        canvas.onmouseup = function (e) {
-            m.onmouseup(e);
-        }
+        var offsets = omg.ui.totalOffsets(canvas);;
+        canvas.onmousedown = function (e) {m.ondown(e.layerX - m.div.offsetLeft);};
+        canvas.onmousemove = function (e) {m.onmove(e.layerX - m.div.offsetLeft);};
+        canvas.onmouseup = function (e) {m.onup();};
+        canvas.ontouchstart = function (e) {
+            offsets = omg.ui.totalOffsets(canvas);
+            m.ondown(e.targetTouches[0].pageX - offsets.left);
+        };
+        canvas.ontouchmove = function (e) {
+            m.onmove(e.targetTouches[0].pageX - offsets.left);
+        };
+        canvas.ontouchend = function (e) {m.onup();};
     }
     this.div = canvas;
     this.ctx = canvas.getContext("2d");
     this.part = part;
 }
 
-MixerVolumeCanvas.prototype.onmousedown = function (e) {
+MixerVolumeCanvas.prototype.ondown = function (x) {
     this.isTouching = true;
-    console.log(this)
-    var percent = (e.layerX - this.div.offsetLeft) / this.div.clientWidth;
+    var percent = x / this.div.clientWidth;
     this.part.data.audioParameters.volume = percent;
     this.drawCanvas(this.div);
 };
-MixerVolumeCanvas.prototype.onmousemove = function (e) {
+MixerVolumeCanvas.prototype.onmove = function (x) {
     if (this.isTouching) {
-        var percent = (e.layerX - this.div.offsetLeft) / this.div.clientWidth;
+        var percent = x / this.div.clientWidth;
         this.part.data.audioParameters.volume = percent;
         this.drawCanvas(this.div);
     }
 };
-MixerVolumeCanvas.prototype.onmouseup = function (e) {
+MixerVolumeCanvas.prototype.onup = function (e) {
     this.isTouching = false;
 };
 MixerVolumeCanvas.prototype.drawCanvas = function () {
@@ -547,36 +559,38 @@ function MixerWarpCanvas(part, canvas) {
     var m = this;
     if (!canvas) {
         canvas = document.createElement("canvas");
-        canvas.onmousedown = function (e) {
-            m.onmousedown(e);
-        }
-        canvas.onmousemove = function (e) {
-            m.onmousemove(e);
-        }
-        canvas.onmouseup = function (e) {
-            m.onmouseup(e);
-        }
+        var offsets = omg.ui.totalOffsets(canvas);;
+        canvas.onmousedown = function (e) {m.ondown(e.layerX - m.div.offsetLeft);};
+        canvas.onmousemove = function (e) {m.onmove(e.layerX - m.div.offsetLeft);};
+        canvas.onmouseup = function (e) {m.onup();};
+        canvas.ontouchstart = function (e) {
+            offsets = omg.ui.totalOffsets(canvas);
+            m.ondown(e.targetTouches[0].pageX - offsets.left);
+        };
+        canvas.ontouchmove = function (e) {
+            m.onmove(e.targetTouches[0].pageX - offsets.left);
+        };
+        canvas.ontouchend = function (e) {m.onup();};
     }
     this.div = canvas;
     this.ctx = canvas.getContext("2d");
     this.part = part;
 }
 
-MixerWarpCanvas.prototype.onmousedown = function (e) {
+MixerWarpCanvas.prototype.ondown = function (x) {
     this.isTouching = true;
-    console.log(this)
-    var percent = (e.layerX - this.div.offsetLeft) / this.div.clientWidth * 2;
+    var percent = x / this.div.clientWidth * 2;
     this.part.data.audioParameters.warp = percent;
     this.drawCanvas(this.div);
 };
-MixerWarpCanvas.prototype.onmousemove = function (e) {
+MixerWarpCanvas.prototype.onmove = function (x) {
     if (this.isTouching) {
-        var percent = (e.layerX - this.div.offsetLeft) / this.div.clientWidth * 2;
+        var percent = x / this.div.clientWidth * 2;
         this.part.data.audioParameters.warp = percent;
         this.drawCanvas(this.div);
     }
 };
-MixerWarpCanvas.prototype.onmouseup = function (e) {
+MixerWarpCanvas.prototype.onup = function (e) {
     this.isTouching = false;
 };
 MixerWarpCanvas.prototype.drawCanvas = function () {
@@ -592,35 +606,38 @@ function MixerPanCanvas(part, canvas) {
     var m = this;
     if (!canvas) {
         canvas = document.createElement("canvas");
-        canvas.onmousedown = function (e) {
-            m.onmousedown(e);
-        }
-        canvas.onmousemove = function (e) {
-            m.onmousemove(e);
-        }
-        canvas.onmouseup = function (e) {
-            m.onmouseup(e);
-        }
+        var offsets = omg.ui.totalOffsets(canvas);;
+        canvas.onmousedown = function (e) {m.ondown(e.layerX);};
+        canvas.onmousemove = function (e) {m.onmove(e.layerX);};
+        canvas.onmouseup = function (e) {m.onup();};
+        canvas.ontouchstart = function (e) {
+            offsets = omg.ui.totalOffsets(canvas);
+            m.ondown(e.targetTouches[0].pageX - offsets.left);
+        };
+        canvas.ontouchmove = function (e) {
+            m.onmove(e.targetTouches[0].pageX - offsets.left);
+        };
+        canvas.ontouchend = function (e) {m.onup();};
     }
     this.div = canvas;
     this.ctx = canvas.getContext("2d");
     this.part = part;
 }
 
-MixerPanCanvas.prototype.onmousedown = function (e) {
+MixerPanCanvas.prototype.ondown = function (x) {
     this.isTouching = true;
-    var percent = (e.layerX - (this.div.clientWidth / 2)) / this.div.clientWidth * 2;
+    var percent = (x - (this.div.clientWidth / 2)) / this.div.clientWidth * 2;
     this.part.data.audioParameters.pan = percent;
     this.drawCanvas(this.div);
 };
-MixerPanCanvas.prototype.onmousemove = function (e) {
+MixerPanCanvas.prototype.onmove = function (x) {
     if (this.isTouching) {
-        var percent = (e.layerX - (this.div.clientWidth / 2)) / this.div.clientWidth * 2;
+        var percent = (x - (this.div.clientWidth / 2)) / this.div.clientWidth * 2;
         this.part.data.audioParameters.pan = percent;
         this.drawCanvas(this.div);
     }
 };
-MixerPanCanvas.prototype.onmouseup = function (e) {
+MixerPanCanvas.prototype.onup = function (e) {
     this.isTouching = false;
 };
 MixerPanCanvas.prototype.drawCanvas = function () {
@@ -747,35 +764,39 @@ function SliderCanvas(canvas, onchange, ongetdata) {
     if (!canvas) {
         canvas = document.createElement("canvas");
     }
-    canvas.onmousedown = function (e) {
-        m.onmousedown(e);
-    }
-    canvas.onmousemove = function (e) {
-        m.onmousemove(e);
-    }
-    canvas.onmouseup = function (e) {
-        m.onmouseup(e);
-    }
+    var offsets = omg.ui.totalOffsets(canvas);;
+    canvas.onmousedown = function (e) {m.ondown(e.layerX - m.div.offsetLeft);};
+    canvas.onmousemove = function (e) {m.onmove(e.layerX - m.div.offsetLeft);};
+    canvas.onmouseup = function (e) {m.onup();};
+    canvas.ontouchstart = function (e) {
+        offsets = omg.ui.totalOffsets(canvas);
+        m.ondown(e.targetTouches[0].pageX - offsets.left);
+    };
+    canvas.ontouchmove = function (e) {
+        m.onmove(e.targetTouches[0].pageX - offsets.left);
+    };
+    canvas.ontouchend = function (e) {m.onup();};
+
     this.div = canvas;
     this.ctx = canvas.getContext("2d");
     this.onchange = onchange;
     this.ongetdata = ongetdata;
 }
 
-SliderCanvas.prototype.onmousedown = function (e) {
+SliderCanvas.prototype.ondown = function (x) {
     this.isTouching = true;
-    var percent = (e.layerX - this.div.offsetLeft) / this.div.clientWidth;
+    var percent = x / this.div.clientWidth;
     if (this.onchange) this.onchange(percent);
     this.drawCanvas(this.div);
 };
-SliderCanvas.prototype.onmousemove = function (e) {
+SliderCanvas.prototype.onmove = function (x) {
     if (this.isTouching) {
-        var percent = (e.layerX - this.div.offsetLeft) / this.div.clientWidth;
+        var percent = x / this.div.clientWidth;
         if (this.onchange) this.onchange(percent);
         this.drawCanvas(this.div);
     }
 };
-SliderCanvas.prototype.onmouseup = function (e) {
+SliderCanvas.prototype.onup = function (e) {
     this.isTouching = false;
 };
 SliderCanvas.prototype.drawCanvas = function () {
