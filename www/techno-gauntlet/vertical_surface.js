@@ -276,17 +276,6 @@ OMGMelodyMaker.prototype.drawCanvas = function () {
 
     var edittingSelected = false;
     var ii;
-    if (!this.animationStarted && frets.current != undefined
-            && frets.current < frets.length && frets.current >= 0) {
-        context.fillStyle = "#707070";
-        ii = frets.length - frets.current - 1;
-        if (this.canvas.mode == "APPEND") {
-            context.fillRect(0, this.topFretTop + ii * fretHeight, canvas.width, fretHeight);
-        } else if (this.canvas.mode == "EDIT" && this.noteEditting &&
-                frets.current == this.noteEditting.note + this.frets.rootNote) {
-            edittingSelected = true;
-        }
-    }
 
     var note;
     var y;
@@ -297,18 +286,34 @@ OMGMelodyMaker.prototype.drawCanvas = function () {
     context.font = "12px sans-serif";
     context.lineWidth = "2px";
     context.strokeStyle = this.color;
-    context.fillStyle = this.color;
     context.beginPath();
     context.moveTo(0, this.topFretTop);
     context.lineTo(canvas.width, this.topFretTop);
-    for (var i = 0; i < frets.length; i++) {
-
+    for (var i = 0; i < frets.length; i++) {    
         ii = frets.length - i;
-
+        
+        if (frets[i].octaveMarker) {
+            context.fillStyle = "#333333";
+            context.fillRect(canvas.width / 4, this.topFretTop + (ii - 1) * fretHeight,
+             canvas.width / 2, fretHeight);
+        }
+        
+        if (frets.current !== undefined && frets.current === i) {
+            context.fillStyle = "#707070";
+            if (this.canvas.mode == "APPEND") {
+                context.fillRect(0, this.topFretTop + (ii - 1)* fretHeight, canvas.width, fretHeight);
+            } else if (this.canvas.mode == "EDIT" && this.noteEditting &&
+                    frets.current == this.noteEditting.note + this.frets.rootNote) {
+                edittingSelected = true;
+            }
+        }
         context.moveTo(0, this.topFretTop + ii * fretHeight);
         context.lineTo(canvas.width, this.topFretTop + ii * fretHeight);
+        context.fillStyle = this.color;
         context.fillText(frets[i].caption, 4, this.topFretTop + ii * fretHeight - fretHeight / 3);
+
     }
+
     for (i = 1; i < 4; i++) {
         context.moveTo(i * canvas.width / 4, this.topFretTop);
         context.lineTo(i * canvas.width / 4, canvas.height - this.bottomFretBottom);
@@ -486,6 +491,7 @@ OMGMelodyMaker.prototype.setupFretBoard = function () {
     var topNote;
     var octave;
     var chromatic = this.data.soundSet.chromatic;
+    this.chromatic = chromatic;
     if (chromatic) {
         rootNote = keyParameters.rootNote;
         bottomNote = this.data.soundSet.lowNote;
@@ -514,7 +520,8 @@ OMGMelodyMaker.prototype.setupFretBoard = function () {
         if (!chromatic || scale.indexOf((i - rootNote % 12) % 12) > -1) {
             frets.push({
                 note: i,
-                caption: chromatic ? omg.ui.noteNames[i] : this.data.soundSet.data[i].name
+                caption: chromatic ? omg.ui.noteNames[i] : this.data.soundSet.data[i].name,
+                octaveMarker: chromatic && i % 12 === rootNote
             });
         }
     }
