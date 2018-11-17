@@ -80,9 +80,9 @@
 		<div class="main-separator">
 		</div>
 
-		Get the Mobile App:
+		Techno GAUNTLET:
 		  <ul>
-			  <a target="_blank" href="https://play.google.com/store/apps/details?id=com.mikehelland.omgtechnogauntlet">
+			  <a href="techno-gauntlet/">
 				  <li class="nav"><img src="img/technogauntlet.png">Techno GAUNTLET</li>
 			  </a>
 		  </ul>
@@ -263,7 +263,8 @@ fpa.search = function () {
 	//todo set the location?
 	parameters.type = filterType.value;
 
-	search(parameters);
+        parameters.resultList.innerHTML = "";
+	omg.search(parameters);
     };
     
     omg.search(parameters);
