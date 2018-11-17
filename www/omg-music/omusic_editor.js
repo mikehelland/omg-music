@@ -721,7 +721,7 @@ OMusicEditor.prototype.makeChordsDialog = function () {
     bam.section.chordsView.buttonGroup = buttonGroup;
     
     //todo song or section ascale
-    var ascale = bam.section.data.ascale || bam.song.data.ascale;
+    var ascale = bam.song.data.keyParameters.scale;
     var chordDiv;
     for (var i = -2; i < ascale.length; i++) {
         chordDiv = document.createElement("span");
@@ -1298,22 +1298,26 @@ OMusicEditor.prototype.loadSection = function (params) {
                 fadeIn.push(newPart.div);
         }
         var sectionBeats = bam.section.data.beatParameters;
-        var songBeats = bam.song.data.beatParameters;
-        if (sectionBeats.beats)
-            songBeats.beats = sectionBeats.beats;
-        if (sectionBeats.subbeats)
-            songBeats.subbeats = sectionBeats.subbeats;
-        if (sectionBeats.measures)
-            songBeats.measures = sectionBeats.measures;
-        if (sectionBeats.subbeatMillis)
-            songBeats.subbeatMillis = sectionBeats.subbeatMillis;
+        if (sectionBeats) {
+            var songBeats = bam.song.data.beatParameters;
+            if (sectionBeats.beats)
+                songBeats.beats = sectionBeats.beats;
+            if (sectionBeats.subbeats)
+                songBeats.subbeats = sectionBeats.subbeats;
+            if (sectionBeats.measures)
+                songBeats.measures = sectionBeats.measures;
+            if (sectionBeats.subbeatMillis)
+                songBeats.subbeatMillis = sectionBeats.subbeatMillis;
+        }
         
         var sectionKey = bam.section.data.keyParameters;
-        var songKey = bam.song.data.keyParameters;
-        if (sectionKey.scale)
-            songKey.scale = sectionKey.scale;
-        if (typeof sectionKey.rootNote === "number")
-            songKey.rootNote = sectionKey.rootNote;
+        if (sectionKey) {
+            var songKey = bam.song.data.keyParameters;
+            if (sectionKey.scale)
+                songKey.scale = sectionKey.scale;
+            if (typeof sectionKey.rootNote === "number")
+                songKey.rootNote = sectionKey.rootNote;
+        }
     } else {
         bam.section = new OMGSection(params.sectionDiv, null, bam.song);
     }
@@ -1432,10 +1436,13 @@ OMusicEditor.prototype.drawDrumCanvas = function (part, subbeat) {
         return;
 
     var params = {};
-    params.drumbeat = part.data;
+    params.part = part;
     params.canvas = part.canvas;
     params.subbeat = subbeat;
     params.songData = this.song.data;
+    params.foreColor = "black";
+    params.downbeatColor = "#A0A0A0";
+    params.beatColor = "#C0C0C0";
 
     omg.ui.drawDrumCanvas(params);
 
@@ -1490,6 +1497,7 @@ OMusicEditor.prototype.setupMelodyMaker = function () {
     bam.mm.canvas = canvas;
 
     bam.mm.ui = new OMGMelodyMaker(canvas, undefined, bam.player);
+    bam.mm.ui.highContrast = false;
 
     bam.mm.setSize = function (width, height) {
         if (width == undefined) {
@@ -2592,7 +2600,8 @@ OMusicEditor.prototype.setChordsText = function (section) {
             if (i > 0) {
                 chordsText += " - ";
             }
-            chordsText += omg.ui.getChordText(chords[i], section.data.keyParameters.scale);
+            //chordsText += omg.ui.getChordText(chords[i], section.data.keyParameters.scale);
+            chordsText += omg.ui.getChordText(chords[i], section.song.data.keyParameters.scale);
         }
     }
     chordsDiv.innerHTML = chordsText;

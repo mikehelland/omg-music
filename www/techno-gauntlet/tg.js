@@ -144,7 +144,9 @@ tg.showDrumMachine = function (omgpart) {
     
     tg.player.onBeatPlayedListeners.push(function (isubbeat, isection) {
         omg.ui.drawDrumCanvas({canvas: tg.surface, part:omgpart, 
-            captionWidth: window.innerWidth / 2 / 8});
+            captionWidth: window.innerWidth / 2 / 8,
+            subbeat:isubbeat
+        });
     });
 };
 tg.showMelodyEditor = function (omgpart) {

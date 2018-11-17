@@ -71,44 +71,43 @@ omg.ui.totalOffsets = function (element, parent) {
 };
 
 
-omg.ui.getImageForNote = function (note, upsideDown) {
+omg.ui.getImageForNote = function (note, highContrast) {
 
-    var draw_noteImage = omg.ui.noteImages[8][note.rest ? 1 : 0];
+    var index = (note.rest ? 2 : 0) + (highContrast ? 1 : 0)
+    var draw_noteImage = omg.ui.noteImages[8][index];
     if (note.beats == 2.0) {
-        draw_noteImage = omg.ui.noteImages[0][note.rest ? 1 : 0];
+        draw_noteImage = omg.ui.noteImages[0][index];
     }
     if (note.beats == 1.5) {
-        draw_noteImage = omg.ui.noteImages[1][note.rest ? 1 : 0];
+        draw_noteImage = omg.ui.noteImages[1][index];
     }
     if (note.beats == 1.0) {
-        draw_noteImage = omg.ui.noteImages[2][note.rest ? 1 : 0];
+        draw_noteImage = omg.ui.noteImages[2][index];
     }
     if (note.beats == 0.75) {
-        draw_noteImage = omg.ui.noteImages[3][note.rest ? 1 : 0];
+        draw_noteImage = omg.ui.noteImages[3][index];
     }
     if (note.beats == 0.5) {
-        draw_noteImage = omg.ui.noteImages[4][note.rest ? 1 :
-                upsideDown ? 2 : 0];
+        draw_noteImage = omg.ui.noteImages[4][index];
     }
     if (note.beats == 0.375) {
-        draw_noteImage = omg.ui.noteImages[5][note.rest ? 1 : 0];
+        draw_noteImage = omg.ui.noteImages[5][index];
     }
     if (note.beats == 0.25) {
-        draw_noteImage = omg.ui.noteImages[6][note.rest ? 1 :
-                upsideDown ? 2 : 0];
+        draw_noteImage = omg.ui.noteImages[6][index];
     }
     if (note.beats == 0.125) {
-        draw_noteImage = omg.ui.noteImages[7][note.rest ? 1 : 0];
+        draw_noteImage = omg.ui.noteImages[7][index];
     }
 
     return draw_noteImage;
 
 };
 
-omg.ui.getNoteImageUrl = function (i, j) {
+omg.ui.getNoteImageUrl = function (i, j, highContrast) {
     var fileName = omg.ui.noteImageUrls[i][j];
     if (fileName) {
-        return "img/notes/w_" + fileName + ".png";
+        return "img/notes/" + (highContrast ? "w_" : "") + fileName + ".png";
     }
 };
 
@@ -123,7 +122,7 @@ omg.ui.setupNoteImages = function () {
     var loadedNotes = 0;
     var areAllNotesLoaded = function () {
         loadedNotes++;
-        if (loadedNotes == omg.ui.noteImageUrls.length * 2) {
+        if (loadedNotes == omg.ui.noteImageUrls.length * 4) {
             omg.ui.noteImages = noteImages;
         }
     };
@@ -134,11 +133,19 @@ omg.ui.setupNoteImages = function () {
         noteImage.onload = areAllNotesLoaded;
         noteImage.src = omg.ui.omgUrl + omg.ui.getNoteImageUrl(i, 1);
 
+        var noteWhiteImage = new Image();
+        noteWhiteImage.onload = areAllNotesLoaded;
+        noteWhiteImage.src = omg.ui.omgUrl + omg.ui.getNoteImageUrl(i, 1, true);
+
         var restImage = new Image();
         restImage.onload = areAllNotesLoaded;
         restImage.src = omg.ui.omgUrl + omg.ui.getNoteImageUrl(i, 2);
+        
+        var restWhiteImage = new Image();
+        restWhiteImage.onload = areAllNotesLoaded;
+        restWhiteImage.src = omg.ui.omgUrl + omg.ui.getNoteImageUrl(i, 2, true);
 
-        var imageBundle = [noteImage, restImage];
+        var imageBundle = [noteImage, noteWhiteImage, restImage, restWhiteImage];
         var upsideDown = omg.ui.getNoteImageUrl(i, 3);
         if (upsideDown) {
             var upsideImage = new Image();
@@ -206,8 +213,9 @@ function OMGMelodyMaker(canvas, part, player) {
     this.autoAddRests = true;
     this.player = player;
     
-    this.backgroundColor = "black";
-    this.color = "white";
+    this.highContrast = true;
+    this.backgroundColor = "white";
+    this.color = "black";
 
     if (part)
         this.setPart(part);
@@ -228,8 +236,7 @@ OMGMelodyMaker.prototype.drawCanvas = function () {
 
     canvas.width = canvas.clientWidth;
 
-//	context.fillStyle = "#F4F4F4";
-    context.fillStyle = this.backgroundColor;
+    context.fillStyle = this.highContrast ? this.color : this.backgroundColor;
     context.fillRect(0, this.topFretTop, canvas.width,
             canvas.height - this.bottomFretBottom - this.topFretTop);
 
@@ -266,7 +273,7 @@ OMGMelodyMaker.prototype.drawCanvas = function () {
     this.noteWidth = noteWidth;
 
     context.lineWidth = 1;
-    context.fillStyle = this.color;
+    context.fillStyle = this.highContrast ? this.backgroundColor : this.color;
     
     if (this.touchingXSection > -1) {
         context.fillStyle = "#808080";
@@ -285,7 +292,7 @@ OMGMelodyMaker.prototype.drawCanvas = function () {
 
     context.font = "12px sans-serif";
     context.lineWidth = "2px";
-    context.strokeStyle = this.color;
+    context.strokeStyle = this.highContrast ? this.backgroundColor : this.color;
     context.beginPath();
     context.moveTo(0, this.topFretTop);
     context.lineTo(canvas.width, this.topFretTop);
@@ -309,7 +316,7 @@ OMGMelodyMaker.prototype.drawCanvas = function () {
         }
         context.moveTo(0, this.topFretTop + ii * fretHeight);
         context.lineTo(canvas.width, this.topFretTop + ii * fretHeight);
-        context.fillStyle = this.color;
+        context.fillStyle = this.highContrast ? this.backgroundColor : this.color;
         context.fillText(frets[i].caption, 4, this.topFretTop + ii * fretHeight - fretHeight / 3);
 
     }
@@ -330,7 +337,7 @@ OMGMelodyMaker.prototype.drawCanvas = function () {
 
         for (var i = 0; i < this.data.notes.length; i++) {
             note = this.data.notes[i]
-            noteImage = omg.ui.getImageForNote(note);
+            noteImage = omg.ui.getImageForNote(note, this.highContrast);
             if (note.rest) {
                 y = restHeight;
             } else {
@@ -486,25 +493,26 @@ OMGMelodyMaker.prototype.drawButtons = function (context, buttonRow, x, y, width
 
 OMGMelodyMaker.prototype.setupFretBoard = function () {
     var keyParameters = this.part.section.song.data.keyParameters;
+    var soundSet = this.data.soundSet;
     var rootNote;
     var bottomNote;
     var topNote;
     var octave;
-    var chromatic = this.data.soundSet.chromatic;
+    var chromatic = soundSet.chromatic;
     this.chromatic = chromatic;
     if (chromatic) {
         rootNote = keyParameters.rootNote;
-        bottomNote = this.data.soundSet.lowNote;
-        topNote = this.data.soundSet.highNote;
-        if (!topNote && this.data.soundSet.data.length) {
-            topNote = bottomNote + this.data.soundSet.data.length - 1;
+        bottomNote = soundSet.lowNote;
+        topNote = soundSet.highNote;
+        if (!topNote && soundSet.data && soundSet.data.length) {
+            topNote = bottomNote + soundSet.data.length - 1;
         }
-        octave = this.data.soundSet.octave;
+        octave = soundSet.octave;
     }
     else {
         rootNote = 0;
         bottomNote = 0;
-        topNote = this.data.soundSet.data.length - 1;
+        topNote = soundSet.data.length - 1;
         octave = 0;
     }
 
@@ -520,7 +528,7 @@ OMGMelodyMaker.prototype.setupFretBoard = function () {
         if (!chromatic || scale.indexOf((i - rootNote % 12) % 12) > -1) {
             frets.push({
                 note: i,
-                caption: chromatic ? omg.ui.noteNames[i] : this.data.soundSet.data[i].name,
+                caption: chromatic ? omg.ui.noteNames[i] : soundSet.data[i].name,
                 octaveMarker: chromatic && i % 12 === rootNote
             });
         }

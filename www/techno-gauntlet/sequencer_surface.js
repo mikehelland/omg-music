@@ -55,10 +55,8 @@ omg.ui.drawDrumCanvasForTrack = function (params) {
         for (var j = 0; j < canvas.omgdata.subbeats; j++) {
 
             subbeatIndex = j + i * canvas.omgdata.subbeats;
-            //context.fillStyle = drumbeat.tracks[canvas.omgdata.selectedTrack].data[subbeatIndex] ? "black" :
-            //        (j == 0) ? "#C0C0C0" : "#E0E0E0";
-            context.fillStyle = drumbeat.tracks[canvas.omgdata.selectedTrack].data[subbeatIndex] ? "white" :
-                    (j == 0) ? "#333333" : "#111111";
+            context.fillStyle = drumbeat.tracks[canvas.omgdata.selectedTrack].data[subbeatIndex] ? params.foreColor :
+                    (j == 0) ? params.downbeatColor : params.beatColor;
 
             context.fillRect(left + captionWidth + columnWidth * j + 1, top + rowHeight * i + 1,
                     columnWidth - 2, rowHeight - 2);
@@ -81,9 +79,10 @@ omg.ui.drawDrumCanvas = function (params) {
     var canvas = params.canvas;
     var captionWidth = params.captionWidth;
     var subbeat = params.subbeat;
-    
-    var foreColor = params.foreColor || "white";
-    var backgroundColor = params.backgroundColor || "black";
+    params.foreColor = params.foreColor || "white";
+    params.downbeatColor = params.downbeatColor || "#333333";
+    params.beatColor = params.beatColor || "#111111";
+
     
     //maybe that other stuff above should be in here
     if (!canvas.omgdata) {
@@ -150,6 +149,7 @@ omg.ui.drawDrumCanvas = function (params) {
         captionWidth = Math.min(canvas.width * 0.2, 50, longestCaptionWidth + 4);
     }
     canvas.omgdata.captionWidth = captionWidth;
+    canvas.omgdata.captionHeight = trackHeight;
 
     if (!params.keepCanvasDirty) {
         canvas.width = params.width || canvas.clientWidth;
@@ -165,22 +165,22 @@ omg.ui.drawDrumCanvas = function (params) {
         
         if (i === canvas.omgdata.selectedTrack) {
             //context.strokeRect(left, top + i * trackHeight, captionWidth - 1, trackHeight);
-            context.fillStyle = "#000044";
-            context.fillRect(left, top + i * trackHeight, captionWidth, trackHeight);
+            context.strokeStyle = params.foreColor;
+            context.strokeRect(left, top + i * trackHeight, captionWidth, trackHeight);
 
         }
         
-        context.fillStyle = foreColor;
+        context.fillStyle = params.foreColor;
         if (captionWidth > 0) {
             captionPixels = context.measureText(drumbeat.tracks[i].name).width;
             context.fillText(drumbeat.tracks[i].name, left + captionWidth / 2 - captionPixels / 2, top + trackHeight * (i + 0.5) + 6);
         }
 
     }
-    context.globalAlpha = 0.5;
-    context.fillStyle = backgroundColor;
-    context.fillRect(left + captionWidth, top, width - captionWidth, height);
-    context.globalAlpha = 1;
+    //context.globalAlpha = 0.5;
+    //context.fillStyle = backgroundColor;
+    //context.fillRect(left + captionWidth, top, width - captionWidth, height);
+    //context.globalAlpha = 1;
 
     if (canvas.omgdata.selectedTrack > -1) {
         omg.ui.drawDrumCanvasForTrack(params);
@@ -207,8 +207,8 @@ omg.ui.drawDrumCanvas = function (params) {
             for (var j = 0; j < canvas.omgdata.totalSubbeats; j++) {
                 //context.fillStyle = drumbeat.tracks[i].data[j] ? "black" :
                 //        (j % canvas.omgdata.subbeats == 0) ? "#C0C0C0" : "#E0E0E0";
-                context.fillStyle = drumbeat.tracks[i].data[j] ? "white" :
-                        (j % canvas.omgdata.subbeats == 0) ? "#333333" : "#111111";
+                context.fillStyle = drumbeat.tracks[i].data[j] ? params.foreColor :
+                        (j % canvas.omgdata.subbeats == 0) ? params.downbeatColor : params.beatColor;
 
                 context.fillRect(left + captionWidth + columnWidth * j + 1, top + rowHeight * ii + 1,
                         columnWidth - 2, rowHeight - 2);
@@ -305,14 +305,16 @@ function OMGDrumMachine(canvas, part) {
 
         var column = Math.floor((x - canvas.captionWidth) / canvas.columnWidth);
         var row = Math.floor(y / canvas.rowHeight);
+        var trackI = Math.floor(y / canvas.omgdata.captionHeight);
 
         if (column < 0) {
-            if (row === canvas.omgdata.selectedTrack) {
+            if (trackI === canvas.omgdata.selectedTrack) {
                 canvas.omgdata.selectedTrack = -1;
             }
             else {
-                canvas.omgdata.selectedTrack = row;
+                canvas.omgdata.selectedTrack = trackI;
             }
+            console.log(canvas.omgdata.selectedTrack);
         } else {
             
             omgdrums.part.saved = false;

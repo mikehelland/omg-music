@@ -1243,7 +1243,6 @@ OMGMelodyMaker.prototype.setupFretBoard = function () {
     var bottomNote;
     var topNote;
     var octaveShift;
-    console.log("rootNote " + rootNote);
     if (rootNote <= 12) {
         octaveShift = this.data.partType == "BASSLINE" ? 3 : 5;
         rootNote = rootNote % 12 + octaveShift * 12;

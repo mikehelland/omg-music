@@ -1192,8 +1192,6 @@ OMusicPlayer.prototype.endLiveNotes = function (part) {
             part.currentI = i + 1;
         }       
     }
-    console.log('nextbeat')
-    console.log(part.nextBeat);
 };
 
 OMusicPlayer.prototype.recordNote = function (part, note) {
@@ -1419,10 +1417,8 @@ function OMGDrumpart(div, data, section) {
         }
     } else {
         this.data = {"type": "PART", "partType": "DRUMBEAT",
-            "surfaceURL": "PRESET_SEQUENCER",
-            "soundsetURL": "PRESET_HIPKIT", "soundsetName": "Hip Hop Drum Kit",
-            "bpm": 120, "kit": 0,
-            isNew: true,
+            "surface": {"url": "PRESET_SEQUENCER"},
+            "soundset": {"url": "PRESET_HIPKIT", "name": "Hip Hop Drum Kit"},
             "tracks": [{"name": "kick", "sound": "PRESET_HH_KICK",
                     "data": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]},
@@ -1449,10 +1445,19 @@ function OMGDrumpart(div, data, section) {
                         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}
             ]};
     }
-    
+    if (!this.data.audioParameters) this.data.audioParameters = {};
+    if (typeof this.data.audioParameters.volume !== "number")
+        this.data.audioParameters.volume = 0.6;
+    if (typeof this.data.audioParameters.pan !== "number")
+        this.data.audioParameters.pan = 0;
+    if (typeof this.data.audioParameters.warp !== "number")
+        this.data.audioParameters.warp = 1;
+
 }
 
 function OMGPart(div, data, section) {
+    console.log("new OMGPart");
+    console.log(data);
     this.div = div;
     if (!section || !section.data) {
         console.log("new OMGPart() called without a section. Not good.");
@@ -1475,8 +1480,9 @@ function OMGPart(div, data, section) {
 
     if (!this.data.partType) {
         //if type is melody or bassline
-        data.partType = data.type;
-        data.type = "PART";
+        //todo find where we use partType, and see if we really need them
+        this.data.partType = this.data.type;
+        this.data.type = "PART";
     }
     if (!this.data.surface) {
         if (this.data.soundSet && this.data.soundSet.defaultSurface) {
@@ -1486,6 +1492,18 @@ function OMGPart(div, data, section) {
             this.data.surface = {url: this.data.surfaceURL || "PRESET_VERTICAL"};
         }
     }
+    
+    if (!this.data.soundSet) {
+        this.data.soundSet = {
+            name: "Sine Oscillator",
+            url: "PRESET_OSC_SINE",
+            highNote: 108,
+            lowNote: 0,
+            chromatic: true,
+            octave: 5
+        };
+    }
+    
     if (this.data.surface.url === "PRESET_VERTICAL") {
         if (!this.data.notes) {
             this.data.notes = [];
