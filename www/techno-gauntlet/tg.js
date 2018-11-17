@@ -130,7 +130,7 @@ tg.setupPartButton = function (omgpart) {
         "#800000" : "#008000";
     partDiv.appendChild(button);
     tg.partList.appendChild(partDiv);
-
+    return partDiv;
 }
 
 tg.showDrumMachine = function (omgpart) {
@@ -475,9 +475,9 @@ tg.hideDetails = function (hideFragment) {
 tg.addPart = function (soundSet) {
     var blankPart = {soundSet: soundSet};
     var omgpart = new OMGPart(undefined,blankPart,tg.song.sections[0]);
-    console.log(omgpart);
     tg.player.loadPart(omgpart);
-    tg.setupPartButton(omgpart);
+    var div = tg.setupPartButton(omgpart);
+    div.getElementsByClassName("part-button")[0].onclick();
 };
 
 tg.addOsc = function (type) {
