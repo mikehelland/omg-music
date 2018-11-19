@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" type="text/css" href="tg.css">
+    <link rel="stylesheet" type="text/css" href="/css/search.css">
     <title>Techno GAUNTLET</title>
 </head>
 <body>
@@ -141,10 +142,14 @@
                 <button id="user-signup-button">Create an Account</button>
             </div>
             <div id="user-info">
-                Username: <span id="user-info-username"></span>
+                <span class="tool-bar-caption">Username:</span> <span id="user-info-username"></span>
+                <br>
+                <span class="tool-bar-caption">Account created:</span> <span class="user-created-at"></span>
             </div>
-            <div id="user-fragment-detail-list">
-                
+             <div class="main-separator"></div>
+             <span class="tool-bar-caption">User's posts:</span>
+             <div class="search-things">
+                <div id="user-fragment-detail-list"></div>
             </div>
             </div>
         </div>
@@ -167,10 +172,10 @@
     </div>
     
     <script src="../js/omgservice.js"></script>
-    <script src="../js/usercontrols.js"></script>
     <script src="omusic_player.js"></script>
     <script src="sequencer_surface.js"></script>
     <script src="vertical_surface.js"></script>
+    <script src="../js/user.js"></script>
     <script src="tg.js"></script>
     
 </body>

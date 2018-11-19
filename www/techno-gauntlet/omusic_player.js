@@ -86,7 +86,7 @@ OMusicPlayer.prototype.play = function (song) {
 
     var lastSection;
     var nextSection;
-    var currentChordI = 0;
+    p.currentChordI = 0;
 
     var play = function () {
 
@@ -115,16 +115,16 @@ OMusicPlayer.prototype.play = function (song) {
             p.loopStarted = Date.now();
 
             if (p.song.sections[p.song.playingSection].data.chordProgression) {
-                currentChordI++;
-                if (currentChordI < p.song.sections[p.song.playingSection].data.chordProgression.length) {
+                p.currentChordI++;
+                if (p.currentChordI < p.song.sections[p.song.playingSection].data.chordProgression.length) {
                     p.rescaleSong(null, null,
-                                p.song.sections[p.song.playingSection].data.chordProgression[currentChordI]);
+                                p.song.sections[p.song.playingSection].data.chordProgression[p.currentChordI]);
                     return;
                 }
                 else {
-                    currentChordI = 0;
+                    p.currentChordI = 0;
                     p.rescaleSong(null, null,
-                                p.song.sections[p.song.playingSection].data.chordProgression[currentChordI]);
+                                p.song.sections[p.song.playingSection].data.chordProgression[p.currentChordI]);
                 }
             }
 

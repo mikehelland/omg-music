@@ -2,9 +2,15 @@
 .search-thing {
    margin:16px;
    padding:16px;
-   background-color:#F8F8F8;
+   /*background-color:#F8F8F8;*/
    cursor:pointer;
    position:relative;
+   border:1px solid #F8F8F8;
+   opacity:0.8;
+}
+
+.search-thing:hover {
+    opacity:1;
 }
 
 .search-thing-image {
@@ -17,6 +23,23 @@
 .search-thing div {
    margin:4px;
    display:inline-block;
+}
+
+.search-thing-right-data {
+    float: right;
+}
+
+.search-thing-votes, .search-thing-user, .search-thing-type {
+    font-size:80%;
+}
+
+@media all and (orientation:portrait) {
+    .search-thing-votes, .search-thing-user, .search-thing-type {
+        display:none !important;
+    }
+    .search-thing-created-at {
+        font-size:80%;
+    }
 }
 
 #search-next-button {float: right; text-align:right;}

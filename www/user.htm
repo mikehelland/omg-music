@@ -39,11 +39,12 @@
 
    </div>
 
+   <script src="js/omgservice.js"></script>
    <script src="js/usercontrols.js"></script>
    <script src="js/user.js"></script>
    <script>
    setupUserControls(document.getElementsByClassName("title-bar-user-controls")[0], function (user) {
-      getUserThings(user);
+      omg.util.getUserThings(user, document.getElementsByClassName("search-things")[0]);
    });
    </script>
 

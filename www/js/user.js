@@ -1,144 +1,105 @@
 //var parameters = getQueryParameters();
 
-var resultList = document.getElementsByClassName("search-things")[0];
+if (!omg) omg = {};
+if (!omg.ui) omg.ui = {};
+if (!omg.util) omg.util = {};
 
-var loadSearchResults = function (results) {
-   results.forEach(function (result) {
-      var resultDiv = document.createElement("div");
-      resultDiv.className = "search-thing";
+if (!omg.util.loadSearchResults) {
+    omg.util.loadSearchResults = function (results, resultList, onclick) {
+       results.forEach(function (result) {
+          var resultDiv = document.createElement("div");
+          resultDiv.className = "search-thing";
 
-      var resultData = document.createElement("div");
-      resultData.className = "search-thing-image";
-      resultData.innerHTML = "&nbsp;"
-      resultData.style.backgroundColor = getBackgroundColor(result.type);
-      resultDiv.appendChild(resultData);
+          var resultData = document.createElement("div");
+          resultData.className = "search-thing-image";
+          resultData.innerHTML = "&nbsp;"
+          resultData.style.backgroundColor = omg.ui.getBackgroundColor(result.type);
+          resultDiv.appendChild(resultData);
 
-      resultData = document.createElement("div");
-      resultData.className = "search-thing-type";
-      resultData.innerHTML = result.type;
-      resultDiv.appendChild(resultData);
+          resultData = document.createElement("div");
+          resultData.className = "search-thing-type";
+          resultData.innerHTML = result.type;
+          resultDiv.appendChild(resultData);
 
-      resultData = document.createElement("div");
-      resultData.className = "search-thing-title";
-      resultData.innerHTML = result.title || "";
-      resultDiv.appendChild(resultData);
+          resultData = document.createElement("div");
+          resultData.className = "search-thing-title";
+          resultData.innerHTML = result.name || (result.tags ? ("(" + result.tags + ")") : "");
+          resultDiv.appendChild(resultData);
 
-      resultData = document.createElement("div");
-      resultData.className = "search-thing-user";
-      resultData.innerHTML = result.username ? "by " + result.username : "";
-      resultDiv.appendChild(resultData);
+          resultData = document.createElement("div");
+          resultData.className = "search-thing-user";
+          resultData.innerHTML = result.username ? "by " + result.username : "";
+          resultDiv.appendChild(resultData);
 
-      var rightData = document.createElement("div");
-      rightData.className = "search-thing-right-data";
-      resultDiv.appendChild(rightData);
+          var rightData = document.createElement("div");
+          rightData.className = "search-thing-right-data";
+          resultDiv.appendChild(rightData);
 
-      resultData = document.createElement("div");
-      resultData.className = "search-thing-votes";
-      resultData.innerHTML = (result.votes || "0") + " votes";
-      rightData.appendChild(resultData);
+          resultData = document.createElement("div");
+          resultData.className = "search-thing-votes";
+          resultData.innerHTML = (result.votes || "0") + " votes";
+          rightData.appendChild(resultData);
 
-      resultData = document.createElement("div");
-      resultData.className = "search-thing-created-at";
-      resultData.innerHTML = getTimeCaption(parseInt(result.created_at));
-      rightData.appendChild(resultData);
+          resultData = document.createElement("div");
+          resultData.className = "search-thing-created-at";
+          resultData.innerHTML = omg.util.getTimeCaption(parseInt(result.created_at));
+          rightData.appendChild(resultData);
 
-      resultDiv.onclick = function () {
-         window.location = "viewer.htm?id=" + result.id;
-      };
-      resultList.appendChild(resultDiv);
-   });
-};
-
-
-function getUserThings(user) {
-
-   var div = document.getElementsByClassName("user-username")[0];
-   div.innerHTML = user.username;
-
-   div = document.getElementsByClassName("user-created-at")[0];
-   div.innerHTML = getTimeCaption(user.created_at);
-
-   var xhr = new XMLHttpRequest();
-   xhr.open("GET", "data/?user_id=" + user.id);
-   xhr.onreadystatechange = function () {
-      var results;
-      if (xhr.readyState == 4) {
-         console.log(xhr.responseText);
-         try {
-            results = JSON.parse(xhr.responseText);
-         }
-         catch (exception) {
-            resultList.innerHTML = "Error parsing search results.";
-            return;
-         }
-         loadSearchResults(results);
-      }
-   };
-   xhr.send();
+          resultDiv.onclick = function () {
+              if (onclick) {
+                  onclick(result);
+              }
+              else {
+                window.location = "viewer.htm?id=" + result.id;
+              }
+          };
+          resultList.appendChild(resultDiv);
+       });
+    };
 }
 
-function getQueryParameters() {
+if (!omg.util.getUserThings) {
+    omg.util.getUserThings = function (user, resultList, onclick) {
 
-	// see if there's somethign to do here
-	var params = document.location.search;
-	var nvp;
-   var parsedParams = {};
-	
-	if (params.length > 1) {
-		params.slice(1).split("&").forEach(function (param) {
-			nvp = param.split("=");
-         parsedParams[nvp[0]] = nvp[1];
-		});
-	}
-	
-   return parsedParams;
-}
+        var div = document.getElementsByClassName("user-username")[0];
+        if (div) {
+            div.innerHTML = user.username;
+        }
 
-function getBackgroundColor(type) {
-   if (type === "SONG") {
-      return "#99FF99";
-   }
+        div = document.getElementsByClassName("user-created-at")[0];
+        if (div) {
+            div.innerHTML = omg.util.getTimeCaption(user.created_at);
+        }
 
-   if (type === "SECTION") {
-      return "#99AAFF";
-   }
-
-   if (type === "MELODY" || type === "DRUMBEAT" || type === "BASSLINE") {
-      return "#FFFF99";
-   }
-
-   return "#808080";
-}
-
-
-function getTimeCaption(timeMS) {
-
-    if (!timeMS) {
-        return "";
+        omg.server.getHTTP("/data/?user_id=" + user.id, function (results) {
+            if (results) {
+                omg.util.loadSearchResults(results, resultList, onclick);
+            }
+            else {
+                resultList.innerHTML = "Error parsing search results.";
+            }
+        });
     }
+}
 
-    var seconds = Math.round((Date.now() - timeMS) / 1000);
-    if (seconds < 60) return seconds + " sec ago";
+if (!omg.ui.getBackgroundColor) {
+    omg.ui.getBackgroundColor = function (type) {
+       if (type === "SONG") {
+          return "#99FF99";
+       }
 
-    var minutes = Math.floor(seconds / 60);
-    if (minutes < 60) return minutes + " min ago";    
-   
-    var hours = Math.floor(minutes / 60);
-    if (hours < 24) return hours + " hr ago";    
+       if (type === "SECTION") {
+          return "#99AAFF";
+       }
 
-    var days = Math.floor(hours / 24);
-    if (days < 7) return days + " days ago";
+       if (type === "PART" || type === "MELODY" || type === "DRUMBEAT" || type === "BASSLINE") {
+          return "#FFFF99";
+       }
+       
+       if (type === "SOUNDSET") {
+           return "#FF9999";
+       }
 
-    var date  = new Date(timeMS);
-    var months = ["Jan", "Feb", "Mar", "Apr", "May",
-                "Jun", "Jul", "Aug", "Sep", "Oct", 
-                "Nov", "Dec"];
-
-    console.log(date.getYear());
-    var monthday = months[date.getMonth()] + " " + date.getDate();
-    if (days < 365) {
-	    return monthday;
-    }
-    return monthday + " " + date.getFullYear();
-};
-
+       return "#808080";
+    };
+}

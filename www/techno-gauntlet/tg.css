@@ -250,9 +250,19 @@ body {
 }
 
 #scale-list div:hover, #key-list div:hover, .chord-select-button:hover {
-    background-color:#808080;
+    background-color:#000022;
+    opacity:1;
 }
+
+.selected-list-item {
+    background-color:#000044;
+}
+.selected-list-item:hover {
+    background-color:#000088 !important;
+}
+
 #scale-list div, #key-list div {
+    opacity:0.8;
     flex:auto;
     cursor:pointer;
     border-radius: 5px;
@@ -323,9 +333,12 @@ body {
 
 #chords-fragment-append-button, #chords-fragment-clear-button {
     cursor:pointer;
+    opacity:0.8;
 }
 #chords-fragment-append-button:hover, #chords-fragment-clear-button:hover {
-    background-color: #888888;
+    background-color:#000022;
+    opacity:1;
+    
 }
 
 #chords-fragment-list {
@@ -335,7 +348,7 @@ body {
 }
 
 .selected-option {
-    background-color:#808080;
+    background-color:#000044 !important;
 }
 
 #main-fragment-bottom-row {
@@ -381,4 +394,8 @@ body {
 .soundset-list-item:hover {
     opacity:1;
     background-color:#444444;
+}
+
+.current-chord {
+    background-color:#D00000;
 }
