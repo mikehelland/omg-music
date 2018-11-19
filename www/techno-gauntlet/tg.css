@@ -282,6 +282,12 @@ body {
     border:1px solid white;
     background-color:#444444;
     cursor:pointer;
+    margin:0.3em;
+    opacity:0.8;
+}
+#add-triangle-osc-button:hover, #add-saw-osc-button:hover, 
+    #add-sine-osc-button:hover, #add-square-osc-button:hover {
+        opacity:1;
 }
 
 #osc-buttons {
@@ -398,4 +404,25 @@ body {
 
 .current-chord {
     background-color:#D00000;
+}
+
+#add-part-tabs {
+    display:flex;
+}
+
+#add-part-tabs > div {
+    flex-grow:1;
+    border:1px solid #888888;
+    cursor:pointer;
+    font-size:0.6em;
+    padding:1.2em;
+    opacity:0.8;
+}
+#add-part-tabs > div:hover {
+    opacity:1;
+    background-color:#000022;
+}
+
+#add-part-oscillator, #add-part-gallery, #add-part-custom {
+    display:none;
 }

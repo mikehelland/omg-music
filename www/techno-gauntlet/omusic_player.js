@@ -246,7 +246,7 @@ OMusicPlayer.prototype.loadMelody = function (part) {
     var section = part.section;
     var song = part.section ? part.section.song : undefined;
 
-    p.rescale(part, song.data.keyParameters, 0);
+    p.rescale(part, song.data.keyParameters, 0); //section.data.chordProgression[p.currentChordI]
 
     if (data.soundSet && typeof data.soundSet.url === "string") {
         p.getSoundSet(data.soundSet.url, function (soundset) {

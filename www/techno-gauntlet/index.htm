@@ -75,21 +75,30 @@
             <div id="chords-fragment-list"></div>
         </div>
         <div id="add-part-fragment">
-            To add an Oscillator choose a wave:
-            <div id="osc-buttons">
-                <span id="add-sine-osc-button">Sine</span>
-                <span id="add-square-osc-button">Square</span>
-                <span id="add-saw-osc-button">Sawtooth</span>
-                <span id="add-triangle-osc-button">Triangle</span>
+            <div id="add-part-tabs">
+                <div id="add-part-gallery-button">Gallery</div>
+                <div id="add-part-oscillator-button">Oscillator</div>
+                <div id="add-part-custom-button">Custom</div>
             </div>
-            <hr>
-            Or add a sound using a URL:
-            <br>
-            <input id="add-part-url-input" placeholder="Web address to sound"><button>Go</button> 
-            <a class="small-link" href="../soundset-editor.htm" target="out">Make a custom SoundSet</a>
-            <hr>
-            Or browse the gallery:
-            <div id="omg-soundset-list"></div>
+            <div id="add-part-oscillator">
+                <h5>Choose a wave:</h5>
+                <div id="osc-buttons">
+                    <div id="add-sine-osc-button">Sine</div>
+                    <div id="add-square-osc-button">Square</div>
+                    <div id="add-saw-osc-button">Sawtooth</div>
+                    <div id="add-triangle-osc-button">Triangle</div>
+                </div>
+            </div>
+            <div id="add-part-custom">
+                <h5>Add a sound using a URL:</h5>
+                <input id="add-part-url-input" placeholder="Web address to sound"><button>Go</button> 
+                <br>
+                <a href="../soundset-editor.htm" target="out">Make a custom SoundSet</a>
+            </div>
+            <div id="add-part-gallery">
+                <h5>Public Sound Sets:</h5>
+                <div id="add-part-soundset-list">Loading...</div>
+            </div>
         </div>
         <div id="mix-fragment"></div>
         <div id="save-fragment">

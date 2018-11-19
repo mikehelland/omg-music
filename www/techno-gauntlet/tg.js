@@ -81,6 +81,9 @@ tg.player.onPlay = function () {
 };
 tg.player.onStop = function () {
     tg.drawPlayButton();
+    var chordsCaption = tg.makeChordsCaption();
+    tg.chordsButton.innerHTML = chordsCaption;
+    tg.chordsEditorView.innerHTML = chordsCaption;
 };
 
 tg.setSongControlsUI = function () {
@@ -442,11 +445,11 @@ tg.makeChordButton = function (chordI) {
 tg.makeChordsCaption = function (chordI) {
     var chordsCaption = "";
     tg.song.sections[0].data.chordProgression.forEach(function (chordI, i) {
-        if (i === tg.player.currentChordI) {
+        if (tg.player.playing && i === tg.player.currentChordI) {
             chordsCaption += "<span class='current-chord'>";
         }
         chordsCaption += tg.makeChordCaption(chordI);
-        if (i === tg.player.currentChordI) {
+        if (tg.player.playing && i === tg.player.currentChordI) {
             chordsCaption += "</span>";
         }
         chordsCaption += " "
@@ -470,6 +473,8 @@ tg.makeChordCaption = function (chordI) {
 tg.showAddPartFragment = function () {
     if (!tg.addPartFragment) {
         tg.addPartFragment = document.getElementById("add-part-fragment");
+        tg.soundSetList = document.getElementById("add-part-soundset-list");
+        tg.setupAddPartTabs();
   
         var addOscButtonClick = function (e) {
           tg.addOsc(e.target.innerHTML);  
@@ -480,11 +485,12 @@ tg.showAddPartFragment = function () {
         document.getElementById("add-triangle-osc-button").onclick = addOscButtonClick;
         
         fetch(location.origin + "/data/?type=SOUNDSET").then(function (e) {return e.json();}).then(function (json) {
+            tg.soundSetList.innerHTML = "";
             json.forEach(function (soundSet) {
                 var newDiv = document.createElement("div");
                 newDiv.className = "soundset-list-item";
                 newDiv.innerHTML = soundSet.name;
-                tg.addPartFragment.appendChild(newDiv);
+                tg.soundSetList.appendChild(newDiv);
                 soundSet.url = location.origin + "/data/" + soundSet.id;
                 newDiv.onclick = function () {
                     tg.addPart(soundSet);
@@ -639,6 +645,10 @@ function MixerWarpCanvas(part, canvas) {
             m.onmove(e.targetTouches[0].pageX - offsets.left);
         };
         canvas.ontouchend = function (e) {m.onup();};
+        canvas.ondblclick = function () {
+            m.part.data.audioParameters.warp = 1;
+            m.drawCanvas(m.div);
+        };
     }
     this.div = canvas;
     this.ctx = canvas.getContext("2d");
@@ -812,8 +822,10 @@ tg.showPartOptionsFragment = function (part) {
     
     new SliderCanvas(document.getElementById("part-options-delay-time"),
         function (percent) {
-            part.delay.delayTime.value = percent;
             part.data.audioParameters.delayTime = percent;
+            if (part.delay) {
+                part.delay.delayTime.value = percent;
+            }
         },
         function () {
             return part.data.audioParameters.delayTime || 0;
@@ -821,8 +833,10 @@ tg.showPartOptionsFragment = function (part) {
     ).drawCanvas();
     new SliderCanvas(document.getElementById("part-options-delay-level"),
         function (percent) {
-            part.feedback.gain.value = percent;
             part.data.audioParameters.delayLevel = percent;
+            if (part.feedback) {
+                part.feedback.gain.value = percent;
+            }
         },
         function () {
             return part.data.audioParameters.delayLevel || 0;
@@ -998,3 +1012,48 @@ omg.server.getHTTP("/user/", function (res) {
         tg.onlogin(res);
     }
 });
+
+
+tg.setupAddPartTabs = function () {
+    var f = tg.addPartFragment;
+    var galleryTab = document.getElementById("add-part-gallery-button");
+    var oscillatorTab = document.getElementById("add-part-oscillator-button");
+    var customTab = document.getElementById("add-part-custom-button");
+    var gallery = document.getElementById("add-part-gallery");
+    var oscillator = document.getElementById("add-part-oscillator");
+    var custom = document.getElementById("add-part-custom");
+    var lastTab;
+    
+    galleryTab.onclick = function (e) {
+        gallery.style.display = "block";
+        oscillator.style.display = "none";
+        custom.style.display = "none";
+        if (lastTab) {
+            lastTab.classList.remove("selected-option");
+        }
+        lastTab = e.target;
+        e.target.classList.add("selected-option");
+    };
+    oscillatorTab.onclick = function (e) {
+        gallery.style.display = "none";
+        oscillator.style.display = "block";
+        custom.style.display = "none";
+        if (lastTab) {
+            lastTab.classList.remove("selected-option");
+        }
+        lastTab = e.target;
+        e.target.classList.add("selected-option");
+    };
+    customTab.onclick = function (e) {
+        gallery.style.display = "none";
+        oscillator.style.display = "none";
+        custom.style.display = "block";
+        if (lastTab) {
+            lastTab.classList.remove("selected-option");
+        }
+        lastTab = e.target;
+        e.target.classList.add("selected-option");
+    };
+    
+    galleryTab.onclick({target: galleryTab});
+};
