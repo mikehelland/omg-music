@@ -299,7 +299,7 @@ body {
     display:none;
 }
 
-#part-options-delay-time, #part-options-delay-level {
+.fx-slider {
     width: 100%;
     height:40px;
     background-color: #444444;
@@ -425,4 +425,47 @@ body {
 
 #add-part-oscillator, #add-part-gallery, #add-part-custom {
     display:none;
+}
+
+.fx-button {
+    padding:0.5em;
+    cursor:pointer;
+    border:1px solid white;
+    opacity:0.8;
+    background-color: #444;
+}
+
+.fx-button:hover {
+    opacity:1;
+}
+
+#part-options-available-fx {
+    flex-wrap: wrap;
+}
+
+.fx-controls {
+    padding:0.2em;
+    margin:0.2em;
+    border:1px solid white;
+    border-radius: 3px;
+}
+
+.fx-controls-caption {
+    text-align: center;
+}
+
+.fx-controls-tools {
+    display:flex;
+}
+.fx-controls-tools > div {
+    flex-grow:1;
+    text-align:center;
+    padding:0.3em;
+    cursor:pointer;
+    opacity:0.8;
+}
+
+.fx-controls-tools > div:hover {
+    opacity:1;
+    background-color:#000022;
 }

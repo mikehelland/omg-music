@@ -820,31 +820,109 @@ tg.showPartOptionsFragment = function (part) {
         tg.hideDetails();
     }
     
-    new SliderCanvas(document.getElementById("part-options-delay-time"),
-        function (percent) {
-            part.data.audioParameters.delayTime = percent;
-            if (part.delay) {
-                part.delay.delayTime.value = percent;
-            }
-        },
-        function () {
-            return part.data.audioParameters.delayTime || 0;
-        }
-    ).drawCanvas();
-    new SliderCanvas(document.getElementById("part-options-delay-level"),
-        function (percent) {
-            part.data.audioParameters.delayLevel = percent;
-            if (part.feedback) {
-                part.feedback.gain.value = percent;
-            }
-        },
-        function () {
-            return part.data.audioParameters.delayLevel || 0;
-        }
-    ).drawCanvas();
+    tg.setupAddFXButtons(part);
+    tg.setupPartOptionsFX(part);
 };
 
-function SliderCanvas(canvas, onchange, ongetdata) {
+tg.availableFX = ["Delay", "Chorus", "Phaser", "Overdrive", "Compressor", 
+    "Reverb", "Filter", "Cabinet", "Tremolo", 
+    "Wah Wah", "Bitcrusher", "Moog", "Ping Pong"
+];
+
+tg.setupAddFXButtons = function (part) {
+    var availableFXDiv = document.getElementById("part-options-available-fx");
+    availableFXDiv.style.display = "none";
+    availableFXDiv.innerHTML = "";
+    tg.availableFX.forEach(function (fx) {
+        var fxDiv = document.createElement("div");
+        fxDiv.className = "fx-button"
+        fxDiv.innerHTML = fx;
+        fxDiv.onclick = function () {
+            tg.addFXToPart(fx, part);
+            addButton.onclick();
+        };
+        availableFXDiv.appendChild(fxDiv);
+    });
+    
+    var addButton = document.getElementById("part-options-add-fx-button");
+    addButton.innerHTML = "Add FX";
+    addButton.onclick = function () {
+        if (availableFXDiv.style.display === "none") {
+            availableFXDiv.style.display = "flex";
+            addButton.innerHTML = "Hide FX";
+        }
+        else {
+            availableFXDiv.style.display = "none"
+            addButton.innerHTML = "Add FX";
+        }
+    };
+};
+
+tg.addFXToPart = function (fxName, part) {
+    var fxNode = tg.player.addFXToPart(fxName, part);
+    
+    tg.setupFXDiv(fxNode, part);
+};
+
+tg.setupPartOptionsFX = function (part) {
+    tg.fxListDiv = document.getElementById("part-options-fx-list");
+    tg.fxListDiv.innerHTML = "";
+    part.fx.forEach(function (fx) {
+        tg.setupFXDiv(fx, part);
+    });
+};
+
+tg.setupFXDiv = function (fx, part) {
+    var holder = document.createElement("div");
+    holder.className = "fx-controls";
+    var captionDiv = document.createElement("div");
+    captionDiv.className = "fx-controls-caption";
+    captionDiv.innerHTML = fx.data.name;
+    holder.appendChild(captionDiv);
+    tg.fxListDiv.appendChild(holder);
+    tg.setupFXControls(fx, part, holder);
+    
+    var tools = document.createElement("div");
+    tools.className = "fx-controls-tools";
+    holder.appendChild(tools);
+    var bypassButton = document.createElement("div");
+    bypassButton.innerHTML = "Bypass FX";
+    bypassButton.onclick = function () {
+        fx.bypass = !fx.bypass ? 1 : 0;
+        fx.data.bypass = fx.bypass ? 1 : 0;
+        bypassButton.classList.toggle("selected-option");
+    };
+    var removeButton = document.createElement("div");
+    removeButton.innerHTML = "Remove FX";
+    removeButton.onclick = function () {
+        tg.fxListDiv.removeChild(holder);
+        tg.player.removeFXFromPart(fx, part);
+    };
+    tools.appendChild(bypassButton);
+    tools.appendChild(removeButton);
+    
+    if (fx.bypass) {
+        bypassButton.classList.add("selected-option");
+    }
+};
+
+tg.setupFXControls = function (fx, part, fxDiv) {
+    var controls = tg.player.fx[fx.data.name].controls;
+    controls.forEach(function (control) {
+        var captionDiv = document.createElement("div");
+        captionDiv.innerHTML = control.name;
+        fxDiv.appendChild(captionDiv);
+        
+        if (control.type === "slider") {
+            var canvas = document.createElement("canvas");
+            canvas.className = "fx-slider";
+            fxDiv.appendChild(canvas);
+            new SliderCanvas(canvas, control, fx).drawCanvas();
+        }
+    });
+};
+
+function SliderCanvas(canvas, data, fxNode) {
     var m = this;
     if (!canvas) {
         canvas = document.createElement("canvas");
@@ -868,20 +946,38 @@ function SliderCanvas(canvas, onchange, ongetdata) {
 
     this.div = canvas;
     this.ctx = canvas.getContext("2d");
-    this.onchange = onchange;
-    this.ongetdata = ongetdata;
+    this.data = data;
+    this.fxNode = fxNode;
+    this.value = 0;
+    this.percent = 0;
+    this.isAudioParam = typeof fxNode[data.property] === "object";
 }
 
 SliderCanvas.prototype.ondown = function (x) {
     this.isTouching = true;
-    var percent = x / this.div.clientWidth;
-    if (this.onchange) this.onchange(percent);
+    this.percent = x / this.div.clientWidth;
+    this.value = (this.data.max - this.data.min) * this.percent + this.data.min;
+    if (this.isAudioParam) {
+        this.fxNode[this.data.property].value = this.value;
+    }
+    else {
+        this.fxNode[this.data.property] = this.value;
+    }
+    this.fxNode.data[this.data.property] = this.value;
     this.drawCanvas(this.div);
 };
 SliderCanvas.prototype.onmove = function (x) {
     if (this.isTouching) {
-        var percent = x / this.div.clientWidth;
-        if (this.onchange) this.onchange(percent);
+        this.percent = x / this.div.clientWidth;
+        this.value = (this.data.max - this.data.min) * this.percent + this.data.min;
+        console.log(this.value);
+        if (this.isAudioParam) {
+            this.fxNode[this.data.property].value = this.value;
+        }
+        else {
+            this.fxNode[this.data.property] = this.value;
+        }
+        this.fxNode.data[this.data.property] = this.value;
         this.drawCanvas(this.div);
     }
 };
@@ -892,7 +988,8 @@ SliderCanvas.prototype.drawCanvas = function () {
     this.div.width = this.div.clientWidth;
     this.div.height = this.div.clientHeight;
     this.ctx.fillStyle = "#008800";
-    var percent = this.ongetdata ? this.ongetdata() : 0;
+    var value = this.fxNode.data[this.data.property];
+    var percent = (value - this.data.min) / (this.data.max - this.data.min);
     this.ctx.fillRect(0, 0, percent * this.div.clientWidth, this.div.height);
 };
 

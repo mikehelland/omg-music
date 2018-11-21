@@ -91,9 +91,10 @@
             </div>
             <div id="add-part-custom">
                 <h5>Add a sound using a URL:</h5>
-                <input id="add-part-url-input" placeholder="Web address to sound"><button>Go</button> 
-                <br>
-                <a href="../soundset-editor.htm" target="out">Make a custom SoundSet</a>
+                <!--<input id="add-part-url-input" placeholder="Web address to sound"><button>Go</button> -->
+                <div>
+                    <a href="../soundset-editor.htm" target="out">Make a custom SoundSet</a>
+                </div>
             </div>
             <div id="add-part-gallery">
                 <h5>Public Sound Sets:</h5>
@@ -115,13 +116,19 @@
             <br>
             <button id="part-options-submixer-button">Tracks Sub Mixer</button>
             <hr>
-            Delay Time:
-            <br>
-            <canvas id="part-options-delay-time"></canvas>
-            <br>
-            Delay Level:
-            <br>
-            <canvas id="part-options-delay-level"></canvas>
+            <button id=part-options-add-fx-button>Add an effect</button>
+            <div id="part-options-available-fx">
+            </div>
+            <div id="part-options-fx-list">
+                <!--    Delay Time:
+                    <br>
+                    <canvas id="part-options-delay-time"></canvas>
+                    <br>
+                    Delay Level:
+                    <br>
+                    <canvas id="part-options-delay-level"></canvas>
+                -->
+            </div>
             <hr>
             Clear or Remove<br>
             <button id="part-options-clear-button">Clear Part Data</button><br>
@@ -181,6 +188,7 @@
     </div>
     
     <script src="../js/omgservice.js"></script>
+    <script src="../js/tuna-min.js"></script>
     <script src="omusic_player.js"></script>
     <script src="sequencer_surface.js"></script>
     <script src="vertical_surface.js"></script>

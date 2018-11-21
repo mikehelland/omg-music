@@ -846,7 +846,7 @@ OMusicEditor.prototype.setupSectionAddButtons = function (buttonGroup) {
 
         var newdiv = bam.createElementOverElement("part2", drumButton, bam.bbody);
 
-        var newPart = new OMGDrumpart(newdiv, null, bam.section)
+        var newPart = new OMGPart(newdiv, OMGPart.prototype.defaultDrumPart(), bam.section)
         newPart.data.partType = "DRUMBEAT";
 
         var otherParts = [bam.section.chordsView];
@@ -1173,9 +1173,9 @@ OMusicEditor.prototype.load = function (params) {
     if (params.type == "DRUMBEAT" ||
             (params.dataToLoad && params.dataToLoad.partType == "DRUMBEAT")) {
         if (params.dataToLoad) {
-            bam.part = new OMGDrumpart(newDiv, params.dataToLoad, bam.section);
+            bam.part = new OMGPart(newDiv, params.dataToLoad, bam.section);
         } else {
-            bam.part = new OMGDrumpart(newDiv, null, bam.section);
+            bam.part = new OMGPart(newDiv, OMGPart.prototype.defaultDrumPart(), bam.section);
             var ppart = bam.part;
             if (params.soundset) {
                 bam.getSoundSet(params.soundset, function (ss) {
