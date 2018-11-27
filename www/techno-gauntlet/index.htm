@@ -21,6 +21,10 @@
                 <span class="tool-bar-caption">Song</span>
                 <span id="tool-bar-song-button">(Untitled)</span>
             </div>
+            <div id="main-fragment-section-button">
+                <span class="tool-bar-caption">Section</span>
+                <span id="tool-bar-section-button">Intro</span>
+            </div>
             <div id="save-button">Save</div>
 	</div>
 
@@ -161,11 +165,12 @@
                 <span class="tool-bar-caption">Username:</span> <span id="user-info-username"></span>
                 <br>
                 <span class="tool-bar-caption">Account created:</span> <span class="user-created-at"></span>
-            </div>
-             <div class="main-separator"></div>
-             <span class="tool-bar-caption">User's posts:</span>
-             <div class="search-things">
-                <div id="user-fragment-detail-list"></div>
+                
+                <div class="main-separator"></div>
+                <span class="tool-bar-caption">User's posts:</span>
+                <div class="search-things">
+                   <div id="user-fragment-detail-list"></div>
+               </div>
             </div>
             </div>
         </div>
@@ -181,6 +186,22 @@
             <input id="song-info-tags" placeholder="no tags">
             <br>
             <button id="song-info-update">Update</button>
+            <br>
+            <hr>
+            <br>
+            Create a new blank song:
+            <br>
+            <button id="create-new-song-button">New Song</button>
+            </div>
+            
+        </div>
+        <div id="section-fragment">
+            <h2>Sections</h2>
+            <div class="detail-fragment-body">
+                <button id="copy-section-button">Copy Current Section</button>
+                <div id="preset-section-name-list">Choose a name for the new section:<br></div>
+                <hr>
+                <div id="section-fragment-list"></div>
             </div>
         </div>
         </div>
@@ -194,6 +215,6 @@
     <script src="vertical_surface.js"></script>
     <script src="../js/user.js"></script>
     <script src="tg.js"></script>
-    
+
 </body>
 </html>

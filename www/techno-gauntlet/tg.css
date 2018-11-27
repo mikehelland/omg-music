@@ -373,7 +373,7 @@ body {
     flex-grow:0 !important;
 }
 
-#user-fragment, #song-fragment {
+#user-fragment, #song-fragment, #section-fragment {
     display:none;
 }
 

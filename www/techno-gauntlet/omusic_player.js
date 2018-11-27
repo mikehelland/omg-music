@@ -526,6 +526,7 @@ OMusicPlayer.prototype.makeOsc = function (part) {
     part.panner.pan.setValueAtTime(part.data.audioParameters.pan, p.context.currentTime);
 
     var volume = part.data.audioParameters.volume;
+    volume = volume * volume;
     if (part.data.audioParameters.mute) {
         part.gain.gain.setValueAtTime(0, p.context.currentTime);
         part.gain.gain.preMuteGain = volume;
@@ -889,7 +890,7 @@ OMusicPlayer.prototype.playNote = function (note, part) {
     if (part.osc) {
         var freq = p.makeFrequency(note.scaledNote) * part.data.audioParameters.warp;
         part.panner.pan.setValueAtTime(part.data.audioParameters.pan, p.context.currentTime);
-        part.gain.gain.setValueAtTime(part.data.audioParameters.volume, p.context.currentTime);
+        part.gain.gain.setValueAtTime(Math.pow(part.data.audioParameters.volume, 2), p.context.currentTime);
         part.osc.frequency.setValueAtTime(freq, p.context.currentTime);
         part.playingI = part.currentI;
         var playingI = part.playingI;
@@ -932,7 +933,7 @@ OMusicPlayer.prototype.playSound = function (sound, part) {
         source.bufferGain.connect(part.topAudioNode);
         
         part.panner.pan.setValueAtTime(part.data.audioParameters.pan, p.context.currentTime);
-        source.bufferGain.gain.setValueAtTime(part.data.audioParameters.volume, p.context.currentTime);
+        source.bufferGain.gain.setValueAtTime(Math.pow(part.data.audioParameters.volume, 2), p.context.currentTime);
         
         source.start(p.context.currentTime);
 
@@ -1064,11 +1065,11 @@ OMusicPlayer.prototype.makeOMGSong = function (data) {
 OMusicPlayer.prototype.updatePartVolumeAndPan = function (part) {
 
     if (part.gain && part.osc) {
-        var oscGain = (part.osc.soft ? 1 : 2) * part.data.volume / 10;
-        part.gain.gain.setValueAtTime(oscGain, this.context.currentTime);
+        //var oscGain = (part.osc.soft ? 1 : 2) * part.data.volume / 10;
+        part.gain.gain.setValueAtTime(Math.pow(part.data.volume, 2), this.context.currentTime);
     }
     if (part.bufferGain) {
-        part.bufferGain.gain.setValueAtTime(part.data.volume, this.context.currentTime);
+        part.bufferGain.gain.setValueAtTime(Math.pow(part.data.volume, 2), this.context.currentTime);
     }
     if (part.panner) {
         part.panner.pan.setValueAtTime(part.data.pan, this.context.currentTime);

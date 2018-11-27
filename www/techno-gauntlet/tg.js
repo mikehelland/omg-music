@@ -24,7 +24,7 @@ tg.getSong = function (callback) {
     if (!id) {
         var defaultSong = {
             "name":"default","type":"SONG","sections":[
-                {"type":"SECTION","parts":[
+                {"type":"SECTION","name": "Intro", "parts":[
                         {"type":"PART","notes":[
                                 {"note":-4,"beats":1,"scaledNote":62},{"note":-3,"beats":1,"scaledNote":64},{"note":-2,"beats":1,"scaledNote":65},{"note":-1,"beats":1,"scaledNote":67}
                             ],
@@ -49,21 +49,12 @@ tg.loadSong = function (songData) {
     tg.song = tg.player.makeOMGSong(songData);
     tg.player.prepareSong(tg.song);    
     
+    tg.loadSection(tg.song.sections[0])
+    
     tg.setSongControlsUI();
     document.getElementById("tool-bar-song-button").innerHTML = tg.song.data.name || "(Untitled)";
+    document.getElementById("tool-bar-section-button").innerHTML = tg.currentSection.data.name || "(Untitled)";
 
-    tg.partList.innerHTML = "";
-    var section;
-    for (var i = 0; i < tg.song.sections.length; i++) {
-        section = tg.song.sections[i];
-
-        for (var j = 0; j < section.parts.length; j++) {
-            tg.setupPartButton(section.parts[j]);
-        }
-
-        break;
-    }
-    
     tg.drawPlayButton();
 };
 
@@ -513,6 +504,7 @@ tg.hideDetails = function (hideFragment) {
     if (tg.partOptionsFragment) tg.partOptionsFragment.style.display = "none";
     if (tg.userFragment) tg.userFragment.style.display = "none";
     if (tg.songFragment) tg.songFragment.style.display = "none";
+    if (tg.sectionFragment) tg.sectionFragment.div.style.display = "none";
     
     if (hideFragment) {
         tg.detailFragment.style.display = "none";
@@ -1083,6 +1075,10 @@ tg.showSongFragment = function () {
     }
     tg.songFragment.nameInput.value = tg.song.data.name || "";
     tg.songFragment.tagsInput.value = tg.song.data.tags || "";
+    
+    document.getElementById("create-new-song-button").onclick = function () {
+        tg.newBlankSong();
+    };
         
     tg.songFragment.style.display = "block";
 };
@@ -1099,17 +1095,6 @@ tg.backButton = document.getElementById("back-button");
 tg.backButton.onclick = function () {
     tg.hideDetails(true);
 };
-
-// away we go
-tg.getSong(function (song) {
-    tg.loadSong(song);
-});
-omg.server.getHTTP("/user/", function (res) {
-    if (res) {
-        tg.onlogin(res);
-    }
-});
-
 
 tg.setupAddPartTabs = function () {
     var f = tg.addPartFragment;
@@ -1154,3 +1139,92 @@ tg.setupAddPartTabs = function () {
     
     galleryTab.onclick({target: galleryTab});
 };
+
+tg.newBlankSong = function () {
+    var blankSong = {
+        "name":"","type":"SONG","sections":[
+            {"name": "Intro", "type":"SECTION","parts":[],"chordProgression":[0]}
+        ],
+        "keyParameters":{"scale":[0,2,4,5,7,9,11],"rootNote":0},
+        "beatParameters":{"bpm":"120","beats":4,"shuffle":0,"measures":1,"subbeats":4}
+    };
+    tg.loadSong(blankSong);
+};
+
+tg.sectionButton = document.getElementById("main-fragment-section-button");
+tg.sectionButton.onclick = function () {
+    tg.hideDetails();
+    tg.showSectionFragment();
+    tg.newChosenButton(tg.sectionButton);
+};
+tg.showSectionFragment = function () {
+    if (!tg.sectionFragment) {
+        tg.sectionFragment = {};
+        
+        tg.sectionFragment.addSectionListItem = (section) => {
+            var sectionDiv = document.createElement("div");
+            sectionDiv.className = "section-list-item";
+            sectionDiv.innerHTML = section.data.name || "(Untitled)";
+            sectionDiv.onclick = function () {
+                tg.loadSection(section);
+            };
+            tg.sectionFragment.listDiv.appendChild(sectionDiv);
+        };
+        
+        tg.sectionFragment.div = document.getElementById("section-fragment");
+        tg.sectionFragment.listDiv = document.getElementById("section-fragment-list");
+        tg.sectionFragment.presetNameListDiv = document.getElementById("preset-section-name-list");
+        tg.sectionFragment.presetNameListDiv.style.display = "none";
+        document.getElementById("copy-section-button").onclick = function () {
+            //tg.sectionFragment.presetNameListDiv.style.display = "flex";
+            var section = tg.copySection();
+            tg.sectionFragment.addSectionListItem(section)
+        };
+        ["Intro", "Preverse", "Verse", "Prechorus", 
+            "Chorus", "Bridge", "Solo", "Outro"].forEach(sectionName => {
+                var presetNameDiv = document.createElement("div");
+                presetNameDiv.className = "preset-name-list-item";
+                presetNameDiv.innerHTML = sectionName;
+                presetNameDiv.onclick = function () {
+                    tg.copySection(sectionName);
+                    tg.sectionFragment.presetNameListDiv.style.display = "none";
+                };
+                tg.sectionFragment.presetNameListDiv.appendChild(presetNameDiv);
+            });
+    }
+    tg.sectionFragment.listDiv.innerHTML = "";
+    tg.song.sections.forEach(section => {
+        tg.sectionFragment.addSectionListItem(section);
+    });
+    tg.sectionFragment.div.style.display = "block";
+};
+
+tg.copySection = function (name) {
+    var newSectionData = JSON.parse(JSON.stringify(tg.currentSection.getData()));
+    if (name) newSectionData.name = name;
+    var newSection = new OMGSection(null, newSectionData, tg.song);
+    tg.loadSection(newSection);
+    return newSection;
+};
+
+tg.loadSection = function (section) {
+    tg.currentSection = section;
+    tg.partList.innerHTML = "";
+    for (var j = 0; j < section.parts.length; j++) {
+        tg.setupPartButton(section.parts[j]);
+    }
+};
+
+
+
+
+// away we go
+// KEEP THIS LAST
+tg.getSong(function (song) {
+    tg.loadSong(song);
+});
+omg.server.getHTTP("/user/", function (res) {
+    if (res) {
+        tg.onlogin(res);
+    }
+});
