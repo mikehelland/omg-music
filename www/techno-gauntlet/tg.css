@@ -388,7 +388,7 @@ body {
     display:none;
 }
 
-.soundset-list-item {
+.section-list-item, .soundset-list-item {
     text-align: left;
     border-top: 1px solid #888888;
     cursor:pointer;
@@ -397,7 +397,14 @@ body {
     opacity:0.8;
     
 }
-.soundset-list-item:hover {
+.section-list-item {
+    font-size:1em;
+    display:flex;
+}
+.section-list-item-rename {
+    margin-right:0.5em;
+}
+.section-list-item:hover, .soundset-list-item:hover {
     opacity:1;
     background-color:#444444;
 }
@@ -427,7 +434,7 @@ body {
     display:none;
 }
 
-.fx-button {
+.preset-name-list-item, .fx-button {
     padding:0.5em;
     cursor:pointer;
     border:1px solid white;
@@ -435,7 +442,7 @@ body {
     background-color: #444;
 }
 
-.fx-button:hover {
+.preset-name-list-item, .fx-button:hover {
     opacity:1;
 }
 
@@ -468,4 +475,11 @@ body {
 .fx-controls-tools > div:hover {
     opacity:1;
     background-color:#000022;
+}
+
+#preset-section-name-list {
+    flex-wrap: wrap;
+    background:black;
+    border:1px solid white;
+    z-index: 1;
 }

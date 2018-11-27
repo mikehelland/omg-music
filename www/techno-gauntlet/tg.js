@@ -1161,14 +1161,53 @@ tg.showSectionFragment = function () {
     if (!tg.sectionFragment) {
         tg.sectionFragment = {};
         
+        tg.sectionFragment.updateSelectedSection = (sectionDiv) => {
+                sectionDiv.classList.add("selected-option");
+                if (tg.sectionFragment.selectedSection) {
+                    tg.sectionFragment.selectedSection.classList.remove("selected-option");
+                }
+                tg.sectionFragment.selectedSection = sectionDiv;            
+        };
         tg.sectionFragment.addSectionListItem = (section) => {
             var sectionDiv = document.createElement("div");
             sectionDiv.className = "section-list-item";
-            sectionDiv.innerHTML = section.data.name || "(Untitled)";
+            
+            var sectionNameDiv = document.createElement("div");
+            sectionNameDiv.className = "section-list-item-name";
+            sectionNameDiv.innerHTML = section.data.name || "(Untitled)";
+            
+            var sectionRenameDiv = document.createElement("div");
+            sectionRenameDiv.className = "section-list-item-rename";
+            sectionRenameDiv.innerHTML = "&#9776;";
+            sectionRenameDiv.onclick = function (e) {
+                if (tg.sectionFragment.contextMenuNameDiv === sectionNameDiv) {
+                    tg.sectionFragment.presetNameListDiv.style.display = "none";
+                    tg.sectionFragment.contextMenuNameDiv = null;
+                    return;
+                }
+                //var offsets = omg.ui.totalOffsets(sectionDiv, tg.sectionFragment.div);
+                var offsets = {top: sectionDiv.offsetTop, left: sectionDiv.offsetLeft};
+                tg.sectionFragment.presetNameListDiv.style.position = "absolute";
+                tg.sectionFragment.presetNameListDiv.style.left = offsets.left + "px";
+                tg.sectionFragment.presetNameListDiv.style.top = offsets.top + sectionDiv.clientHeight + "px";
+                tg.sectionFragment.presetNameListDiv.style.width = sectionDiv.clientWidth + "px";
+                tg.sectionFragment.presetNameListDiv.style.display = "block";
+                
+                tg.sectionFragment.contextMenuSection = section;
+                tg.sectionFragment.contextMenuNameDiv = sectionNameDiv;
+            };
+
             sectionDiv.onclick = function () {
                 tg.loadSection(section);
+                tg.sectionFragment.updateSelectedSection(sectionDiv);
             };
+            if (section === tg.currentSection) {
+                tg.sectionFragment.updateSelectedSection(sectionDiv);
+            }
+            sectionDiv.appendChild(sectionRenameDiv);
+            sectionDiv.appendChild(sectionNameDiv);
             tg.sectionFragment.listDiv.appendChild(sectionDiv);
+            return sectionDiv;
         };
         
         tg.sectionFragment.div = document.getElementById("section-fragment");
@@ -1186,7 +1225,8 @@ tg.showSectionFragment = function () {
                 presetNameDiv.className = "preset-name-list-item";
                 presetNameDiv.innerHTML = sectionName;
                 presetNameDiv.onclick = function () {
-                    tg.copySection(sectionName);
+                    tg.sectionFragment.contextMenuSection.data.name = sectionName;
+                    tg.sectionFragment.contextMenuNameDiv.innerHTML = sectionName;
                     tg.sectionFragment.presetNameListDiv.style.display = "none";
                 };
                 tg.sectionFragment.presetNameListDiv.appendChild(presetNameDiv);
