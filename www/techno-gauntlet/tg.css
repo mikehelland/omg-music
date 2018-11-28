@@ -237,11 +237,9 @@ body {
     height:100%;
 }
 #key-list {
-    
     flex-grow:1;
     display:flex;
     flex-direction: column;
-    
 }
 #scale-list {
     flex-grow: 1;
@@ -261,7 +259,7 @@ body {
     background-color:#000088 !important;
 }
 
-#scale-list div, #key-list div {
+#chords-fragment-list div, #scale-list div, #key-list div {
     opacity:0.8;
     flex:auto;
     cursor:pointer;
@@ -269,7 +267,10 @@ body {
     border:1px solid #000088;
     display:flex;
     justify-content: center;
-    padding-top: 10px;
+}
+
+#chords-fragment-list p, #scale-list p, #key-list p {
+    margin: auto;
 }
 
 #saved-url {
