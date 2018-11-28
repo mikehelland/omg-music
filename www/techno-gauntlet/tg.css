@@ -392,13 +392,13 @@ body {
     text-align: left;
     border-top: 1px solid #888888;
     cursor:pointer;
-    padding:0.4em;
+    padding:0.5em;
     font-size: 0.7em;
     opacity:0.8;
     
 }
 .section-list-item {
-    font-size:1em;
+    font-size:1.2em;
     display:flex;
 }
 .section-list-item-rename {
@@ -477,9 +477,14 @@ body {
     background-color:#000022;
 }
 
-#preset-section-name-list {
-    flex-wrap: wrap;
+#preset-section-name-menu {
     background:black;
     border:1px solid white;
     z-index: 1;
+    position:absolute;
+    padding:0.7em;
+}
+#preset-section-name-list {
+    flex-wrap: wrap;
+    display:flex;
 }

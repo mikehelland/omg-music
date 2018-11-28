@@ -16,6 +16,8 @@ tg.surface.height = tg.surface.clientHeight;
 
 tg.chordsEditorView = document.getElementById("chords-fragment-chords-view");
 
+tg.sectionCaptionDiv = document.getElementById("tool-bar-section-button");
+
 tg.player = new OMusicPlayer();
 
 tg.getSong = function (callback) {
@@ -53,7 +55,6 @@ tg.loadSong = function (songData) {
     
     tg.setSongControlsUI();
     document.getElementById("tool-bar-song-button").innerHTML = tg.song.data.name || "(Untitled)";
-    document.getElementById("tool-bar-section-button").innerHTML = tg.currentSection.data.name || "(Untitled)";
 
     tg.drawPlayButton();
 };
@@ -83,6 +84,8 @@ tg.setSongControlsUI = function () {
     var chordsCaption = tg.makeChordsCaption();
     tg.chordsButton.innerHTML = chordsCaption;
     tg.chordsEditorView.innerHTML = chordsCaption;
+    
+    tg.sectionCaptionDiv.innerHTML = tg.currentSection.data.name || "(Untitled)";
 };
 
 tg.setupPartButton = function (omgpart) {
@@ -389,7 +392,7 @@ tg.showChordsFragment = function () {
         tg.chordsFragment = document.getElementById("chords-fragment");
         tg.chordsFragment.appendMode = false;
         document.getElementById("chords-fragment-clear-button").onclick = function () {
-            tg.song.sections[0].data.chordProgression = [0];
+            tg.currentSection.data.chordProgression = [0];
             tg.setSongControlsUI();
         };
         var appendButton = document.getElementById("chords-fragment-append-button");
@@ -423,10 +426,10 @@ tg.makeChordButton = function (chordI) {
     chordDiv.innerHTML = tg.makeChordCaption(chordI)
     chordDiv.onclick = function () {
         if (tg.chordsFragment.appendMode) {
-            tg.song.sections[0].data.chordProgression.push(chordI);
+            tg.song.currentSection.data.chordProgression.push(chordI);
         }
         else {
-            tg.song.sections[0].data.chordProgression = [chordI];
+            tg.song.currentSection.data.chordProgression = [chordI];
         }
         tg.setSongControlsUI();
     };
@@ -435,7 +438,7 @@ tg.makeChordButton = function (chordI) {
 
 tg.makeChordsCaption = function (chordI) {
     var chordsCaption = "";
-    tg.song.sections[0].data.chordProgression.forEach(function (chordI, i) {
+    tg.currentSection.data.chordProgression.forEach(function (chordI, i) {
         if (tg.player.playing && i === tg.player.currentChordI) {
             chordsCaption += "<span class='current-chord'>";
         }
@@ -519,7 +522,7 @@ tg.hideDetails = function (hideFragment) {
 
 tg.addPart = function (soundSet) {
     var blankPart = {soundSet: soundSet};
-    var omgpart = new OMGPart(undefined,blankPart,tg.song.sections[0]);
+    var omgpart = new OMGPart(undefined,blankPart,tg.currentSection);
     tg.player.loadPart(omgpart);
     var div = tg.setupPartButton(omgpart);
     div.getElementsByClassName("part-button")[0].onclick();
@@ -537,7 +540,7 @@ tg.showMixFragment = function () {
     }
     var divs = [];
     tg.mixFragment.innerHTML = "";
-    tg.song.sections[0].parts.forEach(function (part) {
+    tg.currentSection.parts.forEach(function (part) {
         var newContainerDiv = document.createElement("div");
         newContainerDiv.className = "mixer-part";
         
@@ -803,10 +806,10 @@ tg.showPartOptionsFragment = function (part) {
         }
     };
     document.getElementById("part-options-remove-button").onclick = function () {
-        var i = tg.song.sections[0].parts.indexOf(part);
+        var i = tg.currentSection.parts.indexOf(part);
         if (i > -1) {
-            tg.song.sections[0].parts.splice(i, 1)
-            tg.song.sections[0].data.parts.splice(i, 1)
+            tg.currentSection.parts.splice(i, 1)
+            tg.currentSection.data.parts.splice(i, 1)
             tg.partList.removeChild(tg.partList.children[i])
         }
         tg.hideDetails();
@@ -1162,11 +1165,11 @@ tg.showSectionFragment = function () {
         tg.sectionFragment = {};
         
         tg.sectionFragment.updateSelectedSection = (sectionDiv) => {
-                sectionDiv.classList.add("selected-option");
-                if (tg.sectionFragment.selectedSection) {
-                    tg.sectionFragment.selectedSection.classList.remove("selected-option");
-                }
-                tg.sectionFragment.selectedSection = sectionDiv;            
+            if (tg.sectionFragment.selectedSection) {
+                tg.sectionFragment.selectedSection.classList.remove("selected-option");
+            }
+            sectionDiv.classList.add("selected-option");
+            tg.sectionFragment.selectedSection = sectionDiv;
         };
         tg.sectionFragment.addSectionListItem = (section) => {
             var sectionDiv = document.createElement("div");
@@ -1180,18 +1183,18 @@ tg.showSectionFragment = function () {
             sectionRenameDiv.className = "section-list-item-rename";
             sectionRenameDiv.innerHTML = "&#9776;";
             sectionRenameDiv.onclick = function (e) {
+                e.stopPropagation();
                 if (tg.sectionFragment.contextMenuNameDiv === sectionNameDiv) {
-                    tg.sectionFragment.presetNameListDiv.style.display = "none";
+                    tg.sectionFragment.presetNameMenuDiv.style.display = "none";
                     tg.sectionFragment.contextMenuNameDiv = null;
                     return;
                 }
                 //var offsets = omg.ui.totalOffsets(sectionDiv, tg.sectionFragment.div);
                 var offsets = {top: sectionDiv.offsetTop, left: sectionDiv.offsetLeft};
-                tg.sectionFragment.presetNameListDiv.style.position = "absolute";
-                tg.sectionFragment.presetNameListDiv.style.left = offsets.left + "px";
-                tg.sectionFragment.presetNameListDiv.style.top = offsets.top + sectionDiv.clientHeight + "px";
-                tg.sectionFragment.presetNameListDiv.style.width = sectionDiv.clientWidth + "px";
-                tg.sectionFragment.presetNameListDiv.style.display = "block";
+                tg.sectionFragment.presetNameMenuDiv.style.left = offsets.left + "px";
+                tg.sectionFragment.presetNameMenuDiv.style.top = offsets.top + sectionDiv.clientHeight + "px";
+                tg.sectionFragment.presetNameMenuDiv.style.width = sectionDiv.clientWidth / 2 + "px";
+                tg.sectionFragment.presetNameMenuDiv.style.display = "block";
                 
                 tg.sectionFragment.contextMenuSection = section;
                 tg.sectionFragment.contextMenuNameDiv = sectionNameDiv;
@@ -1200,6 +1203,7 @@ tg.showSectionFragment = function () {
             sectionDiv.onclick = function () {
                 tg.loadSection(section);
                 tg.sectionFragment.updateSelectedSection(sectionDiv);
+                tg.setSongControlsUI();
             };
             if (section === tg.currentSection) {
                 tg.sectionFragment.updateSelectedSection(sectionDiv);
@@ -1211,27 +1215,33 @@ tg.showSectionFragment = function () {
         };
         
         tg.sectionFragment.div = document.getElementById("section-fragment");
+        tg.sectionFragment.div.onclick = function () {
+            tg.sectionFragment.presetNameMenuDiv.style.display = "none";
+            tg.sectionFragment.contextMenuNameDiv = null;
+        }
         tg.sectionFragment.listDiv = document.getElementById("section-fragment-list");
+        tg.sectionFragment.presetNameMenuDiv = document.getElementById("preset-section-name-menu");
         tg.sectionFragment.presetNameListDiv = document.getElementById("preset-section-name-list");
-        tg.sectionFragment.presetNameListDiv.style.display = "none";
         document.getElementById("copy-section-button").onclick = function () {
-            //tg.sectionFragment.presetNameListDiv.style.display = "flex";
             var section = tg.copySection();
             tg.sectionFragment.addSectionListItem(section)
         };
         ["Intro", "Preverse", "Verse", "Prechorus", 
-            "Chorus", "Bridge", "Solo", "Outro"].forEach(sectionName => {
+            "Chorus", "Bridge", "Solo", "Breakdown", 
+            "Refrain", "Outro"].forEach(sectionName => {
                 var presetNameDiv = document.createElement("div");
                 presetNameDiv.className = "preset-name-list-item";
                 presetNameDiv.innerHTML = sectionName;
                 presetNameDiv.onclick = function () {
                     tg.sectionFragment.contextMenuSection.data.name = sectionName;
                     tg.sectionFragment.contextMenuNameDiv.innerHTML = sectionName;
-                    tg.sectionFragment.presetNameListDiv.style.display = "none";
+                    tg.sectionFragment.presetNameMenuDiv.style.display = "none";
+                    tg.setSongControlsUI();
                 };
                 tg.sectionFragment.presetNameListDiv.appendChild(presetNameDiv);
             });
     }
+    tg.sectionFragment.presetNameMenuDiv.style.display = "none";
     tg.sectionFragment.listDiv.innerHTML = "";
     tg.song.sections.forEach(section => {
         tg.sectionFragment.addSectionListItem(section);
@@ -1253,6 +1263,7 @@ tg.loadSection = function (section) {
     for (var j = 0; j < section.parts.length; j++) {
         tg.setupPartButton(section.parts[j]);
     }
+    tg.player.loopSection = tg.song.sections.indexOf(section);
 };
 
 
