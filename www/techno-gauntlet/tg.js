@@ -1007,6 +1007,11 @@ tg.userButton.onclick = function () {
 tg.showUserFragment = function () {
     if (!tg.userFragment) {
         tg.userFragment = document.getElementById("user-fragment");
+        document.getElementById("user-logout-button").onclick = function () {
+            omg.server.logout(() => {
+                tg.onlogin(undefined);
+            });
+        };
         document.getElementById("user-login-button").onclick = function () {
             omg.server.login(
                 document.getElementById("user-login-username").value, 
@@ -1089,10 +1094,10 @@ tg.showSongFragment = function () {
 
 tg.onlogin = function (user) {
     tg.user = user;
-    document.getElementById("tool-bar-user-button").innerHTML = user.username;    
-    document.getElementById("user-login-signup").style.display = "none";
-    document.getElementById("user-info").style.display = "block";
-    document.getElementById("user-info-username").innerHTML = user.username;
+    document.getElementById("tool-bar-user-button").innerHTML = user ? user.username : "Login";
+    document.getElementById("user-login-signup").style.display = user ? "none" : "block";
+    document.getElementById("user-info").style.display = user ? "block" : "none";
+    document.getElementById("user-info-username").innerHTML = user ? user.username : "Login";
 };
 
 tg.backButton = document.getElementById("back-button");

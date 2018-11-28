@@ -120,9 +120,9 @@ app.post("/api-login",
         }       
    });
 
-app.get("/logout", function (req, res) {
+app.get("/api-logout", function (req, res) {
       req.logout();
-      res.redirect("/");
+      res.send({});
    }
 );
 app.post('/api-signup', 

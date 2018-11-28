@@ -77,6 +77,10 @@ omg.server.signup = function (username, password, callback) {
             callback: callback});
 };
 
+omg.server.logout = function (callback) {
+    omg.server.getHTTP("/api-logout", callback);
+};
+
 
 /** 
  * Utility functions for the client
