@@ -1803,6 +1803,7 @@ OMGPart.prototype.makeTracks = function () {
             sound.sound = (that.data.soundSet.prefix || "") +
                     sound.url + (that.data.soundSet.postfix || "");
             sound.data = [];
+            sound.audioParameters = {volume: 1, pan: 0, warp: 1};
         });
     }
 };
