@@ -911,34 +911,28 @@ OMusicPlayer.prototype.playSound = function (sound, part, audioParameters) {
             p.loadedSounds[sound] !== "loading") {
 
         var source = p.context.createBufferSource();
+        source.bufferGain = p.context.createGain();
+        source.buffer = p.loadedSounds[sound];
 
-        var gain, pan;
         var warp = part.data.audioParameters.warp;
         if (audioParameters) {
             warp = (warp - 1) + (audioParameters.warp - 1) + 1;
+            source.bufferGain.gain.setValueAtTime(audioParameters.gain, p.context.currentTime);
         }
-        if (audioParameters && ( //only do this if we don't have defaults
-                audioParameters.pan !== 0 || 
-                audioParameters.gain !== 1)) {
-            pan = part.data.audioParameters.pan + audioParameters.pan;
-            gain = part.data.audioParameters.gain * audioParameters.gain;
-            
-            source.bufferPanner = p.context.createStereoPanner();
-            source.bufferGain = p.context.createGain();
-            
-            source.bufferPanner.pan.setValueAtTime(pan, p.context.currentTime);
-            source.bufferGain.gain.setValueAtTime(gain, p.context.currentTime);
+        if (audioParameters && audioParameters.pan) {                        
+            source.bufferPanner = p.context.createStereoPanner();            
+            source.bufferPanner.pan.setValueAtTime(audioParameters.pan, p.context.currentTime);
                         
             source.connect(source.bufferPanner);
             source.bufferPanner.connect(source.bufferGain);
-            source.bufferGain.connect(part.topAudioNode);
         }
         else {
-            source.connect(part.topAudioNode);
+            source.connect(source.bufferGain);
         }
-        
+
+        source.bufferGain.connect(part.topAudioNode);
+
         source.playbackRate.value = warp;
-        source.buffer = p.loadedSounds[sound];
 
         source.start(p.context.currentTime);
         
