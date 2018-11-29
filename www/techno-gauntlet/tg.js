@@ -679,7 +679,7 @@ tg.makeMixerDiv = function (part, divs) {
     var audioParameters = part.audioParameters || part.data.audioParameters;
     
     var volumeProperty = {"property": "gain", "name": "Volume", "type": "slider", "min": 0, "max": 1, 
-            "color": audioParameters.mute ?"#880000" : "#008800"};
+            "color": audioParameters.mute ?"#880000" : "#008800", transform: "square"};
     var warpProperty = {"property": "warp", "name": "Warp", "type": "slider", "min": 0, "max": 2, resetValue: 1, "color": "#880088"};
     var panProperty = {"property": "pan", "name": "Pan", "type": "slider", "min": -1, "max": 1, resetValue: 0, "color": "#000088"};
     var mixerVolumeCanvas = new SliderCanvas(null, volumeProperty, part.gain, audioParameters);
@@ -788,15 +788,20 @@ tg.setupFXDiv = function (fx, part) {
 
 tg.setupFXControls = function (fx, part, fxDiv) {
     var controls = tg.player.fx[fx.data.name].controls;
+    var divs = [];
     controls.forEach(function (control) {        
         if (control.type === "slider") {
             var canvas = document.createElement("canvas");
             canvas.className = "fx-slider";
             fxDiv.appendChild(canvas);
             var slider = new SliderCanvas(canvas, control, fx, fx.data);
-            slider.sizeCanvas();
-            slider.drawCanvas();
+            divs.push(slider);
         }
+    });
+    divs.forEach((div) => {
+        div.sizeCanvas();
+        div.drawCanvas();
+
     });
 };
 
@@ -831,6 +836,8 @@ function SliderCanvas(canvas, controlInfo, audioNode, data) {
     this.percent = 0;
     this.isAudioParam = audioNode && typeof audioNode[controlInfo.property] === "object";
     
+    this.frequencyTransformScale = Math.log(controlInfo.max) - Math.log(controlInfo.min);
+    
     if (typeof this.controlInfo.resetValue === "number") {
         var slider = this;
         this.div.ondblclick = function () {
@@ -850,9 +857,18 @@ SliderCanvas.prototype.onmove = function (x) {
 };
 SliderCanvas.prototype.onnewX = function (x) {
     this.percent = x / this.div.clientWidth;
-    var value = Math.min(this.controlInfo.max, 
+    if (this.controlInfo.transform === "square") {
+        this.percent = this.percent * this.percent;
+    }
+    var value;
+    if (this.controlInfo.min === 20 && this.controlInfo.max > 10000) {
+        value = Math.exp(this.percent * this.frequencyTransformScale + Math.log(this.controlInfo.min));
+    }
+    else {
+        value = Math.min(this.controlInfo.max, 
                  Math.max(this.controlInfo.min, 
-        (this.controlInfo.max - this.controlInfo.min) * this.percent + this.controlInfo.min));
+            (this.controlInfo.max - this.controlInfo.min) * this.percent + this.controlInfo.min));
+    }
     this.onupdate(value);
 };
 
@@ -875,15 +891,23 @@ SliderCanvas.prototype.onup = function (e) {
 };
 SliderCanvas.prototype.sizeCanvas = function () {
     this.div.width = this.div.clientWidth;
-    this.div.height = this.div.clientHeight;    
+    this.div.height = this.div.clientHeight;
 };
 SliderCanvas.prototype.drawCanvas = function () {
     this.div.width = this.div.width;
 
     this.ctx.fillStyle = this.controlInfo.color || "#008800";
     var value = this.data[this.controlInfo.property];
-    var percent = (value - this.controlInfo.min) / (this.controlInfo.max - this.controlInfo.min);
-    var startX = (0 - this.controlInfo.min) / (this.controlInfo.max - this.controlInfo.min);
+    var percent = value;
+    if (this.controlInfo.transform === "square") {
+        percent = Math.sqrt(percent);
+    }
+    percent = (percent - this.controlInfo.min) / (this.controlInfo.max - this.controlInfo.min);
+    if (this.controlInfo.min === 20 && this.controlInfo.max > 10000) {
+        percent = (Math.log(value) - Math.log(this.controlInfo.min)) / this.frequencyTransformScale;
+    }
+    var startX = this.controlInfo >= 0 ? 0 : 
+            ((0 - this.controlInfo.min) / (this.controlInfo.max - this.controlInfo.min));
     startX = startX * this.div.clientWidth;
     if (startX) {
         this.ctx.fillRect(startX - 2, 0, 4, this.div.height);
@@ -892,22 +916,18 @@ SliderCanvas.prototype.drawCanvas = function () {
     this.ctx.fillStyle = "white";
     this.ctx.font = "10pt sans-serif";
     this.ctx.fillText(this.controlInfo.name, 10, this.div.height / 2 + 5);
-    if (this.controlInfo.max > 100) {
-        value = Math.round(value);
+    var suffix = "";
+    if (value > 1000) {
+        value = value / 1000;
+        suffix = "K";
     }
-    else {
-        value = Math.round(value * 100) / 100;
-    }
-    var valueLength = this.ctx.measureText("" + value).width;
-    this.ctx.fillText(value, this.div.clientWidth - 10 - valueLength, this.div.height / 2 + 6);
+    value = Math.round(value * 100) / 100;
+    value = value + "" + suffix;
+    var valueLength = this.ctx.measureText(value).width;
+    this.ctx.fillText("", 0, 0);
+    this.ctx.fillText(value, this.div.clientWidth - valueLength - 10, this.div.height / 2 + 5);
 
 };
-//    var nameLength = this.ctx.measureText(this.part.data.soundSet.name).width;
-//    this.ctx.fillText(this.part.data.soundSet.name, this.div.width / 2 - nameLength / 2, 10);
-
-//    var percent = (x - (this.div.clientWidth / 2)) / this.div.clientWidth * 2;
-//    this.ctx.fillStyle = ;
-//    this.ctx.fillRect(this.div.clientWidth / 2 - 2, 0, 4, this.div.height);
 
 tg.newChosenButton = function (button) {
     if (tg.chosenButton) {
