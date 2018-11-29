@@ -251,9 +251,6 @@ OMusicPlayer.prototype.loadMelody = function (part) {
         p.getSoundSet(data.soundSet.url, function (soundset) {
             p.setupPartWithSoundSet(soundset, part, true);
         });
-        if (data.soundSet.url.startsWith("PRESET_OSC")) {
-            p.makeOsc(part);
-        }
     }
     else if (data.soundSet && data.soundSet.data) {
         p.setupPartWithSoundSet(data.soundSet, part, true);
@@ -496,6 +493,7 @@ OMusicPlayer.prototype.makeOsc = function (part) {
     }
 
     if (part.osc) {
+        console.log(part.osc)
         console.log("makeOsc, already exists");
         try {
             part.osc.stop(p.context.currentTime);
@@ -506,6 +504,9 @@ OMusicPlayer.prototype.makeOsc = function (part) {
     }
 
     part.osc = p.context.createOscillator();
+    part.osc.onended = () => {
+        console.log("HEY BUD! WE ENDED!");
+    };
 
     var soundsetURL = part.data.soundSet.url ||
             "PRESET_OSC_TRIANGLE_SOFT_DELAY";
@@ -520,30 +521,16 @@ OMusicPlayer.prototype.makeOsc = function (part) {
         part.osc.type = "triangle";
     }
 
-    part.gain = p.context.createGain();
-    
-    part.osc.connect(part.gain);
-    part.gain.connect(part.topAudioNode);
-    
-    part.panner.pan.setValueAtTime(part.data.audioParameters.pan, p.context.currentTime);
-
-    var volume = part.data.audioParameters.volume;
-    volume = volume * volume;
-    if (part.data.audioParameters.mute) {
-        part.gain.gain.setValueAtTime(0, p.context.currentTime);
-        part.gain.gain.preMuteGain = volume;
-    } else {
-        part.gain.gain.setValueAtTime(volume, p.context.currentTime);
-    }
+    part.osc.connect(part.topAudioNode);
 
     part.osc.frequency.setValueAtTime(0, p.context.currentTime);
     part.osc.start(p.context.currentTime);
 
     part.osc.finishPart = function () {
-        part.gain.gain.setValueAtTime(0, p.context.currentTime);
+        part.osc.frequency.setValueAtTime(0, p.context.currentTime);
 
         //total hack, this is why things should be processed ala AudioContext, not our own thread
-        setTimeout(function () {
+        /*setTimeout(function () {
             part.osc.stop(p.context.currentTime);
             part.osc.disconnect(part.gain);
             part.gain.disconnect(part.topAudioNode);
@@ -551,7 +538,7 @@ OMusicPlayer.prototype.makeOsc = function (part) {
             part.oscStarted = false;
             part.osc = null;
             part.gain = null;
-        }, 50);
+        }, 50);*/
     };
 
     part.oscStarted = true;
@@ -891,8 +878,6 @@ OMusicPlayer.prototype.playNote = function (note, part) {
 
     if (part.osc) {
         var freq = p.makeFrequency(note.scaledNote) * part.data.audioParameters.warp;
-        part.panner.pan.setValueAtTime(part.data.audioParameters.pan, p.context.currentTime);
-        part.gain.gain.setValueAtTime(Math.pow(part.data.audioParameters.volume, 2), p.context.currentTime);
         part.osc.frequency.setValueAtTime(freq, p.context.currentTime);
         part.playingI = part.currentI;
         var playingI = part.playingI;
@@ -910,7 +895,7 @@ OMusicPlayer.prototype.playNote = function (note, part) {
     else {
         var audio = p.playSound(note.sound, part);
         if (audio) {
-            audio.bufferGain.gain.linearRampToValueAtTime(part.data.audioParameters.volume, 
+            audio.bufferGain.gain.linearRampToValueAtTime(part.data.audioParameters.gain, 
                 p.context.currentTime + fromNow * 0.995);
             audio.bufferGain.gain.linearRampToValueAtTime(0, p.context.currentTime + fromNow);
             audio.stop(p.context.currentTime + fromNow);
@@ -925,29 +910,38 @@ OMusicPlayer.prototype.playSound = function (sound, part, audioParameters) {
     if (p.loadedSounds[sound] &&
             p.loadedSounds[sound] !== "loading") {
 
-        var warp = part.data.audioParameters.warp;
-        var pan = part.data.audioParameters.pan;
-        var volume = part.data.audioParameters.volume;
-        if (audioParameters) {
-            warp = warp * audioParameters.warp;
-            pan = pan + audioParameters.pan;
-            volume = volume * audioParameters.volume;
-        }
-
         var source = p.context.createBufferSource();
-        source.playbackRate.value =  warp;
+
+        var gain, pan;
+        var warp = part.data.audioParameters.warp;
+        if (audioParameters) {
+            warp = (warp - 1) + (audioParameters.warp - 1) + 1;
+        }
+        if (audioParameters && ( //only do this if we don't have defaults
+                audioParameters.pan !== 0 || 
+                audioParameters.gain !== 1)) {
+            pan = part.data.audioParameters.pan + audioParameters.pan;
+            gain = part.data.audioParameters.gain * audioParameters.gain;
+            
+            source.bufferPanner = p.context.createStereoPanner();
+            source.bufferGain = p.context.createGain();
+            
+            source.bufferPanner.pan.setValueAtTime(pan, p.context.currentTime);
+            source.bufferGain.gain.setValueAtTime(gain, p.context.currentTime);
+                        
+            source.connect(source.bufferPanner);
+            source.bufferPanner.connect(source.bufferGain);
+            source.bufferGain.connect(part.topAudioNode);
+        }
+        else {
+            source.connect(part.topAudioNode);
+        }
+        
+        source.playbackRate.value = warp;
         source.buffer = p.loadedSounds[sound];
-        
-        source.bufferGain = p.context.createGain();
-        source.connect(source.bufferGain);
 
-        source.bufferGain.connect(part.topAudioNode);
-
-        part.panner.pan.setValueAtTime(pan, p.context.currentTime);
-        source.bufferGain.gain.setValueAtTime(Math.pow(volume, 2), p.context.currentTime);
-        
         source.start(p.context.currentTime);
-
+        
         return source;
     }
 };
@@ -1075,6 +1069,7 @@ OMusicPlayer.prototype.makeOMGSong = function (data) {
 
 OMusicPlayer.prototype.updatePartVolumeAndPan = function (part) {
 
+    //todo umm?
     if (part.gain && part.osc) {
         //var oscGain = (part.osc.soft ? 1 : 2) * part.data.volume / 10;
         part.gain.gain.setValueAtTime(Math.pow(part.data.volume, 2), this.context.currentTime);
@@ -1132,13 +1127,9 @@ OMusicPlayer.prototype.playLiveNotes = function (notes, part) {
     
     part.liveNotes = notes;
     if (notes.autobeat === 0 || !this.playing) {
-        if (part.data.soundSet.url.startsWith("PRESET_OSC")) {
-            if (!part.osc)
-                this.makeOsc(part);
-            if (part.osc) {
-                part.osc.frequency.setValueAtTime(this
-                        .makeFrequency(notes[0].scaledNote) * part.data.audioParameters.warp, this.context.currentTime);
-            }
+        if (part.osc) {
+            part.osc.frequency.setValueAtTime(this
+                    .makeFrequency(notes[0].scaledNote) * part.data.audioParameters.warp, this.context.currentTime);
         }
         else {
             //var sound = this.getSound(part.data.soundSet, notes[0]);
@@ -1225,14 +1216,23 @@ OMusicPlayer.prototype.recordNote = function (part, note) {
 };
 
 OMusicPlayer.prototype.makeAudioNodesForPart = function (part) {
-    console.log(part)
+
     var p = this;
     part.panner = p.context.createStereoPanner();
+    part.gain = p.context.createGain();
+    part.gain.connect(part.panner);
     part.panner.connect(p.compressor);
-    part.topAudioNode = part.panner;
+    part.defaultTopAudioNode = part.gain;
+    part.topAudioNode = part.defaultTopAudioNode;
+    part.gain.gain.setValueAtTime(part.data.audioParameters.gain, p.context.currentTime);
+    part.panner.pan.setValueAtTime(part.data.audioParameters.pan, p.context.currentTime);
 
     for (var i = 0; i < part.data.fx.length; i++) {
         p.makeFXNodeForPart(part.data.fx[i], part);        
+    }
+    
+    if (part.data.soundSet.url.startsWith("PRESET_OSC")) {
+        p.makeOsc(part);
     }
 };
 
@@ -1246,19 +1246,19 @@ OMusicPlayer.prototype.addFXToPart = function (fx, part) {
 
 OMusicPlayer.prototype.removeFXFromPart = function (fx, part) {
     var index = part.fx.indexOf(fx);
-    var connectedTo = part.fx[index + 1] || part.panner;
+    var connectedTo = part.fx[index + 1] || part.defaultTopAudioNode;
     fx.disconnect();
     part.fx.splice(index, 1);
     if (index === 0) {
-        part.topAudioNode = part.fx[0] || part.panner;
+        part.topAudioNode = part.fx[0] || part.defaultTopAudioNode;
         if (part.osc) {
-            part.gain.disconnect();
-            part.gain.connect(part.topAudioNode);
+            part.osc.disconnect();
+            part.osc.connect(part.topAudioNode);
         }
     }
     else {
         part.fx[index - 1].disconnect();
-        part.fx[index - 1].connect(part.fx[index] || part.panner);
+        part.fx[index - 1].connect(part.fx[index] || part.defaultTopAudioNode);
     }
     index = part.data.fx.indexOf(fx.data);
     part.data.fx.splice(index, 1);
@@ -1524,7 +1524,7 @@ OMusicPlayer.prototype.makeFXNodeForPart = function (fx, part) {
         fxNode.data = fxData;
         var lastFX = part.fx[part.fx.length - 1];
         if (lastFX) {
-            lastFX.disconnect(part.panner);
+            lastFX.disconnect(part.defaultTopAudioNode);
             lastFX.connect(fxNode);
         }
         else {
@@ -1534,7 +1534,7 @@ OMusicPlayer.prototype.makeFXNodeForPart = function (fx, part) {
             }
             part.topAudioNode = fxNode;
         }
-        fxNode.connect(part.panner);
+        fxNode.connect(part.defaultTopAudioNode);
         part.fx.push(fxNode);
     }
     return fxNode;
@@ -1755,8 +1755,15 @@ function OMGPart(div, data, section) {
 OMGPart.prototype.makeAudioParameters = function (track) {
     var obj = track || this.data;
     if (!obj.audioParameters) obj.audioParameters = {};
-    if (typeof obj.audioParameters.volume !== "number")
-        obj.audioParameters.volume = track ? 1 : 0.6;
+    
+    //backwards compat, we use gain instead of volume
+    if (typeof obj.audioParameters.volume === "number" && 
+            typeof obj.audioParameters.gain !== "number") {
+        obj.audioParameters.gain = obj.audioParameters.volume;
+    }
+    if (typeof obj.audioParameters.gain !== "number") {
+        obj.audioParameters.gain = track ? 1 : 0.6;
+    }
     if (typeof obj.audioParameters.pan !== "number")
         obj.audioParameters.pan = 0;
     if (typeof obj.audioParameters.warp !== "number")
@@ -1803,7 +1810,7 @@ OMGPart.prototype.makeTracks = function () {
             sound.sound = (that.data.soundSet.prefix || "") +
                     sound.url + (that.data.soundSet.postfix || "");
             sound.data = [];
-            sound.audioParameters = {volume: 1, pan: 0, warp: 1};
+            sound.audioParameters = {gain: 1, pan: 0, warp: 1};
         });
     }
 };

@@ -678,14 +678,15 @@ tg.makeMixerDiv = function (part, divs) {
 
     var audioParameters = part.audioParameters || part.data.audioParameters;
     
-    var volumeProperty = {"property": "volume", "name": "Volume", "type": "slider", "min": 0, "max": 1};
+    var volumeProperty = {"property": "gain", "name": "Volume", "type": "slider", "min": 0, "max": 1, 
+            "color": audioParameters.mute ?"#880000" : "#008800"};
     var warpProperty = {"property": "warp", "name": "Warp", "type": "slider", "min": 0, "max": 2, resetValue: 1, "color": "#880088"};
     var panProperty = {"property": "pan", "name": "Pan", "type": "slider", "min": -1, "max": 1, resetValue: 0, "color": "#000088"};
-    var mixerVolumeCanvas = new SliderCanvas(null, volumeProperty, null, audioParameters);
+    var mixerVolumeCanvas = new SliderCanvas(null, volumeProperty, part.gain, audioParameters);
     mixerVolumeCanvas.div.className = "mixer-part-volume";
     var mixerWarpCanvas = new SliderCanvas(null, warpProperty, null, audioParameters);
     mixerWarpCanvas.div.className = "mixer-part-warp";
-    var mixerPanCanvas = new SliderCanvas(null, panProperty, null, audioParameters);
+    var mixerPanCanvas = new SliderCanvas(null, panProperty, part.panner, audioParameters);
     mixerPanCanvas.div.className = "mixer-part-pan";
 
     newContainerDiv.appendChild(mixerVolumeCanvas.div);
@@ -858,7 +859,7 @@ SliderCanvas.prototype.onnewX = function (x) {
 SliderCanvas.prototype.onupdate = function (value) {
     if (this.audioNode) {
         if (this.isAudioParam) {
-            this.audioNode[this.controlInfo.property].value = value;
+            this.audioNode[this.controlInfo.property].setValueAtTime(value, tg.player.context.currentTime);
         }
         else {
             this.audioNode[this.controlInfo.property] = value;

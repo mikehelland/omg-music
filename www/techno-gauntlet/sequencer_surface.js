@@ -162,6 +162,13 @@ omg.ui.drawDrumCanvas = function (params) {
         if (!drumbeat.tracks[i].sound) {
             continue;
         }
+
+        if (drumbeat.tracks[i].audioParameters.mute) {
+            context.globalAlpha = 0.6;
+            context.fillStyle = "#880000";
+            context.fillRect(left, top + i * trackHeight, captionWidth, trackHeight);
+            context.globalAlpha = 1;
+        }
         
         if (i === canvas.omgdata.selectedTrack) {
             //context.strokeRect(left, top + i * trackHeight, captionWidth - 1, trackHeight);
@@ -308,13 +315,17 @@ function OMGDrumMachine(canvas, part) {
         var trackI = Math.floor(y / canvas.omgdata.captionHeight);
 
         if (column < 0) {
+            if (Date.now() - omgdrums.lastTrackNameClick < 700) {
+                var audioParameters = omgdrums.part.data.tracks[trackI].audioParameters;
+                audioParameters.mute = !audioParameters.mute;
+            }
             if (trackI === canvas.omgdata.selectedTrack) {
                 canvas.omgdata.selectedTrack = -1;
             }
             else {
                 canvas.omgdata.selectedTrack = trackI;
             }
-            console.log(canvas.omgdata.selectedTrack);
+            omgdrums.lastTrackNameClick = Date.now();
         } else {
             
             omgdrums.part.saved = false;
@@ -348,7 +359,7 @@ function OMGDrumMachine(canvas, part) {
 
         if (omgdrums.readOnly)
             return;
-
+        
         if (!omgdrums.isTouching)
             return;
 
