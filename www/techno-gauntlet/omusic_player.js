@@ -387,7 +387,9 @@ OMusicPlayer.prototype.playBeatForDrumPart = function (iSubBeat, part) {
 
     for (var i = 0; i < tracks.length; i++) {
         if (tracks[i].data[iSubBeat]) {
-            this.playSound(tracks[i].sound, part);
+            if (!tracks[i].audioParameters.mute) {
+                this.playSound(tracks[i].sound, part, tracks[i].audioParameters);
+            }
         }
     }
 };
@@ -918,22 +920,31 @@ OMusicPlayer.prototype.playNote = function (note, part) {
 
 
 
-OMusicPlayer.prototype.playSound = function (sound, part) {
+OMusicPlayer.prototype.playSound = function (sound, part, audioParameters) {
     var p = this;
     if (p.loadedSounds[sound] &&
             p.loadedSounds[sound] !== "loading") {
 
+        var warp = part.data.audioParameters.warp;
+        var pan = part.data.audioParameters.pan;
+        var volume = part.data.audioParameters.volume;
+        if (audioParameters) {
+            warp = warp * audioParameters.warp;
+            pan = pan + audioParameters.pan;
+            volume = volume * audioParameters.volume;
+        }
+
         var source = p.context.createBufferSource();
-        source.playbackRate.value = part.data.audioParameters.warp;
+        source.playbackRate.value =  warp;
         source.buffer = p.loadedSounds[sound];
         
         source.bufferGain = p.context.createGain();
         source.connect(source.bufferGain);
 
         source.bufferGain.connect(part.topAudioNode);
-        
-        part.panner.pan.setValueAtTime(part.data.audioParameters.pan, p.context.currentTime);
-        source.bufferGain.gain.setValueAtTime(Math.pow(part.data.audioParameters.volume, 2), p.context.currentTime);
+
+        part.panner.pan.setValueAtTime(pan, p.context.currentTime);
+        source.bufferGain.gain.setValueAtTime(Math.pow(volume, 2), p.context.currentTime);
         
         source.start(p.context.currentTime);
 
@@ -1441,7 +1452,7 @@ OMusicPlayer.prototype.setupFX = function () {
             {"property": "baseFrequency", "name": "Base Frequency", "type": "slider", "min": 0, "max": 1},
             {"property": "excursionOctaves", "name": "Excursion Octaves", "type": "slider", "min": 1, "max": 6},
             {"property": "sweep", "name": "Sweep", "type": "slider", "min": 0, "max": 1},
-            {"property": "resonance", "name": "Resonane", "type": "slider", "min": 1, "max": 10},
+            {"property": "resonance", "name": "Resonance", "type": "slider", "min": 1, "max": 10},
             {"property": "sensitivity", "name": "Sensitivity", "type": "slider", "min": -1, "max": 1}
         ]
     };
@@ -1456,7 +1467,7 @@ OMusicPlayer.prototype.setupFX = function () {
         },
         "controls": [
             {"property": "bits", "name": "Bits", "type": "slider", "min": 1, "max": 16},
-            {"property": "normfreq", "name": "Normal Frequeny", "type": "slider", "min": 0, "max": 1}
+            {"property": "normfreq", "name": "Normal Frequency", "type": "slider", "min": 0, "max": 1}
         ]
     };
     p.fx["Moog"] = {"audioClass": p.tuna.MoogFilter,
@@ -1469,7 +1480,7 @@ OMusicPlayer.prototype.setupFX = function () {
             };
         },
         "controls": [
-            {"property": "cutoff", "name": "cutoff", "type": "slider", "min": 0, "max": 1},
+            {"property": "cutoff", "name": "Cutoff", "type": "slider", "min": 0, "max": 1},
             {"property": "resonance", "name": "Resonance", "type": "slider", "min": 0, "max": 4}
         ]
     };
@@ -1728,20 +1739,29 @@ function OMGPart(div, data, section) {
         if (!this.data.tracks) {
             this.makeTracks();
         }
+        for (var i = 0; i < this.data.tracks.length; i++) {
+            this.makeAudioParameters(this.data.tracks[i]);
+        }
     }
-    if (!this.data.audioParameters) this.data.audioParameters = {};
-    if (typeof this.data.audioParameters.volume !== "number")
-        this.data.audioParameters.volume = 0.6;
-    if (typeof this.data.audioParameters.pan !== "number")
-        this.data.audioParameters.pan = 0;
-    if (typeof this.data.audioParameters.warp !== "number")
-        this.data.audioParameters.warp = 1;
-
+    
+    this.makeAudioParameters();
+    
     if (this.data.id) {
         this.saved = true;
     }
     
 }
+
+OMGPart.prototype.makeAudioParameters = function (track) {
+    var obj = track || this.data;
+    if (!obj.audioParameters) obj.audioParameters = {};
+    if (typeof obj.audioParameters.volume !== "number")
+        obj.audioParameters.volume = track ? 1 : 0.6;
+    if (typeof obj.audioParameters.pan !== "number")
+        obj.audioParameters.pan = 0;
+    if (typeof obj.audioParameters.warp !== "number")
+        obj.audioParameters.warp = 1;
+};
 
 OMGPart.prototype.defaultDrumPart = function () {
     return {"type": "PART", "partType": "DRUMBEAT",

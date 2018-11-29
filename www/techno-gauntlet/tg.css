@@ -221,12 +221,11 @@ body {
 }
 .mixer-part-pan {
     width:50%;
-    height:35%;
+    height:34%;
     display:block;
     right:0px;
-    bottom:-1px;
+    bottom:2px;
     position:absolute;
-    
 }
 
 
@@ -488,4 +487,11 @@ body {
 #preset-section-name-list {
     flex-wrap: wrap;
     display:flex;
+}
+
+.mixer-part-name {
+    position:absolute;
+    width:100%;
+    text-align:center;
+    pointer-events: none;
 }

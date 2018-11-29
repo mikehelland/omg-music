@@ -541,24 +541,8 @@ tg.showMixFragment = function () {
     }
     var divs = [];
     tg.mixFragment.innerHTML = "";
-    tg.currentSection.parts.forEach(function (part) {
-        var newContainerDiv = document.createElement("div");
-        newContainerDiv.className = "mixer-part";
-        
-        var mixerVolumeCanvas = new MixerVolumeCanvas(part);
-        mixerVolumeCanvas.div.className = "mixer-part-volume";
-        var mixerWarpCanvas = new MixerWarpCanvas(part);
-        mixerWarpCanvas.div.className = "mixer-part-warp";
-        var mixerPanCanvas = new MixerPanCanvas(part);
-        mixerPanCanvas.div.className = "mixer-part-pan";
-        
-        newContainerDiv.appendChild(mixerVolumeCanvas.div);
-        newContainerDiv.appendChild(mixerWarpCanvas.div);
-        newContainerDiv.appendChild(mixerPanCanvas.div);
-        tg.mixFragment.appendChild(newContainerDiv);
-        divs.push(mixerVolumeCanvas);
-        divs.push(mixerWarpCanvas);
-        divs.push(mixerPanCanvas);
+    tg.currentSection.parts.forEach(function (part) {        
+        tg.makeMixerDiv(part, divs);
     });
     
     tg.hideDetails();
@@ -568,163 +552,6 @@ tg.showMixFragment = function () {
     divs.forEach(function (child) {
         child.drawCanvas(child);
     });
-};
-
-function MixerVolumeCanvas(part, canvas) {
-    var m = this;
-    if (!canvas) {
-        canvas = document.createElement("canvas");
-        var offsets = omg.ui.totalOffsets(canvas);;
-        canvas.onmousedown = function (e) {
-            offsets = omg.ui.totalOffsets(canvas);;
-            m.ondown(e.clientX - offsets.left);
-        };
-        canvas.onmousemove = function (e) {m.onmove(e.clientX - offsets.left);};
-        canvas.onmouseup = function (e) {m.onup();};
-        canvas.ontouchstart = function (e) {
-            offsets = omg.ui.totalOffsets(canvas);
-            m.ondown(e.targetTouches[0].pageX - offsets.left);
-        };
-        canvas.ontouchmove = function (e) {
-            m.onmove(e.targetTouches[0].pageX - offsets.left);
-        };
-        canvas.ontouchend = function (e) {m.onup();};
-    }
-    this.div = canvas;
-    this.ctx = canvas.getContext("2d");
-    this.part = part;
-}
-
-MixerVolumeCanvas.prototype.ondown = function (x) {
-    this.isTouching = true;
-    var percent = x / this.div.clientWidth;
-    this.part.data.audioParameters.volume = percent;
-    this.drawCanvas(this.div);
-};
-MixerVolumeCanvas.prototype.onmove = function (x) {
-    if (this.isTouching) {
-        var percent = x / this.div.clientWidth;
-        this.part.data.audioParameters.volume = percent;
-        this.drawCanvas(this.div);
-    }
-};
-MixerVolumeCanvas.prototype.onup = function (e) {
-    this.isTouching = false;
-};
-MixerVolumeCanvas.prototype.drawCanvas = function () {
-    this.div.width = this.div.clientWidth;
-    this.div.height = this.div.clientHeight;
-    this.ctx.fillStyle = this.part.data.audioParameters.mute ? "#880000" : "#008800";
-    this.ctx.fillRect(0, 0, this.part.data.audioParameters.volume * this.div.clientWidth, this.div.height);
-    this.ctx.fillStyle = "white";
-    this.ctx.fillText("volume", 10, this.div.height / 2);
-    var nameLength = this.ctx.measureText(this.part.data.soundSet.name).width;
-    this.ctx.fillText(this.part.data.soundSet.name, this.div.width / 2 - nameLength / 2, 10);
-};
-
-function MixerWarpCanvas(part, canvas) {
-    var m = this;
-    if (!canvas) {
-        canvas = document.createElement("canvas");
-        var offsets = omg.ui.totalOffsets(canvas);;
-        canvas.onmousedown = function (e) {
-            offsets = omg.ui.totalOffsets(canvas);;
-            m.ondown(e.clientX - offsets.left);
-        };
-        canvas.onmousemove = function (e) {m.onmove(e.clientX - offsets.left);};
-        canvas.onmouseup = function (e) {m.onup();};
-        canvas.ontouchstart = function (e) {
-            offsets = omg.ui.totalOffsets(canvas);
-            m.ondown(e.targetTouches[0].pageX - offsets.left);
-        };
-        canvas.ontouchmove = function (e) {
-            m.onmove(e.targetTouches[0].pageX - offsets.left);
-        };
-        canvas.ontouchend = function (e) {m.onup();};
-        canvas.ondblclick = function () {
-            m.part.data.audioParameters.warp = 1;
-            m.drawCanvas(m.div);
-        };
-    }
-    this.div = canvas;
-    this.ctx = canvas.getContext("2d");
-    this.part = part;
-}
-
-MixerWarpCanvas.prototype.ondown = function (x) {
-    this.isTouching = true;
-    var percent = x / this.div.clientWidth * 2;
-    this.part.data.audioParameters.warp = percent;
-    this.drawCanvas(this.div);
-};
-MixerWarpCanvas.prototype.onmove = function (x) {
-    if (this.isTouching) {
-        var percent = x / this.div.clientWidth * 2;
-        this.part.data.audioParameters.warp = percent;
-        this.drawCanvas(this.div);
-    }
-};
-MixerWarpCanvas.prototype.onup = function (e) {
-    this.isTouching = false;
-};
-MixerWarpCanvas.prototype.drawCanvas = function () {
-    this.div.width = this.div.clientWidth;
-    this.div.height = this.div.clientHeight;
-    this.ctx.fillStyle = "#880088";
-    this.ctx.fillRect(0, 0, this.part.data.audioParameters.warp * this.div.clientWidth / 2, this.div.height);
-    this.ctx.fillStyle = "white";
-    this.ctx.fillText("warp", 10, this.div.height / 2);
-};
-
-function MixerPanCanvas(part, canvas) {
-    var m = this;
-    if (!canvas) {
-        canvas = document.createElement("canvas");
-        var offsets = omg.ui.totalOffsets(canvas);
-        canvas.onmousedown = function (e) {
-            offsets = omg.ui.totalOffsets(canvas);
-            m.ondown(e.clientX - offsets.left);
-        };
-        canvas.onmousemove = function (e) {m.onmove(e.clientX - offsets.left);};
-        canvas.onmouseup = function (e) {m.onup();};
-        canvas.ontouchstart = function (e) {
-            offsets = omg.ui.totalOffsets(canvas);
-            m.ondown(e.targetTouches[0].pageX - offsets.left);
-        };
-        canvas.ontouchmove = function (e) {
-            m.onmove(e.targetTouches[0].pageX - offsets.left);
-        };
-        canvas.ontouchend = function (e) {m.onup();};
-    }
-    this.div = canvas;
-    this.ctx = canvas.getContext("2d");
-    this.part = part;
-}
-
-MixerPanCanvas.prototype.ondown = function (x) {
-    this.isTouching = true;
-    var percent = (x - (this.div.clientWidth / 2)) / this.div.clientWidth * 2;
-    this.part.data.audioParameters.pan = percent;
-    this.drawCanvas(this.div);
-};
-MixerPanCanvas.prototype.onmove = function (x) {
-    if (this.isTouching) {
-        var percent = (x - (this.div.clientWidth / 2)) / this.div.clientWidth * 2;
-        this.part.data.audioParameters.pan = percent;
-        this.drawCanvas(this.div);
-    }
-};
-MixerPanCanvas.prototype.onup = function (e) {
-    this.isTouching = false;
-};
-MixerPanCanvas.prototype.drawCanvas = function () {
-    this.div.width = this.div.clientWidth;
-    this.div.height = this.div.clientHeight;
-    this.ctx.fillStyle = "#000088";
-    this.ctx.fillRect(this.div.clientWidth / 2 - 2, 0, 4, this.div.height);
-    this.ctx.fillRect(this.div.clientWidth / 2, 0, this.part.data.audioParameters.pan * this.div.clientWidth / 2, this.div.height);
-    this.ctx.fillStyle = "white";
-    this.ctx.fillText("Pan", 10, this.div.height / 2);
 };
 
 tg.showSaveFragment = function () {
@@ -800,8 +627,8 @@ tg.showPartOptionsFragment = function (part) {
         }
         if (part.data.tracks) {
             for (var i = 0; i < part.data.tracks.length; i++) {
-                for (var j = 0; j < part.data.tracks[i].length; j++) {
-                    part.data.tracks[i][j] = false;
+                for (var j = 0; j < part.data.tracks[i].data.length; j++) {
+                    part.data.tracks[i].data[j] = false;
                 }
             }
         }
@@ -816,8 +643,61 @@ tg.showPartOptionsFragment = function (part) {
         tg.hideDetails();
     }
     
+    submixerButton.onclick = function () {
+        tg.showSubmixFragment(part);
+    };
+    
     tg.setupAddFXButtons(part);
     tg.setupPartOptionsFX(part);
+};
+
+tg.showSubmixFragment = function (part) {
+    if (!tg.mixFragment) {
+        tg.mixFragment = document.getElementById("mix-fragment");
+    }
+    var divs = [];
+    tg.mixFragment.innerHTML = "";
+    part.data.tracks.forEach(function (track) {
+        tg.makeMixerDiv(track, divs);        
+    });
+    
+    tg.hideDetails();
+    tg.mixFragment.style.display = "flex";
+    //tg.newChosenButton(tg.mixButton);
+    
+    divs.forEach(function (child) {
+        child.drawCanvas(child);
+    });
+};
+
+tg.makeMixerDiv = function (part, divs) {
+    var newContainerDiv = document.createElement("div");
+    newContainerDiv.className = "mixer-part";
+
+    var audioParameters = part.audioParameters || part.data.audioParameters;
+    
+    var captionDiv = document.createElement("div");
+    captionDiv.innerHTML = part.name || part.data.soundSet.name;
+    captionDiv.className = "mixer-part-name";
+    newContainerDiv.appendChild(captionDiv);
+
+    var volumeProperty = {"property": "volume", "name": "Volume", "type": "slider", "min": 0, "max": 1};
+    var warpProperty = {"property": "warp", "name": "Warp", "type": "slider", "min": 0, "max": 2, resetValue: 1, "color": "#880088"};
+    var panProperty = {"property": "pan", "name": "Pan", "type": "slider", "min": -1, "max": 1, resetValue: 0, "color": "#000088"};
+    var mixerVolumeCanvas = new SliderCanvas(null, volumeProperty, null, audioParameters);
+    mixerVolumeCanvas.div.className = "mixer-part-volume";
+    var mixerWarpCanvas = new SliderCanvas(null, warpProperty, null, audioParameters);
+    mixerWarpCanvas.div.className = "mixer-part-warp";
+    var mixerPanCanvas = new SliderCanvas(null, panProperty, null, audioParameters);
+    mixerPanCanvas.div.className = "mixer-part-pan";
+
+    newContainerDiv.appendChild(mixerVolumeCanvas.div);
+    newContainerDiv.appendChild(mixerWarpCanvas.div);
+    newContainerDiv.appendChild(mixerPanCanvas.div);
+    tg.mixFragment.appendChild(newContainerDiv);
+    divs.push(mixerVolumeCanvas);
+    divs.push(mixerWarpCanvas);
+    divs.push(mixerPanCanvas);
 };
 
 tg.availableFX = ["Delay", "Chorus", "Phaser", "Overdrive", "Compressor", 
@@ -904,26 +784,22 @@ tg.setupFXDiv = function (fx, part) {
 
 tg.setupFXControls = function (fx, part, fxDiv) {
     var controls = tg.player.fx[fx.data.name].controls;
-    controls.forEach(function (control) {
-        var captionDiv = document.createElement("div");
-        captionDiv.innerHTML = control.name;
-        fxDiv.appendChild(captionDiv);
-        
+    controls.forEach(function (control) {        
         if (control.type === "slider") {
             var canvas = document.createElement("canvas");
             canvas.className = "fx-slider";
             fxDiv.appendChild(canvas);
-            new SliderCanvas(canvas, control, fx).drawCanvas();
+            new SliderCanvas(canvas, control, fx, fx.data).drawCanvas();
         }
     });
 };
 
-function SliderCanvas(canvas, data, fxNode) {
+function SliderCanvas(canvas, controlInfo, audioNode, data) {
     var m = this;
     if (!canvas) {
         canvas = document.createElement("canvas");
     }
-    var offsets = omg.ui.totalOffsets(canvas);;
+    var offsets = omg.ui.totalOffsets(canvas);
     canvas.onmousedown = function (e) {
         offsets = omg.ui.totalOffsets(canvas);
         m.ondown(e.clientX - offsets.left);
@@ -931,6 +807,7 @@ function SliderCanvas(canvas, data, fxNode) {
     canvas.onmousemove = function (e) {
         m.onmove(e.clientX - offsets.left);};
     canvas.onmouseup = function (e) {m.onup();};
+    canvas.onmouseout = function (e) {m.onup();};
     canvas.ontouchstart = function (e) {
         offsets = omg.ui.totalOffsets(canvas);
         m.ondown(e.targetTouches[0].pageX - offsets.left);
@@ -943,39 +820,49 @@ function SliderCanvas(canvas, data, fxNode) {
     this.div = canvas;
     this.ctx = canvas.getContext("2d");
     this.data = data;
-    this.fxNode = fxNode;
-    this.value = 0;
+    this.audioNode = audioNode;
+    this.controlInfo = controlInfo;
     this.percent = 0;
-    this.isAudioParam = typeof fxNode[data.property] === "object";
+    this.isAudioParam = audioNode && typeof audioNode[controlInfo.property] === "object";
+    
+    if (typeof this.controlInfo.resetValue === "number") {
+        var slider = this;
+        this.div.ondblclick = function () {
+            slider.onupdate(slider.controlInfo.resetValue);
+        };
+    }
 }
 
 SliderCanvas.prototype.ondown = function (x) {
     this.isTouching = true;
-    this.percent = x / this.div.clientWidth;
-    this.value = (this.data.max - this.data.min) * this.percent + this.data.min;
-    if (this.isAudioParam) {
-        this.fxNode[this.data.property].value = this.value;
-    }
-    else {
-        this.fxNode[this.data.property] = this.value;
-    }
-    this.fxNode.data[this.data.property] = this.value;
-    this.drawCanvas(this.div);
+    this.onnewX(x);
 };
 SliderCanvas.prototype.onmove = function (x) {
     if (this.isTouching) {
-        this.percent = x / this.div.clientWidth;
-        this.value = (this.data.max - this.data.min) * this.percent + this.data.min;
-        console.log(this.value);
+        this.onnewX(x);
+    }
+};
+SliderCanvas.prototype.onnewX = function (x) {
+    this.percent = x / this.div.clientWidth;
+    var value = Math.min(this.controlInfo.max, 
+                 Math.max(this.controlInfo.min, 
+        (this.controlInfo.max - this.controlInfo.min) * this.percent + this.controlInfo.min));
+    this.onupdate(value);
+};
+
+SliderCanvas.prototype.onupdate = function (value) {
+    if (this.audioNode) {
         if (this.isAudioParam) {
-            this.fxNode[this.data.property].value = this.value;
+            this.audioNode[this.controlInfo.property].value = value;
         }
         else {
-            this.fxNode[this.data.property] = this.value;
+            this.audioNode[this.controlInfo.property] = value;
         }
-        this.fxNode.data[this.data.property] = this.value;
-        this.drawCanvas(this.div);
     }
+    if (this.data) {
+        this.data[this.controlInfo.property] = value;
+    }
+    this.drawCanvas(this.div);    
 };
 SliderCanvas.prototype.onup = function (e) {
     this.isTouching = false;
@@ -983,11 +870,33 @@ SliderCanvas.prototype.onup = function (e) {
 SliderCanvas.prototype.drawCanvas = function () {
     this.div.width = this.div.clientWidth;
     this.div.height = this.div.clientHeight;
-    this.ctx.fillStyle = "#008800";
-    var value = this.fxNode.data[this.data.property];
-    var percent = (value - this.data.min) / (this.data.max - this.data.min);
-    this.ctx.fillRect(0, 0, percent * this.div.clientWidth, this.div.height);
+    this.ctx.fillStyle = this.controlInfo.color || "#008800";
+    var value = this.data[this.controlInfo.property];
+    var percent = (value - this.controlInfo.min) / (this.controlInfo.max - this.controlInfo.min);
+    var startX = (0 - this.controlInfo.min) / (this.controlInfo.max - this.controlInfo.min);
+    startX = startX * this.div.clientWidth;
+    if (startX) {
+        this.ctx.fillRect(startX - 2, 0, 4, this.div.height);
+    }
+    this.ctx.fillRect(startX, 0, percent * this.div.clientWidth - startX, this.div.height);
+    this.ctx.fillStyle = "white";
+    this.ctx.fillText(this.controlInfo.name, 10, this.div.height / 2);
+    if (this.controlInfo.max > 100) {
+        value = Math.round(value);
+    }
+    else {
+        value = Math.round(value * 100) / 100;
+    }
+    var valueLength = this.ctx.measureText("" + value).width;
+    this.ctx.fillText(value, this.div.clientWidth - 10 - valueLength, this.div.height / 2);
+
 };
+//    var nameLength = this.ctx.measureText(this.part.data.soundSet.name).width;
+//    this.ctx.fillText(this.part.data.soundSet.name, this.div.width / 2 - nameLength / 2, 10);
+
+//    var percent = (x - (this.div.clientWidth / 2)) / this.div.clientWidth * 2;
+//    this.ctx.fillStyle = ;
+//    this.ctx.fillRect(this.div.clientWidth / 2 - 2, 0, 4, this.div.height);
 
 tg.newChosenButton = function (button) {
     if (tg.chosenButton) {
