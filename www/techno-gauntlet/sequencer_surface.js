@@ -261,139 +261,179 @@ function OMGDrumMachine(canvas, part) {
     if (part) {
         this.setPart(part);
     }
-    canvas.onmouseup = function (e) {
+    
+    this.setCanvasEvents();
+}
+
+OMGDrumMachine.prototype.setCanvasEvents = function () {
+    var canvas = this.canvas;
+    var omgdrums = this;
+    this.touches = [];
+    
+    canvas.onmousedown = function (e) {
         e.preventDefault();
-        omgdrums.isTouching = false;
-    };
-    canvas.onmouseout = function () {
-        omgdrums.isTouching = false;
-    };
-    canvas.ontouchend = function (e) {
-        e.preventDefault();
-        omgdrums.isTouching = false;
+
+        omgdrums.mouseTouch = {x: e.clientX - omgdrums.offsetLeft,
+                               y: e.clientY - omgdrums.offsetTop,
+                               identifier: "mouse"};
+        omgdrums.ondown(omgdrums.mouseTouch);
     };
 
     canvas.onmousemove = function (e) {
         e.preventDefault();
 
-        var x = e.clientX - omgdrums.offsetLeft;
-        var y = e.clientY - omgdrums.offsetTop;
-        canvas.onmove(x, y);
+        if (omgdrums.mouseTouch) {
+            omgdrums.mouseTouch.x = e.clientX - omgdrums.offsetLeft;
+            omgdrums.mouseTouch.y = e.clientY - omgdrums.offsetTop;
+            omgdrums.onmove(omgdrums.mouseTouch);
+        }
+    };
+    
+    canvas.onmouseup = function (e) {
+        e.preventDefault();
+        omgdrums.onup(omgdrums.mouseTouch);
+        omgdrums.mouseTouch = false;
+    };
+    canvas.onmouseout = function () {
+        omgdrums.onup(omgdrums.mouseTouch);
+        omgdrums.mouseTouch = false;
+    };
+    
+    canvas.ontouchstart = function (e) {
+        e.preventDefault();
+
+        for (var i = 0; i < e.changedTouches.length; i++) {
+            omgdrums.ondown({x: e.changedTouches[i].pageX - omgdrums.offsetLeft, 
+                             y: e.changedTouches[i].pageY - omgdrums.offsetTop,
+                             identifier: e.changedTouches[i].identifier});
+        }
     };
 
     canvas.ontouchmove = function (e) {
         e.preventDefault();
 
-        var x = e.targetTouches[0].pageX - omgdrums.offsetLeft;
-        var y = e.targetTouches[0].pageY - omgdrums.offsetTop;
-        canvas.onmove(x, y);
+        for (var i = 0; i < e.changedTouches.length; i++) {
+            for (var j = 0; j < omgdrums.touches.length; j++) {
+                var touch = omgdrums.touches[j];
+                if (e.changedTouches[i].identifier === touch.identifier) {
+                    touch.x = e.changedTouches[i].pageX - omgdrums.offsetLeft;
+                    touch.y = e.changedTouches[i].pageY - omgdrums.offsetTop;
+                    omgdrums.onmove(touch);
+                    break;
+                }
+            }
+        }
     };
 
-
-    canvas.onmousedown = function (e) {
+    canvas.ontouchend = function (e) {
         e.preventDefault();
-
-        var x = e.clientX - omgdrums.offsetLeft;
-        var y = e.clientY - omgdrums.offsetTop;
-        canvas.ondown(x, y);
+        for (var i = 0; i < e.changedTouches.length; i++) {
+            for (var j = 0; j < omgdrums.touches.length; j++) {
+                if (omgdrums.touches[j] === e.changedTouches[i].identifier) {
+                    omgdrums.onup(omgdrums.touches[j]);
+                    break;
+                }
+            }
+        }
     };
+};
 
-    canvas.ontouchstart = function (e) {
-        e.preventDefault();
+OMGDrumMachine.prototype.ondown = function (touch) {
+    var canvas = this.canvas;
+    var omgdrums = this;
+    var x = touch.x;
+    var y = touch.y;
+    if (omgdrums.readOnly)
+        return;
 
-        var x = e.targetTouches[0].pageX - omgdrums.offsetLeft;
-        var y = e.targetTouches[0].pageY - omgdrums.offsetTop;
-        canvas.ondown(x, y);
-    };
+    var column = Math.floor((x - canvas.captionWidth) / canvas.columnWidth);
+    var row = Math.floor(y / canvas.rowHeight);
+    var trackI = Math.floor(y / canvas.omgdata.captionHeight);
 
-    canvas.ondown = function (x, y) {
-        if (omgdrums.readOnly)
-            return;
+    if (column < 0) {
+        if (Date.now() - omgdrums.lastTrackNameClick < 700) {
+            var audioParameters = omgdrums.part.data.tracks[trackI].audioParameters;
+            audioParameters.mute = !audioParameters.mute;
+        }
+        if (trackI === canvas.omgdata.selectedTrack) {
+            canvas.omgdata.selectedTrack = -1;
+        }
+        else {
+            canvas.omgdata.selectedTrack = trackI;
+        }
+        omgdrums.lastTrackNameClick = Date.now();
+    } else {
 
-        var column = Math.floor((x - canvas.captionWidth) / canvas.columnWidth);
-        var row = Math.floor(y / canvas.rowHeight);
-        var trackI = Math.floor(y / canvas.omgdata.captionHeight);
+        omgdrums.part.saved = false;
 
-        if (column < 0) {
-            if (Date.now() - omgdrums.lastTrackNameClick < 700) {
-                var audioParameters = omgdrums.part.data.tracks[trackI].audioParameters;
-                audioParameters.mute = !audioParameters.mute;
-            }
-            if (trackI === canvas.omgdata.selectedTrack) {
-                canvas.omgdata.selectedTrack = -1;
-            }
-            else {
-                canvas.omgdata.selectedTrack = trackI;
-            }
-            omgdrums.lastTrackNameClick = Date.now();
-        } else {
-            
-            omgdrums.part.saved = false;
-            
-            // figure out the subbeat this is
-            var subbeat;
-            var data;
-            if (canvas.omgdata.selectedTrack < 0) {
-                subbeat = column;
-                data = omgdrums.part.data.tracks[row].data;
-            }
-            else {
-                subbeat = column + row * canvas.omgdata.subbeats;
-                data = omgdrums.part.data.tracks[canvas.omgdata.selectedTrack].data;
-            }
-
-            data[subbeat] = !data[subbeat];
-
-            lastBox = [column, row];
-            omgdrums.isTouching = true;
-
-            if (omgdrums.onchange)
-                omgdrums.onchange();
+        // figure out the subbeat this is
+        var subbeat;
+        var data;
+        if (canvas.omgdata.selectedTrack < 0) {
+            subbeat = column;
+            data = omgdrums.part.data.tracks[row].data;
+        }
+        else {
+            subbeat = column + row * canvas.omgdata.subbeats;
+            data = omgdrums.part.data.tracks[canvas.omgdata.selectedTrack].data;
         }
 
-        //omgdrums.drawLargeCanvas();
-        omgdrums.canvas.omusic_refresh();
-    };
+        data[subbeat] = !data[subbeat];
 
-    canvas.onmove = function (x, y) {
+        touch.lastBox = [column, row];
 
-        if (omgdrums.readOnly)
-            return;
+        if (omgdrums.onchange)
+            omgdrums.onchange();
         
-        if (!omgdrums.isTouching)
-            return;
+        this.touches.push(touch);
+    }
 
-        var column = Math.floor((x - canvas.captionWidth) / canvas.columnWidth);
-        var row = Math.floor(y / canvas.rowHeight);
+    //omgdrums.drawLargeCanvas();
+    omgdrums.canvas.omusic_refresh();
+};
 
-        if (column < 0) {
-            omgdrums.isTouching = false;
-        } else if (lastBox[0] != column || lastBox[1] !== row) {
-            var subbeat;
-            var data;
-            if (canvas.omgdata.selectedTrack < 0) {
-                subbeat = column;
-                data = omgdrums.part.data.tracks[row].data;
-            }
-            else {
-                subbeat = column + row * canvas.omgdata.subbeats;
-                data = omgdrums.part.data.tracks[canvas.omgdata.selectedTrack].data;
-            }
-            data[subbeat] = data[subbeat] ? 0 : 1;
+OMGDrumMachine.prototype.onmove = function (touch) {
+    var canvas = this.canvas;
+    var x = touch.x;
+    var y = touch.y;
+    var omgdrums = this;
 
-            lastBox = [column, row];
+    if (omgdrums.readOnly)
+        return;
 
-            if (omgdrums.onchange)
-                omgdrums.onchange();
+    var column = Math.floor((x - canvas.captionWidth) / canvas.columnWidth);
+    var row = Math.floor(y / canvas.rowHeight);
 
+    if (column < 0) {
+        omgdrums.isTouching = false;
+    } else if (touch.lastBox[0] !== column || touch.lastBox[1] !== row) {
+        var subbeat;
+        var data;
+        if (canvas.omgdata.selectedTrack < 0) {
+            subbeat = column;
+            data = omgdrums.part.data.tracks[row].data;
         }
+        else {
+            subbeat = column + row * canvas.omgdata.subbeats;
+            data = omgdrums.part.data.tracks[canvas.omgdata.selectedTrack].data;
+        }
+        data[subbeat] = data[subbeat] ? 0 : 1;
 
-        //omgdrums.drawLargeCanvas();
-        omgdrums.canvas.omusic_refresh();
+        touch.lastBox = [column, row];
 
-    };
+        if (omgdrums.onchange)
+            omgdrums.onchange();
 
+    }
 
+    //omgdrums.drawLargeCanvas();
+    omgdrums.canvas.omusic_refresh();
+
+};
+
+OMGDrumMachine.prototype.onup = function (touch) {
+    var index = this.touches.indexOf(touch);
+    this.touches.splice(index, 1);
 };
 
 OMGDrumMachine.prototype.setSize = function (width, height) {

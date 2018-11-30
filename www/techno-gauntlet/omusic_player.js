@@ -449,17 +449,23 @@ OMusicPlayer.prototype.playBeatWithLiveNote = function (iSubBeat, part) {
 
     if (part.liveNotes.autobeat > 0) {
         if (iSubBeat % part.liveNotes.autobeat === 0) {
-            var note = {note: part.liveNotes[0].note,
-                scaledNote: part.liveNotes[0].scaledNote,
+            var index = part.liveNotes.nextIndex || 0;
+            if (index >= part.liveNotes.length) {
+                index = 0;
+            }
+            
+            var note = {note: part.liveNotes[index].note,
+                scaledNote: part.liveNotes[index].scaledNote,
                 beats: part.liveNotes.autobeat / part.section.song.data.beatParameters.subbeats};
             if (part.soundSet) {
-                note.sound = this.getSound(part.soundSet, part.liveNotes[0]);
+                note.sound = this.getSound(part.soundSet, part.liveNotes[index]);
             }
 
             this.playNote(note, part);
             if (!part.data.audioParameters.mute) {
                 this.recordNote(part, note);
             }
+            part.liveNotes.nextIndex = index + 1;
         }
     }
     else {
