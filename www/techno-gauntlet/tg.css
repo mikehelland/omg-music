@@ -500,3 +500,8 @@ body {
     text-align:center;
     pointer-events: none;
 }
+
+button {
+    font-size:1.2em;
+    padding:0.7em;
+}

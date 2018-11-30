@@ -1225,7 +1225,7 @@ OMusicPlayer.prototype.makeAudioNodesForPart = function (part) {
         p.makeFXNodeForPart(part.data.fx[i], part);        
     }
     
-    if (part.data.soundSet.url.startsWith("PRESET_OSC")) {
+    if (part.data.soundSet.url && part.data.soundSet.url.startsWith("PRESET_OSC")) {
         p.makeOsc(part);
     }
 };
@@ -1751,7 +1751,7 @@ OMGPart.prototype.makeAudioParameters = function (track) {
     var obj = track || this.data;
     if (!obj.audioParameters) obj.audioParameters = {};
     
-    //backwards compat, we use gain instead of volume
+    //backwards compat, now we use gain instead of volume
     if (typeof obj.audioParameters.volume === "number" && 
             typeof obj.audioParameters.gain !== "number") {
         obj.audioParameters.gain = Math.pow(obj.audioParameters.volume, 2);
