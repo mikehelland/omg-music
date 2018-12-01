@@ -120,7 +120,7 @@ OMGDrumMachine.prototype.setCanvasEvents = function () {
         e.preventDefault();
         for (var i = 0; i < e.changedTouches.length; i++) {
             for (var j = 0; j < omgdrums.touches.length; j++) {
-                if (omgdrums.touches[j] === e.changedTouches[i].identifier) {
+                if (omgdrums.touches[j].identifier === e.changedTouches[i].identifier) {
                     omgdrums.onup(omgdrums.touches[j]);
                     break;
                 }
@@ -180,7 +180,6 @@ OMGDrumMachine.prototype.ondown = function (touch) {
         this.touches.push(touch);
     }
 
-    //omgdrums.drawLargeCanvas();
     this.draw();
 };
 
