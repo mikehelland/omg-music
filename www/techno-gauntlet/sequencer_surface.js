@@ -315,14 +315,30 @@ OMGDrumMachine.prototype.drawTrackView = function (subbeat) {
     var subbeatIndex;
     for (var i = 0; i < this.totalBeats; i++) {
         for (var j = 0; j < this.beatParameters.subbeats; j++) {
-
             subbeatIndex = j + i * this.beatParameters.subbeats;
-            this.ctx.fillStyle = this.drumbeat.tracks[this.selectedTrack].data[subbeatIndex] ? this.foreColor :
-                    (j == 0) ? this.downbeatColor : this.beatColor;
+            var value = this.drumbeat.tracks[this.selectedTrack].data[subbeatIndex];
+            this.ctx.fillStyle = value >= 1 ? this.foreColor :
+                    (j === 0) ? this.downbeatColor : this.beatColor;
 
             this.ctx.fillRect(this.left + this.captionWidth + this.columnWidth * j + 1, 
                     this.top + this.rowHeight * i + 1,
                     this.columnWidth - 2, this.rowHeight - 2);
+
+            if (value > 0  && value < 1) {
+                if (value >= 0.5) {
+                    this.beatMarginX = this.columnWidth / 10;
+                    this.beatMarginY = this.rowHeight / 10;
+                }
+                else {
+                    this.beatMarginX = this.columnWidth / 5;
+                    this.beatMarginY = this.rowHeight / 5
+                }
+                this.ctx.fillStyle = this.foreColor;
+                this.ctx.fillRect(this.left + this.captionWidth + this.columnWidth * j + this.beatMarginX, 
+                    this.top + this.rowHeight * i + this.beatMarginY,
+                    this.columnWidth - this.beatMarginX * 2, this.rowHeight - this.beatMarginY * 2);
+            }
+
 
             if (subbeatIndex === subbeat) {
                 this.ctx.globalAlpha = 0.5;
