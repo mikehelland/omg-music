@@ -50,7 +50,7 @@
     
     <div id="detail-fragment">
         <div id="detail-fragment-body">
-        <div id="sequencer-fragment">
+        <div id="sequencer-fragment" class="fragment">
             <div id="sequencer-fragment-toolbar">
                 <div id="sequencer-beat-strength-loud" class="sequencer-toolbar-beat-strength"></div>
                 <div id="sequencer-beat-strength-medium" class="sequencer-toolbar-beat-strength"></div>
@@ -58,8 +58,14 @@
             </div>
             <canvas id="sequencer-canvas"></canvas>
         </div>
-        <canvas id="instrument-surface"></canvas>
-        <div id="beats-fragment">
+        <div id="instrument-fragment" class="fragment">
+            <div class="detail-toolbar">
+                <div id="instrument-edit-button" class="selectable-button">Edit</div>
+                <div id="instrument-zoom-button" class="selectable-button">Zoom</div>
+            </div>
+            <canvas id="instrument-canvas"></canvas>
+        </div>
+        <div id="beats-fragment" class="fragment">
             <h1></h1>
             <div><span id="bpm-label">X</span> bpm</div>
             <input id="bpm-range" min="20" max="220" value="120" type="range">
@@ -72,21 +78,21 @@
             <div><span id="shuffle-label">X</span>% Shuffle</div>
             <input id="shuffle-range" min="0" max="100" value="0" type="range">
         </div>
-        <div id="key-fragment">
+        <div id="key-fragment" class="fragment">
             <div id="key-list">
             </div>
             <div id="scale-list">
             </div>
         </div>
-        <div id="chords-fragment">
-            <div id="chords-fragment-buttons">
-                <div id="chords-fragment-append-button">Append</div>
+        <div id="chords-fragment" class="fragment">
+            <div id="chords-fragment-buttons" class="detail-toolbar">
+                <div id="chords-fragment-append-button" class="selectable-button">Append</div>
                 <div id="chords-fragment-chords-view">I</div>
-                <div id="chords-fragment-clear-button">Clear</div>
+                <div id="chords-fragment-clear-button" class="selectable-button">Clear</div>
             </div>
             <div id="chords-fragment-list"></div>
         </div>
-        <div id="add-part-fragment">
+        <div id="add-part-fragment" class="fragment">
             <div id="add-part-tabs">
                 <div id="add-part-gallery-button">Gallery</div>
                 <div id="add-part-oscillator-button">Oscillator</div>
@@ -113,13 +119,13 @@
                 <div id="add-part-soundset-list">Loading...</div>
             </div>
         </div>
-        <div id="mix-fragment"></div>
-        <div id="save-fragment">
+        <div id="mix-fragment" class="fragment"></div>
+        <div id="save-fragment" class="fragment">
             <h3>Saved to OpenMusic.Gallery</h3>
             <p>Your song can be accessed at this URL:</p>
             <input id="saved-url">
         </div>
-        <div id="part-options-fragment">
+        <div id="part-options-fragment" class="fragment">
             <h2>Part Options</h2>
             <div class="detail-fragment-body">
             Choose a surface:<br>
@@ -147,7 +153,7 @@
             <button id="part-options-remove-button">Remove Part</button>
             </div>
         </div>
-        <div id="user-fragment">
+        <div id="user-fragment" class="fragment">
             <h2>User</h2>
             <div class="detail-fragment-body">
             <div id="user-login-signup">
@@ -183,7 +189,7 @@
             </div>
             </div>
         </div>
-        <div id="song-fragment">
+        <div id="song-fragment" class="fragment">
             <h2>Song</h2>
             <div class="detail-fragment-body">
             Song name:
@@ -204,7 +210,7 @@
             </div>
             
         </div>
-        <div id="section-fragment">
+        <div id="section-fragment" class="fragment">
             <h2>Sections</h2>
             <div class="detail-fragment-body">
                 <button id="copy-section-button">Copy Current Section</button>

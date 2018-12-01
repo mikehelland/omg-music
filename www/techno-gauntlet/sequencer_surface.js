@@ -225,18 +225,6 @@ OMGDrumMachine.prototype.onup = function (touch) {
     this.touches.splice(index, 1);
 };
 
-OMGDrumMachine.prototype.setSize = function (width, height) {
-    var canvas = this.canvas;
-    canvas.height = height;
-    canvas.width = width;
-    canvas.style.height = height + "px";
-    //canvas.style.width = width + "px";
-
-    this.columnWidth = width / this.columns;
-    this.rowHeight = height / this.rows;
-    this.drawLargeCanvas();
-
-};
 
 OMGDrumMachine.prototype.setPart = function (part) {
 
@@ -247,9 +235,6 @@ OMGDrumMachine.prototype.setPart = function (part) {
     this.totalBeats = this.beatParameters.measures * this.beatParameters.beats;
     this.totalSubbeats = this.totalBeats * this.beatParameters.subbeats;
     
-    this.columns = this.totalSubbeats; //1 + this.subbeats;
-    this.rows = this.part.data.tracks.length;
-
 };
 
 OMGDrumMachine.prototype.draw = function (subbeat) {

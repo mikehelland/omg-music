@@ -181,10 +181,8 @@ body {
     display:none;
 }
 #beats-fragment, #save-fragment, #add-part-fragment {
-    width:100%;
     text-align:center;
     font-size: 1.5em;
-    display:none;
 }
 
 #beats-fragment input {
@@ -192,10 +190,7 @@ body {
 }
 
 #mix-fragment {
-	display:none;
-	flex-direction:column;
-        height:100%;
-        
+    flex-direction:column;    
 }
 .mixer-part {
     flex-grow:1;
@@ -235,10 +230,7 @@ body {
 }*/
 
 #key-fragment {
-    display:none;
     flex-direction:row;
-    width:100%;
-    height:100%;
 }
 #key-list {
     flex-grow:1;
@@ -316,8 +308,6 @@ body {
 
 #chords-fragment {
     flex-direction: column;
-    height:100%;
-    display:none;
 }
 
 .chord-select-button {
@@ -327,29 +317,10 @@ body {
     cursor:pointer;
 }
 
-#chords-fragment-buttons {
-    display:flex;
-    text-align: center;
-}
-
-#chords-fragment-buttons div {
-    padding:1em;
-}
-
 #chords-fragment-chords-view {
     flex-grow: 2;
     border-left:1px solid #888888;
     border-right:1px solid #888888;
-}
-
-#chords-fragment-append-button, #chords-fragment-clear-button {
-    cursor:pointer;
-    opacity:0.8;
-}
-#chords-fragment-append-button:hover, #chords-fragment-clear-button:hover {
-    background-color:#000022;
-    opacity:1;
-    
 }
 
 #chords-fragment-list {
@@ -376,10 +347,6 @@ body {
 
 #main-fragment-user-button {
     flex-grow:0 !important;
-}
-
-#user-fragment, #song-fragment, #section-fragment {
-    display:none;
 }
 
 .detail-fragment-body {
@@ -506,13 +473,11 @@ button {
     padding:0.5em;
 }
 
-#sequencer-fragment {
-    display:none;
-    height:100%;
+#sequencer-fragment, #instrument-fragment {
     flex-direction:column;
 }
 
-#sequencer-fragment-toolbar {
+#sequencer-fragment-toolbar, #instrument-fragment-toolbar {
     display:flex;
 }
 
@@ -522,6 +487,7 @@ button {
     height:2em;
     margin:0.4em;
     opacity:0.5;
+    cursor:pointer;
 }
 
 .sequencer-toolbar-beat-strength:hover {
@@ -532,9 +498,8 @@ button {
     opacity:1 !important;
 }
 
-#sequencer-canvas {
+#sequencer-canvas, #instrument-canvas {
     flex-grow:1;
-    width:100%;
 }
 
 #sequencer-beat-strength-loud {
@@ -549,4 +514,33 @@ button {
     flex-grow:1;
     margin:1.0em;
     height:1.1em;
+}
+
+.fragment {
+    height:100%;
+    width:100%;
+    display:none;
+}
+
+.detail-toolbar {
+    display:flex;
+    text-align:center;
+}
+
+.detail-toolbar > div {
+    padding:1em;
+    flex-grow:1;
+}
+
+.selectable-button {
+    cursor:pointer;
+    opacity:0.8;
+}
+.selectable-button:hover {
+    background-color:#000022;
+    opacity:1;
+}
+
+#chords-fragment-append-button, #chords-fragment-clear-button {
+    flex-grow:0;
 }

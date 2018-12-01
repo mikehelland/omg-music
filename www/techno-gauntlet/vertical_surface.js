@@ -231,7 +231,6 @@ OMGMelodyMaker.prototype.drawCanvas = function () {
     var canvas = this.canvas;
 
     var backgroundAlpha = 1;
-    var noteAlpha = 1;
 
     var frets = this.frets;
     var fretHeight = frets.height;
@@ -240,17 +239,17 @@ OMGMelodyMaker.prototype.drawCanvas = function () {
     var context = canvas.getContext("2d");
 
     canvas.width = canvas.clientWidth;
+    canvas.height = canvas.clientHeight;
  
     context.fillStyle = this.highContrast ? this.color : this.backgroundColor;
     context.fillRect(0, this.topFretTop, canvas.width,
             canvas.height - this.bottomFretBottom - this.topFretTop);
 
     var subbeats = this.part.section.song.data.beatParameters.subbeats;
-    var beatWidth = canvas.width / (
+    this.beatWidth = canvas.width / (
             subbeats * 
             this.part.section.song.data.beatParameters.beats * 
             this.part.section.song.data.beatParameters.measures);
-    var beatsUsed = 0;
     
 
     var noteImage;
@@ -272,10 +271,11 @@ OMGMelodyMaker.prototype.drawCanvas = function () {
     if (noteWidth * (this.data.notes.length + 2) > canvas.width) {
         noteWidth = canvas.width / (this.data.notes.length + 2);
     }
-    var restHeight = canvas.height / 2 - noteHeight / 2;
+    this.restHeight = canvas.height / 2 - noteHeight / 2;
 
     // for ontouch
     this.noteWidth = noteWidth;
+    this.noteHeight = noteHeight;
 
     context.lineWidth = 1;
     context.fillStyle = this.highContrast ? this.backgroundColor : this.color;
@@ -300,12 +300,7 @@ OMGMelodyMaker.prototype.drawCanvas = function () {
         fret = this.touches[i].fret;
         ii = frets.length - fret;
         context.fillStyle = "#707070";
-        if (this.canvas.mode == "APPEND") {
-            context.fillRect(0, this.topFretTop + (ii - 1)* fretHeight, canvas.width, fretHeight);
-        } else if (this.canvas.mode == "EDIT" && this.noteEditting &&
-                frets.current == this.noteEditting.note + this.frets.rootNote) {
-            edittingSelected = true;
-        }
+        context.fillRect(0, this.topFretTop + (ii - 1)* fretHeight, canvas.width, fretHeight);
     }
 
     context.font = "12px sans-serif";
@@ -339,76 +334,78 @@ OMGMelodyMaker.prototype.drawCanvas = function () {
     context.stroke();
     context.closePath();
 
-    context.globalAlpha = noteAlpha;
-
     var selectedX;
     var selectedY;
     var x;
-    if (!this.drawnOnce || noteAlpha > 0) {
 
-        for (var i = 0; i < this.data.notes.length; i++) {
-            note = this.data.notes[i]
-            noteImage = omg.ui.getImageForNote(note, this.highContrast);
-            if (note.rest) {
-                y = restHeight;
-            } else {
-                y = this.topFretTop +
-                        (this.frets.length - this.data.notes[i].note - this.frets.rootNote - 1)
-                        * fretHeight
-                        + fretHeight * 0.5
-                        - noteImage.height * 0.75;
-            }
+    this.setupNotesInfo();
+    //this.drawNotes();
+    
+    for (var i = 0; i < this.notesInfo.length; i++) {
+        context.drawImage(this.notesInfo[i].image, this.notesInfo[i].x, this.notesInfo[i].y);
 
-            if (note.rest || noteAlpha == 1)
-                x = noteWidth + beatsUsed * subbeats * beatWidth; //i * noteWidth + noteWidth;
-            else
-                x = note.drawData.x;
+        if (playingI == i) {
+            context.fillStyle = "#4fa5d5";
 
-            if (playingI == i) {
-                context.fillStyle = "#4fa5d5";
+            note = notes[playingI];
 
-                note = notes[playingI];
-                if (note.rest) {
-                    y = restHeight;
-                } else {
-                    y = this.topFretTop + (this.frets.length - note.note - this.frets.rootNote - 1)
-                            * fretHeight + fretHeight * 0.5 - noteHeight * 0.75;
-                }
-                
-                var oldAlpha = context.globalAlpha;
-                context.globalAlpha = 0.4;
-                context.fillRect(x
-                        + (omg.ui.rawNoteWidth / 2 - omg.ui.rawNoteWidth / 2),
-                        y, noteWidth,
-                        noteHeight);
-                context.globalAlpha = oldAlpha;
-            }
-
-            beatsUsed += note.beats;
-            if (this.noteEditting == note && edittingSelected) {
-                context.fillStyle = "orange";
-                context.fillRect(x, y, noteWidth, noteImage.height);
-                selectedX = x + noteWidth;
-                selectedY = y + noteImage.height;
-            }
-
-            context.drawImage(noteImage, x, y);
-
-            if (this.noteEditting == note) {
-                context.strokeRect(x, y, noteWidth, noteImage.height);
-            }
+            var oldAlpha = context.globalAlpha;
+            context.globalAlpha = 0.4;
+            context.fillRect(this.notesInfo[i].x,
+                    this.notesInfo[i].y, this.noteWidth,
+                    noteHeight);
+            context.globalAlpha = oldAlpha;
         }
+
+        if (this.noteEditting === note && edittingSelected) {
+            context.fillStyle = "orange";
+            context.fillRect(x, y, noteWidth, noteImage.height);
+            selectedX = x + noteWidth;
+            selectedY = y + noteImage.height;
+        }
+
+        if (this.noteHovering === this.notesInfo[i].note || 
+                this.edittingNoteInfo && this.notesInfo[i].note === this.edittingNoteInfo.note) {
+            context.strokeRect(this.notesInfo[i].x, this.notesInfo[i].y, 
+                this.noteWidth, this.noteHeight);
+        }
+
     }
 
-    this.drawnOnce = true;
-
     if (this.noteEdittingDialog) {
-        this.drawNoteEdittingDialog(canvas, context, selectedX, selectedY);
+        this.drawNoteEdittingDialog(canvas, context);
     }
 };
 
-OMGMelodyMaker.prototype.drawNoteEdittingDialog = function (canvas, context, x, y) {
+OMGMelodyMaker.prototype.setupNotesInfo = function () {
+    var beatsUsed = 0;
+    this.notesInfo = [];
+    var noteInfo;
+    for (var i = 0; i < this.data.notes.length; i++) {
+        noteInfo = {note: this.data.notes[i]};
+        noteInfo.image = omg.ui.getImageForNote(noteInfo.note, this.highContrast);
 
+        if (noteInfo.note.rest) {
+            noteInfo.y = this.restHeight;
+        } else {
+            noteInfo.y = this.topFretTop +
+                    (this.frets.length - this.data.notes[i].note - this.frets.rootNote - 1)
+                    * this.frets.height
+                    + this.frets.height * 0.5
+                    - noteInfo.image.height * 0.75;
+        }
+
+        noteInfo.x = this.noteWidth + beatsUsed * this.beatParameters.subbeats * this.beatWidth; //i * noteWidth + noteWidth;
+
+        beatsUsed += noteInfo.note.beats;
+        this.notesInfo.push(noteInfo);
+    }    
+};
+
+OMGMelodyMaker.prototype.drawNoteEdittingDialog = function (canvas, context) {
+
+    var x = this.edittingNoteInfo.x;
+    var y = this.edittingNoteInfo.y + this.noteHeight;
     if (this.noteEdittingDialog.x == undefined) {
         if (x - 120 < 0) {
             x = 0;
@@ -564,29 +561,6 @@ OMGMelodyMaker.prototype.setupFretBoard = function () {
 };
 
 
-OMGMelodyMaker.prototype.addTimeToNote = function (note, thisNote) {
-    var skipCount = 0;
-    var skipped = 0;
-    var omgmm = this;
-    var handle = setInterval(function () {
-
-        if (note.beats < 2 && omgmm.lastNewNote == thisNote) {
-            if (skipCount == skipped) {
-                note.beats += note.beats < 1 ? 0.25 : 0.5;
-                omgmm.drawCanvas();
-
-                skipped = 0;
-                skipCount++;
-            } else {
-                skipped++;
-            }
-        } else {
-            clearInterval(handle);
-        }
-    }, 225);
-
-};
-
 OMGMelodyMaker.prototype.doneTouching = function () {
     
     this.player.endLiveNotes(this.part);
@@ -623,7 +597,7 @@ OMGMelodyMaker.prototype.onDisplay = function () {
         this.hasBeenShown = true;
 
         var canvas = this.canvas;
-        canvas.mode = "APPEND";
+        this.mode = "APPEND";
         canvas.bottomRow = [];
 
         canvas.restButtonRow = [];
@@ -633,7 +607,7 @@ OMGMelodyMaker.prototype.onDisplay = function () {
         canvas.removeButtonRow[0].onclick = function () {
             for (var inote = 0; inote < omgmm.part.data.notes.length; inote++) {
 
-                if (omgmm.part.data.notes[inote] == omgmm.noteSelecting) {
+                if (omgmm.part.data.notes[inote] == omgmm.edittingNoteInfo.note) {
                     omgmm.part.data.notes.splice(inote, 1);
                     break;
                 }
@@ -646,13 +620,13 @@ OMGMelodyMaker.prototype.onDisplay = function () {
         canvas.bottomRow.push({text: "Mode:"});
 
         var writeButton = {button: true, selected: function () {
-                return canvas.mode == "APPEND"
+                return omgmm.mode == "APPEND"
             }, text: "Append"};
         var editButton = {button: true, selected: function () {
-                return canvas.mode == "EDIT"
+                return omgmm.mode == "EDIT"
             }, text: "Edit"};
         writeButton.onclick = function () {
-            canvas.mode = canvas.mode == "APPEND" ? "EDIT" : "APPEND";
+            omgmm.mode = omgmm.mode == "APPEND" ? "EDIT" : "APPEND";
             omgmm.drawCanvas();
         };
         editButton.onclick = writeButton.onclick;
@@ -674,8 +648,8 @@ OMGMelodyMaker.prototype.onDisplay = function () {
             canvas.noteButtonRow.push(noteButton);
             noteButton.onclick = (function (beats) {
                 return function () {
-                    omgmm.noteSelecting.rest = false;
-                    omgmm.noteSelecting.beats = beats;
+                    omgmm.edittingNoteInfo.note.rest = false;
+                    omgmm.edittingNoteInfo.note.beats = beats;
                     omgmm.drawCanvas();
                 };
             })(beats);
@@ -684,8 +658,8 @@ OMGMelodyMaker.prototype.onDisplay = function () {
 
             restButton.onclick = (function (beats) {
                 return function () {
-                    omgmm.noteSelecting.rest = true;
-                    omgmm.noteSelecting.beats = beats;
+                    omgmm.edittingNoteInfo.note.rest = true;
+                    omgmm.edittingNoteInfo.note.beats = beats;
                     omgmm.drawCanvas();
                 };
             })(beats);
@@ -745,18 +719,24 @@ OMGMelodyMaker.prototype.setCanvasEvents = function () {
     canvas.onmousemove = function (e) {
         e.preventDefault();
 
-        if (!omgmm.isMouseTouching) {
-            return;
-        }
-        
         if (omgmm.redoOffsets) {
             omgmm.updateOffsets();
             omgmm.redoOffsets = false;
         }
 
-        omgmm.mouseTouch.x = e.clientX - omgmm.offsets.left;
-        omgmm.mouseTouch.y = e.clientY + omg.ui.getScrollTop() - omgmm.offsets.top;
-        omgmm.onmove(omgmm.mouseTouch);
+        var x = e.clientX - omgmm.offsets.left;
+        var y = e.clientY + omg.ui.getScrollTop() - omgmm.offsets.top;
+
+        if (omgmm.isMouseTouching) {
+            omgmm.mouseTouch.x = x;
+            omgmm.mouseTouch.y = y;
+            omgmm.onmove(omgmm.mouseTouch);
+        }
+        else {
+            if (omgmm.mode === "EDIT") {
+                omgmm.onhoverInEditMode(x, y);
+            }
+        }        
     };
     
     canvas.onmouseout = function () {
@@ -822,96 +802,82 @@ OMGMelodyMaker.prototype.setCanvasEvents = function () {
 }
 
 OMGMelodyMaker.prototype.ondown = function (touch) {
-    var x = touch.x;
-    var y = touch.y;
-    var omgmm = this;
-    
-    //auto play policy?
-    if (omgmm.player && !omgmm.player.playedSound)
-        omgmm.player.initSound();
-
-    if (omgmm.noteEdittingDialog) {
-        omgmm.ondownInEdittingDialog(x, y);
-        return;
-    }
-
-    omgmm.part.saved = false;
-
-    var fret = omgmm.frets.length - 1 -
-            Math.floor((y - omgmm.topFretTop) / omgmm.frets.height);
-    if (fret >= omgmm.frets.length)
-        fret = omgmm.frets.length - 1;
-
-    var noteNumber = omgmm.frets[fret].note;
-
-    var note;
-
     if (this.mode === "EDIT") {
-        if (omgmm.noteEditting) {
+        return this.ondownInEditMode(touch);
+    }
+    else if (this.mode === "ZOOM") {
+        return this.ondownInZoomMode(touch);
+    }
+    else {
+        this.ondownInWriteMode(touch)
+    }
+};
 
-            if (fret === omgmm.noteEditting.note + omgmm.frets.rootNote) {
-                omgmm.noteSelecting = omgmm.noteEditting;
-            } else {
-                omgmm.noteEditting.note = fret - omgmm.frets.rootNote;
-                omgmm.noteEditting.scaledNote = noteNumber;
-            }
-        }
-        return;
+
+OMGMelodyMaker.prototype.onmove = function (touch) {
+    if (this.mode === "EDIT") {
+        return this.onmoveInEditMode(touch);
+    }
+    else if (this.mode === "ZOOM") {
+        return this.onmoveInZoomMode(touch);
+    }
+    else {
+        this.onmoveInWriteMode(touch)
+    }
+};
+
+OMGMelodyMaker.prototype.onup = function (touch) {
+    if (this.mode === "EDIT") {
+        return this.onupInEditMode(touch);
+    }
+    else if (this.mode === "ZOOM") {
+        return this.onupInZoomMode(touch);
+    }
+    else {
+        this.onupInWriteMode(touch)
     }
 
-    note = {
-        note: fret - omgmm.frets.rootNote,
+    var touchIndex = this.touches.indexOf(touch);
+    this.touches.splice(touchIndex, 1);
+};    
+
+OMGMelodyMaker.prototype.ondownInWriteMode = function (touch) {
+    //auto play policy?
+    //if (omgmm.player && !omgmm.player.playedSound) omgmm.player.initSound();
+    
+    var fret = this.getFret(touch.y);
+    var noteNumber = this.frets[fret].note;
+
+    var note = {
+        note: fret - this.frets.rootNote,
         scaledNote: noteNumber,
         beats: 0.25
     };
 
-    //omgmm.frets.touching = fret;
     touch.fret = fret;
-    var xsection = Math.floor(x / (this.canvas.width / 4));
+    var xsection = Math.floor(touch.x / (this.canvas.width / 4));
     touch.xsection = xsection;
     touch.note = note;
 
     this.touches.push(touch);
-    this.notes.push(note);
-    
+    this.notes.push(note);    
     this.setTouchingXSection();
         
-    omgmm.player.playLiveNotes(this.notes, omgmm.part, 0);
+    this.player.playLiveNotes(this.notes, this.part, 0);
 
-    omgmm.lastNewNote = Date.now();
+    this.drawCanvas();
+    this.part.saved = false;
 
-    omgmm.drawCanvas();
 };
 
-OMGMelodyMaker.prototype.onmove = function (touch) {
-    var omgmm = this;
-    var x = touch.x;
-    var y = touch.y;
+OMGMelodyMaker.prototype.onmoveInWriteMode = function (touch) {
 
-    if (omgmm.noteEdittingDialog) {
-        omgmm.onmoveInEdittingDialog(x, y);
-        return;
-    }
+    var fret = this.getFret(touch.y);
+    var xsection = Math.floor(touch.x / (this.canvas.width / 4));
 
-    var fret = omgmm.frets.length -
-            1 - Math.floor((y - omgmm.topFretTop) / omgmm.frets.height);
-    if (fret >= omgmm.frets.length) {
-        fret = omgmm.frets.length - 1;
-    }
-
-    var note;
-    if (this.canvas.mode === "EDIT") {
-        note = omgmm.part.data.notes[
-                Math.floor((x - omg.ui.rawNoteWidth) / omgmm.noteWidth)];
-        omgmm.noteEditting = note;
-        omgmm.drawCanvas();
-        return;
-    }
-
-    var xsection = Math.floor(x / (this.canvas.width / 4));
     if (fret !== touch.fret || xsection !== touch.xsection) {
 
-        var noteNumber = omgmm.frets[fret].note;
+        var noteNumber = this.frets[fret].note;
 
         touch.xsection = xsection;
         touch.fret = fret;
@@ -923,50 +889,116 @@ OMGMelodyMaker.prototype.onmove = function (touch) {
             touch.note = {};
             this.notes.push(touch.note);
         }
-        touch.note.note = fret - omgmm.frets.rootNote;
+        touch.note.note = fret - this.frets.rootNote;
         touch.note.scaledNote = noteNumber;
         touch.note.beats = 0.25;
 
-        omgmm.player.playLiveNotes(this.notes, omgmm.part);
+        this.player.playLiveNotes(this.notes, this.part);
         
-        omgmm.drawCanvas();
+        this.drawCanvas();
     }
 };
 
-OMGMelodyMaker.prototype.onup = function (touch) {
-    var x = touch.x;
-    var y = touch.y;
-    var omgmm = this;
-    if (omgmm.noteEdittingDialog) {
-        omgmm.onupInEdittingDialog(x, y);
-        omgmm.noteEdittingDialog = undefined;
-        omgmm.noteSelecting = undefined;
-        omgmm.noteEditting = undefined;
-        omgmm.drawCanvas();
-        return;
-    }
+OMGMelodyMaker.prototype.onupInWriteMode = function (touch) {
 
-    if (y > this.canvas.height - omgmm.bottomFretBottom) {
-        //omgmm.finishBottomRow(x);
-    } else {
-        if (this.mode === "EDIT" && omgmm.noteEditting &&
-                omgmm.noteEditting === omgmm.noteSelecting) {
-            omgmm.noteEdittingDialog = {note: omgmm.noteSelecting};
-            //omgmm.noteSelecting = undefined;
-        }
-    }
-
-    var touchIndex = this.touches.indexOf(touch);
-    this.touches.splice(touchIndex, 1);
     var noteIndex = this.notes.indexOf(touch.note);
     this.notes.splice(noteIndex, 1);
 
     this.setTouchingXSection();
 
-    if (this.touches.length === 0) {
-        omgmm.doneTouching();
+    if (this.touches.length === 1) {
+        this.doneTouching();
     }
 };
+
+
+OMGMelodyMaker.prototype.ondownInEditMode = function (touch) {
+    if (this.noteEdittingDialog) {
+        this.ondownInEdittingDialog(touch);
+        return;
+    }
+
+    var noteInfo = this.noteHitTest(touch.x, touch.y);
+    if (noteInfo.note) {
+        var fret = this.getFret(touch.y);
+        noteInfo.startingFret = fret;
+        this.edittingNoteInfo = noteInfo;
+        this.edittingNoteInfo.changed = false;
+        this.touches.push(touch);
+    }
+};
+
+OMGMelodyMaker.prototype.onmoveInEditMode = function (touch) {
+    if (!this.edittingNoteInfo) {
+        return;
+    }
+
+    if (this.noteEdittingDialog) {
+        this.onmoveInEdittingDialog(touch);
+        return;
+    }
+
+    var fret = this.getFret(touch.y);
+    var diff = fret - this.edittingNoteInfo.startingFret;
+    if (!diff) {
+        return;
+    }
+
+    this.edittingNoteInfo.changed = true;
+    var noteNumber = this.frets[fret + diff].note;
+    this.edittingNoteInfo.note.note = fret - this.frets.rootNote;
+    this.edittingNoteInfo.note.scaledNote = noteNumber;
+    this.edittingNoteInfo.startingFret += diff;
+
+    this.drawCanvas();
+};
+
+OMGMelodyMaker.prototype.onupInEditMode = function (touch) {
+    if (!this.edittingNoteInfo) {
+        return;
+    }
+    
+    if (this.noteEdittingDialog) {
+        this.onupInEdittingDialog(touch);
+        return;
+    }
+
+    if (!this.edittingNoteInfo.changed) {
+        this.noteEdittingDialog = {note: this.edittingNoteInfo.note};
+    }
+    else {
+        this.edittingNoteInfo = undefined;
+    }
+    
+    this.drawCanvas();
+};
+
+
+OMGMelodyMaker.prototype.onhoverInEditMode = function (x, y) {
+
+    var noteInfo = this.noteHitTest(x, y);
+    if (noteInfo.note !== this.noteHovering) {
+        this.noteHovering = noteInfo.note;
+        this.drawCanvas();
+    }
+};
+
+OMGMelodyMaker.prototype.getFret = function (y) {
+    return Math.max(0, Math.min(this.frets.length - 1,
+        this.frets.length - 1 -Math.floor((y - this.topFretTop) / this.frets.height)));
+};
+
+OMGMelodyMaker.prototype.noteHitTest = function (x, y) {
+    var noteInfo;
+    for (var i = 0; i < this.notesInfo.length; i++) {
+        noteInfo = this.notesInfo[i];
+        if (x >= noteInfo.x && x <= noteInfo.x + this.noteWidth &&
+                y >= noteInfo.y && y <= noteInfo.y + this.noteHeight) {
+            return noteInfo;
+        }
+    }
+    return {};
+}
 
 OMGMelodyMaker.prototype.setTouchingXSection = function () {
     this.touchingXSection = 0;
@@ -1027,7 +1059,7 @@ OMGMelodyMaker.prototype.finishBottomRow = function (x) {
 };
 
 
-OMGMelodyMaker.prototype.ondownInEdittingDialog = function (x, y) {
+OMGMelodyMaker.prototype.ondownInEdittingDialog = function (touch) {
     var button;
     var row;
     var rows = [this.canvas.noteButtonRow, this.canvas.restButtonRow, this.canvas.removeButtonRow];
@@ -1035,9 +1067,10 @@ OMGMelodyMaker.prototype.ondownInEdittingDialog = function (x, y) {
         row = rows[ir];
 
         for (var ib = 0; ib < row.length; ib++) {
-            if (row[ib].button && row[ib].leftX < x && row[ib].rightX > x &&
-                    row[ib].topY < y && row[ib].bottomY > y) {
+            if (row[ib].button && row[ib].leftX < touch.x && row[ib].rightX > touch.x &&
+                    row[ib].topY < touch.y && row[ib].bottomY > touch.y) {
                 this.buttonTouched = row[ib];
+                this.touches.push(touch);
                 break;
             }
         }
@@ -1045,28 +1078,29 @@ OMGMelodyMaker.prototype.ondownInEdittingDialog = function (x, y) {
     this.drawCanvas();
 };
 
-OMGMelodyMaker.prototype.onmoveInEdittingDialog = function (x, y) {
+OMGMelodyMaker.prototype.onmoveInEdittingDialog = function (touch) {
     var button;
     var row;
     var rows = [this.canvas.noteButtonRow, this.canvas.restButtonRow, this.canvas.removeButtonRow];
     for (var ir = 0; ir < rows.length; ir++) {
         row = rows[ir];
         for (var ib = 0; ib < row.length; ib++) {
-            if (row[ib].button && row[ib].leftX < x && row[ib].rightX > x &&
-                    row[ib].topY < y && row[ib].bottomY > y) {
+            if (row[ib].button && row[ib].leftX < touch.x && row[ib].rightX > touch.x &&
+                    row[ib].topY < touch.y && row[ib].bottomY > touch.y) {
                 button = row[ib];
                 break;
             }
         }
     }
     if (!(button && this.buttonTouched && button == this.buttonTouched)) {
+        console.log("tt")
         this.buttonTouched = undefined;
     }
     this.drawCanvas();
 };
 
 
-OMGMelodyMaker.prototype.onupInEdittingDialog = function (x, y) {
+OMGMelodyMaker.prototype.onupInEdittingDialog = function (touch) {
     var button;
     var row;
     var rows = [this.canvas.noteButtonRow, this.canvas.restButtonRow, this.canvas.removeButtonRow];
@@ -1075,20 +1109,23 @@ OMGMelodyMaker.prototype.onupInEdittingDialog = function (x, y) {
 
         for (var ib = 0; ib < row.length; ib++) {
 
-            if (row[ib].button && row[ib].leftX < x && row[ib].rightX > x &&
-                    row[ib].topY < y && row[ib].bottomY > y) {
+            if (row[ib].button && row[ib].leftX < touch.x && row[ib].rightX > touch.x &&
+                    row[ib].topY < touch.y && row[ib].bottomY > touch.y) {
                 button = row[ib];
                 break;
             }
         }
     }
-
     if (button && this.buttonTouched && button == this.buttonTouched) {
         if (button.onclick) {
             button.onclick();
         }
     }
     this.buttonTouched = undefined;
+    
+    this.noteEdittingDialog = undefined;
+    this.edittingNoteInfo = undefined;
+
     this.drawCanvas();
 };
 
@@ -1102,13 +1139,12 @@ OMGMelodyMaker.prototype.setPart = function (part, welcomeStyle) {
 
     this.part = part;
     this.data = part.data;
-    this.lastNewNote = 0;
-    //this.captionsAreSetup = false;
-
+    this.beatParameters = part.section.song.data.beatParameters;
+    
     if (this.data.notes.length == 0) {
-        this.canvas.mode = "APPEND";
+        this.mode = "APPEND";
     } else {
-        this.canvas.mode = "EDIT";
+        this.mode = "EDIT";
     }
 
     var visibility;
