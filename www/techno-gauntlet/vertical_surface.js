@@ -913,14 +913,19 @@ OMGMelodyMaker.prototype.onmove = function (touch) {
 
         var noteNumber = omgmm.frets[fret].note;
 
-        touch.note.note = fret - omgmm.frets.rootNote;
-        touch.note.scaledNote = noteNumber;
-        touch.note.beats = 0.25;
-
         touch.xsection = xsection;
         touch.fret = fret;
 
         this.setTouchingXSection();
+
+        if (this.touchingXSection === 0) {
+            this.notes.splice(this.notes.indexOf(touch.note), 1);
+            touch.note = {};
+            this.notes.push(touch.note);
+        }
+        touch.note.note = fret - omgmm.frets.rootNote;
+        touch.note.scaledNote = noteNumber;
+        touch.note.beats = 0.25;
 
         omgmm.player.playLiveNotes(this.notes, omgmm.part);
         

@@ -9,6 +9,70 @@ tg.saveButton = document.getElementById("save-button");
 tg.addPartButton = document.getElementById("add-part-button");
 tg.partList = document.getElementById("part-list");
 
+
+tg.sequencer = {
+    div: document.getElementById("sequencer-fragment"),
+    fullStrengthButton: document.getElementById("sequencer-beat-strength-loud"),
+    mediumStrengthButton: document.getElementById("sequencer-beat-strength-medium"),
+    softStrengthButton: document.getElementById("sequencer-beat-strength-soft"),
+    canvas: document.getElementById("sequencer-canvas")
+};
+
+tg.sequencer.setup = function () {
+    var s = tg.sequencer;
+    s.currentStrength = s.fullStrengthButton;
+    s.currentStrength.classList.add("sequencer-toolbar-beat-strength-selected");
+    
+    s.fullStrengthButton.onclick = function (e) {
+        s.currentStrength.classList.remove("sequencer-toolbar-beat-strength-selected");
+        e.target.classList.add("sequencer-toolbar-beat-strength-selected");
+        s.currentStrength = e.target;
+        s.drumMachine.beatStrength = 1;
+    };
+    s.mediumStrengthButton.onclick = function (e) {
+        s.currentStrength.classList.remove("sequencer-toolbar-beat-strength-selected");
+        e.target.classList.add("sequencer-toolbar-beat-strength-selected");
+        s.currentStrength = e.target;
+        s.drumMachine.beatStrength = 0.50;
+    };
+    s.softStrengthButton.onclick = function (e) {
+        s.currentStrength.classList.remove("sequencer-toolbar-beat-strength-selected");
+        e.target.classList.add("sequencer-toolbar-beat-strength-selected");
+        s.currentStrength = e.target;
+        s.drumMachine.beatStrength = 0.25;
+    };
+};
+tg.sequencer.setup();
+
+tg.sequencer.show = function (omgpart) {
+    var s = tg.sequencer;
+    
+    if (tg.surface.omgdata) {
+        tg.surface.omgdata.selectedTrack = -1;
+    }
+    
+    var beatStrength = 1;
+    if (s.drumMachine) {
+        beatStrength = s.drumMachine.beatStrength;
+    }
+    
+    s.drumMachine = new OMGDrumMachine(s.canvas, omgpart);
+    s.drumMachine.captionWidth = window.innerWidth / 2 / 8;
+    s.drumMachine.readOnly = false;
+    s.drumMachine.beatStrength = beatStrength;
+    
+    tg.player.onBeatPlayedListeners.push(function (isubbeat, isection) {
+        s.drumMachine.draw(isubbeat);
+    });
+    
+    tg.hideDetails();
+    s.div.style.display = "flex";
+    s.drumMachine.draw();
+
+    
+};
+
+
 tg.detailFragment = document.getElementById("detail-fragment");
 tg.surface = document.getElementById("instrument-surface");
 tg.surface.width = tg.surface.clientWidth;
@@ -106,11 +170,11 @@ tg.setupPartButton = function (omgpart) {
     bigbutton.className = "part-button";
     bigbutton.innerHTML = omgpart.data.soundSet.name;
     bigbutton.onclick = function (e) {
-        tg.showSurface();
         if (omgpart.data.surface.url === "PRESET_SEQUENCER") {
-            tg.showDrumMachine(omgpart);
+            tg.sequencer.show(omgpart);            
         }
         else if (omgpart.data.surface.url === "PRESET_VERTICAL") {
+            tg.showSurface();
             tg.showMelodyEditor(omgpart);
         }
         tg.newChosenButton(bigbutton);
@@ -131,22 +195,7 @@ tg.setupPartButton = function (omgpart) {
     return partDiv;
 }
 
-tg.showDrumMachine = function (omgpart) {
-    if (tg.surface.omgdata) {
-        tg.surface.omgdata.selectedTrack = -1;
-    }
-    var drumMachine = new OMGDrumMachine(tg.surface, omgpart);
-    omg.ui.drawDrumCanvas({canvas: tg.surface, part: omgpart, 
-        captionWidth: window.innerWidth / 2 / 8});
-    drumMachine.readOnly = false;
-    
-    tg.player.onBeatPlayedListeners.push(function (isubbeat, isection) {
-        omg.ui.drawDrumCanvas({canvas: tg.surface, part:omgpart, 
-            captionWidth: window.innerWidth / 2 / 8,
-            subbeat:isubbeat
-        });
-    });
-};
+
 tg.showMelodyEditor = function (omgpart) {
     melodyEditor = new OMGMelodyMaker(tg.surface, omgpart, tg.player);
     tg.player.onBeatPlayedListeners.push(function (isubbeat, isection) {
@@ -509,6 +558,7 @@ tg.hideDetails = function (hideFragment) {
     if (tg.userFragment) tg.userFragment.style.display = "none";
     if (tg.songFragment) tg.songFragment.style.display = "none";
     if (tg.sectionFragment) tg.sectionFragment.div.style.display = "none";
+    if (tg.sequencer) tg.sequencer.div.style.display = "none";
     
     if (hideFragment) {
         tg.detailFragment.style.display = "none";

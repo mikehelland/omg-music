@@ -730,8 +730,14 @@ OMGDrumMachine.prototype.setPart = function (part) {
     this.captionsAreSetup = false;
 };
 
-OMGDrumMachine.prototype.draw = function () {
-    
+OMGDrumMachine.prototype.draw = function (isubbeat) {
+    var part = this.part;
+    var canvas = this.canvas;
+    omg.ui.drawDrumCanvas({canvas: canvas, part: part, 
+        captionWidth: window.innerWidth / 2 / 8,
+        subbeat:isubbeat
+    });
+
 };
 
 OMGDrumMachine.prototype.refresh = function (part) {

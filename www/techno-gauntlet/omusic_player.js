@@ -381,11 +381,13 @@ OMusicPlayer.prototype.playBeatForDrumPart = function (iSubBeat, part) {
 
     if (part.data.audioParameters.mute)
         return;
-
+    var strength;
     for (var i = 0; i < tracks.length; i++) {
         if (tracks[i].data[iSubBeat]) {
             if (!tracks[i].audioParameters.mute) {
-                this.playSound(tracks[i].sound, part, tracks[i].audioParameters);
+                this.playSound(tracks[i].sound, part, tracks[i].audioParameters,
+                        typeof tracks[i].data[iSubBeat] === "number" ?
+                            tracks[i].data[iSubBeat] : undefined);
             }
         }
     }
@@ -911,7 +913,7 @@ OMusicPlayer.prototype.playNote = function (note, part) {
 
 
 
-OMusicPlayer.prototype.playSound = function (sound, part, audioParameters) {
+OMusicPlayer.prototype.playSound = function (sound, part, audioParameters, strength) {
     var p = this;
     if (p.loadedSounds[sound] &&
             p.loadedSounds[sound] !== "loading") {
@@ -920,10 +922,11 @@ OMusicPlayer.prototype.playSound = function (sound, part, audioParameters) {
         source.bufferGain = p.context.createGain();
         source.buffer = p.loadedSounds[sound];
 
+        var gain = 1;
         var warp = part.data.audioParameters.warp;
         if (audioParameters) {
             warp = (warp - 1) + (audioParameters.warp - 1) + 1;
-            source.bufferGain.gain.setValueAtTime(audioParameters.gain, p.context.currentTime);
+            gain = audioParameters.gain;
         }
         if (audioParameters && audioParameters.pan) {                        
             source.bufferPanner = p.context.createStereoPanner();            
@@ -936,6 +939,11 @@ OMusicPlayer.prototype.playSound = function (sound, part, audioParameters) {
             source.connect(source.bufferGain);
         }
 
+        if (strength) {
+            gain = gain * strength;
+        }
+
+        source.bufferGain.gain.setValueAtTime(gain, p.context.currentTime);
         source.bufferGain.connect(part.topAudioNode);
 
         source.playbackRate.value = warp;
