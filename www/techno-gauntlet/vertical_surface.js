@@ -221,6 +221,9 @@ function OMGMelodyMaker(canvas, part, player) {
     this.touches = [];
     this.notes = [];
 
+    this.skipFretsTop = 0;
+    this.skipFretsBottom = 0;
+    
     if (part)
         this.setPart(part);
     
@@ -300,7 +303,7 @@ OMGMelodyMaker.prototype.drawCanvas = function () {
         fret = this.touches[i].fret;
         ii = frets.length - fret;
         context.fillStyle = "#707070";
-        context.fillRect(0, this.topFretTop + (ii - 1)* fretHeight, canvas.width, fretHeight);
+        context.fillRect(0, this.topFretTop + (ii - 1 - this.skipFretsTop) * fretHeight, canvas.width, fretHeight);
     }
 
     context.font = "12px sans-serif";
@@ -309,8 +312,8 @@ OMGMelodyMaker.prototype.drawCanvas = function () {
     context.beginPath();
     context.moveTo(0, this.topFretTop);
     context.lineTo(canvas.width, this.topFretTop);
-    for (var i = 0; i < frets.length; i++) {    
-        ii = frets.length - i;
+    for (var i = this.skipFretsBottom; i < frets.length - this.skipFretsTop; i++) {    
+        ii = frets.length - i - this.skipFretsTop;;
         
         if (frets[i].octaveMarker) {
             context.fillStyle = "#333333";
@@ -390,7 +393,7 @@ OMGMelodyMaker.prototype.setupNotesInfo = function () {
             noteInfo.y = this.restHeight;
         } else {
             noteInfo.y = this.topFretTop +
-                    (this.frets.length - this.data.notes[i].note - this.frets.rootNote - 1)
+                    (this.frets.length - this.data.notes[i].note - this.frets.rootNote - 1 - this.skipFretsTop)
                     * this.frets.height
                     + this.frets.height * 0.5
                     - noteInfo.image.height * 0.75;
@@ -548,7 +551,8 @@ OMGMelodyMaker.prototype.setupFretBoard = function () {
         frets.rootNote = 0;
     }
 
-    frets.height = (this.canvas.height - this.topFretTop - this.bottomFretBottom) / frets.length;
+    frets.height = (this.canvas.height - this.topFretTop - this.bottomFretBottom) / 
+            (frets.length - this.skipFretsBottom - this.skipFretsTop);
     this.frets = frets;
 
     var notes = this.data.notes;
@@ -692,6 +696,8 @@ OMGMelodyMaker.prototype.setCanvasEvents = function () {
         var y = e.clientY + omg.ui.getScrollTop() - omgmm.offsets.top;
 
         if (omgmm.isMouseTouching) {
+            omgmm.mouseTouch.lastX = omgmm.mouseTouch.x;
+            omgmm.mouseTouch.lastY = omgmm.mouseTouch.y;
             omgmm.mouseTouch.x = x;
             omgmm.mouseTouch.y = y;
             omgmm.onmove(omgmm.mouseTouch);
@@ -947,9 +953,58 @@ OMGMelodyMaker.prototype.onhoverInEditMode = function (x, y) {
     }
 };
 
+OMGMelodyMaker.prototype.ondownInZoomMode = function (touch) {
+    touch.originalX = touch.x;
+    touch.originalY = touch.y;
+    this.originalSkipTop = this.skipFretsTop;
+    this.originalSkipBottom = this.skipFretsBottom;
+};
+
+OMGMelodyMaker.prototype.onmoveInZoomMode = function (touch) {
+    var diff, skipNewFrets;
+
+    diff = touch.originalY - touch.y;
+    skipNewFrets = Math.floor(diff / this.frets.height);
+
+    var topTouch;
+    var bottomTouch;
+    if (this.touches.length > 1) {
+        for (var i = 0; i < this.touches.length; i++) {
+            if (!topTouch || this.touches[i].y < topTouch.y) {
+                topTouch = this.touches[i];
+            }
+            if (!bottomTouch || this.touches[i].y > bottomTouch.y) {
+                bottomTouch = this.touches[i];
+            }
+        }
+        if (touch === topTouch) {
+            this.skipFretsTop = Math.max(0, this.originalSkipTop + skipNewFrets);
+        }
+        if (touch === bottomTouch) {
+            this.skipFretsBottom = Math.max(0, this.originalSkipBottom - skipNewFrets);
+        }
+    }
+    
+    if (touch.identifier === "mouse") {
+        if (touch.originalY < this.canvas.height / 2) {
+            this.skipFretsTop = Math.max(0, this.originalSkipTop + skipNewFrets);        
+        }
+        else {
+            this.skipFretsBottom = Math.max(0, this.originalSkipBottom - skipNewFrets);
+        }
+    }
+    this.frets.height = (this.canvas.height - this.topFretTop - this.bottomFretBottom) / 
+            (this.frets.length - this.skipFretsBottom - this.skipFretsTop);
+};
+
+OMGMelodyMaker.prototype.onupInZoomMode = function (touch) {
+    this.part.data.surface.skipTop = this.skipFretsTop;
+    this.part.data.surface.skipBottom = this.skipFretsBottom;
+};
+
 OMGMelodyMaker.prototype.getFret = function (y) {
     return Math.max(0, Math.min(this.frets.length - 1,
-        this.frets.length - 1 -Math.floor((y - this.topFretTop) / this.frets.height)));
+        this.frets.length - 1 - this.skipFretsTop - Math.floor((y - this.topFretTop) / this.frets.height)));
 };
 
 OMGMelodyMaker.prototype.noteHitTest = function (x, y) {
@@ -1051,6 +1106,9 @@ OMGMelodyMaker.prototype.setPart = function (part, welcomeStyle) {
     this.part = part;
     this.data = part.data;
     this.beatParameters = part.section.song.data.beatParameters;
+
+    this.skipFretsTop = this.part.data.surface.skipTop || 0;
+    this.skipFretsBottom = this.part.data.surface.skipBottom || 0;
     
     if (this.data.notes.length == 0) {
         this.mode = "APPEND";
