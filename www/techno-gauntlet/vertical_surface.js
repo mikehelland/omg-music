@@ -364,15 +364,16 @@ OMGMelodyMaker.prototype.drawCanvas = function () {
             selectedY = y + noteImage.height;
         }
 
-        if (this.noteHovering === this.notesInfo[i].note || 
-                this.edittingNoteInfo && this.notesInfo[i].note === this.edittingNoteInfo.note) {
-            context.strokeRect(this.notesInfo[i].x, this.notesInfo[i].y, 
-                this.noteWidth, this.noteHeight);
+        if (this.mode === "EDIT") {
+            if (this.noteHovering === this.notesInfo[i].note || 
+                    this.edittingNoteInfo && this.notesInfo[i].note === this.edittingNoteInfo.note) {
+                context.strokeRect(this.notesInfo[i].x, this.notesInfo[i].y, 
+                    this.noteWidth, this.noteHeight);
+            }
         }
-
     }
 
-    if (this.noteEdittingDialog) {
+    if (this.mode === "EDIT" && this.noteEdittingDialog) {
         this.drawNoteEdittingDialog(canvas, context);
     }
 };
@@ -435,20 +436,21 @@ OMGMelodyMaker.prototype.drawNoteEdittingDialog = function (canvas, context) {
 
     this.drawButtons(context, canvas.noteButtonRow, x + 2, y + 4, 240, 40);
     this.drawButtons(context, canvas.restButtonRow, x + 2, y + 44, 240, 40);
-    this.drawButtons(context, canvas.removeButtonRow, x + 60, y + 100, 240, 40);
+    this.drawButtons(context, canvas.removeButtonRow, x + 40, y + 100, 240, 40);
 };
 
 OMGMelodyMaker.prototype.drawButtons = function (context, buttonRow, x, y, width, height) {
 
     var button;
-    var buttonWidth;
+    var buttonWidth, imageWidth;
     var margin = 4;
     var nextLeft = x + margin;
     var ymargin = y + margin;
     var heightmargin = height - margin * 2;
     for (var ibtn = 0; ibtn < buttonRow.length; ibtn++) {
         button = buttonRow[ibtn];
-        buttonWidth = button.width || (button.image ? button.image.width : 50);
+        imageWidth = button.width || (button.image ? button.image.width : 50);
+        buttonWidth = imageWidth * 1.33;
 
 
         if (button.button) {
@@ -471,8 +473,8 @@ OMGMelodyMaker.prototype.drawButtons = function (context, buttonRow, x, y, width
             }
 
             if (button.image) {
-                context.drawImage(button.image, nextLeft,
-                        ymargin, buttonWidth, heightmargin);
+                context.drawImage(button.image, nextLeft + imageWidth * 0.16,
+                        ymargin, imageWidth, heightmargin);
             }
 
             context.strokeRect(nextLeft, ymargin, buttonWidth, heightmargin);
@@ -597,8 +599,7 @@ OMGMelodyMaker.prototype.onDisplay = function () {
         this.hasBeenShown = true;
 
         var canvas = this.canvas;
-        this.mode = "APPEND";
-        canvas.bottomRow = [];
+        this.mode = "WRITE";
 
         canvas.restButtonRow = [];
         canvas.noteButtonRow = [];
@@ -615,32 +616,17 @@ OMGMelodyMaker.prototype.onDisplay = function () {
             omgmm.drawCanvas();
         };
 
-        //canvas.bottomRow.push({button: true, width: 80, text: "Sine Wave"});
-
-        canvas.bottomRow.push({text: "Mode:"});
-
-        var writeButton = {button: true, selected: function () {
-                return omgmm.mode == "APPEND"
-            }, text: "Append"};
-        var editButton = {button: true, selected: function () {
-                return omgmm.mode == "EDIT"
-            }, text: "Edit"};
-        writeButton.onclick = function () {
-            omgmm.mode = omgmm.mode == "APPEND" ? "EDIT" : "APPEND";
-            omgmm.drawCanvas();
-        };
-        editButton.onclick = writeButton.onclick;
-        canvas.bottomRow.push(writeButton);
-        canvas.bottomRow.push(editButton);
-
-        canvas.bottomRow.push({text: "Add:"});
-
         var restButton;
         var restNoteImage;
         var beats;
         var ib = 0;
         for (var iimg = 0; iimg < omg.ui.noteImageUrls.length - 1; iimg++) {
+
             beats = omg.ui.noteImageUrls[iimg][0];
+            if (!(beats % 0.25 == 0)) {
+                continue;
+            }
+            
             restNoteImage = omg.ui.getImageForNote({rest: true, beats: beats});
             noteImage = omg.ui.getImageForNote({rest: false, beats: beats});
 
@@ -665,30 +651,8 @@ OMGMelodyMaker.prototype.onDisplay = function () {
             })(beats);
             canvas.restButtonRow.push(restButton);
 
-            if (!(beats % 0.25 == 0)) {
-                continue;
-            }
-
-            restButton = {button: true, image: restNoteImage};
-
-            restButton.onclick = (function (beats) {
-                return function () {
-                    omgmm.part.data.notes.push({rest: true, beats: beats});
-                    omgmm.drawCanvas();
-                };
-            })(beats);
-            canvas.bottomRow.push(restButton);
-
         }
 
-        var autoButton = {button: true, selected: function () {
-                return omgmm.autoAddRests
-            }, text: "auto"};
-        autoButton.onclick = function () {
-            omgmm.autoAddRests = !omgmm.autoAddRests;
-        };
-        canvas.bottomRow.push(autoButton);
-        
         this.redoOffsets = true;
 
         var canvasHeight = canvas.clientHeight; //window.innerHeight - offsetTop - 12 - 38;
@@ -802,36 +766,39 @@ OMGMelodyMaker.prototype.setCanvasEvents = function () {
 }
 
 OMGMelodyMaker.prototype.ondown = function (touch) {
+    this.touches.push(touch);
     if (this.mode === "EDIT") {
-        return this.ondownInEditMode(touch);
+        this.ondownInEditMode(touch);
     }
     else if (this.mode === "ZOOM") {
-        return this.ondownInZoomMode(touch);
+        this.ondownInZoomMode(touch);
     }
     else {
         this.ondownInWriteMode(touch)
     }
+    this.drawCanvas();
 };
 
 
 OMGMelodyMaker.prototype.onmove = function (touch) {
     if (this.mode === "EDIT") {
-        return this.onmoveInEditMode(touch);
+        this.onmoveInEditMode(touch);
     }
     else if (this.mode === "ZOOM") {
-        return this.onmoveInZoomMode(touch);
+        this.onmoveInZoomMode(touch);
     }
     else {
         this.onmoveInWriteMode(touch)
     }
+    this.drawCanvas();
 };
 
 OMGMelodyMaker.prototype.onup = function (touch) {
     if (this.mode === "EDIT") {
-        return this.onupInEditMode(touch);
+        this.onupInEditMode(touch);
     }
     else if (this.mode === "ZOOM") {
-        return this.onupInZoomMode(touch);
+        this.onupInZoomMode(touch);
     }
     else {
         this.onupInWriteMode(touch)
@@ -839,6 +806,7 @@ OMGMelodyMaker.prototype.onup = function (touch) {
 
     var touchIndex = this.touches.indexOf(touch);
     this.touches.splice(touchIndex, 1);
+    this.drawCanvas();
 };    
 
 OMGMelodyMaker.prototype.ondownInWriteMode = function (touch) {
@@ -859,7 +827,6 @@ OMGMelodyMaker.prototype.ondownInWriteMode = function (touch) {
     touch.xsection = xsection;
     touch.note = note;
 
-    this.touches.push(touch);
     this.notes.push(note);    
     this.setTouchingXSection();
         
@@ -924,7 +891,6 @@ OMGMelodyMaker.prototype.ondownInEditMode = function (touch) {
         noteInfo.startingFret = fret;
         this.edittingNoteInfo = noteInfo;
         this.edittingNoteInfo.changed = false;
-        this.touches.push(touch);
     }
 };
 
@@ -969,8 +935,6 @@ OMGMelodyMaker.prototype.onupInEditMode = function (touch) {
     else {
         this.edittingNoteInfo = undefined;
     }
-    
-    this.drawCanvas();
 };
 
 
@@ -1012,55 +976,7 @@ OMGMelodyMaker.prototype.setTouchingXSection = function () {
 
 };
 
-
-OMGMelodyMaker.prototype.touchingBottomRow = function (x) {
-    var row = this.canvas.bottomRow;
-    for (var ib = 0; ib < row.length; ib++) {
-        if (row[ib].button && row[ib].leftX < x && row[ib].rightX > x) {
-            this.buttonTouched = row[ib];
-            break;
-        }
-    }
-    this.drawCanvas();
-};
-
-OMGMelodyMaker.prototype.moveBottomRow = function (x) {
-    var button;
-    var row = this.canvas.bottomRow;
-    for (var ib = 0; ib < row.length; ib++) {
-        if (row[ib].button && row[ib].leftX < x && row[ib].rightX > x) {
-            button = row[ib];
-            break;
-        }
-    }
-    if (!(button && this.buttonTouched && button == this.buttonTouched)) {
-        this.buttonTouched = undefined;
-    }
-    this.drawCanvas();
-};
-
-OMGMelodyMaker.prototype.finishBottomRow = function (x) {
-    var button;
-    var row = this.canvas.bottomRow;
-    for (var ib = 0; ib < row.length; ib++) {
-        if (row[ib].button && row[ib].leftX < x && row[ib].rightX > x) {
-            button = row[ib];
-            break;
-        }
-    }
-
-    if (button && this.buttonTouched && button == this.buttonTouched) {
-        if (button.onclick) {
-            button.onclick();
-        }
-    }
-    this.buttonTouched = undefined;
-    this.drawCanvas();
-};
-
-
 OMGMelodyMaker.prototype.ondownInEdittingDialog = function (touch) {
-    var button;
     var row;
     var rows = [this.canvas.noteButtonRow, this.canvas.restButtonRow, this.canvas.removeButtonRow];
     for (var ir = 0; ir < rows.length; ir++) {
@@ -1070,12 +986,10 @@ OMGMelodyMaker.prototype.ondownInEdittingDialog = function (touch) {
             if (row[ib].button && row[ib].leftX < touch.x && row[ib].rightX > touch.x &&
                     row[ib].topY < touch.y && row[ib].bottomY > touch.y) {
                 this.buttonTouched = row[ib];
-                this.touches.push(touch);
                 break;
             }
         }
     }
-    this.drawCanvas();
 };
 
 OMGMelodyMaker.prototype.onmoveInEdittingDialog = function (touch) {
@@ -1096,7 +1010,6 @@ OMGMelodyMaker.prototype.onmoveInEdittingDialog = function (touch) {
         console.log("tt")
         this.buttonTouched = undefined;
     }
-    this.drawCanvas();
 };
 
 
@@ -1125,8 +1038,6 @@ OMGMelodyMaker.prototype.onupInEdittingDialog = function (touch) {
     
     this.noteEdittingDialog = undefined;
     this.edittingNoteInfo = undefined;
-
-    this.drawCanvas();
 };
 
 
