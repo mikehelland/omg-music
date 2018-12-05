@@ -7,6 +7,8 @@ function OMusicPlayer() {
     p.playing = false;
     p.loadedSounds = {};
     p.downloadedSoundSets = {};
+    
+    p.latency = 20;
 
     if (!window.AudioContext)
         window.AudioContext = window.webkitAudioContext;
@@ -43,7 +45,6 @@ function OMusicPlayer() {
     p.setupFX();
 }
 
-
 OMusicPlayer.prototype.play = function (song) {
     var p = this;
     if (!p.context)
@@ -66,6 +67,9 @@ OMusicPlayer.prototype.play = function (song) {
     p.playing = true;
     p.loopStarted = Date.now();
     p.iSubBeat = 0;
+    
+    p.nextBeatTime = p.context.currentTime + (p.latency / 1000);
+    console.log(p.nextBeatTime - p.context.currentTime);
 
     //todo this bpm thing isn't consistent
     var beatParameters = p.song.data.beatParameters;
@@ -109,6 +113,8 @@ OMusicPlayer.prototype.play = function (song) {
                 console.log(ex);
             }
         }
+
+        p.nextBeatTime += p.subbeatLength / 1000;
 
         p.iSubBeat++;
         if (p.iSubBeat == beatsPerSection) {
@@ -182,12 +188,11 @@ OMusicPlayer.prototype.play = function (song) {
             p.playingIntervalHandle = setInterval(play, p.subbeatLength);
             p.newBPM = undefined;
         }
+        if (p.playing) {
+            setTimeout(play, (p.nextBeatTime - p.context.currentTime) * 1000 - p.latency)
+        }
     };
-
-    p.playingIntervalHandle = setInterval(play, p.subbeatLength);
-
-    // ??
-    p.songStarted = p.loopStarted;
+    play();
 
     if (typeof (p.onPlay) == "function") {
         p.onPlay();
@@ -535,7 +540,7 @@ OMusicPlayer.prototype.makeOsc = function (part) {
     part.osc.start(p.context.currentTime);
 
     part.osc.finishPart = function () {
-        part.osc.frequency.setValueAtTime(0, p.context.currentTime);
+        part.osc.frequency.setValueAtTime(0, p.nextBeatTime);
 
         //total hack, this is why things should be processed ala AudioContext, not our own thread
         /*setTimeout(function () {
@@ -879,14 +884,14 @@ OMusicPlayer.prototype.playNote = function (note, part) {
 
     if (!note || note.rest) {
         if (part.osc) {
-            part.osc.frequency.setValueAtTime(0, p.context.currentTime);
+            part.osc.frequency.setValueAtTime(0, p.nextBeatTime);
         }
         return;
     }
 
     if (part.osc) {
         var freq = p.makeFrequency(note.scaledNote) * part.data.audioParameters.warp;
-        part.osc.frequency.setValueAtTime(freq, p.context.currentTime);
+        part.osc.frequency.setValueAtTime(freq, p.nextBeatTime);
         part.playingI = part.currentI;
         var playingI = part.playingI;
         
@@ -896,7 +901,7 @@ OMusicPlayer.prototype.playNote = function (note, part) {
             if (part.osc && part.playingI == playingI) {
                 part.osc.frequency.setValueAtTime(0,
                         //p.subbeats * note.beats * p.subbeatLength * 0.85)
-                        p.context.currentTime);
+                        p.nextBeatTime);
             }
         }, p.song.data.beatParameters.subbeats * note.beats * p.subbeatLength * 0.85);
     }
@@ -948,7 +953,7 @@ OMusicPlayer.prototype.playSound = function (sound, part, audioParameters, stren
 
         source.playbackRate.value = warp;
 
-        source.start(p.context.currentTime);
+        source.start(p.nextBeatTime);
         
         return source;
     }

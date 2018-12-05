@@ -709,10 +709,11 @@ OMGMelodyMaker.prototype.setCanvasEvents = function () {
         }        
     };
     
-    canvas.onmouseout = function () {
+    canvas.onmouseout = function (e) {
+        e.preventDefault();
         if (omgmm.isMouseTouching) {
             omgmm.isMouseTouching = false;
-            omgmm.doneTouching();
+            omgmm.onup(omgmm.mouseTouch);
         }
     };
 
