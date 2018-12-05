@@ -587,9 +587,13 @@ OMusicPlayer.prototype.loadSound = function (sound, part) {
     if (!sound || !p.context) {
         return;
     }
-
     var key = sound;
     var url = sound;
+    
+    if (url.startsWith("http:")) {
+        url = sound.slice(5);
+    }
+
     if (sound.indexOf("PRESET_") == 0) {
         var preseturl;
         if (!p.dev) {
@@ -981,14 +985,7 @@ OMusicPlayer.prototype.getSound = function (soundSet, note) {
 
     //kinda hacky place for this
     note.sound = (soundSet.prefix || "") + soundSet.data[noteIndex].url + 
-            (soundSet.postfix || "");
-    if (note.sound.startsWith("http:")) {
-        note.sound = note.sound.slice(5);
-    }
-    if (note.sound.startsWith("https:")) {
-        note.sound = note.sound.slice(6);
-    }
-    
+            (soundSet.postfix || "");    
     
     return note.sound;
 };
