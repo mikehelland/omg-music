@@ -307,6 +307,10 @@ tg.drawPlayButton = function (subbeat) {
     measures = context.measureText(caption);
     context.fillText(caption, tg.playButton.width / 2 - measures.width / 2, 
                         tg.playButton.height / 2 + 10);
+                        
+    //context.font = "bold 10px sans-serif";
+    //context.fillText(tg.player.latencyMonitor, 10, tg.playButton.height / 2 + 10);
+
 };
 tg.player.onBeatPlayedListeners.push(function (isubbeat, isection) {
     tg.drawPlayButton(isubbeat);

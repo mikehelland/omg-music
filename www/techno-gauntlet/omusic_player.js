@@ -9,7 +9,7 @@ function OMusicPlayer() {
     p.downloadedSoundSets = {};
     
     p.latency = 20;
-
+    p.latencyMonitor = 0;
     if (!window.AudioContext)
         window.AudioContext = window.webkitAudioContext;
 
@@ -114,6 +114,7 @@ OMusicPlayer.prototype.play = function (song) {
             }
         }
 
+        var timeToPlay = p.nextBeatTime;
         p.nextBeatTime += p.subbeatLength / 1000;
 
         p.iSubBeat++;
@@ -180,6 +181,10 @@ OMusicPlayer.prototype.play = function (song) {
                     lastSection.parts[ils].osc.finishPart();
                 }
             }
+            if (p.negativeLatencyCounter > 0 && p.latency < 500) {
+                p.latency += 20;
+            }
+            p.negativeLatencyCounter = 0;
         }
 
         if (p.newBPM) {
@@ -191,6 +196,10 @@ OMusicPlayer.prototype.play = function (song) {
         if (p.playing) {
             setTimeout(play, (p.nextBeatTime - p.context.currentTime) * 1000 - p.latency)
         }
+        
+        p.latencyMonitor = Math.round((timeToPlay - p.context.currentTime) * 1000);
+        if (p.latencyMonitor < 0)
+            p.negativeLatencyCounter++
     };
     play();
 

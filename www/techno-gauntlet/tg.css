@@ -345,6 +345,10 @@ body {
 
 }
 
+#main-options-button {
+    flex-grow:0 !important; 
+}
+
 #main-fragment-user-button {
     flex-grow:0 !important;
 }
