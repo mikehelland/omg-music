@@ -106,7 +106,7 @@ body {
 }
 
 #key-button, #chords-button {
-	border-left:1px solid #AAAAAA;
+	border-left:1px solid #000088;
         cursor: pointer;
 }
 #beats-button {

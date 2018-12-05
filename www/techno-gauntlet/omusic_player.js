@@ -982,6 +982,13 @@ OMusicPlayer.prototype.getSound = function (soundSet, note) {
     //kinda hacky place for this
     note.sound = (soundSet.prefix || "") + soundSet.data[noteIndex].url + 
             (soundSet.postfix || "");
+    if (note.sound.startsWith("http:")) {
+        note.sound = note.sound.slice(5);
+    }
+    if (note.sound.startsWith("https:")) {
+        note.sound = note.sound.slice(6);
+    }
+    
     
     return note.sound;
 };
