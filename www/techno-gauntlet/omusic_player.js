@@ -114,6 +114,12 @@ OMusicPlayer.prototype.play = function (song) {
             }
         }
 
+        if (p.newBPM) {
+            clearInterval(p.playingIntervalHandle);
+            p.subbeatLength = 1000 / (p.newBPM / 60 * beatParameters.subbeats);
+            p.newBPM = undefined;
+        }
+
         var timeToPlay = p.nextBeatTime;
         p.nextBeatTime += p.subbeatLength / 1000;
 
@@ -190,12 +196,6 @@ OMusicPlayer.prototype.play = function (song) {
             p.negativeLatencyCounter = 0;
         }
 
-        if (p.newBPM) {
-            clearInterval(p.playingIntervalHandle);
-            p.subbeatLength = 1000 / (p.newBPM / 60 * beatParameters.subbeats);
-            p.playingIntervalHandle = setInterval(play, p.subbeatLength);
-            p.newBPM = undefined;
-        }
         if (p.playing) {
             setTimeout(play, (p.nextBeatTime - p.context.currentTime) * 1000 - p.latency)
         }
