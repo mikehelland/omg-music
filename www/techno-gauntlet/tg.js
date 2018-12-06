@@ -343,6 +343,7 @@ tg.showBeatsFragment = function () {
             bf.subbeatsLabel.innerHTML = bf.subbeatsRange.value;
             tg.song.data.beatParameters.subbeats = bf.subbeatsRange.value;
         };
+        bf.subbeatsRange.ontouchmove = onSubeatsChange;
         bf.subbeatsRange.onmousemove = onSubeatsChange;
         bf.subbeatsRange.onmousedown = onSubeatsChange;
         bf.subbeatsRange.onchange = onSubeatsChange;
@@ -350,6 +351,7 @@ tg.showBeatsFragment = function () {
             bf.beatsLabel.innerHTML = bf.beatsRange.value;
             tg.song.data.beatParameters.beats = bf.beatsRange.value;
         };
+        bf.beatsRange.ontouchmove = onBeatsChange;
         bf.beatsRange.onmousemove = onBeatsChange;
         bf.beatsRange.onmousedown = onBeatsChange;
         bf.beatsRange.onchange = onBeatsChange;
@@ -357,6 +359,7 @@ tg.showBeatsFragment = function () {
             bf.measuresLabel.innerHTML = bf.measuresRange.value;
             tg.song.data.beatParameters.measures = bf.measuresRange.value;
         };
+        bf.measuresRange.ontouchmove = onMeasuresChange;
         bf.measuresRange.onmousemove = onMeasuresChange;
         bf.measuresRange.onmousedown = onMeasuresChange;
         bf.measuresRange.onchange = onMeasuresChange;
@@ -366,6 +369,7 @@ tg.showBeatsFragment = function () {
             tg.player.newBPM = bf.bpmRange.value;
             tg.setSongControlsUI();
         };
+        bf.bpmRange.ontouchmove = onBpmChange;
         bf.bpmRange.onmousemove = onBpmChange;
         bf.bpmRange.onmousedown = onBpmChange;
         bf.bpmRange.onchange = onBpmChange;
@@ -373,6 +377,7 @@ tg.showBeatsFragment = function () {
             bf.shuffleLabel.innerHTML = bf.shuffleRange.value;
             tg.song.data.beatParameters.shuffle = bf.shuffleRange.value;
         };
+        bf.shuffleRange.ontouchmove = onShuffleChange;
         bf.shuffleRange.onmousemove = onShuffleChange;
         bf.shuffleRange.onmousedown = onShuffleChange;
         bf.shuffleRange.onchange = onShuffleChange;

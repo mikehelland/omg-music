@@ -123,12 +123,13 @@ OMusicPlayer.prototype.play = function (song) {
             p.iSubBeat = 0;
             p.loopStarted = Date.now();
 
+            var nextChord = false;
             if (p.song.sections[p.song.playingSection].data.chordProgression) {
                 p.currentChordI++;
                 if (p.currentChordI < p.song.sections[p.song.playingSection].data.chordProgression.length) {
                     p.rescaleSong(null, null,
                                 p.song.sections[p.song.playingSection].data.chordProgression[p.currentChordI]);
-                    return;
+                    nextChord = true;
                 }
                 else {
                     p.currentChordI = 0;
@@ -137,48 +138,50 @@ OMusicPlayer.prototype.play = function (song) {
                 }
             }
 
-            lastSection = p.song.sections[p.song.playingSection];
+            if (!nextChord) {
+                lastSection = p.song.sections[p.song.playingSection];
 
-            if (p.loopSection == -1) {
-                p.song.playingSection++;
-            }
-
-            if (p.nextUp) {
-                p.song = p.nextUp;
-                p.song.playingSection = 0;
-                p.nextUp = null;
-            }
-
-            nextSection = p.song.sections[p.song.playingSection];
-
-            if (p.song.playingSection >= p.song.sections.length) {
-                if (p.song.loop) {
-                    p.song.playingSection = 0;
-                    nextSection = p.song.sections[p.song.playingSection];
-                } else {
-                    p.stop();
-                    nextSection = undefined;
+                if (p.loopSection == -1) {
+                    p.song.playingSection++;
                 }
-            }
 
-            //cancel all oscilators that aren't used next section
-            //TODO make this work right
-            var usedAgain;
-            for (var ils = 0; ils < lastSection.parts.length; ils++) {
-                if (!lastSection.parts[ils].osc)
-                    continue;
+                if (p.nextUp) {
+                    p.song = p.nextUp;
+                    p.song.playingSection = 0;
+                    p.nextUp = null;
+                }
 
-                usedAgain = false;
-                if (nextSection) {
-                    for (var ins = 0; ins < nextSection.parts.length; ins++) {
-                        if (lastSection.parts[ils] == nextSection.parts[ins]) {
-                            usedAgain = true;
-                            break;
-                        }
+                nextSection = p.song.sections[p.song.playingSection];
+
+                if (p.song.playingSection >= p.song.sections.length) {
+                    if (p.song.loop) {
+                        p.song.playingSection = 0;
+                        nextSection = p.song.sections[p.song.playingSection];
+                    } else {
+                        p.stop();
+                        nextSection = undefined;
                     }
                 }
-                if (!usedAgain) {
-                    lastSection.parts[ils].osc.finishPart();
+
+                //cancel all oscilators that aren't used next section
+                //TODO make this work right
+                var usedAgain;
+                for (var ils = 0; ils < lastSection.parts.length; ils++) {
+                    if (!lastSection.parts[ils].osc)
+                        continue;
+
+                    usedAgain = false;
+                    if (nextSection) {
+                        for (var ins = 0; ins < nextSection.parts.length; ins++) {
+                            if (lastSection.parts[ils] == nextSection.parts[ins]) {
+                                usedAgain = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (!usedAgain) {
+                        lastSection.parts[ils].osc.finishPart();
+                    }
                 }
             }
             if (p.negativeLatencyCounter > 0 && p.latency < 500) {
