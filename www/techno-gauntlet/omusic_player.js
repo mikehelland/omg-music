@@ -69,26 +69,8 @@ OMusicPlayer.prototype.play = function (song) {
     p.iSubBeat = 0;
     
     p.nextBeatTime = p.context.currentTime + (p.latency / 1000);
-    console.log(p.nextBeatTime - p.context.currentTime);
 
-    //todo this bpm thing isn't consistent
     var beatParameters = p.song.data.beatParameters;
-    var beatsPerSection = beatParameters.beats * beatParameters.subbeats * 
-                                        beatParameters.measures;
-    if (beatParameters.bpm) {
-        p.subbeatLength = 1000 / (beatParameters.bpm / 60 * beatParameters.subbeats);
-    }
-    else if (beatParameters.subbeatMillis) {
-        p.subbeatLength = beatParameters.subbeatMillis;
-    }
-    else if (p.song.sections[0].data &&
-            p.song.sections[0].data.beatParameters &&
-            p.song.sections[0].data.beatParameters.subbeatMillis) {
-        p.subbeatLength = p.song.sections[0].data.beatParameters.subbeatMillis;
-    } 
-    else {
-        p.subbeatLength = 125;
-    }
 
     var lastSection;
     var nextSection;
@@ -98,6 +80,8 @@ OMusicPlayer.prototype.play = function (song) {
 
         if (!p.playing)
             return;
+
+        p.subbeatLength = 1000 / (beatParameters.bpm / 60 * beatParameters.subbeats);
 
         if (p.loopSection > -1 && p.loopSection < p.song.sections.length) {
             p.song.playingSection = p.loopSection;
@@ -114,17 +98,12 @@ OMusicPlayer.prototype.play = function (song) {
             }
         }
 
-        if (p.newBPM) {
-            clearInterval(p.playingIntervalHandle);
-            p.subbeatLength = 1000 / (p.newBPM / 60 * beatParameters.subbeats);
-            p.newBPM = undefined;
-        }
-
         var timeToPlay = p.nextBeatTime;
         p.nextBeatTime += p.subbeatLength / 1000;
 
         p.iSubBeat++;
-        if (p.iSubBeat == beatsPerSection) {
+        if (p.iSubBeat >= beatParameters.beats * beatParameters.subbeats * 
+                                        beatParameters.measures) {
 
             p.iSubBeat = 0;
             p.loopStarted = Date.now();
