@@ -48,6 +48,8 @@ function OMGDrumMachine(canvas, part, params) {
     
     this.left = 0;
     this.top = 0;
+    
+    this.fontHeight = 10;
 
     if (part) {
         this.setPart(part);
@@ -142,7 +144,8 @@ OMGDrumMachine.prototype.ondown = function (touch) {
     var trackI = Math.floor(y / this.captionHeight);
 
     if (column < 0) {
-        if (Date.now() - omgdrums.lastTrackNameClick < 700) {
+        if (Date.now() - omgdrums.lastTrackNameClick < 500 &&
+                omgdrums.lastTrackNameI === trackI) {
             var audioParameters = omgdrums.part.data.tracks[trackI].audioParameters;
             audioParameters.mute = !audioParameters.mute;
         }
@@ -154,6 +157,7 @@ OMGDrumMachine.prototype.ondown = function (touch) {
         }
         this.setRowColumnSizes();
         omgdrums.lastTrackNameClick = Date.now();
+        omgdrums.lastTrackNameI = trackI;
     } else {
 
         omgdrums.part.saved = false;
@@ -338,26 +342,29 @@ OMGDrumMachine.prototype.drawTrackView = function (subbeat) {
 
 OMGDrumMachine.prototype.drawCaptions = function () {
     for (var i = 0; i < this.info.length; i++) {
+        
+        if (this.info[i].i === this.selectedTrack) {
+            this.ctx.fillStyle = this.foreColor;
+            this.ctx.fillRect(this.left, this.top + i * this.captionHeight, 
+                    this.captionWidth, this.captionHeight);
 
+        }
         if (this.info[i].track.audioParameters.mute) {
             this.ctx.globalAlpha = 0.6;
             this.ctx.fillStyle = "#880000";
             this.ctx.fillRect(this.left, this.top + i * this.captionHeight, 
                                 this.captionWidth, this.captionHeight);
-            this.ctx.globalAlpha = 1;        }
-        
-        if (this.info[i].i === this.selectedTrack) {
-            this.ctx.strokeStyle = this.foreColor;
-            this.ctx.strokeRect(this.left, this.top + i * this.captionHeight, 
-                    this.captionWidth, this.captionHeight);
-
+            this.ctx.globalAlpha = 1;        
         }
         
-        this.ctx.fillStyle = this.foreColor;
-        if (this.info[i].width  > 0) {
-            this.ctx.fillText(this.info[i].caption, 
-                this.left + this.captionWidth / 2 - this.info[i].width / 2, 
-                this.top + this.captionHeight * (i + 0.5) + 6);
+        this.ctx.fillStyle = this.info[i].i === this.selectedTrack ? this.beatColor : this.foreColor;
+        for (var w = 0; w < this.info[i].captionWords.length; w++) {
+            if (this.info[i].captionWords[w].width  > 0) {
+                this.ctx.fillText(this.info[i].captionWords[w].caption, 
+                    this.left + this.captionWidth / 2 - this.info[i].captionWords[w].width / 2, 
+                    this.top + this.captionHeight * i + this.info[i].captionWords[w].y);
+                    //this.top + this.captionHeight * (i + 0.5) + this.fontHeight / 2);
+            }            
         }
     }
 };
@@ -376,19 +383,18 @@ OMGDrumMachine.prototype.setInfo = function () {
     this.info = [];
     var longestCaptionWidth = 0;
 
+    var words;
+    var info;
     for (var i = 0; i < this.drumbeat.tracks.length; i++) {
-        if (this.drumbeat.tracks[i].sound) {
-            var width = this.ctx.measureText(this.drumbeat.tracks[i].name).width
-            if (this.captionWidth === undefined && this.drumbeat.tracks[i].name.length > 0) {
-                longestCaptionWidth = Math.max(longestCaptionWidth, width);
-            }
-            this.info.push({
-                caption: this.drumbeat.tracks[i].name, 
-                width: width,
-                track: this.drumbeat.tracks[i],
-                i: i
-            });
+        if (!this.drumbeat.tracks[i].sound) {
+            continue;
         }
+        
+        this.info.push({captionWords: [],
+            name: this.drumbeat.tracks[i].name, 
+            track: this.drumbeat.tracks[i],
+            i: i
+        });
     }
 
     if (!this.info.length) {
@@ -401,6 +407,23 @@ OMGDrumMachine.prototype.setInfo = function () {
     this.rowHeight = this.captionHeight;
     this.rowHeightTrack = this.canvas.height / (this.totalBeats);
     this.columnWidthTrack = (this.width - this.captionWidth) / this.beatParameters.subbeats;
+
+
+    for (i = 0; i < this.info.length; i++) {
+        var words = this.info[i].name.split(" ");
+        for (var w = 0; w < words.length; w++) {
+            var width = this.ctx.measureText(words[w]).width;
+            //if (this.captionWidth === undefined && this.info[i].words.length > 0) {
+            //    longestCaptionWidth = Math.max(longestCaptionWidth, width);
+            //}
+            this.info[i].captionWords.push({
+                y: this.getCaptionY(w, words.length),
+                caption: words[w], 
+                width: width
+            });
+        }
+
+    }
 
     if (this.captionWidth === undefined) {
         this.captionWidth = Math.min(this.canvas.width * 0.2, 50, longestCaptionWidth + 4);
@@ -417,3 +440,13 @@ OMGDrumMachine.prototype.setRowColumnSizes = function () {
         this.rowHeight = this.canvas.height / (this.totalBeats);
     }
 };
+
+OMGDrumMachine.prototype.getCaptionY = function (i, length) {
+    if (length <= 1) {
+        return this.captionHeight * 0.5 + this.fontHeight / 2;
+    }
+    if (length === 2) {
+        return this.captionHeight * 0.5 + i * this.fontHeight;
+    }
+    return this.captionHeight * (i + 1) / length - this.fontHeight / 2;
+}
