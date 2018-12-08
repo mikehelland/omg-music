@@ -214,11 +214,6 @@ OMusicEditor.prototype.setupPartDiv = function (part) {
     }
     var surface = part.data.surface.url;
 
-    if (type == "CHORDPROGRESSION") {
-        //todo might show this thing?
-        return;
-    }
-
     if (part.controls) {
         debug("setupPartDiv: We are already setup!");
         return;
@@ -304,11 +299,6 @@ OMusicEditor.prototype.setupDivForDrumbeat = function (part) {
 
     part.canvas = canvas;
 
-    canvas.update = function (isubbeat) {
-        bam.drawDrumCanvas(part, isubbeat);
-    };
-    canvas.update();
-
     canvas.style.cursor = "pointer";
     canvas.onclick = function () {
 
@@ -330,8 +320,18 @@ OMusicEditor.prototype.setupDivForDrumbeat = function (part) {
 
     part.isNew = false;
 
-    part.ui = new OMGDrumMachine(canvas, part);
-}
+    var params = {};
+    params.foreColor = "black";
+    params.downbeatColor = "#A0A0A0";
+    params.beatColor = "#C0C0C0";
+
+    part.ui = new OMGDrumMachine(canvas, part, params);
+    
+    canvas.update = function (isubbeat, y, z) {
+        part.ui.setInfo();
+        part.ui.draw(isubbeat);
+    };
+};
 
 OMusicEditor.prototype.setupMelodyDiv = function (part) {
     var bam = this;
@@ -346,13 +346,8 @@ OMusicEditor.prototype.setupMelodyDiv = function (part) {
 
     part.canvas.style.width = part.canvas.parentElement.clientWidth - 10 + "px";
     part.canvas.width = part.canvas.clientWidth;
-
-    try {
-        omg.ui.drawMelodyCanvas({data: part.data, canvas: part.canvas});
-    } catch (exp) {
-        debug("error drawing melody canvas");
-        debug(exp);
-    }
+    part.ui = new OMGMelodyMaker(part.canvas, part, bam.player);
+    part.ui.highContrast = false;
 
     var beatMarker = document.createElement("div");
     var offsetLeft;
@@ -384,6 +379,7 @@ OMusicEditor.prototype.setupMelodyDiv = function (part) {
         } else {
             beatMarker.style.display = "none";
         }
+        part.ui.draw(isubbeat);
     };
 
     div.beatMarker = beatMarker;
@@ -653,13 +649,13 @@ OMusicEditor.prototype.setupSectionEditor = function () {
             callback = function () {
                 if (typeof oldCallback === "function") 
                     oldCallback();
-                bam.mm.ui.setPart(bam.part);
+                //bam.mm.ui.setPart(bam.part);
             };
-            bam.part.ui = bam.mm.ui;
-            bam.fadeIn([bam.mm], function () {
+//            bam.part.ui = bam.mm.ui;
+            //bam.fadeIn([bam.mm], function () {
                 
-            });
-            fadeList.push(bam.part.controls);
+            //});
+            //fadeList.push(bam.part.controls);
         }
 
         bam.fadeOut(fadeList);
@@ -685,7 +681,7 @@ OMusicEditor.prototype.setupSectionEditor = function () {
             }
             if (part.ui) {
                 part.ui.readOnly = false;
-                part.ui.refresh();
+                part.ui.draw();
             }
             part.div.style.zIndex = "auto";
         }, children);
@@ -777,6 +773,7 @@ OMusicEditor.prototype.setupSectionAddButtons = function (buttonGroup) {
         var newdiv = bam.createElementOverElement("part2", melodyButton, bam.bbody);
 
         var newPart = new OMGPart(newdiv, null, bam.section);
+        bam.player.loadPart(newPart);
         //newPart.section = bam.section;
         newPart.data.partType = "MELODY";
         //newPart.position = bam.section.parts.length;
@@ -794,12 +791,14 @@ OMusicEditor.prototype.setupSectionAddButtons = function (buttonGroup) {
         newdiv.style.display = "block";
         newdiv.style.zIndex = "1";
 
+        bam.setupPartDiv(newPart);
+
         bam.fadeOut([bam.sectionEditor]);
-        bam.grow(newPart.div, function () {
+        bam.sectionEditor.growPart(newPart, function () {
             newdiv.style.zIndex = "auto";
-            bam.mm.setPart(newPart);
+            //bam.mm.setPart(newPart);
         });
-        bam.fadeIn([bam.mm]);
+        //bam.fadeIn([bam.mm]);
 
     };
 
@@ -812,6 +811,7 @@ OMusicEditor.prototype.setupSectionAddButtons = function (buttonGroup) {
         var newdiv = bam.createElementOverElement("part2", bassButton, bam.bbody);
 
         var newPart = new OMGPart(newdiv, null, bam.section);
+        bam.player.loadPart(newPart);
         newPart.data.partType = "BASSLINE";
         newPart.data.soundsetURL = "PRESET_BASS";
         newPart.data.soundsetURL = "PRESET_OSC_SAW";
@@ -830,11 +830,11 @@ OMusicEditor.prototype.setupSectionAddButtons = function (buttonGroup) {
         bam.part = newPart;
 
         bam.fadeOut([bam.sectionEditor]);
-        bam.grow(newPart.div, function () {
+        bam.sectionEditor.growPart(newPart, function () {
             newdiv.style.zIndex = "auto";
-            bam.mm.setPart(newPart);
+            //bam.mm.setPart(newPart);
         });
-        bam.fadeIn([bam.mm]);
+        //bam.fadeIn([bam.mm]);
 
     };
 
@@ -847,6 +847,7 @@ OMusicEditor.prototype.setupSectionAddButtons = function (buttonGroup) {
         var newdiv = bam.createElementOverElement("part2", drumButton, bam.bbody);
 
         var newPart = new OMGPart(newdiv, OMGPart.prototype.defaultDrumPart(), bam.section)
+        bam.player.loadPart(newPart);
         newPart.data.partType = "DRUMBEAT";
 
         var otherParts = [bam.section.chordsView];
@@ -860,7 +861,7 @@ OMusicEditor.prototype.setupSectionAddButtons = function (buttonGroup) {
         newdiv.style.display = "block";
         bam.part = newPart;
 
-        bam.setupPartDiv(newPart)
+        bam.setupPartDiv(newPart);
 
         bam.fadeOut([bam.sectionEditor]);
         bam.sectionEditor.growPart(newPart);
@@ -1183,35 +1184,34 @@ OMusicEditor.prototype.load = function (params) {
                 });
             }
         }
-        bam.setupPartDiv(bam.part);
-        bam.part.div.style.display = "block";
-        bam.part.controls.style.marginLeft = "10%";
-        bam.part.controls.style.width = "80%";
-        bam.part.controls.style.height = bam.windowHeight - 
-                            bam.part.canvas.offsetTop - 15 + "px";
-        bam.part.canvas.width = bam.part.controls.clientWidth;
-        bam.part.canvas.height = bam.part.controls.clientHeight;
-        bam.part.canvas.style.width = bam.part.canvas.width + "px";
-        bam.part.canvas.style.height = bam.part.canvas.height + "px";
-        bam.part.ui.refresh();
-        bam.part.canvas.omusic_refresh();
-        bam.part.ui.readOnly = false;
-
-        bam.fadeIn([bam.part.div], function () {
-            loadPartCallback();
-        });
     } else {
-        var welcome = false;
         if (params.dataToLoad) {
             bam.part = new OMGPart(newDiv, params.dataToLoad, bam.section);
         } else {
             bam.part = new OMGPart(newDiv, null, bam.section);
             bam.part.data.partType = params.type;
-            welcome = true;
         }
-        bam.fadeIn([bam.part.div, bam.mm], loadPartCallback);
-        bam.mm.setPart(bam.part, welcome);
     }
+
+
+    bam.setupPartDiv(bam.part);
+    bam.part.div.style.display = "block";
+    bam.part.controls.style.marginLeft = "10%";
+    bam.part.controls.style.width = "80%";
+    bam.part.controls.style.height = bam.windowHeight - 
+                        bam.part.canvas.offsetTop - 15 + "px";
+    bam.part.canvas.width = bam.part.controls.clientWidth;
+    bam.part.canvas.height = bam.part.controls.clientHeight;
+    bam.part.canvas.style.width = bam.part.canvas.width + "px";
+    bam.part.canvas.style.height = bam.part.canvas.height + "px";
+    //bam.part.canvas.omusic_refresh();
+    bam.part.ui.readOnly = false;
+
+    bam.fadeIn([bam.part.div], function () {
+        loadPartCallback();
+        bam.part.ui.draw();
+    });
+    bam.player.loadPart(bam.part);
 
     if (typeof bam.onzonechange === "function")
         bam.onzonechange(bam.part);
@@ -1346,7 +1346,7 @@ OMusicEditor.prototype.clear = function () {
 
     bam.songEditor.style.display = "none";
     bam.sectionEditor.style.display = "none";
-    bam.mm.style.display = "none";
+    //bam.mm.style.display = "none";
 
     bam.song.div.innerHTML = "";
     bam.section = undefined;
@@ -1429,25 +1429,6 @@ function rescale(part, rootNote, scale) {
 
 }
 
-
-OMusicEditor.prototype.drawDrumCanvas = function (part, subbeat) {
-
-    if (part.data.tracks.length == 0)
-        return;
-
-    var params = {};
-    params.part = part;
-    params.canvas = part.canvas;
-    params.subbeat = subbeat;
-    params.songData = this.song.data;
-    params.foreColor = "black";
-    params.downbeatColor = "#A0A0A0";
-    params.beatColor = "#C0C0C0";
-
-    omg.ui.drawDrumCanvas(params);
-
-}
-
 OMusicEditor.prototype.getSelectInstrumentOptions = function (partData) {
     var type = partData;
     var select = "";
@@ -1485,7 +1466,7 @@ function debug(out) {
 OMusicEditor.prototype.setupMelodyMaker = function () {
     var bam = this;
 
-    bam.mm = document.createElement("div");
+    /*bam.mm = document.createElement("div");
     bam.mm.className = "area";
     bam.bbody.appendChild(bam.mm);
 
@@ -1520,18 +1501,14 @@ OMusicEditor.prototype.setupMelodyMaker = function () {
 
     bam.mm.setPart = function (part, welcomeStyle) {
 
-        /*if (welcomeStyle)
-         bam.mm.caption.style.opacity = 0;
-         else
-         bam.mm.caption.style.opacity = 1;
-         */
         bam.mm.ui.setPart(part, welcomeStyle);
 
         if (typeof bam.onzonechange == "function") {
             bam.onzonechange(part);
         }
     };
-
+    */
+    bam.mm = {};
     bam.mm.playButtonClick = function () {
         if (bam.player.playing) {
             bam.player.stop();
@@ -1579,8 +1556,8 @@ OMusicEditor.prototype.setupMelodyMaker = function () {
             bam.setupPartDiv(part);
 
             var otherParts = [];
-            if (part.data.partType !== "DRUMBEAT")
-                otherParts.push(part.controls);
+            //if (part.data.partType !== "DRUMBEAT")
+            //    otherParts.push(part.controls);
             var otherPart;
             var otherPartsList = bam.section.div
                     .getElementsByClassName("part2");
@@ -1598,16 +1575,11 @@ OMusicEditor.prototype.setupMelodyMaker = function () {
             bam.arrangeParts();
         };
 
+        bam.part.ui.readOnly = true;
         if (surface == "PRESET_SEQUENCER") {
-            bam.part.ui.readOnly = true;
-            bam.part.canvas.omgdata.selectedTrack = -1;
-            
-            shrinkPart();
-        } else {
-            //todo not fade out the whole melody maker, just the edit parts
-            bam.fadeOut([bam.mm], shrinkPart);
-            bam.mm.playAfterAnimation = false;
+            bam.part.ui.selectedTrack = -1;
         }
+        shrinkPart();
     };
 
     //TODO not used, use it, or lose it
@@ -1624,7 +1596,7 @@ OMusicEditor.prototype.setupMelodyMaker = function () {
             bam.part.data.notes = [];
             bam.mm.lastNewNote = 0;
             bam.mm.ui.canvas.mode = "APPEND";
-            bam.mm.ui.drawCanvas();
+            bam.mm.ui.draw();
 
         }
     };
@@ -1701,8 +1673,8 @@ OMusicEditor.prototype.grow = function (div, callback, children) {
                     child.canvas.style.height = child.height + "px";
                     child.canvas.width = child.width;
                     child.canvas.height = child.height;
-                    if (child.canvas.omusic_refresh) {
-                        child.canvas.omusic_refresh();
+                    if (child.canvas.update) {
+                        child.canvas.update(child.width, child.height);
                     }
                 }
             });
@@ -1862,8 +1834,8 @@ OMusicEditor.prototype.arrangeParts = function (callback) {
                 child.controls.style.marginLeft = child.canvasOriginalX
                                 - child.canvasOriginalX * now + "px";
 
-                if (typeof (child.canvas.omusic_refresh) === "function") {
-                    child.canvas.omusic_refresh(cwidth, cheight - child.canvas.offsetTop);
+                if (typeof (child.canvas.update) === "function") {
+                    child.canvas.update(cwidth, cheight - child.canvas.offsetTop);
                 }
             }
         }
@@ -2018,8 +1990,8 @@ OMusicEditor.prototype.arrangeSections = function (callback, animLength) {
                         gchild.canvas.width = gwidth;
                         gchild.canvas.height = gheight;
 
-                        if (gchild.canvas.omusic_refresh)
-                            gchild.canvas.omusic_refresh(gwidth, gheight);
+                        if (gchild.canvas.update)
+                            gchild.canvas.update(gwidth, gheight);
 
                     }
                 }
@@ -2644,15 +2616,7 @@ OMusicEditor.prototype.songZoneBeatPlayed = function (isubbeat, isection) {
 OMusicEditor.prototype.partZoneBeatPlayed = function (isubbeat) {
     var bam = this;
 
-    //dec2017, I think partType is the way to go
-    if (bam.part.data.type == "DRUMBEAT" ||
-            bam.part.data.partType == "DRUMBEAT" ||
-            bam.part.data.surfaceURL == "PRESET_SEQUENCER") {
-        bam.part.canvas.omusic_refresh(isubbeat);
-    } else {
-        bam.mm.ui.drawCanvas();
-
-    }
+    bam.part.canvas.update(isubbeat);
 };
 
 OMusicEditor.prototype.sectionZoneBeatPlayed = function (isubbeat) {
@@ -2972,7 +2936,7 @@ OMusicEditor.prototype.setupSelectInstrument = function (part) {
         
         if (part.data.partType === "DRUMBEAT") {
             bam.player.setupDrumPartWithSoundSet(soundset, part, true);
-            part.canvas.omusic_refresh();
+            part.canvas.update();
         } else {
             bam.player.setupPartWithSoundSet(soundset, part, true);
         }

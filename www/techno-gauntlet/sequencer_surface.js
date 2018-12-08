@@ -43,6 +43,9 @@ function OMGDrumMachine(canvas, part, params) {
     this.foreColor = params.foreColor || "white";
     this.downbeatColor = params.downbeatColor || "#333333";
     this.beatColor = params.beatColor || "#111111";
+    if (typeof params.captionWidth === "number") {
+        this.captionWidth = params.captionWidth;
+    }
 
     this.selectedTrack = -1;
     
@@ -249,7 +252,7 @@ OMGDrumMachine.prototype.draw = function (subbeat) {
     if (!this.info) {
         this.setInfo();
     }
-    
+
     this.canvas.width = this.width;
     
     this.drawCaptions();
@@ -356,7 +359,7 @@ OMGDrumMachine.prototype.drawCaptions = function () {
                                 this.captionWidth, this.captionHeight);
             this.ctx.globalAlpha = 1;        
         }
-        
+
         this.ctx.fillStyle = this.info[i].i === this.selectedTrack ? this.beatColor : this.foreColor;
         for (var w = 0; w < this.info[i].captionWords.length; w++) {
             if (this.info[i].captionWords[w].width  > 0) {
@@ -402,6 +405,9 @@ OMGDrumMachine.prototype.setInfo = function () {
         return;
     }
 
+    if (this.captionWidth === undefined) {
+        this.captionWidth = this.canvas.width / 8; //, longestCaptionWidth + 4);
+    }
     this.columnWidth = (this.width - this.captionWidth) / this.totalSubbeats;
     this.captionHeight = this.canvas.height / this.info.length;
     this.rowHeight = this.captionHeight;
@@ -423,10 +429,6 @@ OMGDrumMachine.prototype.setInfo = function () {
             });
         }
 
-    }
-
-    if (this.captionWidth === undefined) {
-        this.captionWidth = Math.min(this.canvas.width * 0.2, 50, longestCaptionWidth + 4);
     }
 };
 

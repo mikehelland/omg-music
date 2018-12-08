@@ -355,10 +355,6 @@ OMusicPlayer.prototype.playBeat = function (section, iSubBeat) {
 
 OMusicPlayer.prototype.playBeatForPart = function (iSubBeat, part) {
     var p = this;
-    if (part.data.type == "CHORDPROGRESSION") {
-        //TODO should this really be in here? As a part that is?
-        return;
-    }
 
     if (!part.loaded) {
         p.loadPart(part);
@@ -1537,7 +1533,6 @@ OMusicPlayer.prototype.makeFXNodeForPart = function (fx, part) {
         }
         else {
             if (part.osc) {
-                console.log(part.topAudioNode)
                 part.osc.disconnect(part.topAudioNode);
                 part.osc.connect(fxNode);
             }

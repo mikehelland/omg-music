@@ -97,7 +97,7 @@ tg.instrument.setMode = function (mode) {
     }
     
     this.mm.mode = mode;
-    this.mm.drawCanvas();
+    this.mm.draw();
 };
 
 tg.instrument.setup = function () {
@@ -117,7 +117,7 @@ tg.instrument.setup = function () {
     };
     
     tg.instrument.onBeatPlayedListener = function (isubbeat, isection) {
-        tg.instrument.mm.drawCanvas(isubbeat);
+        tg.instrument.mm.draw(isubbeat);
     };
 };
 tg.instrument.setup();
@@ -129,7 +129,7 @@ tg.instrument.show = function (omgpart) {
     tg.player.onBeatPlayedListeners.push(tg.instrument.onBeatPlayedListener);
 
     tg.currentFragment = tg.sequencer;
-    tg.instrument.mm.drawCanvas();
+    tg.instrument.mm.draw();
     tg.instrument.setMode("WRITE");
 };
 
@@ -265,7 +265,6 @@ tg.drawPlayButton = function (subbeat) {
     var context = tg.playButton.getContext("2d");
 
     if (!tg.song) {
-        console.log("draw loading");
         context.fillStyle = "white";
         context.font = "bold 30px sans-serif";
         var caption = "LOADING...";
