@@ -416,7 +416,7 @@ OMGDrumMachine.prototype.setInfo = function () {
 
 
     for (i = 0; i < this.info.length; i++) {
-        var words = this.info[i].name.split(" ");
+        var words = (this.info[i].name || "").split(" ");
         for (var w = 0; w < words.length; w++) {
             var width = this.ctx.measureText(words[w]).width;
             //if (this.captionWidth === undefined && this.info[i].words.length > 0) {

@@ -77,7 +77,7 @@ return `<!DOCTYPE html>
    <script>
    setupUserControls(document.getElementsByClassName("title-bar-user-controls")[0]);
    omg.setupShareWindow();
-   var id = omg.server.getQueryString().id
+   var id = omg.util.getPageParams().id
    omg_embedded_viewer_loadId({div: document.getElementById("omgviewer"), id: id,
 		height: window.innerHeight - 44 - 250});
    </script>

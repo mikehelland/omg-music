@@ -101,23 +101,26 @@ function omg_embedded_viewer_loadData(params) {
     omg.ui.omgUrl = "omg-music/";
     omg.ui.setupNoteImages();
 
-    viewer.loadSong = function (data) {
+    viewer.loadSong = function (song) {
         var flexDiv = document.createElement("div");
         flexDiv.className = "omg-song-data";
         flexDiv.style.height = height + "px";
         viewer.div.appendChild(flexDiv);
 
-        data.sections.forEach(function (section, isection) {
+        song.sections.forEach(function (section, isection) {
             var sectionDiv = document.createElement("div");
             sectionDiv.className = "omg-section-data";
             flexDiv.appendChild(sectionDiv);
             //section.div = sectionDiv;
             viewer.loadSection(sectionDiv, section);
         });
-        viewer.drawSectionCanvases(data);
+        setTimeout(function () {
+            viewer.drawSectionCanvases(song);
+        }, 1000);
+        
     };
-    viewer.drawSectionCanvases = function (data) {
-        data.sections.forEach(function (section, isection) {
+    viewer.drawSectionCanvases = function (song) {
+        song.sections.forEach(function (section, isection) {
             viewer.drawPartsCanvases(section);
         });
     };
@@ -134,41 +137,54 @@ function omg_embedded_viewer_loadData(params) {
     };
     viewer.loadSection = function (div, section) {
         section.parts.forEach(function (part) {
-            viewer.loadPart(div, part);
+            part.div = document.createElement("div");
+            part.div.className = "omg-part";
+            div.appendChild(part.div);
+
+        });
+                            
+        //viewer.loadPart(div, part);
+
+        var height = section.parts[0].div.clientHeight;
+        var width = section.parts[0].div.clientWidth;
+
+        section.parts.forEach(function (part) {
+            part.canvas = document.createElement("canvas");
+            part.canvas.width = 0;
+            part.canvas.height = 0;
+            part.canvas.className = "omg-viewer-part-canvas";
+            part.div.appendChild(part.canvas);
+
+            //part.div.height = height;
+            //part.div.width = width;
         });
     };
     viewer.loadPart = function (div, part) {
-        var partDiv = document.createElement("canvas");
-        part.div = partDiv;
-        if (!part.mute) {
-            partDiv.height = 1;
-            partDiv.width = 1;
-            partDiv.className = "omg-part";
-        } else {
-            partDiv.height = 1;
-            partDiv.width = 1;
-            partDiv.className = "omg-part-muted";
-        }
-        div.appendChild(partDiv);
 
     };
     viewer.drawPart = function (part, width, height) {
         var partDiv = part.div;
-        partDiv.height = partDiv.clientHeight;
-        partDiv.width = partDiv.clientWidth - 16;
+
+
+        part.canvas.height = part.canvas.clientHeight;
+        part.canvas.width = part.canvas.clientWidth - 16;
 
         var params = {};
         params.canvas = partDiv;
         params.keepCanvasDirty = true; // so each part doesn't clear the rest
         params.data = part; //part.data;
 
-        if (params.data.surfaceURL === "PRESET_SEQUENCER" ||
-                (params.data.surface && params.data.surface.url === "PRESET_SEQUENCER")) {
-            params.captionWidth = 0;
-            omg.ui.drawDrumCanvas(params);
-        } else {
-            omg.ui.drawMelodyCanvas(params);
+        if (!part.ui) {
+            if (part.data.surface.url === "PRESET_SEQUENCER") {
+                part.ui = new OMGDrumMachine(part.canvas, part)
+                part.ui.captionWidth = 0;
+                part.ui.highContrast = false;
+            } else {
+                part.ui = new OMGMelodyMaker(part.canvas, part)
+                part.ui.highContrast = false;
+            }            
         }
+        part.ui.draw();
     };
 
     viewer.loadPlayer = function (dataToPlay) {
@@ -182,7 +198,8 @@ function omg_embedded_viewer_loadData(params) {
             viewer.div.className = "omg-soundset";
         } else {
             viewer.player = new OMusicPlayer();
-            var info = viewer.player.prepare(dataToPlay);
+            viewer.song = viewer.player.makeOMGSong(dataToPlay);
+            var info = viewer.player.prepareSong(viewer.song);
             if (!info) {
                 console.log("couldn't prepare data");
                 console.log(dataToPlay);
@@ -193,11 +210,11 @@ function omg_embedded_viewer_loadData(params) {
 
         if (dataToPlay.type === "SONG") {
             viewer.div.className = "omg-song";
-            viewer.loadSong(dataToPlay);
+            viewer.loadSong(viewer.song);
         }
         if (dataToPlay.type === "SECTION") {
             viewer.div.className = "omg-section";
-            var section = dataToPlay;
+            var section = viewer.song.sections[0]; //dataToPlay;
 
             var flexDiv = document.createElement("div");
             flexDiv.className = "omg-section-data";
@@ -208,11 +225,9 @@ function omg_embedded_viewer_loadData(params) {
             viewer.drawPartsCanvases(section);
 
         }
-        if (dataToPlay.type === "PART" ||
-                dataToPlay.type === "MELODY" || dataToPlay.type === "BASSLINE" ||
-                dataToPlay.type === "DRUMBEAT") {
+        if (dataToPlay.type === "PART") {
             viewer.div.className = "omg-part-data";
-            var part = dataToPlay; //viewer.omgsong.sections[0].parts[0];
+            var part = viewer.song.sections[0].parts[0];
             viewer.loadPart(viewer.div, part);
             part.div.style.width = viewer.div.clientWidth - 16 + "px";
             part.div.style.height = height + "px";

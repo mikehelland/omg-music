@@ -109,10 +109,12 @@
 			<a href="#most-recent" id="select-recent-area-button" class="select-area-button">Most Recent</a>
 		</div>
 		
-		<script src="omg-music/omusic_partsui.js"></script>
-		<script src="omg-music/omusic_player_new.js"></script>
+		<script src="omg-music/sequencer_surface.js"></script>
+                <script src="omg-music/vertical_surface.js"></script>
+		<script src="omg-music/tuna-min.js"></script>
+                <script src="omg-music/omusic_player.js"></script>
 		<script src="js/omgservice.js"></script>
-		<script src="js/embedded_viewer.js"></script>
+		<script src="js/embedded_viewer2.js"></script>
 		
 		<div id="featured-area" class="frontpage-area">
 
@@ -177,7 +179,7 @@ fpa.showFeatureArea = function () {
 	fpa.featureArea.style.display = "block";
 
 	if (!fpa.loadedFeaturedArea) {
-		omg_embedded_viewer_loadId({id: 570, height: 80,
+		/*omg_embedded_viewer_loadId({id: 570, height: 80,
                         div: document.getElementById("song-example"), 
                         onPlay: fpa.onPlay, onStop: fpa.onStop});
 		omg_embedded_viewer_loadId({id: 622, height: 80,
@@ -185,8 +187,22 @@ fpa.showFeatureArea = function () {
                         onPlay: fpa.onPlay, onStop: fpa.onStop});
 		omg_embedded_viewer_loadId({id: 791, height: 80,
                         div: document.getElementById("melody-example"), 
-                        onPlay: fpa.onPlay, onStop: fpa.onStop});
-		fpa.loadedFeaturedArea = true;
+                        onPlay: fpa.onPlay, onStop: fpa.onStop});*/
+            omg.server.getId(570, song => new OMGEmbeddedViewer({id: 570, height: 80,
+                        data: song,
+                        div: document.getElementById("song-example"), 
+                        onPlay: fpa.onPlay, onStop: fpa.onStop})
+                    );
+            omg.server.getId(622, song => new OMGEmbeddedViewer({id: 570, height: 80,
+                        data: song,
+                        div: document.getElementById("drumbeat-example"), 
+                        onPlay: fpa.onPlay, onStop: fpa.onStop})
+                    );
+            omg.server.getId(791, song => new OMGEmbeddedViewer({id: 570, height: 80,
+                        data: song,
+                        div: document.getElementById("melody-example"), 
+                        onPlay: fpa.onPlay, onStop: fpa.onStop})
+                    );
 	}
 };
 fpa.showRecentArea = function () {

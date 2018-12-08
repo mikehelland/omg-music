@@ -6,8 +6,10 @@ function OMusicPlayer() {
 
     p.playing = false;
     p.loadedSounds = {};
-    p.downloadedSoundSets = [];
-
+    p.downloadedSoundSets = {};
+    
+    p.latency = 20;
+    p.latencyMonitor = 0;
     if (!window.AudioContext)
         window.AudioContext = window.webkitAudioContext;
 
@@ -15,7 +17,7 @@ function OMusicPlayer() {
         p.context = new AudioContext();
         if (!p.context.createGain)
             p.context.createGain = p.context.createGainNode;
-
+        p.tuna = new Tuna(p.context);
     } catch (e) {
         var nowebaudio = document.getElementById("no-web-audio");
         if (nowebaudio)
@@ -39,8 +41,9 @@ function OMusicPlayer() {
     p.nextUp = null;
 
     p.loopSection = -1;
+    
+    p.setupFX();
 }
-
 
 OMusicPlayer.prototype.play = function (song) {
     var p = this;
@@ -54,7 +57,6 @@ OMusicPlayer.prototype.play = function (song) {
     }
 
     // if there is no song already here, this'll blow
-
     p.song.playingSection = 0;
 
     if (!p.song.sections || !p.song.sections.length) {
@@ -65,32 +67,21 @@ OMusicPlayer.prototype.play = function (song) {
     p.playing = true;
     p.loopStarted = Date.now();
     p.iSubBeat = 0;
+    
+    p.nextBeatTime = p.context.currentTime + (p.latency / 1000);
 
-    //todo this bpm thing isn't consistent
     var beatParameters = p.song.data.beatParameters;
-    var beatsPerSection = beatParameters.beats * beatParameters.subbeats * 
-                                        beatParameters.measures;
-
-    if (beatParameters.subbeatMillis) {
-        p.subbeatLength = beatParameters.subbeatMillis;
-    }
-    else if (p.song.sections[0].data &&
-            p.song.sections[0].data.beatParameters &&
-            p.song.sections[0].data.beatParameters.subbeatMillis) {
-        p.subbeatLength = p.song.sections[0].data.beatParameters.subbeatMillis;
-    } 
-    else {
-        p.subbeatLength = 125;
-    }
 
     var lastSection;
     var nextSection;
-    var currentChordI = 0;
+    p.currentChordI = 0;
 
     var play = function () {
 
         if (!p.playing)
             return;
+
+        p.subbeatLength = 1000 / (beatParameters.bpm / 60 * beatParameters.subbeats);
 
         if (p.loopSection > -1 && p.loopSection < p.song.sections.length) {
             p.song.playingSection = p.loopSection;
@@ -107,84 +98,92 @@ OMusicPlayer.prototype.play = function (song) {
             }
         }
 
+        var timeToPlay = p.nextBeatTime;
+        p.nextBeatTime += p.subbeatLength / 1000;
+
         p.iSubBeat++;
-        if (p.iSubBeat == beatsPerSection) {
+        if (p.iSubBeat >= beatParameters.beats * beatParameters.subbeats * 
+                                        beatParameters.measures) {
 
             p.iSubBeat = 0;
             p.loopStarted = Date.now();
 
+            var nextChord = false;
             if (p.song.sections[p.song.playingSection].data.chordProgression) {
-                currentChordI++;
-                if (currentChordI < p.song.sections[p.song.playingSection].data.chordProgression.length) {
+                p.currentChordI++;
+                if (p.currentChordI < p.song.sections[p.song.playingSection].data.chordProgression.length) {
                     p.rescaleSong(null, null,
-                                p.song.sections[p.song.playingSection].data.chordProgression[currentChordI]);
-                    return;
+                                p.song.sections[p.song.playingSection].data.chordProgression[p.currentChordI]);
+                    nextChord = true;
                 }
                 else {
-                    currentChordI = 0;
+                    p.currentChordI = 0;
                     p.rescaleSong(null, null,
-                                p.song.sections[p.song.playingSection].data.chordProgression[currentChordI]);
+                                p.song.sections[p.song.playingSection].data.chordProgression[p.currentChordI]);
                 }
             }
 
-            lastSection = p.song.sections[p.song.playingSection];
+            if (!nextChord) {
+                lastSection = p.song.sections[p.song.playingSection];
 
-            if (p.loopSection == -1) {
-                p.song.playingSection++;
-            }
+                if (p.loopSection == -1) {
+                    p.song.playingSection++;
+                }
 
-            if (p.nextUp) {
-                p.song = p.nextUp;
-                p.song.playingSection = 0;
-                p.nextUp = null;
-            }
-
-            nextSection = p.song.sections[p.song.playingSection];
-
-            if (p.song.playingSection >= p.song.sections.length) {
-                if (p.song.loop) {
+                if (p.nextUp) {
+                    p.song = p.nextUp;
                     p.song.playingSection = 0;
-                    nextSection = p.song.sections[p.song.playingSection];
-                } else {
-                    p.stop();
-                    nextSection = undefined;
+                    p.nextUp = null;
                 }
-            }
 
-            //cancel all oscilators that aren't used next section
-            //TODO make this work right
-            var usedAgain;
-            for (var ils = 0; ils < lastSection.parts.length; ils++) {
-                if (!lastSection.parts[ils].osc)
-                    continue;
+                nextSection = p.song.sections[p.song.playingSection];
 
-                usedAgain = false;
-                if (nextSection) {
-                    for (var ins = 0; ins < nextSection.parts.length; ins++) {
-                        if (lastSection.parts[ils] == nextSection.parts[ins]) {
-                            usedAgain = true;
-                            break;
-                        }
+                if (p.song.playingSection >= p.song.sections.length) {
+                    if (p.song.loop) {
+                        p.song.playingSection = 0;
+                        nextSection = p.song.sections[p.song.playingSection];
+                    } else {
+                        p.stop();
+                        nextSection = undefined;
                     }
                 }
-                if (!usedAgain) {
-                    lastSection.parts[ils].osc.finishPart();
+
+                //cancel all oscilators that aren't used next section
+                //TODO make this work right
+                var usedAgain;
+                for (var ils = 0; ils < lastSection.parts.length; ils++) {
+                    if (!lastSection.parts[ils].osc)
+                        continue;
+
+                    usedAgain = false;
+                    if (nextSection) {
+                        for (var ins = 0; ins < nextSection.parts.length; ins++) {
+                            if (lastSection.parts[ils] == nextSection.parts[ins]) {
+                                usedAgain = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (!usedAgain) {
+                        lastSection.parts[ils].osc.finishPart();
+                    }
                 }
             }
+            if (p.negativeLatencyCounter > 0 && p.latency < 500) {
+                p.latency += 20;
+            }
+            p.negativeLatencyCounter = 0;
         }
 
-        if (p.newSubbeatMillis) {
-            clearInterval(p.playingIntervalHandle);
-            p.subbeatLength = p.newSubbeatMillis;
-            p.playingIntervalHandle = setInterval(play, p.subbeatLength);
-            p.newSubbeatMillis = undefined;
+        if (p.playing) {
+            setTimeout(play, (p.nextBeatTime - p.context.currentTime) * 1000 - p.latency)
         }
+        
+        p.latencyMonitor = Math.round((timeToPlay - p.context.currentTime) * 1000);
+        if (p.latencyMonitor < 0)
+            p.negativeLatencyCounter++
     };
-
-    p.playingIntervalHandle = setInterval(play, p.subbeatLength);
-
-    // ??
-    p.songStarted = p.loopStarted;
+    play();
 
     if (typeof (p.onPlay) == "function") {
         p.onPlay();
@@ -196,12 +195,12 @@ OMusicPlayer.prototype.play = function (song) {
 OMusicPlayer.prototype.stop = function () {
     var p = this;
 
+    clearInterval(p.playingIntervalHandle);
+    p.playing = false;
+
     if (typeof (p.onStop) == "function") {
         p.onStop();
     }
-
-    clearInterval(p.playingIntervalHandle);
-    p.playing = false;
 
     if (p.song && p.song.sections[p.song.playingSection]) {
         var parts = p.song.sections[p.song.playingSection].parts;
@@ -222,26 +221,15 @@ OMusicPlayer.prototype.loadPart = function (part) {
 
     part.soundsLoading = 0;
     part.loaded = false;
-    if (type === "PART") {
 
-        if (part.data.volume === undefined) {
-            part.data.volume = 0.6;
-        }
-        if (part.data.pan === undefined) {
-            part.data.pan = 0;
-        }
-
-        if (surface === "PRESET_SEQUENCER") {
-            part.data.soundsetURL = part.data.soundsetURL || "PRESET_HIPKIT";
-            this.loadDrumbeat(part);
-        } else {
-            part.data.soundsetURL = part.data.soundsetURL || "PRESET_OSC_SINE_SOFT_DELAY";
-            this.loadMelody(part);
-        }
-
+    if (!part.panner) {
+        this.makeAudioNodesForPart(part);
     }
-    if (type == "CHORDPROGRESSION") {
-        part.loaded = true;
+
+    if (surface === "PRESET_SEQUENCER") {
+        this.loadDrumbeat(part);
+    } else {
+        this.loadMelody(part);
     }
 };
 
@@ -253,12 +241,15 @@ OMusicPlayer.prototype.loadMelody = function (part) {
     var section = part.section;
     var song = part.section ? part.section.song : undefined;
 
-    p.rescale(part, p.song.data.keyParameters, 0);
+    p.rescale(part, song.data.keyParameters, 0); //section.data.chordProgression[p.currentChordI]
 
-    if (typeof data.soundsetURL == "string") {
-        p.getSoundSet(data.soundsetURL, function (soundset) {
+    if (data.soundSet && typeof data.soundSet.url === "string") {
+        p.getSoundSet(data.soundSet.url, function (soundset) {
             p.setupPartWithSoundSet(soundset, part, true);
         });
+    }
+    else if (data.soundSet && data.soundSet.data) {
+        p.setupPartWithSoundSet(data.soundSet, part, true);
     }
     var soundsToLoad = 0;
 
@@ -280,6 +271,7 @@ OMusicPlayer.prototype.loadMelody = function (part) {
 
     if (soundsToLoad == 0) {
         part.loaded = true;
+        console.log(part.data.soundSet.name + " loaded");
     }
 
 };
@@ -363,10 +355,6 @@ OMusicPlayer.prototype.playBeat = function (section, iSubBeat) {
 
 OMusicPlayer.prototype.playBeatForPart = function (iSubBeat, part) {
     var p = this;
-    if (part.data.type == "CHORDPROGRESSION") {
-        //TODO should this really be in here? As a part that is?
-        return;
-    }
 
     if (!part.loaded) {
         p.loadPart(part);
@@ -383,19 +371,22 @@ OMusicPlayer.prototype.playBeatForPart = function (iSubBeat, part) {
 OMusicPlayer.prototype.playBeatForDrumPart = function (iSubBeat, part) {
     var tracks = part.data.tracks;
 
-    if (part.data.mute)
+    if (part.data.audioParameters.mute)
         return;
-
+    var strength;
     for (var i = 0; i < tracks.length; i++) {
         if (tracks[i].data[iSubBeat]) {
-            this.playSound(tracks[i].sound, part);
+            if (!tracks[i].audioParameters.mute) {
+                this.playSound(tracks[i].sound, part, tracks[i].audioParameters,
+                        typeof tracks[i].data[iSubBeat] === "number" ?
+                            tracks[i].data[iSubBeat] : undefined);
+            }
         }
     }
 };
 
 OMusicPlayer.prototype.playBeatForMelody = function (iSubBeat, part) {
     var p = this;
-console.log("playBeatForMelody")
     var data = part.data;
     var beatToPlay = iSubBeat;
     if (iSubBeat == 0) {
@@ -419,45 +410,77 @@ console.log("playBeatForMelody")
         beatToPlay += part.loopedBeats;
     }
 
-    if (beatToPlay == part.nextBeat) {
-        if (data.notes == undefined) {
+    if (part.liveNotes && part.liveNotes.length > 0) {
+        this.playBeatWithLiveNote(iSubBeat, part);
+        return;
+    }
+
+    if (beatToPlay === part.nextBeat) {
+        if (!data.notes) {
             console.log("something wrong here");
             return;
         }
         var note = data.notes[part.currentI];
 
-        if (part.data.mute) {
+        if (part.data.audioParameters.mute) {
             //play solo they can't here ya
         }
-        else if (note && note.sound) {
+        else if (note) {
             p.playNote(note, part, data);
-        } else {
-            if (!part.osc) {
-                p.makeOsc(part);
-            }
-
-            if (!note || note.rest)
-                part.osc.frequency.setValueAtTime(0, p.context.currentTime);
-            else {
-
-                var freq = p.makeFrequency(note.scaledNote);
-                part.osc.frequency.setValueAtTime(freq, p.context.currentTime);
-                part.playingI = part.currentI;
-                var playingI = part.playingI;
-                setTimeout(function () {
-                    if (part.osc && part.playingI == playingI) {
-                        part.osc.frequency.setValueAtTime(0,
-                                //p.subbeats * note.beats * p.subbeatLength * 0.85)
-                                p.context.currentTime);
-                    }
-                }, p.song.data.beatParameters.subbeats * note.beats * p.subbeatLength * 0.85);
-            }
         }
-
+            
         if (note) {
             part.nextBeat += p.song.data.beatParameters.subbeats * note.beats;
-            console.log("nextBeat is: " + part.nextBeat)
             part.currentI++;
+        }
+    }
+};
+
+OMusicPlayer.prototype.playBeatWithLiveNote = function (iSubBeat, part) {
+    if (!part.liveNotes || !part.liveNotes.length) {
+        return;
+    }
+
+    if (part.liveNotes.autobeat > 0) {
+        if (iSubBeat % part.liveNotes.autobeat === 0) {
+            var index = part.liveNotes.nextIndex || 0;
+            if (index >= part.liveNotes.length) {
+                index = 0;
+            }
+            
+            var note = {note: part.liveNotes[index].note,
+                scaledNote: part.liveNotes[index].scaledNote,
+                beats: part.liveNotes.autobeat / part.section.song.data.beatParameters.subbeats};
+            if (part.soundSet) {
+                note.sound = this.getSound(part.soundSet, part.liveNotes[index]);
+            }
+
+            this.playNote(note, part);
+            if (!part.data.audioParameters.mute) {
+                this.recordNote(part, note);
+            }
+            part.liveNotes.nextIndex = index + 1;
+        }
+    }
+    else {
+        this.extendNote(part, part.liveNotes[0]);    
+    }
+};
+
+OMusicPlayer.prototype.extendNote = function (part, note) {
+    for (var i = 0; i < part.data.notes.length; i++) {
+        if (part.data.notes[i] === note) {
+            note.beats += 0.25;
+            if (part.data.notes[i + 1]) {
+                if (part.data.notes[i + 1].beats > 0.25) {
+                    part.data.notes[i + 1].beats -= 0.25;
+                    part.data.notes[i + 1].rest = true;
+                }
+                else {
+                    part.data.notes.splice(i + 1, 1);
+                }
+            }
+            break;
         }
     }
 };
@@ -470,20 +493,23 @@ OMusicPlayer.prototype.makeOsc = function (part) {
     }
 
     if (part.osc) {
+        console.log(part.osc)
         console.log("makeOsc, already exists");
         try {
             part.osc.stop(p.context.currentTime);
             part.osc.disconnect(part.gain);
-            part.gain.disconnect(part.panner);
-            part.panner.disconnect(p.compressor);
+            part.gain.disconnect(part.topAudioNode);
         } catch (e) {
         }
     }
 
     part.osc = p.context.createOscillator();
+    part.osc.onended = () => {
+        console.log("HEY BUD! WE ENDED!");
+    };
 
-    var soundsetURL = part.data.soundsetURL ||
-            "PRESET_OSC_SINE_SOFT_DELAY";
+    var soundsetURL = part.data.soundSet.url ||
+            "PRESET_OSC_TRIANGLE_SOFT_DELAY";
     if (soundsetURL.indexOf("SAW") > -1) {
         part.osc.type = "sawtooth";
     } else if (soundsetURL.indexOf("SINE") > -1) {
@@ -491,61 +517,28 @@ OMusicPlayer.prototype.makeOsc = function (part) {
     } else if (soundsetURL.indexOf("SQUARE") > -1) {
         part.osc.type = "square";
     }
-
-    if (soundsetURL.indexOf("SOFT") > -1) {
-        part.osc.soft = true;
-    }
-    if (soundsetURL.indexOf("DELAY") > -1) {
-        part.osc.delay = true;
+    else if (soundsetURL.indexOf("TRIANGLE") > -1) {
+        part.osc.type = "triangle";
     }
 
-    part.gain = p.context.createGain();
-    part.osc.connect(part.gain);
-
-    part.panner = p.context.createStereoPanner();
-
-    part.gain.connect(part.panner);
-    if (part.osc.delay) {
-        part.delay = p.context.createDelay();
-        part.delay.delayTime.value = 0.5;
-        part.feedback = p.context.createGain();
-        part.feedback.gain.value = 0.3;
-        part.gain.connect(part.delay);
-        part.delay.connect(part.feedback);
-        part.feedback.connect(part.delay);
-        part.feedback.connect(p.compressor);
-    }
-    part.panner.connect(p.compressor);
-    part.panner.pan.setValueAtTime(part.data.pan, p.context.currentTime);
-
-    var volume = part.data.volume / 10;
-    if (part.osc.soft) {
-        volume = volume * 0.5;
-    }
-    if (part.data.mute) {
-        part.gain.gain.setValueAtTime(0, p.context.currentTime);
-        part.gain.gain.preMuteGain = volume;
-    } else {
-        part.gain.gain.setValueAtTime(volume, p.context.currentTime);
-    }
+    part.osc.connect(part.topAudioNode);
 
     part.osc.frequency.setValueAtTime(0, p.context.currentTime);
     part.osc.start(p.context.currentTime);
 
     part.osc.finishPart = function () {
-        part.gain.gain.setValueAtTime(0, p.context.currentTime);
+        part.osc.frequency.setValueAtTime(0, p.nextBeatTime);
 
         //total hack, this is why things should be processed ala AudioContext, not our own thread
-        setTimeout(function () {
+        /*setTimeout(function () {
             part.osc.stop(p.context.currentTime);
             part.osc.disconnect(part.gain);
-            part.gain.disconnect(part.panner);
-            part.panner.disconnect(p.compressor);
+            part.gain.disconnect(part.topAudioNode);
 
             part.oscStarted = false;
             part.osc = null;
             part.gain = null;
-        }, 50);
+        }, 50);*/
     };
 
     part.oscStarted = true;
@@ -581,9 +574,13 @@ OMusicPlayer.prototype.loadSound = function (sound, part) {
     if (!sound || !p.context) {
         return;
     }
-
     var key = sound;
     var url = sound;
+    
+    if (url.startsWith("http:")) {
+        url = sound.slice(5);
+    }
+
     if (sound.indexOf("PRESET_") == 0) {
         var preseturl;
         if (!p.dev) {
@@ -634,10 +631,8 @@ OMusicPlayer.prototype.rescale = function (part, keyParameters, chord) {
         return;
     }
 
-    var octaveShift = data.octave || data.octaveShift;
+    var octave = data.soundSet.octave;
     var octaves2;
-    if (isNaN(octaveShift))
-        octaveShift = data.type == "BASSLINE" ? 3 : 5;
     var newNote;
     var onote;
     var note;
@@ -660,14 +655,13 @@ OMusicPlayer.prototype.rescale = function (part, keyParameters, chord) {
         }
 
         newNote = keyParameters.scale[newNote] + octaves2 * 12 + 
-                octaveShift * 12 + keyParameters.rootNote;
+                octave * 12 + keyParameters.rootNote;
 
         onote.scaledNote = newNote;
-        console.log(newNote);
     }
 
-    if (part.soundset) {
-        p.setupPartWithSoundSet(part.soundset, part, true);
+    if (part.soundSet) {
+        p.setupPartWithSoundSet(part.soundSet, part, true);
     }
 };
 
@@ -677,7 +671,19 @@ OMusicPlayer.prototype.setupPartWithSoundSet = function (ss, part, load) {
     if (!ss)
         return;
 
-    part.soundset = ss;
+    var topNote = ss.highNote;
+    if (!topNote && ss.data.length) {
+        topNote = ss.lowNote + ss.data.length - 1;
+    }
+    if (!ss.octave) {
+        ss.octave = Math.floor((topNote + ss.lowNote) / 2 / 12);
+    }
+    if (part.data.soundSet && !part.data.soundSet.octave) {
+        part.data.soundSet.octave = ss.octave;
+    }
+
+
+    part.soundSet = ss;
     var note;
     var noteIndex;
 
@@ -788,8 +794,11 @@ OMusicPlayer.prototype.getSoundSet = function (url, callback) {
 
         if (xhr2.readyState == 4) {
             var ojson = JSON.parse(xhr2.responseText);
+            console.log("ojson")
+            console.log(ojson);
             if (ojson) {
                 p.downloadedSoundSets[url] = ojson;
+                p.loadSoundsFromSoundSet(ojson);
                 callback(ojson);
             } else {
                 callback(ojson);
@@ -800,6 +809,12 @@ OMusicPlayer.prototype.getSoundSet = function (url, callback) {
 
 };
 
+OMusicPlayer.prototype.loadSoundsFromSoundSet = function (soundSet) {
+    for (var i = 0; i < soundSet.data.length; i++) {
+        this.loadSound((soundSet.prefix || "") + soundSet.data[i].url + 
+            (soundSet.postfix || ""), {});
+    }
+};
 
 
 OMusicPlayer.prototype.getPresetSoundSet = function (preset) {
@@ -858,43 +873,108 @@ OMusicPlayer.prototype.playNote = function (note, part) {
     
     var fromNow = (note.beats * 4 * p.subbeatLength) / 1000;
 
-    var audio = p.playSound(note.sound, part);
-    if (audio) {
-        part.bufferGain.gain.linearRampToValueAtTime(part.data.volume, 
-            p.context.currentTime + fromNow * 0.995);
-	part.bufferGain.gain.linearRampToValueAtTime(0, p.context.currentTime + fromNow);
-	audio.stop(p.context.currentTime + fromNow);
-
+    if (!note || note.rest) {
+        if (part.osc) {
+            part.osc.frequency.setValueAtTime(0, p.nextBeatTime);
+        }
+        return;
     }
 
+    if (part.osc) {
+        var freq = p.makeFrequency(note.scaledNote) * part.data.audioParameters.warp;
+        part.osc.frequency.setValueAtTime(freq, p.nextBeatTime);
+        part.playingI = part.currentI;
+        var playingI = part.playingI;
+        
+        //this should be a timeout so it can be canceled if
+        //a different note has played
+        setTimeout(function () {
+            if (part.osc && part.playingI == playingI) {
+                part.osc.frequency.setValueAtTime(0,
+                        //p.subbeats * note.beats * p.subbeatLength * 0.85)
+                        p.nextBeatTime);
+            }
+        }, p.song.data.beatParameters.subbeats * note.beats * p.subbeatLength * 0.85);
+    }
+    else {
+        var audio = p.playSound(note.sound, part);
+        if (audio) {
+            audio.bufferGain.gain.linearRampToValueAtTime(part.data.audioParameters.gain, 
+                p.context.currentTime + fromNow * 0.995);
+            audio.bufferGain.gain.linearRampToValueAtTime(0, p.context.currentTime + fromNow);
+            audio.stop(p.context.currentTime + fromNow);
+        }
+    }
 };
 
 
 
-OMusicPlayer.prototype.playSound = function (sound, part) {
+OMusicPlayer.prototype.playSound = function (sound, part, audioParameters, strength) {
     var p = this;
     if (p.loadedSounds[sound] &&
             p.loadedSounds[sound] !== "loading") {
 
         var source = p.context.createBufferSource();
+        source.bufferGain = p.context.createGain();
         source.buffer = p.loadedSounds[sound];
-        
-        if (!part.bufferPanner) {
-            part.bufferPanner = p.context.createStereoPanner();
-            part.bufferGain = p.context.createGain();
 
-            part.bufferGain.connect(part.bufferPanner)
-            part.bufferPanner.connect(p.compressor);
+        var gain = 1;
+        var warp = part.data.audioParameters.warp;
+        if (audioParameters) {
+            warp = (warp - 1) + (audioParameters.warp - 1) + 1;
+            gain = audioParameters.gain;
         }
-        source.connect(part.bufferGain);
-        
-        part.bufferPanner.pan.setValueAtTime(part.data.pan, p.context.currentTime);
-        part.bufferGain.gain.setValueAtTime(part.data.volume, p.context.currentTime);
-        
-        source.start(p.context.currentTime);
+        if (audioParameters && audioParameters.pan) {                        
+            source.bufferPanner = p.context.createStereoPanner();            
+            source.bufferPanner.pan.setValueAtTime(audioParameters.pan, p.context.currentTime);
+                        
+            source.connect(source.bufferPanner);
+            source.bufferPanner.connect(source.bufferGain);
+        }
+        else {
+            source.connect(source.bufferGain);
+        }
 
+        if (strength) {
+            gain = gain * strength;
+        }
+
+        source.bufferGain.gain.setValueAtTime(gain, p.context.currentTime);
+        source.bufferGain.connect(part.topAudioNode);
+
+        source.playbackRate.value = warp;
+
+        source.start(p.nextBeatTime);
+        
         return source;
     }
+};
+
+OMusicPlayer.prototype.getSound = function (soundSet, note) {
+    var noteIndex;
+    if (soundSet.chromatic) {
+        noteIndex = note.scaledNote - soundSet.lowNote;
+        if (noteIndex < 0) {
+            noteIndex = noteIndex % 12 + 12;
+        } else {
+            while (noteIndex >= soundSet.data.length) {
+                noteIndex = noteIndex - 12;
+            }
+        }
+    }
+    else {
+        noteIndex = note.note;
+    }
+
+    if (!soundSet.data[noteIndex]) {
+        return "";
+    }
+
+    //kinda hacky place for this
+    note.sound = (soundSet.prefix || "") + soundSet.data[noteIndex].url + 
+            (soundSet.postfix || "");    
+    
+    return note.sound;
 };
 
 OMusicPlayer.prototype.makeOMGSong = function (data) {
@@ -970,21 +1050,9 @@ OMusicPlayer.prototype.makeOMGSong = function (data) {
         return newSection.song;
     }
 
-    //todo this could go away, we only have type = "PART" now
-    //its for back compat with pre-launch data
-    if (data.type == "MELODY" || data.type == "BASSLINE"
-            || data.partType == "MELODY" || data.partType == "BASSLINE") {
+    if (data.type == "PART") {
         newPart = new OMGPart(null, data);
-    }
-    else if (data.type == "DRUMBEAT"
-            || data.partType == "DRUMBEAT") {
-        newPart = new OMGDrumpart(null, data);
-    }
-    else if (data.type == "PART") {
-        newPart = new OMGPart(null, data);
-    }
-
-    if (newPart) {
+        console.log("new part", newPart)
         return newPart.section.song;
     }
 
@@ -993,12 +1061,13 @@ OMusicPlayer.prototype.makeOMGSong = function (data) {
 
 OMusicPlayer.prototype.updatePartVolumeAndPan = function (part) {
 
+    //todo umm?
     if (part.gain && part.osc) {
-        var oscGain = (part.osc.soft ? 1 : 2) * part.data.volume / 10;
-        part.gain.gain.setValueAtTime(oscGain, this.context.currentTime);
+        //var oscGain = (part.osc.soft ? 1 : 2) * part.data.volume / 10;
+        part.gain.gain.setValueAtTime(Math.pow(part.data.volume, 2), this.context.currentTime);
     }
     if (part.bufferGain) {
-        part.bufferGain.gain.setValueAtTime(part.data.volume, this.context.currentTime);
+        part.bufferGain.gain.setValueAtTime(Math.pow(part.data.volume, 2), this.context.currentTime);
     }
     if (part.panner) {
         part.panner.pan.setValueAtTime(part.data.pan, this.context.currentTime);
@@ -1035,14 +1104,433 @@ OMusicPlayer.prototype.rescaleSong = function (rootNote, ascale, chord) {
                     chord || 0);
         });
     });
-    console.log("rescaledSong")
-}
+};
 
 OMusicPlayer.prototype.setSubbeatMillis = function (subbeatMillis) {
     this.newSubbeatMillis = subbeatMillis;
 };
 
+OMusicPlayer.prototype.playLiveNotes = function (notes, part) {
+    
+    if (part.liveNotes && part.liveNotes.liveAudio) {
+            part.liveNotes.liveAudio.bufferGain.gain.setTargetAtTime(0, this.context.currentTime, 0.001);
+            part.liveNotes.liveAudio.stop(this.context.currentTime + 0.015);
+    }
+    
+    part.liveNotes = notes;
+    if (notes.autobeat === 0 || !this.playing) {
+        if (part.osc) {
+            part.osc.frequency.setValueAtTime(this
+                    .makeFrequency(notes[0].scaledNote) * part.data.audioParameters.warp, this.context.currentTime);
+        }
+        else {
+            //var sound = this.getSound(part.data.soundSet, notes[0]);
+            notes[0].sound = this.getSound(part.soundSet, notes[0]);
+            part.liveNotes.liveAudio = this.playSound(notes[0].sound, part);
+        }
+    }
+    if (this.playing && !part.data.audioParameters.mute && notes.autobeat === 0) {
+        this.recordNote(part, notes[0]);
+    }
+};
 
+OMusicPlayer.prototype.endLiveNotes = function (part) {
+  
+    if (part.osc) {
+        part.osc.frequency.setValueAtTime(0,
+                this.context.currentTime);
+    }  
+    else {
+        if (part.liveNotes && part.liveNotes.liveAudio) {
+            part.liveNotes.liveAudio.bufferGain.gain.setTargetAtTime(0, this.context.currentTime, 0.001);
+            part.liveNotes.liveAudio.stop(this.context.currentTime + 0.015);
+        }
+    }
+    part.liveNotes = [];
+    
+    part.nextBeat = 0;
+    part.currentI = -1;
+    for (var i = 0; i < part.data.notes.length; i++) {
+        if (part.nextBeat < this.iSubBeat) {
+            part.nextBeat += part.data.notes[i].beats * this.song.data.beatParameters.subbeats;
+            part.currentI = i + 1;
+        }       
+    }
+};
+
+OMusicPlayer.prototype.recordNote = function (part, note) {
+
+    var beatsUsed = 0;
+    var currentBeat = this.iSubBeat / part.section.song.data.beatParameters.subbeats;
+    var index = -1;
+    for (var i = 0; i < part.data.notes.length; i++) {
+        if (currentBeat === beatsUsed) {
+            index = i;
+            break;
+        }
+        if (beatsUsed > currentBeat) {
+            part.data.notes[i - 1].beats -= beatsUsed - currentBeat;
+            index = i;
+            break;
+        } 
+        beatsUsed += part.data.notes[i].beats;
+    }
+    if (index > -1) {
+        part.data.notes.splice(index, 0, note);
+        if (beatsUsed - currentBeat > note.beats) {
+            part.data.notes.splice(index + 1, 0, {rest:true, beats: beatsUsed - currentBeat - note.beats});
+        }
+        else if (beatsUsed - currentBeat < note.beats) {
+            beatsUsed = note.beats;
+            while (part.data.notes[index + 1] && beatsUsed > 0) {
+                if (part.data.notes[index + 1].beats > beatsUsed) {
+                    part.data.notes[index + 1].beats -= beatsUsed;
+                    part.data.notes[index + 1].rest = true;
+                    break;
+                }
+                else {
+                    beatsUsed -= part.data.notes[index + 1].beats;
+                    part.data.notes.splice(index + 1, 1);
+                }
+            }
+        }
+    }
+    else {
+        var newBeats;
+        //add quarter note rests to take up needed space
+        while (currentBeat > beatsUsed) {
+            newBeats = Math.min(1, currentBeat - beatsUsed);
+            part.data.notes.push({rest:true, beats: newBeats});
+            beatsUsed += newBeats;
+        }
+        part.data.notes.push(note);
+    }
+};
+
+OMusicPlayer.prototype.makeAudioNodesForPart = function (part) {
+
+    var p = this;
+    part.panner = p.context.createStereoPanner();
+    part.gain = p.context.createGain();
+    part.gain.connect(part.panner);
+    part.panner.connect(p.compressor);
+    part.defaultTopAudioNode = part.gain;
+    part.topAudioNode = part.defaultTopAudioNode;
+    part.gain.gain.setValueAtTime(part.data.audioParameters.gain, p.context.currentTime);
+    part.panner.pan.setValueAtTime(part.data.audioParameters.pan, p.context.currentTime);
+
+    for (var i = 0; i < part.data.fx.length; i++) {
+        p.makeFXNodeForPart(part.data.fx[i], part);        
+    }
+    
+    if (part.data.soundSet.url && part.data.soundSet.url.startsWith("PRESET_OSC")) {
+        p.makeOsc(part);
+    }
+};
+
+OMusicPlayer.prototype.addFXToPart = function (fx, part) {
+    var node = this.makeFXNodeForPart(fx, part)
+    if (node) {
+        part.data.fx.push(node.data);
+    }
+    return node;
+};
+
+OMusicPlayer.prototype.removeFXFromPart = function (fx, part) {
+    var index = part.fx.indexOf(fx);
+    var connectedTo = part.fx[index + 1] || part.defaultTopAudioNode;
+    fx.disconnect();
+    part.fx.splice(index, 1);
+    if (index === 0) {
+        part.topAudioNode = part.fx[0] || part.defaultTopAudioNode;
+        if (part.osc) {
+            part.osc.disconnect();
+            part.osc.connect(part.topAudioNode);
+        }
+    }
+    else {
+        part.fx[index - 1].disconnect();
+        part.fx[index - 1].connect(part.fx[index] || part.defaultTopAudioNode);
+    }
+    index = part.data.fx.indexOf(fx.data);
+    part.data.fx.splice(index, 1);
+};
+
+OMusicPlayer.prototype.setupFX = function () {
+    var p = this;
+    p.fx = {};
+    p.fx["Delay"] = {"audioClass" : p.tuna.Delay,
+        "makeData": function (init) {
+            return {
+                name: "Delay",
+                feedback: 0.45,    //0 to 1+
+                delayTime: 150,    //1 to 10000 milliseconds
+                wetLevel: 0.25,    //0 to 1+
+                dryLevel: 1,       //0 to 1+
+                cutoff: 2000,      //cutoff frequency of the built in lowpass-filter. 20 to 22050
+                bypass: 0
+            };                        
+        },
+        "controls": [
+            {"property": "feedback", "name": "Feedback", "type": "slider", "min": 0, "max": 1},
+            {"property": "delayTime", "name": "Delay Time", "type": "slider", "min": 1, "max": 1000},
+            {"property": "wetLevel", "name": "Wet Level", "type": "slider", "min": 0, "max": 1},
+            {"property": "dryLevel", "name": "Dry Level", "type": "slider", "min": 0, "max": 1},
+            {"property": "cutoff", "name": "Cutoff", "type": "slider", "min": 20, "max": 22050}
+        ]
+    };
+    p.fx["Chorus"] = {"audioClass": p.tuna.Chorus,
+        "makeData": function (init) {
+            return {
+                name: "Chorus",
+                rate: 1.5,         //0.01 to 8+
+                feedback: 0.2,     //0 to 1+
+                delay: 0.0045,     //0 to 1
+                depth: 0.7,     //0 to 1
+                bypass: 0          //the value 1 starts the effect as bypassed, 0 or 1
+            };
+        },            
+        "controls": [
+            {"property": "rate", "name": "Rate", "type": "slider", "min": 0.01, "max": 8},
+            {"property": "feedback", "name": "Feedback", "type": "slider", "min": 0, "max": 1},
+            {"property": "depth", "name": "Depth", "type": "slider", "min": 0, "max": 1},
+            {"property": "delay", "name": "Delay", "type": "slider", "min": 0, "max": 1}
+        ]
+    };
+    
+    p.fx["Phaser"] = {"audioClass": p.tuna.Phaser,
+        "makeData": function (init) {
+            return {
+                name: "Phaser",
+                rate: 1.2,                     //0.01 to 8 is a decent range, but higher values are possible
+                depth: 0.3,                    //0 to 1
+                feedback: 0.2,                 //0 to 1+
+                stereoPhase: 30,               //0 to 180
+                baseModulationFrequency: 700,  //500 to 1500
+                bypass: 0
+            };
+        },
+        "controls": [
+            {"property": "rate", "name": "Rate", "type": "slider", "min": 0.01, "max": 12},
+            {"property": "depth", "name": "Depth", "type": "slider", "min": 0, "max": 1},
+            {"property": "feedback", "name": "Feedback", "type": "slider", "min": 0, "max": 1},
+            {"property": "stereoPhase", "name": "Stereo Phase", "type": "slider", "min": 0, "max": 180},
+            {"property": "baseModulationFrequeny", "name": "Base Modulation Freq", "type": "slider", "min": 500, "max": 1500}
+        ]
+    };        
+    p.fx["Overdrive"] = {"audioClass": p.tuna.Overdrive,
+        "makeData": function (init) {
+            return {
+                name: "Overdrive",
+                outputGain: 0.5,         //0 to 1+
+                drive: 0.7,              //0 to 1
+                curveAmount: 1,          //0 to 1
+                algorithmIndex: 0,       //0 to 5, selects one of our drive algorithms
+                bypass: 0
+            };
+        },
+        "controls" : [
+            {"property": "outputGain", "name": "Output Gain", "type": "slider", "min": 0, "max": 1.5},
+            {"property": "drive", "name": "Drive", "type": "slider", "min": 0, "max": 1},
+            {"property": "curveAmount", "name": "Curve Amount", "type": "slider", "min": 0, "max": 1},
+            {"property": "algorithmIndex", "name": "Type", "type": "slider", "min": 0, "max": 5}
+        ]
+    };
+    p.fx["Compressor"] = {"audioClass": p.tuna.Compressor,
+        "makeData": function (init) {
+            return {
+                name: "Compressor",
+                threshold: -1,    //-100 to 0
+                makeupGain: 1,     //0 and up (in decibels)
+                attack: 1,         //0 to 1000
+                release: 0,        //0 to 3000
+                ratio: 4,          //1 to 20
+                knee: 5,           //0 to 40
+                automakeup: true,  //true/false
+                bypass: 0
+            };
+        },
+        "controls" : [
+            {"property": "threshold", "name": "Threshold", "type": "slider", "min": -100, "max": 0},
+            {"property": "makeupGain", "name": "Makeup Gain", "type": "slider", "min": 0, "max": 10},
+            {"property": "attack", "name": "Attack", "type": "slider", "min": 0, "max": 1000},
+            {"property": "release", "name": "Release", "type": "slider", "min": 0, "max": 3000},
+            {"property": "ratio", "name": "Ratio", "type": "slider", "min": 0, "max": 20},
+            {"property": "knee", "name": "Knee", "type": "slider", "min": 0, "max": 40},
+            {"property": "automakeup", "name": "Auto Makeup", "type": "check"}
+        ]
+    };
+    p.fx["Reverb"] = {"audioClass": p.tuna.Convolver,
+        "makeData": function (init) {
+            return {
+                name: "Reverb",
+                highCut: 22050,                         //20 to 22050
+                lowCut: 20,                             //20 to 22050
+                dryLevel: 1,                            //0 to 1+
+                wetLevel: 1,                            //0 to 1+
+                level: 1,                               //0 to 1+, adjusts total output of both wet and dry
+            };
+        },
+        "controls": [
+            {"property": "highCut", "name": "High Cut", "type": "slider", "min": 20, "max": 22050},
+            {"property": "lowCut", "name": "Low Cut", "type": "slider", "min": 20, "max": 22050},
+            {"property": "dryLevel", "name": "Dry Level", "type": "slider", "min": 0, "max": 1},
+            {"property": "wetLevel", "name": "Wet Level", "type": "slider", "min": 0, "max": 1},
+            {"property": "level", "name": "Level", "type": "slider", "min": 0, "max": 1},
+        ]
+    };
+    p.fx["Filter"] = {"audioClass": p.tuna.Filter,
+        "makeData": function (init) {
+            return {
+                name: "Filter",
+                frequency: 440, //20 to 22050
+                Q: 1, //0.001 to 100
+                gain: 0, //-40 to 40 (in decibels)
+                filterType: "lowpass", //lowpass, highpass, bandpass, lowshelf, highshelf, peaking, notch, allpass
+                bypass: 0
+            };
+        },
+        "controls": [
+            {"property": "frequency", "name": "Frequency", "type": "slider", "min": 20, "max": 22050},
+            {"property": "Q", "name": "Q", "type": "slider", "min": 0.001, "max": 100},
+            {"property": "gain", "name": "Gain", "type": "slider", "min": -40, "max": 40},
+            {"property": "filterType", "name": "Filter Type", "type": "options"},
+        ]
+    };
+    p.fx["Cabinet"] = {"audioClass": p.tuna.Cabinet,
+        "makeData": function (init) {
+            return {
+                name: "Cabinet",
+                makeupGain: 1,                                 //0 to 20
+                impulsePath: "impulses/impulse_guitar.wav",    //path to your speaker impulse
+                bypass: 0
+            };
+        },
+        "controls": [
+            {"property": "makeupGain", "name": "Makeup Gain", "type": "slider", "min": 0, "max": 20}
+        ]
+    };
+    p.fx["Tremolo"] = {"audioClass": p.tuna.Tremolo,
+        "makeData": function (init) {
+            return {
+                name: "Tremolo",
+                intensity: 0.3,    //0 to 1
+                rate: 4,         //0.001 to 8
+                stereoPhase: 0,    //0 to 180
+                bypass: 0
+            };
+        },
+        "controls": [
+            {"property": "intensity", "name": "Intensity", "type": "slider", "min": 0, "max": 1},
+            {"property": "rate", "name": "Rate", "type": "slider", "min": 0.001, "max": 8},
+            {"property": "stereoPhase", "name": "Stereo Phase", "type": "slider", "min": 0, "max": 180}
+        ]
+    };
+    p.fx["Wah Wah"] = {"audioClass": p.tuna.WahWah,
+        "makeData": function (init) {
+            return {
+                name: "Wah Wah",
+                automode: true,                //true/false
+                baseFrequency: 0.5,            //0 to 1
+                excursionOctaves: 2,           //1 to 6
+                sweep: 0.2,                    //0 to 1
+                resonance: 10,                 //1 to 100
+                sensitivity: 0.5,              //-1 to 1
+                bypass: 0
+            };
+        },
+        "controls": [
+            {"property": "automode", "name": "Auto Mode", "type": "check"},
+            {"property": "baseFrequency", "name": "Base Frequency", "type": "slider", "min": 0, "max": 1},
+            {"property": "excursionOctaves", "name": "Excursion Octaves", "type": "slider", "min": 1, "max": 6},
+            {"property": "sweep", "name": "Sweep", "type": "slider", "min": 0, "max": 1},
+            {"property": "resonance", "name": "Resonance", "type": "slider", "min": 1, "max": 10},
+            {"property": "sensitivity", "name": "Sensitivity", "type": "slider", "min": -1, "max": 1}
+        ]
+    };
+    p.fx["Bitcrusher"] = {"audioClass": p.tuna.Bitcrusher,
+        "makeData": function (init) {
+            return {
+                name: "Bitcrusher",
+                bits: 4,          //1 to 16
+                normfreq: 0.1,    //0 to 1
+                bufferSize: 4096  //256 to 16384
+            };
+        },
+        "controls": [
+            {"property": "bits", "name": "Bits", "type": "slider", "min": 1, "max": 16},
+            {"property": "normfreq", "name": "Normal Frequency", "type": "slider", "min": 0, "max": 1}
+        ]
+    };
+    p.fx["Moog"] = {"audioClass": p.tuna.MoogFilter,
+        "makeData": function (init) {
+            return {
+                name: "Moog",
+                cutoff: 0.065,    //0 to 1
+                resonance: 3.5,   //0 to 4
+                bufferSize: 4096  //256 to 16384
+            };
+        },
+        "controls": [
+            {"property": "cutoff", "name": "Cutoff", "type": "slider", "min": 0, "max": 1},
+            {"property": "resonance", "name": "Resonance", "type": "slider", "min": 0, "max": 4}
+        ]
+    };
+    p.fx["Ping Pong"] = {"audioClass": p.tuna.PingPongDelay,
+        "makeData": function (init) {
+            return {
+                name: "Ping Pong",
+                wetLevel: 0.5, //0 to 1
+                feedback: 0.3, //0 to 1
+                delayTimeLeft: 150, //1 to 10000 (milliseconds)
+                delayTimeRight: 200 //1 to 10000 (milliseconds)
+            };
+        },
+        "controls": [
+            {"property": "wetLevel", "name": "Wet Level", "type": "slider", "min": 0, "max": 1},
+            {"property": "feedback", "name": "Feedback", "type": "slider", "min": 0, "max": 1},
+            {"property": "delayTimeLeft", "name": "Delay Time Left", "type": "slider", "min": 1, "max": 10000},
+            {"property": "delayTimeRight", "name": "Delay Time Right", "type": "slider", "min": 1, "max": 10000}
+        ]
+    };
+};
+
+OMusicPlayer.prototype.makeFXNodeForPart = function (fx, part) {
+    var fxNode, fxData;
+    var makeData = true;
+    var fxName = fx;
+    if (typeof fx === "object") {
+        makeData = false;
+        fxName = fx.name;
+        fxData = fx;
+    }
+    var fxInfo = this.fx[fxName];
+    if (fxInfo) {
+        if (makeData) {
+            fxData = fxInfo.makeData();
+        }
+        fxNode = new fxInfo.audioClass(fxData);
+    }
+    
+    if (fxNode) {
+        fxNode.data = fxData;
+        var lastFX = part.fx[part.fx.length - 1];
+        if (lastFX) {
+            lastFX.disconnect(part.defaultTopAudioNode);
+            lastFX.connect(fxNode);
+        }
+        else {
+            if (part.osc) {
+                part.osc.disconnect(part.topAudioNode);
+                part.osc.connect(fxNode);
+            }
+            part.topAudioNode = fxNode;
+        }
+        fxNode.connect(part.defaultTopAudioNode);
+        part.fx.push(fxNode);
+    }
+    return fxNode;
+};
 
 function OMGSong(div, data, headerOnly) {
     this.div = div;
@@ -1071,11 +1559,14 @@ function OMGSong(div, data, headerOnly) {
                 };
     }
     if (!data.keyParameters) {
-        console.log(data);
         data.keyParameters = {"rootNote": data.rootNote || 0, 
                     "scale": data.ascale 
                             || (data.scale ? data.scale.split(",") : 0) 
                             || [0,2,4,5,7,9,11]};
+    }
+    
+    if (!data.beatParameters.bpm && data.beatParameters.subbeatMillis) {
+        data.beatParameters.bpm = 1 / data.beatParameters.subbeatMillis * 60000 / 4;
     }
 };
 
@@ -1143,7 +1634,7 @@ function OMGSection(div, data, song) {
             if (typeof data.keyParameters.rootNote === "number") {
                 song.data.keyParameters.rootNote = data.keyParameters.rootNote;
             }
-            if (this.data.ascale) {
+            if (data.keyParameters.scale) {
                 song.data.keyParameters.scale = data.keyParameters.scale;
             }
         }
@@ -1160,15 +1651,15 @@ function OMGSection(div, data, song) {
     } else {
         this.data = {type: "SECTION", parts: []};
     }
+    
+    if (!this.data.chordProgression) {
+        this.data.chordProgression = [0];
+    }
 
     for (var ip = 0; ip < this.data.parts.length; ip++) {
         partData = this.data.parts[ip];
-        if (partData.type == "DRUMBEAT" ||
-                partData.partType == "DRUMBEAT") {
-            part = new OMGDrumpart(null, partData, this);
-        } else {
-            part = new OMGPart(null, partData, this);
-        }
+        part = new OMGPart(null, partData, this);
+        //todo should part be put somewhere?
     }
 }
 
@@ -1180,10 +1671,11 @@ OMGSection.prototype.getData = function () {
     return this.data;
 };
 
-function OMGDrumpart(div, data, section) {
+function OMGPart(div, data, section) {
     this.div = div;
+    this.fx = [];
     if (!section || !section.data) {
-        console.log("new OMGDrumpart() called without a section. Not good.");
+        console.log("new OMGPart() called without a section. Not good.");
         try {throw new Exception();}
         catch (e) {console.log(e);}
         var song = new OMGSong();
@@ -1193,27 +1685,87 @@ function OMGDrumpart(div, data, section) {
     this.section = section;
     this.position = section.parts.length;
     section.parts.push(this);        
-    
+
     if (!section.song || !section.song.data) {
         section.song = new OMGSong();
-        section.song.sections.push(section.song);        
+        section.song.sections.push(section.song);
+    }
+
+    this.data = data || {};
+    if (!this.data.fx) {
+        this.data.fx = [];
+    }
+
+    if (!this.data.partType) {
+        //if type is melody or bassline
+        //todo find where we use partType, and see if we really need them
+        this.data.partType = this.data.type;
+        this.data.type = "PART";
+    }
+    if (!this.data.surface) {
+        if (this.data.soundSet && this.data.soundSet.defaultSurface) {
+            this.data.surface = {url: this.data.soundSet.defaultSurface};
+        }
+        else {
+            this.data.surface = {url: this.data.surfaceURL || "PRESET_VERTICAL"};
+        }
     }
     
-    if (data) {
-        this.data = data;
-        if (!data.partType) {
-            data.partType = "DRUMBEAT";
-            data.type = "PART";
+    if (!this.data.soundSet) {
+        this.data.soundSet = {
+            name: "Sine Oscillator",
+            url: "PRESET_OSC_SINE",
+            highNote: 108,
+            lowNote: 0,
+            chromatic: true,
+            octave: 5
+        };
+    }
+    
+    if (this.data.surface.url === "PRESET_VERTICAL") {
+        if (!this.data.notes) {
+            this.data.notes = [];
+        }     
+    }
+    else {
+        if (!this.data.tracks) {
+            this.makeTracks();
         }
-        if (data.id) {
-            this.saved = true;
+        for (var i = 0; i < this.data.tracks.length; i++) {
+            this.makeAudioParameters(this.data.tracks[i]);
         }
-    } else {
-        this.data = {"type": "PART", "partType": "DRUMBEAT",
-            "surfaceURL": "PRESET_SEQUENCER",
-            "soundsetURL": "PRESET_HIPKIT", "soundsetName": "Hip Hop Drum Kit",
-            "bpm": 120, "kit": 0,
-            isNew: true,
+    }
+    
+    this.makeAudioParameters();
+    
+    if (this.data.id) {
+        this.saved = true;
+    }
+    
+}
+
+OMGPart.prototype.makeAudioParameters = function (track) {
+    var obj = track || this.data;
+    if (!obj.audioParameters) obj.audioParameters = {};
+    
+    //backwards compat, now we use gain instead of volume
+    if (typeof obj.audioParameters.volume === "number" && 
+            typeof obj.audioParameters.gain !== "number") {
+        obj.audioParameters.gain = Math.pow(obj.audioParameters.volume, 2);
+    }
+    if (typeof obj.audioParameters.gain !== "number") {
+        obj.audioParameters.gain = track ? 1 : 0.6;
+    }
+    if (typeof obj.audioParameters.pan !== "number")
+        obj.audioParameters.pan = 0;
+    if (typeof obj.audioParameters.warp !== "number")
+        obj.audioParameters.warp = 1;
+};
+
+OMGPart.prototype.defaultDrumPart = function () {
+    return {"type": "PART", "partType": "DRUMBEAT",
+            "surface": {"url": "PRESET_SEQUENCER"},
+            "soundset": {"url": "PRESET_HIPKIT", "name": "Hip Hop Drum Kit"},
             "tracks": [{"name": "kick", "sound": "PRESET_HH_KICK",
                     "data": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]},
@@ -1239,51 +1791,19 @@ function OMGDrumpart(div, data, section) {
                     "data": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}
             ]};
-    }
-    
-}
+};
 
-function OMGPart(div, data, section) {
-    this.div = div;
-    if (!section || !section.data) {
-        console.log("new OMGPart() called without a section. Not good.");
-        try {throw new Exception();}
-        catch (e) {console.log(e);}
-        var song = new OMGSong();
-        section = new OMGSection(null, null, song);
+OMGPart.prototype.makeTracks = function () {
+    this.data.tracks = [];
+    if (this.data.soundSet && this.data.soundSet.data) {
+        var that = this;
+        this.data.soundSet.data.forEach(function (sound) {
+            that.data.tracks.push(sound);
+            sound.sound = (that.data.soundSet.prefix || "") +
+                    sound.url + (that.data.soundSet.postfix || "");
+            sound.data = [];
+            sound.audioParameters = {gain: 1, pan: 0, warp: 1};
+        });
     }
+};
 
-    this.section = section;
-    this.position = section.parts.length;
-    section.parts.push(this);        
-
-    if (!section.song || !section.song.data) {
-        section.song = new OMGSong();
-        section.song.sections.push(section.song);
-    }
-
-    if (data) {
-        this.data = data;
-        if (!data.partType) {
-            //if type is melody or bassline
-            data.partType = data.type;
-            data.type = "PART";
-        }
-        if (!data.surface) {
-            data.surface = {url: data.surfaceURL || "PRESET_VERTICAL"};
-        }
-    } else {
-        this.data = {type: "PART",
-            partType: "MELODY", surface: {url: "PRESET_VERTICAL"},
-            soundsetURL: "PRESET_OSC_SINE_SOFT_DELAY",
-            soundsetName: "Osc Soft Sine Delay",
-            notes: [], volume: 0.6, pan: 0, 
-            keyParameters: {rootNote: 0, scale: [0,2,4,5,7,9,11]}
-        };
-    }
-
-    if (this.data.id) {
-        this.saved = true;
-    }
-    
-}

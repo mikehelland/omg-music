@@ -129,6 +129,7 @@ tg.instrument.show = function (omgpart) {
     tg.player.onBeatPlayedListeners.push(tg.instrument.onBeatPlayedListener);
 
     tg.currentFragment = tg.sequencer;
+    tg.instrument.mm.readOnly = false;
     tg.instrument.mm.draw();
     tg.instrument.setMode("WRITE");
 };

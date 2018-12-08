@@ -29,12 +29,12 @@ omg.loadSearchResults = function (params, results) {
         resultDiv.innerHTML = '<div class="beat-marker"></div>';
         params.resultList.appendChild(resultDiv);
 
-        omg_embedded_viewer_loadData({div: resultDiv, 
-                                        data: result,
-                                        height: 80, 
-                                        onPlay: params.onPlay,
-                                        onStop: params.onStop
-                                    });
+        new OMGEmbeddedViewer({div: resultDiv, 
+                                data: result,
+                                height: 80, 
+                                onPlay: params.onPlay,
+                                onStop: params.onStop
+                            });
 
         params.resultList.appendChild(document.createElement("br"));
 

@@ -288,6 +288,33 @@ h3 {
 	/*margin:0.4em;*/
 }
 
+.omg-viewer-canvas {
+    height:100%;
+    width:100%;
+}
+
+.omg-viewer-song {
+    background-color:#99FF99; 
+    border-radius:8px; padding:4px;
+    border:1px solid #808080;
+}
+.omg-viewer-section {
+    background-color:#99AAFF;
+    border-radius:8px; padding:4px;
+    border:1px solid #808080;
+}
+.omg-viewer-part {
+    background-color:#FFFF99;
+    border-radius:8px; padding:4px;
+    border:1px solid #808080;
+}
+.omg-viewer-soundset {
+    background-color:#FF9999; 
+    border-radius:8px; padding:4px;
+    border:1px solid #808080;
+}
+
+
 .omg-soundset {border-spacing:10px; 
 	background-color:#FF9999; 
 }
@@ -313,6 +340,10 @@ h3 {
 
 .omg-section {border:1px solid #808080;
 	opacity:0.6;
+}
+
+.omg-part {
+    /*position:relative;*/
 }
 
 .omg-part-data, .omg-part-muted, .omg-part {background-color:#FFFF99; border-radius:8px; 

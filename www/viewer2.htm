@@ -4,6 +4,10 @@
 
    <link rel="stylesheet" href="css/main.css" type="text/css" />
    <link rel="stylesheet" href="css/viewer.css" type="text/css" />
+   <meta property="og:image" content="http://openmusic.gallery/img/section.png"/>
+   <meta property="og:description" content="Find, create, and customize music for your project. For Free."/>
+   <meta property="og:title" content="${resultCaption}"/>
+
 	<style>html,body {height:100%; margin:0; }
 		
 </style>
@@ -34,7 +38,7 @@
       </a>
 
 	   <div class="main-description">
-		  Find, create, and customize music for your project.??
+		  Find, create, and customize music for your project.
 	   </div>
 
          <div class="main-title-bar-right">
@@ -44,20 +48,28 @@
       </div>
    </div>
 
-   <script src="omg-music/omusic_partsui.js"></script>
-   <script src="omg-music/omusic_player_new.js"></script>
+   <script src="omg-music/sequencer_surface.js"></script>
+   <script src="omg-music/vertical_surface.js"></script>
+   <script src="omg-music/tuna-min.js"></script>
+   <script src="omg-music/omusic_player.js"></script>
    <script src="js/omgservice.js"></script>
-   <script src="js/embedded_viewer.js"></script>
+   <script src="js/embedded_viewer2.js"></script>
 
    <script src="js/usercontrols.js"></script>
    <script src="js/sharecontrols.js"></script>
    <script>
-       console.log("test test testxxx")
-   setupUserControls(document.getElementsByClassName("title-bar-user-controls")[0]);
-   omg.setupShareWindow();
-   var id = omg.util.getPageParams().id;
-   omg_embedded_viewer_loadId({div: document.getElementById("omgviewer"), id: id,
-		height: window.innerHeight - 44 - 250});
+   var viewer;
+   window.onload = function () {
+        setupUserControls(document.getElementsByClassName("title-bar-user-controls")[0]);
+        omg.setupShareWindow();
+        omg.server.getId(omg.util.getPageParams().id, function (data) {
+            viewer = new OMGEmbeddedViewer({div: document.getElementById("omgviewer"),
+                data: data,
+                height: window.innerHeight - 44 - 250});
+        });
+        //omg_embedded_viewer_loadId({div: document.getElementById("omgviewer"), id: id,
+        //    height: window.innerHeight - 44 - 250});
+    }
    </script>
 
 </body>
