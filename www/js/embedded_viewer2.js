@@ -135,6 +135,9 @@ function OMGEmbeddedViewer(params) {
     viewer.tipButton.onclick = function () {
         window.location = "bitcoin:1Jdam2fBZxfhWLB8yP69Zbw6fLzRpweRjc?amount=0.004";
     };
+    viewer.editButton.onclick = function () {
+        window.location = "music-maker.htm?id=" + data.id;
+    };
 
     var br = document.createElement("br");
     viewer.div.appendChild(br);
@@ -264,9 +267,6 @@ OMGEmbeddedViewer.prototype.draw = function () {
                 viewer.beatMarker.style.width = pxPerBeat * (1 + isubbeat + isection * beatsInSection) + "px";
             });
 
-            viewer.editButton.onclick = function () {
-                window.location = "music-maker.htm?id=" + dataToPlay.id;
-            };
 
         }
     };

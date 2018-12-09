@@ -157,7 +157,7 @@ omg.ui.noteImageUrls = [[2, "note_half", "note_rest_half"],
     [0.375, "note_dotted_sixteenth", "note_rest_dotted_sixteenth"],
     [0.25, "note_sixteenth", "note_rest_sixteenth"], //, "note_sixteenth_upside"],
     [0.125, "note_thirtysecond", "note_rest_thirtysecond"],
-    [-1, "no_file", "no_file"]];
+    [-1, "note_no_file", "note_no_file"]];
 
 omg.ui.noteNames = ["C-", "C#-", "D-", "Eb-", "E-", "F-", "F#-", "G-", "G#-", "A-", "Bb-", "B-",
     "C0", "C#0", "D0", "Eb0", "E0", "F0", "F#0", "G0", "G#0", "A0", "Bb0", "B0",
@@ -262,6 +262,27 @@ omg.ui.setupNoteImages = function () {
         omg.ui.getImageUrlForNote({beats: 1});
 
     var noteImages = [];
+    var hasImgs = true;
+    var img, img2;
+    for (var i = 0; i < omg.ui.noteImageUrls.length; i++) {
+        img = document.getElementById("omg_" + omg.ui.noteImageUrls[i][1]);
+        img2 = document.getElementById("omg_" + omg.ui.noteImageUrls[i][2]);
+        if (img && img2) {
+            noteImages.push([img, img, img2, img2]);
+        }
+        else {
+            hasImgs = false;
+            break;
+        }
+    }
+    
+    if (hasImgs) {
+        console.log("hasImgs")
+        omg.ui.noteImages = noteImages;
+        return;
+    }
+    
+    noteImages = [];
     var loadedNotes = 0;
     var areAllNotesLoaded = function () {
         loadedNotes++;
