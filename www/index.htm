@@ -108,14 +108,7 @@
 			<!--<div id="select-popular-area-button" class="select-area-button">Most Popular</div>-->
 			<a href="#most-recent" id="select-recent-area-button" class="select-area-button">Most Recent</a>
 		</div>
-		
-		<script src="omg-music/sequencer_surface.js"></script>
-                <script src="omg-music/vertical_surface.js"></script>
-		<script src="omg-music/tuna-min.js"></script>
-                <script src="omg-music/omusic_player.js"></script>
-		<script src="js/omgservice.js"></script>
-		<script src="js/embedded_viewer2.js"></script>
-		
+				
 		<div id="featured-area" class="frontpage-area">
 
 			<div id="song-example" class="omgviewer"><div class="beat-marker"></div></div>
@@ -181,6 +174,12 @@
     <img src="/omg-music/img/notes/note_no_file.png" id="omg_note_no_file">
 </div>
 
+<script src="omg-music/sequencer_surface.js"></script>
+<script src="omg-music/vertical_surface.js"></script>
+<script src="omg-music/tuna-min.js"></script>
+<script src="omg-music/omusic_player.js"></script>
+<script src="js/omgservice.js"></script>
+<script src="js/embedded_viewer2.js"></script>
 
 
 <script src="js/usercontrols.js"></script>
@@ -319,13 +318,15 @@ fpa.recentButton.onclick = function () {
 	fpa.showRecentArea();
 };
 
-if (window.location.hash.length === 0 || window.location.hash === "#featured") {
-	fpa.showFeatureArea();
-}
-console.log(window.location.hash);
-if (window.location.hash === "#most-recent") {
-	fpa.showRecentArea();
-}
+window.onload = function () {
+    if (window.location.hash.length === 0 || window.location.hash === "#featured") {
+            fpa.showFeatureArea();
+    }
+    console.log(window.location.hash);
+    if (window.location.hash === "#most-recent") {
+            fpa.showRecentArea();
+    }
+};
 
 var menuVisible = false;
 document.getElementsByClassName("title-bar-user-menu")[0].onclick = function () {
