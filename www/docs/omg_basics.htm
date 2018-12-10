@@ -2,9 +2,9 @@
 <html>
 <head>
 
-   <link rel="stylesheet" href="css/main.css" type="text/css" />
-   <link rel="stylesheet" href="css/search.css" type="text/css" />
-   <link rel="stylesheet" href="css/viewer.css" type="text/css" />
+   <link rel="stylesheet" href="/css/main.css" type="text/css" />
+   <link rel="stylesheet" href="/css/search.css" type="text/css" />
+   <link rel="stylesheet" href="/css/viewer.css" type="text/css" />
     <meta property="og:image" content="http://openmusic.gallery/img/overview.png"/>
     <meta property="og:description" content="Basic overview of making music with OpenMusic.Gallery"/>
     <meta property="og:title" content="OpenMusic.Gallery Basics"/>
@@ -20,7 +20,7 @@
 
    <div class="main-title-bar">
          <div class="main-title-bar-content">
-         <a class="main-page-link" href="index.htm">
+         <a class="main-page-link" href="/index.htm">
          <span class="main-title-open">Open</span><span class="main-title-media">Music</span><span class="main-title-gallery">.Gallery</span>
          </a>
 
@@ -78,10 +78,11 @@ Part: Drumbeat
 
 	<div id="drum-example" class="omgviewer"><div class="beat-marker"></div></div>
 
-   <script src="omg-music/omusic_partsui.js"></script>
-   <script src="omg-music/omusic_player.js"></script>
-   <script src="js/omgservice.js"></script>
-   <script src="js/embedded_viewer.js"></script>
+   <script src="/js/omgservice.js"></script>
+   <script src="/omg-music/vertical_surface.js"></script>
+   <script src="/omg-music/sequencer_surface.js"></script>
+   <script src="/omg-music/omusic_player.js"></script>
+   <script src="/js/embedded_viewer.js"></script>
 
 <script>
 omg_embedded_viewer_loadId({div: document.getElementById("drum-example"), id: 316});

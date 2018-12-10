@@ -548,3 +548,10 @@ button {
 #chords-fragment-append-button, #chords-fragment-clear-button {
     flex-grow:0;
 }
+
+
+#add-part-gallery-select {
+    padding:0.3em;
+    margin:0.3em;
+    font-size:0.8em;
+}

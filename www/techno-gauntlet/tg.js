@@ -581,7 +581,14 @@ tg.showAddPartFragment = function () {
     if (!tg.addPartFragment) {
         tg.addPartFragment = document.getElementById("add-part-fragment");
         tg.soundSetList = document.getElementById("add-part-soundset-list");
+        tg.soundFontList = document.getElementById("add-part-soundfont-list");
         tg.setupAddPartTabs();
+  
+        tg.gallerySelect = document.getElementById("add-part-gallery-select");
+        tg.gallerySelect.onchange = function (e) {
+            tg.soundSetList.style.display = tg.gallerySelect.value === "omg" ? "block" : "none";
+            tg.soundFontList.style.display = tg.gallerySelect.value !== "omg" ? "block" : "none";
+        };
   
         var addOscButtonClick = function (e) {
           tg.addOsc(e.target.innerHTML);  
@@ -604,7 +611,23 @@ tg.showAddPartFragment = function () {
                 };
             });
         });
+        
+        omg.ui.soundFontNames.forEach(function (name) {
+            var newDiv = document.createElement("div");
+            newDiv.className = "soundset-list-item";
+            newDiv.innerHTML = name.split("_").join(" ");
+            tg.soundFontList.appendChild(newDiv);
+            newDiv.onclick = function () {
+                var soundSet = tg.player.getSoundSetForSoundFont(newDiv.innerHTML + " (" + tg.gallerySelect.selectedOptions[0].innerHTML + ")", 
+                    tg.gallerySelect.value + name + "-mp3/");
+                tg.addPart(soundSet);
+            };
+
+        });
     }
+    tg.soundSetList.style.display = tg.gallerySelect.value === "omg" ? "block" : "none";
+    tg.soundFontList.style.display = tg.gallerySelect.value !== "omg" ? "block" : "none";
+
     tg.addPartFragment.style.display = "block";
     tg.newChosenButton(tg.addPartButton);
 };
