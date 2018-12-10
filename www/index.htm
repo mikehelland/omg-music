@@ -202,15 +202,6 @@ fpa.showFeatureArea = function () {
 	fpa.featureArea.style.display = "block";
 
 	if (!fpa.loadedFeaturedArea) {
-		/*omg_embedded_viewer_loadId({id: 570, height: 80,
-                        div: document.getElementById("song-example"), 
-                        onPlay: fpa.onPlay, onStop: fpa.onStop});
-		omg_embedded_viewer_loadId({id: 622, height: 80,
-                        div: document.getElementById("drumbeat-example"), 
-                        onPlay: fpa.onPlay, onStop: fpa.onStop});
-		omg_embedded_viewer_loadId({id: 791, height: 80,
-                        div: document.getElementById("melody-example"), 
-                        onPlay: fpa.onPlay, onStop: fpa.onStop});*/
             omg.server.getId(570, song => new OMGEmbeddedViewer({id: 570, height: 80,
                         data: song,
                         div: document.getElementById("song-example"), 
@@ -226,6 +217,7 @@ fpa.showFeatureArea = function () {
                         div: document.getElementById("melody-example"), 
                         onPlay: fpa.onPlay, onStop: fpa.onStop})
                     );
+            fpa.loadedFeaturedArea = true;
 	}
 };
 fpa.showRecentArea = function () {
@@ -250,13 +242,13 @@ fpa.globalPlayer = {
 fpa.globalPlayer.playerArea = document.getElementsByClassName("main-footer-bar")[0];
 fpa.globalPlayer.playButton = fpa.globalPlayer.playerArea.getElementsByClassName("play-button")[0];
 
-fpa.onPlay = function (player, params) {
+fpa.onPlay = function (player) {
     fpa.showPlayerBar();
     if (fpa.globalPlayer.currentPlayer && fpa.globalPlayer.currentPlayer != player) {
         fpa.globalPlayer.currentPlayer.stop();
     }
  
-    var result = params.data;
+    var result = player.song.data;
     var resultCaption = result.tags || result.name || "";
     var type = result.partType || result.type || "";
     if (resultCaption.length === 0) {
@@ -272,7 +264,7 @@ fpa.onPlay = function (player, params) {
             player.stop();
         }
         else {
-            player.play(params);
+            player.play();
         }
     };
 };

@@ -218,8 +218,10 @@ OMGEmbeddedViewer.prototype.getDrawingData = function () {
         }
         
     });
+
     if (this.drawingData.sections.length > 0) {
         this.sectionLength = Math.max(200, this.canvas.width / this.drawingData.sections.length);
+        this.measureLength = this.sectionLength / this.beatParameters.measures;
         this.subbeatLength = this.sectionLength / this.totalSubbeats;
         
     }
@@ -228,13 +230,15 @@ OMGEmbeddedViewer.prototype.getDrawingData = function () {
 OMGEmbeddedViewer.prototype.draw = function () {
     var usedBeats;
     for (var isection = 0; isection < this.drawingData.sections.length; isection++) {
+        
         for (var itrack = this.drawingData.sections[isection].tracks.length - 1; itrack >= 0 ; itrack--) {
             for (var i = 0; i < this.totalSubbeats; i++) {
                 this.context.fillStyle = this.drawingData.sections[isection].tracks[itrack].data[i] ?
-                                            "black" : "white";
-                this.context.fillRect(isection * this.sectionLength + i * this.subbeatLength, 
-                                    this.canvas.height - itrack * this.drawingData.sections[isection].trackHeight, 
-                                    this.subbeatLength, -1 * this.drawingData.sections[isection].trackHeight);
+                                            "black" : 
+                                            (i % this.beatParameters.beats == 0 ? "#DDDDDD" : "white");
+                this.context.fillRect(isection * this.sectionLength + i * this.subbeatLength + 1, 
+                                    this.canvas.height - itrack * this.drawingData.sections[isection].trackHeight + 1, 
+                                    this.subbeatLength - 2, -1 * this.drawingData.sections[isection].trackHeight + 2);
                 //this.context.fillRect(i * 10, itrack * 10, 10, 10);
             }
         }
@@ -253,6 +257,25 @@ OMGEmbeddedViewer.prototype.draw = function () {
                 }
             }
         }
+        
+        if (isection > 0) {
+            this.context.beginPath();
+            this.context.lineWidth = 1;
+            this.context.strokeStyle = "black";
+            this.context.moveTo(isection * this.sectionLength, 0);
+            this.context.lineTo(isection * this.sectionLength, this.canvas.height);
+            this.context.stroke();
+        }
+
+        this.context.beginPath();
+        this.context.lineWidth = 1;
+        this.context.strokeStyle = "#AAAAAA";
+        for (var imeasure = 1; imeasure < this.beatParameters.measures; imeasure++) {
+            this.context.moveTo(isection * this.sectionLength + imeasure * this.measureLength, 0);
+            this.context.lineTo(isection * this.sectionLength + imeasure * this.measureLength, this.canvas.height);
+        }
+        this.context.stroke();
+
     }
 };
 

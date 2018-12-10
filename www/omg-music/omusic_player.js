@@ -1,3 +1,7 @@
+if (typeof omg !== "object") omg = {};
+if (!omg.loadedSounds) omg.loadedSounds = {};
+if (!omg.downloadedSoundSets) omg.downloadedSoundSets = {};
+
 function OMusicPlayer() {
 
     this.dev = typeof (omg) == "object" && omg.dev;
@@ -5,8 +9,8 @@ function OMusicPlayer() {
     var p = this;
 
     p.playing = false;
-    p.loadedSounds = {};
-    p.downloadedSoundSets = {};
+    p.loadedSounds = omg.loadedSounds;
+    p.downloadedSoundSets = omg.downloadedSoundSets;
     
     p.latency = 20;
     p.latencyMonitor = 0;
@@ -186,7 +190,7 @@ OMusicPlayer.prototype.play = function (song) {
     play();
 
     if (typeof (p.onPlay) == "function") {
-        p.onPlay();
+        p.onPlay(p);
     }
 
     return p.playingIntervalHandle;
@@ -199,7 +203,7 @@ OMusicPlayer.prototype.stop = function () {
     p.playing = false;
 
     if (typeof (p.onStop) == "function") {
-        p.onStop();
+        p.onStop(p);
     }
 
     if (p.song && p.song.sections[p.song.playingSection]) {
