@@ -485,6 +485,7 @@ OMGMelodyMaker.prototype.setCanvasEvents = function () {
     var omgmm = this;
 
     canvas.onmousedown = function (e) {
+        if (omgmm.readOnly && omgmm.mode !== "ZOOM") return;
         e.preventDefault();
         
         omgmm.isMouseTouching = true;
@@ -497,6 +498,7 @@ OMGMelodyMaker.prototype.setCanvasEvents = function () {
     };
 
     canvas.onmousemove = function (e) {
+        if (omgmm.readOnly && omgmm.mode !== "ZOOM") return;
         e.preventDefault();
 
         if (omgmm.redoOffsets) {
@@ -522,6 +524,7 @@ OMGMelodyMaker.prototype.setCanvasEvents = function () {
     };
     
     canvas.onmouseout = function (e) {
+        if (omgmm.readOnly && omgmm.mode !== "ZOOM") return;
         e.preventDefault();
         if (omgmm.isMouseTouching) {
             omgmm.isMouseTouching = false;
@@ -530,6 +533,7 @@ OMGMelodyMaker.prototype.setCanvasEvents = function () {
     };
 
     canvas.onmouseup = function (e) {
+        if (omgmm.readOnly && omgmm.mode !== "ZOOM") return;
         e.preventDefault();
         if (omgmm.isMouseTouching) {
             omgmm.isMouseTouching = false;
@@ -538,6 +542,7 @@ OMGMelodyMaker.prototype.setCanvasEvents = function () {
     };
 
     canvas.ontouchstart = function (e) {
+        if (omgmm.readOnly && omgmm.mode !== "ZOOM") return;
         e.preventDefault();
 
         if (omgmm.redoOffsets) {
@@ -553,6 +558,7 @@ OMGMelodyMaker.prototype.setCanvasEvents = function () {
     };
 
     canvas.ontouchmove = function (e) {
+        if (omgmm.readOnly && omgmm.mode !== "ZOOM") return;
         e.preventDefault();
 
         for (var i = 0; i < e.changedTouches.length; i++) {
@@ -571,6 +577,7 @@ OMGMelodyMaker.prototype.setCanvasEvents = function () {
     };
 
     canvas.ontouchend = function (e) {
+        if (omgmm.readOnly && omgmm.mode !== "ZOOM") return;
         e.preventDefault();
         for (var i = 0; i < e.changedTouches.length; i++) {
             for (var j = 0; j < omgmm.touches.length; j++) {;

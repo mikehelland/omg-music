@@ -229,17 +229,29 @@ OMGEmbeddedViewer.prototype.getDrawingData = function () {
 
 OMGEmbeddedViewer.prototype.draw = function () {
     var usedBeats;
+    var marginX, marginY;
+    var value;
     for (var isection = 0; isection < this.drawingData.sections.length; isection++) {
         
         for (var itrack = this.drawingData.sections[isection].tracks.length - 1; itrack >= 0 ; itrack--) {
             for (var i = 0; i < this.totalSubbeats; i++) {
-                this.context.fillStyle = this.drawingData.sections[isection].tracks[itrack].data[i] ?
-                                            "black" : 
+                value = this.drawingData.sections[isection].tracks[itrack].data[i];
+                marginX = 1;
+                marginY = this.trackHeight > 5 ? 1 : 0;
+                if (typeof value === "number" && value > 0 && value < 1) {
+                    this.context.fillStyle =  i % this.beatParameters.beats == 0 ? "#DDDDDD" : "white";
+                    this.context.fillRect(isection * this.sectionLength + i * this.subbeatLength + marginX, 
+                                        this.canvas.height - itrack * this.drawingData.sections[isection].trackHeight - marginY, 
+                                        this.subbeatLength - marginX * 2, -1 * this.drawingData.sections[isection].trackHeight + marginY * 2);
+                    marginY = (this.drawingData.sections[isection].trackHeight - this.drawingData.sections[isection].trackHeight * value) / 3;
+                    marginX = (this.subbeatLength - this.subbeatLength * value) / 3;
+                    console.log("value", value, this.subbeatLength, this.subbeatLength * value, value, this.subbeatLength - this.subbeatLength * value)
+                }
+                this.context.fillStyle =  value ? "black" : 
                                             (i % this.beatParameters.beats == 0 ? "#DDDDDD" : "white");
-                this.context.fillRect(isection * this.sectionLength + i * this.subbeatLength + 1, 
-                                    this.canvas.height - itrack * this.drawingData.sections[isection].trackHeight + 1, 
-                                    this.subbeatLength - 2, -1 * this.drawingData.sections[isection].trackHeight + 2);
-                //this.context.fillRect(i * 10, itrack * 10, 10, 10);
+                this.context.fillRect(isection * this.sectionLength + i * this.subbeatLength + marginX, 
+                                    this.canvas.height - itrack * this.drawingData.sections[isection].trackHeight - marginY, 
+                                    this.subbeatLength - marginX * 2, -1 * this.drawingData.sections[isection].trackHeight + marginY * 2);
             }
         }
         for (var inotes = 0; inotes < this.drawingData.sections[isection].notes.length; inotes++) {
