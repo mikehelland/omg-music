@@ -139,6 +139,30 @@ omg.util. getTimeCaption = function (timeMS) {
     return monthday + " " + date.getFullYear();
 };
 
+omg.util.getUniqueName = function (name, names) {
+    var isUnique = true;
+    for (var i = 0; i < names.length; i++) {
+        if (name === names[i]) {
+            isUnique = false;
+            break;
+        }
+    }
+    
+    if (isUnique) {
+        return name;
+    }
+    
+    var ending;
+    i = name.lastIndexOf(" ");
+    if (i > -1 && i < name.length) {
+        ending = name.substr(i + 1);
+        if (!isNaN(ending * 1)) {
+            return omg.util.getUniqueName(name.substr(0, i + 1) + (ending * 1 + 1), names);
+        }
+    }
+    return omg.util.getUniqueName(name + " 2", names);
+};
+
 /*
  * UI stuff
  * 

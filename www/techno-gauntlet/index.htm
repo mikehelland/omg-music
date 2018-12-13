@@ -135,9 +135,11 @@
         <div id="part-options-fragment" class="fragment">
             <h2>Part Options</h2>
             <div class="detail-fragment-body">
-            Choose a surface:<br>
-            <input type="radio" name="surface" id="part-options-vertical-surface">Vertical<br>
-            <input type="radio" name="surface" id="part-options-sequencer-surface">Sequencer
+                <div id="part-options-surface-area">
+                    Surface:<br>
+                    <button id="part-options-vertical-surface">Switch to Vertical Surface</button>
+                    <button id="part-options-sequencer-surface">Switch to Sequencer Surface</button>
+                </div>
             <br>
             <button id="part-options-submixer-button">Tracks Sub Mixer</button>
             <hr>
@@ -156,7 +158,9 @@
             </div>
             <hr>
             Clear or Remove<br>
-            <button id="part-options-clear-button">Clear Part Data</button><br>
+            <button id="part-options-clear-button">Clear Part Data</button>
+            <br>
+            <br>
             <button id="part-options-remove-button">Remove Part</button>
             </div>
         </div>
@@ -218,7 +222,7 @@
             
         </div>
         <div id="section-fragment" class="fragment">
-            <h2>Sections</h2>
+            <h2>Sections:</h2>
             <div class="detail-fragment-body">
                 <button id="copy-section-button">Copy Current Section</button>
                 <div id="preset-section-name-menu">
@@ -228,6 +232,11 @@
                 </div>
                 <hr>
                 <div id="section-fragment-list"></div>
+                <hr>
+            </div>
+            <h2>Arrangement:</h2>
+            <div class="detail-fragment-body">
+                <div id="section-arrangement-list"></div>
             </div>
         </div>
         </div>

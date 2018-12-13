@@ -1290,7 +1290,7 @@ OMusicEditor.prototype.loadSection = function (params) {
     var fadeIn = [params.sectionDiv, bam.sectionEditor];
     if (params.dataToLoad) {
         bam.section = new OMGSection(params.sectionDiv, params.dataToLoad, bam.song);
-        bam.makeChordsView(bam.section);
+        //bam.makeChordsView(bam.section);
 
         for (var ip = 0; ip < bam.section.parts.length; ip++) {
             newPart = bam.makePartDiv(bam.section.parts[ip]);
@@ -1321,6 +1321,8 @@ OMusicEditor.prototype.loadSection = function (params) {
     } else {
         bam.section = new OMGSection(params.sectionDiv, null, bam.song);
     }
+    bam.makeChordsView(bam.section);
+
     bam.fadeIn(fadeIn, params.callback);
     bam.arrangeParts(function () {
         if (params.part) {
@@ -2891,7 +2893,8 @@ OMusicEditor.prototype.getSoundSets = function (type, callback) {
     // we want to get the productions servers soundsets
     var bam = this;
     var dev = this.omgservice.dev;
-    var url = dev ? "soundsets.json" : "data/?type=SOUNDSET";
+    //var url = dev ? "soundsets.json" : "data/?type=SOUNDSET";
+    var url = "/data/?type=SOUNDSET";
 
     this.omgservice.getHTTP(url, function (soundsets) {
         bam.soundsets = soundsets;

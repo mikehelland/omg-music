@@ -419,3 +419,8 @@ body {background:white;}
    bottom:50%;
    left:5%;
 }
+
+.no-section-message {
+    top:30%;
+    margin:auto;
+}

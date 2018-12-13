@@ -739,31 +739,41 @@ tg.showPartOptionsFragment = function (part) {
     tg.partOptionsFragment.style.display = "block";
     
     var submixerButton = document.getElementById("part-options-submixer-button");
-    var verticalRadio = document.getElementById("part-options-vertical-surface");
-    var sequencerRadio = document.getElementById("part-options-sequencer-surface");
+    var verticalButton = document.getElementById("part-options-vertical-surface");
+    var sequencerButton = document.getElementById("part-options-sequencer-surface");
+    var surfaceArea = document.getElementById("part-options-surface-area");
     if (part.data.surface.url === "PRESET_VERTICAL") {
-        verticalRadio.checked = true;
+        verticalButton.style.display = "none";
+        sequencerButton.style.display = "block";
         submixerButton.style.display = "none";
     }
     else {
-        sequencerRadio.checked = true;
+        sequencerButton.style.display = "none";
+        verticalButton.style.display = "block";
         submixerButton.style.display = "block";
     }
-    verticalRadio.onchange = function () {
+    if (part.osc) {
+        sequencerButton.style.display = "none";
+        
+    }
+    
+    verticalButton.onclick = function () {
         part.data.surface.url = "PRESET_VERTICAL";
         submixerButton.style.display = "none";
         if (!part.data.notes) {
             part.data.notes = [];
         }
+        tg.instrument.show(part);
     };
-    sequencerRadio.onchange = function () {
+    sequencerButton.onclick = function () {
         submixerButton.style.display = "block";
         part.data.surface.url = "PRESET_SEQUENCER";
         if (!part.data.tracks) {
             part.makeTracks();
         }
+        tg.sequencer.show(part);
     };
-    
+    surfaceArea.style.display = part.osc ? "none" : "block";
     document.getElementById("part-options-clear-button").onclick = function () {
         if (part.data.notes) {
             part.data.notes = [];
@@ -820,7 +830,7 @@ tg.makeMixerDiv = function (part, divs) {
 
     var audioParameters = part.audioParameters || part.data.audioParameters;
     
-    var volumeProperty = {"property": "gain", "name": "Volume", "type": "slider", "min": 0, "max": 1, 
+    var volumeProperty = {"property": "gain", "name": "Volume", "type": "slider", "min": 0, "max": 1.5, 
             "color": audioParameters.mute ?"#880000" : "#008800", transform: "square"};
     var warpProperty = {"property": "warp", "name": "Warp", "type": "slider", "min": 0, "max": 2, resetValue: 1, "color": "#880088"};
     var panProperty = {"property": "pan", "name": "Pan", "type": "slider", "min": -1, "max": 1, resetValue: 0, "color": "#000088"};
@@ -1041,10 +1051,10 @@ SliderCanvas.prototype.drawCanvas = function () {
     this.ctx.fillStyle = this.controlInfo.color || "#008800";
     var value = this.data[this.controlInfo.property];
     var percent = value;
+    percent = (percent - this.controlInfo.min) / (this.controlInfo.max - this.controlInfo.min);
     if (this.controlInfo.transform === "square") {
         percent = Math.sqrt(percent);
     }
-    percent = (percent - this.controlInfo.min) / (this.controlInfo.max - this.controlInfo.min);
     if (this.controlInfo.min === 20 && this.controlInfo.max > 10000) {
         percent = (Math.log(value) - Math.log(this.controlInfo.min)) / this.frequencyTransformScale;
     }
@@ -1255,6 +1265,7 @@ tg.sectionFragment.div.onclick = function () {
     tg.sectionFragment.contextMenuNameDiv = null;
 };
 tg.sectionFragment.listDiv = document.getElementById("section-fragment-list");
+tg.sectionFragment.arrangementDiv = document.getElementById("section-arrangement-list");
 tg.sectionFragment.presetNameMenuDiv = document.getElementById("preset-section-name-menu");
 tg.sectionFragment.presetNameListDiv = document.getElementById("preset-section-name-list");
 document.getElementById("copy-section-button").onclick = function () {
@@ -1277,6 +1288,19 @@ tg.sectionFragment.renameInput.onclick = function () {
         };
         tg.sectionFragment.presetNameListDiv.appendChild(presetNameDiv);
     });
+tg.sectionFragment.contextMenuRemove = document.createElement("button");
+tg.sectionFragment.contextMenuRemove.innerHTML = "Remove Section";
+tg.sectionFragment.contextMenuRemove.onclick = function (e) {
+    e.stopPropagation();
+    tg.sectionFragment.presetNameMenuDiv.style.display = "none";
+    var index = tg.song.sections.indexOf(tg.sectionFragment.contextMenuSection);
+    if (tg.song.sections.length > 1) {
+        tg.song.sections.splice(index, 1);
+        tg.sectionFragment.div.removeChild(index);
+    }
+    
+};
+tg.sectionFragment.presetNameListDiv.appendChild(tg.sectionFragment.contextMenuRemove);
 tg.sectionFragment.renameInput.onclick = function (e) {
     e.stopPropagation();
 };
@@ -1339,10 +1363,114 @@ tg.sectionFragment.addSectionListItem = (section) => {
     }
     sectionDiv.appendChild(sectionRenameDiv);
     sectionDiv.appendChild(sectionNameDiv);
+    
+    var addToArrangementButton = document.createElement("div");
+    addToArrangementButton.innerHTML = "+";
+    addToArrangementButton.className = "section-list-item-add-to-arrangement";
+    addToArrangementButton.onclick = function (e) {
+        e.stopPropagation();
+        if (!tg.song.arrangement) {
+            tg.song.arrangement = [];
+        }
+        tg.song.arrangement.push({section: section, data: {repeat: 0, name: section.data.name}});
+        tg.sectionFragment.addArrangementListItem(tg.song.arrangement[tg.song.arrangement.length - 1]);
+    };
+    sectionDiv.appendChild(addToArrangementButton);
+    
     tg.sectionFragment.listDiv.appendChild(sectionDiv);
     return sectionDiv;
 };
 
+tg.sectionFragment.addArrangementListItem = (arrangementItem) => {
+    var section = arrangementItem.section;
+    var sectionDiv = document.createElement("div");
+    sectionDiv.className = "section-list-item";
+    arrangementItem.div = sectionDiv;
+
+    var sectionNameDiv = document.createElement("div");
+    sectionNameDiv.className = "section-list-item-name";
+    var updateCaption = function () {
+        var caption = (arrangementItem.data.name || "(Untitled)");
+        if (arrangementItem.data.repeat > 0) {
+            caption += " x" + (arrangementItem.data.repeat + 1);
+        }
+        sectionNameDiv.innerHTML = caption;
+    };
+    updateCaption();
+
+    var moveUpDiv = document.createElement("div");
+    moveUpDiv.className = "arrangement-move-button";
+    moveUpDiv.innerHTML = "&uarr;";
+    moveUpDiv.onclick = function (e) {
+        e.stopPropagation();
+        var index = tg.song.arrangement.indexOf(arrangementItem);
+        if (index > 0) {
+            tg.song.arrangement.splice(index, 1);
+            tg.song.arrangement.splice(index - 1, 0, arrangementItem);
+            tg.sectionFragment.arrangementDiv.insertBefore(arrangementItem.div, 
+                        tg.song.arrangement[index].div);
+        }
+    };
+    var moveDownDiv = document.createElement("div");
+    moveDownDiv.className = "arrangement-move-button";
+    moveDownDiv.innerHTML = "&darr;";
+    moveDownDiv.onclick = function (e) {
+        e.stopPropagation();
+        var index = tg.song.arrangement.indexOf(arrangementItem);
+        if (index < tg.song.arrangement.length - 1) {
+            tg.song.arrangement.splice(index, 1);
+            tg.song.arrangement.splice(index + 1, 0, arrangementItem);
+            tg.sectionFragment.arrangementDiv.insertBefore(arrangementItem.div, 
+                        tg.song.arrangement[index].div.nextSibling);
+        }
+    };
+
+    var repeatUpDiv = document.createElement("div");
+    repeatUpDiv.className = "arrangement-move-button";
+    repeatUpDiv.innerHTML = "&plus;";
+    repeatUpDiv.onclick = function (e) {
+        e.stopPropagation();
+        arrangementItem.data.repeat++;
+        updateCaption();
+    };
+    var repeatDownDiv = document.createElement("div");
+    repeatDownDiv.className = "arrangement-move-button";
+    repeatDownDiv.innerHTML = "&minus;";
+    repeatDownDiv.onclick = function (e) {
+        e.stopPropagation();
+        if (arrangementItem.data.repeat > 0) {
+            arrangementItem.data.repeat--;
+            updateCaption();
+        }
+    };
+
+
+    sectionDiv.onclick = function () {
+        tg.loadSection(section);
+        tg.sectionFragment.updateSelectedSection(sectionDiv);
+        tg.setSongControlsUI();
+    };
+    if (section === tg.currentSection) {
+        tg.sectionFragment.updateSelectedSection(sectionDiv);
+    }
+    sectionDiv.appendChild(moveUpDiv);
+    sectionDiv.appendChild(moveDownDiv);
+    sectionDiv.appendChild(repeatDownDiv);
+    sectionDiv.appendChild(repeatUpDiv);
+    sectionDiv.appendChild(sectionNameDiv);
+    
+    var removeFromArrangementButton = document.createElement("div");
+    removeFromArrangementButton.innerHTML = "&times;";
+    removeFromArrangementButton.className = "arrangement-item-remove";
+    removeFromArrangementButton.onclick = function () {
+        tg.song.arrangement.splice(tg.song.arrangement.indexOf(arrangementItem), 1);
+        tg.sectionFragment.arrangementDiv.removeChild(sectionDiv);
+    };
+    sectionDiv.appendChild(removeFromArrangementButton);
+    
+    tg.sectionFragment.arrangementDiv.appendChild(sectionDiv);
+    return sectionDiv;
+};
 
 tg.showSectionFragment = function () {
     tg.sectionFragment.presetNameMenuDiv.style.display = "none";
@@ -1350,12 +1478,18 @@ tg.showSectionFragment = function () {
     tg.song.sections.forEach(section => {
         tg.sectionFragment.addSectionListItem(section);
     });
+    tg.sectionFragment.arrangementDiv.innerHTML = "";
+    tg.song.arrangement.forEach(section => {
+        tg.sectionFragment.addArrangementListItem(section);
+    });
     tg.sectionFragment.div.style.display = "block";
 };
 
 tg.copySection = function (name) {
     var newSectionData = JSON.parse(JSON.stringify(tg.currentSection.getData()));
     if (name) newSectionData.name = name;
+    var names = tg.song.sections.map(section => section.data.name);
+    newSectionData.name = omg.util.getUniqueName(newSectionData.name, names);
     var newSection = new OMGSection(null, newSectionData, tg.song);
     tg.loadSection(newSection);
     return newSection;
@@ -1366,8 +1500,10 @@ tg.loadSection = function (section) {
     tg.partList.innerHTML = "";
     for (var j = 0; j < section.parts.length; j++) {
         tg.setupPartButton(section.parts[j]);
+        tg.player.loadPart(section.parts[j]);
     }
     tg.player.loopSection = tg.song.sections.indexOf(section);
+    tg.setSongControlsUI();
 };
 
 

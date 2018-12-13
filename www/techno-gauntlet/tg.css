@@ -377,6 +377,25 @@ body {
     font-size:1.2em;
     display:flex;
 }
+
+.section-list-item-name {
+    margin-left:0.3em;
+}
+
+.arrangement-item-remove, .section-list-item-add-to-arrangement {
+    border:1px solid #808080;
+    border-radius:2px;
+    padding:0px 4px 2px;
+    margin-left: auto;
+}
+
+.arrangement-move-button {
+    border:1px solid #808080;
+    border-radius:2px;
+    padding:0px 4px;
+    margin-right:0.2em;
+}
+
 .section-list-item-rename {
     margin-right:0.5em;
 }
@@ -473,8 +492,14 @@ body {
 }
 
 button {
-    font-size:1.1em;
-    padding:0.5em;
+    font-size:1.0em;
+    padding:0.4em;
+    width:100%;
+}
+
+input {
+    font-size:1.0em;
+    width:80%;
 }
 
 #sequencer-fragment, #instrument-fragment {

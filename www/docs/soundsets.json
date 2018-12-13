@@ -1,0 +1,1270 @@
+[
+  {
+    "data": [
+      {
+        "url": "e",
+        "name": "E3"
+      },
+      {
+        "url": "f",
+        "name": "F2"
+      },
+      {
+        "url": "fs",
+        "name": "F#2"
+      },
+      {
+        "url": "g",
+        "name": "G2"
+      },
+      {
+        "url": "gs",
+        "name": "G#2"
+      },
+      {
+        "url": "a",
+        "name": "A1"
+      },
+      {
+        "url": "bf",
+        "name": "Bb1"
+      },
+      {
+        "url": "b",
+        "name": "B1"
+      },
+      {
+        "url": "c",
+        "name": "C2"
+      },
+      {
+        "url": "cs",
+        "name": "C#2"
+      },
+      {
+        "url": "d",
+        "name": "D2"
+      },
+      {
+        "url": "ds",
+        "name": "D#2"
+      },
+      {
+        "url": "e2",
+        "name": "E3"
+      },
+      {
+        "url": "f2",
+        "name": "F3"
+      },
+      {
+        "url": "fs2",
+        "name": "F#3"
+      },
+      {
+        "url": "g2",
+        "name": "G3"
+      },
+      {
+        "url": "gs2",
+        "name": "G#3"
+      },
+      {
+        "url": "a2",
+        "name": "A2"
+      }
+    ],
+    "name": "Guitar Power Chords",
+    "tags": "melody",
+    "type": "SOUNDSET",
+    "prefix": "http://mikehelland.com/omg/electric_power/",
+    "lowNote": 40,
+    "postfix": "power.mp3",
+    "user_id": "1",
+    "highNote": 57,
+    "username": "m                   ",
+    "chromatic": true,
+    "created_at": 1513203692976,
+    "last_modified": 1513204102927,
+    "id": 401
+  },
+  {
+    "data": [
+      {
+        "url": "a1",
+        "name": "A1"
+      },
+      {
+        "url": "bf1",
+        "name": "Bb1"
+      },
+      {
+        "url": "b1",
+        "name": "B1"
+      },
+      {
+        "url": "c2",
+        "name": "C2"
+      },
+      {
+        "url": "cs2",
+        "name": "C#2"
+      },
+      {
+        "url": "d2",
+        "name": "D2"
+      },
+      {
+        "url": "ds2",
+        "name": "D#2"
+      },
+      {
+        "url": "e2",
+        "name": "E3"
+      },
+      {
+        "url": "f2",
+        "name": "F2"
+      },
+      {
+        "url": "fs2",
+        "name": "F#2"
+      },
+      {
+        "url": "g2",
+        "name": "G2"
+      },
+      {
+        "url": "gs2",
+        "name": "G#2"
+      },
+      {
+        "url": "a2",
+        "name": "A2"
+      },
+      {
+        "url": "bf2",
+        "name": "Bb2"
+      },
+      {
+        "url": "b2",
+        "name": "B2"
+      },
+      {
+        "url": "c3",
+        "name": "C3"
+      },
+      {
+        "url": "cs3",
+        "name": "C#3"
+      },
+      {
+        "url": "d3",
+        "name": "D3"
+      },
+      {
+        "url": "ds3",
+        "name": "D#3"
+      },
+      {
+        "url": "e3",
+        "name": "E3"
+      },
+      {
+        "url": "f3",
+        "name": "F3"
+      },
+      {
+        "url": "fs3",
+        "name": "F#3"
+      },
+      {
+        "url": "g3",
+        "name": "G3"
+      },
+      {
+        "url": "gs3",
+        "name": "G#3"
+      },
+      {
+        "url": "a3",
+        "name": "A3"
+      },
+      {
+        "url": "bf3",
+        "name": "Bb3"
+      },
+      {
+        "url": "b3",
+        "name": "B3"
+      },
+      {
+        "url": "c4",
+        "name": "C4"
+      },
+      {
+        "url": "cs4",
+        "name": "C#4"
+      },
+      {
+        "url": "d4",
+        "name": "D4"
+      },
+      {
+        "url": "ds4",
+        "name": "D#4"
+      },
+      {
+        "url": "e4",
+        "name": "E4"
+      },
+      {
+        "url": "f4",
+        "name": "F4"
+      },
+      {
+        "url": "fs4",
+        "name": "F#4"
+      },
+      {
+        "url": "g4",
+        "name": "G4"
+      },
+      {
+        "url": "gs4",
+        "name": "G#4"
+      },
+      {
+        "url": "a4",
+        "name": "A4"
+      },
+      {
+        "url": "bf4",
+        "name": "Bb4"
+      },
+      {
+        "url": "b4",
+        "name": "B4"
+      },
+      {
+        "url": "c5",
+        "name": "C5"
+      },
+      {
+        "url": "cs5",
+        "name": "C#5"
+      },
+      {
+        "url": "d5",
+        "name": "D5"
+      },
+      {
+        "url": "ds5",
+        "name": "D#5"
+      },
+      {
+        "url": "e5",
+        "name": "E5"
+      },
+      {
+        "url": "f5",
+        "name": "F5"
+      },
+      {
+        "url": "fs5",
+        "name": "F#5"
+      },
+      {
+        "url": "g5",
+        "name": "G5"
+      },
+      {
+        "url": "gs5",
+        "name": "G#5"
+      },
+      {
+        "url": "a5",
+        "name": "A5"
+      },
+      {
+        "url": "bf5",
+        "name": "Bb5"
+      },
+      {
+        "url": "b5",
+        "name": "B5"
+      },
+      {
+        "url": "c6",
+        "name": "C6"
+      },
+      {
+        "url": "cs6",
+        "name": "C#6"
+      },
+      {
+        "url": "d6",
+        "name": "D6"
+      },
+      {
+        "url": "ds6",
+        "name": "D#6"
+      },
+      {
+        "url": "e6",
+        "name": "E6"
+      },
+      {
+        "url": "f6",
+        "name": "F6"
+      },
+      {
+        "url": "fs6",
+        "name": "F#6"
+      },
+      {
+        "url": "g6",
+        "name": "G6"
+      },
+      {
+        "url": "gs6",
+        "name": "G#6"
+      },
+      {
+        "url": "a6",
+        "name": "A6"
+      }
+    ],
+    "name": "Keyboard",
+    "tags": "melody bassline",
+    "type": "SOUNDSET",
+    "prefix": "http://mikehelland.com/omg/kb/kb1_",
+    "lowNote": 33,
+    "postfix": ".mp3",
+    "user_id": "1",
+    "username": "m                   ",
+    "chromatic": true,
+    "created_at": 1513199938897,
+    "last_modified": 1513203767851,
+    "id": 397
+  },
+  {
+    "data": [
+      {
+        "url": "e",
+        "name": "E2"
+      },
+      {
+        "url": "f",
+        "name": "F2"
+      },
+      {
+        "url": "fs",
+        "name": "F#2"
+      },
+      {
+        "url": "g",
+        "name": "G2"
+      },
+      {
+        "url": "gs",
+        "name": "G#2"
+      },
+      {
+        "url": "a",
+        "name": "A2"
+      },
+      {
+        "url": "bf",
+        "name": "Bb2"
+      },
+      {
+        "url": "b",
+        "name": "B2"
+      },
+      {
+        "url": "c",
+        "name": "C3"
+      },
+      {
+        "url": "cs",
+        "name": "C#3"
+      },
+      {
+        "url": "d",
+        "name": "D3"
+      },
+      {
+        "url": "ds",
+        "name": "D#3"
+      },
+      {
+        "url": "e2",
+        "name": "E3"
+      },
+      {
+        "url": "f2",
+        "name": "F3"
+      },
+      {
+        "url": "fs2",
+        "name": "F#2"
+      },
+      {
+        "url": "g2",
+        "name": "G2"
+      },
+      {
+        "url": "gs2",
+        "name": "G#2"
+      },
+      {
+        "url": "a2",
+        "name": "A3"
+      },
+      {
+        "url": "bf2",
+        "name": "Bb3"
+      },
+      {
+        "url": "b2",
+        "name": "B3"
+      },
+      {
+        "url": "c2",
+        "name": "C4"
+      },
+      {
+        "url": "cs2",
+        "name": "C#4"
+      },
+      {
+        "url": "d2",
+        "name": "D4"
+      },
+      {
+        "url": "ds2",
+        "name": "D#4"
+      },
+      {
+        "url": "e3",
+        "name": "E4"
+      },
+      {
+        "url": "f3",
+        "name": "F4"
+      },
+      {
+        "url": "fs3",
+        "name": "F#4"
+      },
+      {
+        "url": "g3",
+        "name": "G4"
+      },
+      {
+        "url": "gs3",
+        "name": "G#4"
+      },
+      {
+        "url": "a3",
+        "name": "A4"
+      },
+      {
+        "url": "bf3",
+        "name": "Bb4"
+      },
+      {
+        "url": "b3",
+        "name": "B4"
+      },
+      {
+        "url": "c3",
+        "name": "C5"
+      },
+      {
+        "url": "cs3",
+        "name": "C#5"
+      },
+      {
+        "url": "d3",
+        "name": "D5"
+      },
+      {
+        "url": "ds3",
+        "name": "D#5"
+      },
+      {
+        "url": "e4",
+        "name": "E5"
+      },
+      {
+        "url": "f4",
+        "name": "F5"
+      },
+      {
+        "url": "fs4",
+        "name": "F#5"
+      },
+      {
+        "url": "g4",
+        "name": "G5"
+      },
+      {
+        "url": "gs4",
+        "name": "G#5"
+      },
+      {
+        "url": "a4",
+        "name": "A5"
+      },
+      {
+        "url": "bf4",
+        "name": "Bb5"
+      },
+      {
+        "url": "b4",
+        "name": "B5"
+      },
+      {
+        "url": "c4",
+        "name": "C6"
+      },
+      {
+        "url": "cs4",
+        "name": "C#6"
+      }
+    ],
+    "name": "Electric Guitar",
+    "tags": "melody",
+    "type": "SOUNDSET",
+    "prefix": "http://mikehelland.com/omg/electric/electric_",
+    "lowNote": 40,
+    "postfix": ".mp3",
+    "user_id": "1",
+    "username": "m                   ",
+    "chromatic": true,
+    "created_at": 1513199866864,
+    "last_modified": 1513205625274,
+    "defaultSurface": "PRESET_VERTICAL",
+    "id": 396
+  },
+  {
+    "data": [
+      {
+        "url": "e",
+        "name": "E2"
+      },
+      {
+        "url": "f",
+        "name": "F2"
+      },
+      {
+        "url": "fs",
+        "name": "F#2"
+      },
+      {
+        "url": "g",
+        "name": "G2"
+      },
+      {
+        "url": "gs",
+        "name": "G#2"
+      },
+      {
+        "url": "a",
+        "name": "A2"
+      },
+      {
+        "url": "bf",
+        "name": "Bb2"
+      },
+      {
+        "url": "b",
+        "name": "B2"
+      },
+      {
+        "url": "c",
+        "name": "C3"
+      },
+      {
+        "url": "cs",
+        "name": "C#3"
+      },
+      {
+        "url": "d",
+        "name": "D3"
+      },
+      {
+        "url": "ds",
+        "name": "Eb3"
+      },
+      {
+        "url": "e2",
+        "name": "E3"
+      },
+      {
+        "url": "f2",
+        "name": "F3"
+      },
+      {
+        "url": "fs2",
+        "name": "F#3"
+      },
+      {
+        "url": "g2",
+        "name": "G3"
+      },
+      {
+        "url": "gs2",
+        "name": "G#3"
+      },
+      {
+        "url": "a2",
+        "name": "A3"
+      },
+      {
+        "url": "bf2",
+        "name": "Bb3"
+      },
+      {
+        "url": "b2",
+        "name": "B3"
+      },
+      {
+        "url": "c2",
+        "name": "C4"
+      }
+    ],
+    "name": "Electric Bass",
+    "tags": "bassline",
+    "type": "SOUNDSET",
+    "prefix": "http://mikehelland.com/omg/bass1/bass_",
+    "lowNote": 28,
+    "postfix": ".mp3",
+    "user_id": "1",
+    "username": "m                   ",
+    "chromatic": true,
+    "created_at": 1513199637025,
+    "last_modified": 1513203894245,
+    "id": 395
+  },
+  {
+    "data": [
+      {
+        "url": "http://www.mikehelland.com/omg/stripes/2/main_title.mp3",
+        "name": "main_title"
+      },
+      {
+        "url": "http://www.mikehelland.com/omg/stripes/2/aarrggh.mp3",
+        "name": "aarrggh"
+      },
+      {
+        "url": "http://www.mikehelland.com/omg/stripes/2/applause.mp3",
+        "name": "applause"
+      },
+      {
+        "url": "http://www.mikehelland.com/omg/stripes/2/funny.mp3",
+        "name": "funny"
+      },
+      {
+        "url": "http://www.mikehelland.com/omg/stripes/2/kiddingme.mp3",
+        "name": "kiddingme"
+      },
+      {
+        "url": "http://www.mikehelland.com/omg/stripes/2/nsfw.mp3",
+        "name": "nsfw"
+      },
+      {
+        "url": "http://www.mikehelland.com/omg/stripes/2/trump_knows_words.mp3",
+        "name": "trump_knows_words"
+      },
+      {
+        "url": "http://www.mikehelland.com/omg/stripes/2/wahahaha.mp3",
+        "name": "wahahaha"
+      }
+    ],
+    "name": "Stripes Show 2",
+    "type": "SOUNDSET",
+    "created_at": 1506373991382,
+    "last_modified": 1506373991382,
+    "id": 210
+  },
+  {
+    "data": [
+      {
+        "url": "http://www.mikehelland.com/omg/stripes/1/fanfare_intro.mp3",
+        "name": "fanfare_intro"
+      },
+      {
+        "url": "http://www.mikehelland.com/omg/stripes/1/fanfare.mp3",
+        "name": "fanfare"
+      },
+      {
+        "url": "http://www.mikehelland.com/omg/stripes/1/kingofamerica.mp3",
+        "name": "kingofamerica"
+      },
+      {
+        "url": "http://www.mikehelland.com/omg/stripes/1/mike_doesnt_get_it.mp3",
+        "name": "mike_doesnt_get_it"
+      },
+      {
+        "url": "http://www.mikehelland.com/omg/stripes/1/realstuff.mp3",
+        "name": "realstuff"
+      },
+      {
+        "url": "http://www.mikehelland.com/omg/stripes/1/stripes_has_mail.mp3",
+        "name": "stripes_has_mail"
+      },
+      {
+        "url": "http://www.mikehelland.com/omg/stripes/1/todaytomorrow.mp3",
+        "name": "todaytomorrow"
+      },
+      {
+        "url": "http://www.mikehelland.com/omg/stripes/1/weird.mp3",
+        "name": "weird"
+      }
+    ],
+    "name": "Stripes Show 1",
+    "type": "SOUNDSET",
+    "created_at": 1506372228890,
+    "last_modified": 1506372228890,
+    "id": 209
+  },
+  {
+    "data": [
+      {
+        "url": "http://soundbible.com/grab.php?id=2129&type=mp3",
+        "name": "Scream"
+      }
+    ],
+    "name": "Howler",
+    "type": "SOUNDSET",
+    "created_at": 1503786149035,
+    "last_modified": 1503786149035,
+    "id": 191
+  },
+  {
+    "data": [
+      {
+        "url": "http://mikehelland.com/omg/closer/basshits.mp3",
+        "name": "bass hits"
+      },
+      {
+        "url": "http://mikehelland.com/omg/closer/ffunk.mp3",
+        "name": "ffunk"
+      },
+      {
+        "url": "http://mikehelland.com/omg/closer/synthLEAD.mp3",
+        "name": "synth 1"
+      },
+      {
+        "url": "http://mikehelland.com/omg/closer/synthleads.mp3",
+        "name": "synth 2"
+      },
+      {
+        "url": "http://mikehelland.com/omg/closer/descend1a.mp3",
+        "name": "descend1a"
+      },
+      {
+        "url": "http://mikehelland.com/omg/closer/descend1b.mp3",
+        "name": "descend1b"
+      },
+      {
+        "url": "http://mikehelland.com/omg/closer/descend2a.mp3",
+        "name": "descend2a"
+      },
+      {
+        "url": "http://mikehelland.com/omg/closer/descend2b.mp3",
+        "name": "descend2b"
+      }
+    ],
+    "name": "Closer Outro",
+    "type": "SOUNDSET",
+    "created_at": 1502040051017,
+    "last_modified": 1502040051017,
+    "id": 186
+  },
+  {
+    "data": [
+      {
+        "url": "http://mikehelland.com/omg/closer/kick.mp3",
+        "name": "kick"
+      },
+      {
+        "url": "http://mikehelland.com/omg/closer/snare.mp3",
+        "name": "snare"
+      },
+      {
+        "url": "http://mikehelland.com/omg/closer/snare2.mp3",
+        "name": "snare2"
+      },
+      {
+        "url": "http://mikehelland.com/omg/closer/chorusbass.mp3",
+        "name": "chorusbass"
+      },
+      {
+        "url": "http://mikehelland.com/omg/closer/rock_crash.ogg",
+        "name": "crash"
+      },
+      {
+        "url": "http://mikehelland.com/omg/closer/rock_hihat_closed.ogg",
+        "name": "hihat"
+      },
+      {
+        "url": "http://mikehelland.com/omg/closer/rock_hihat_open.ogg",
+        "name": "hihat open"
+      },
+      {
+        "url": "http://mikehelland.com/omg/closer/climb1.mp3",
+        "name": "climb1"
+      }
+    ],
+    "name": "Closer Chorus",
+    "type": "SOUNDSET",
+    "user_id": "1",
+    "username": "m                   ",
+    "created_at": 1511041805366,
+    "last_modified": 1511041805366,
+    "id": 185
+  },
+  {
+    "data": [
+      {
+        "url": "http://mikehelland.com/omg/closer/kick.mp3",
+        "name": "kick"
+      },
+      {
+        "url": "http://mikehelland.com/omg/closer/snare.mp3",
+        "name": "snare"
+      },
+      {
+        "url": "http://mikehelland.com/omg/closer/snare2.mp3",
+        "name": "snare2"
+      },
+      {
+        "url": "http://mikehelland.com/omg/closer/synthBASS.mp3",
+        "name": "synthBASS"
+      },
+      {
+        "url": "PRESET_ROCK_HIHAT_CLOSED",
+        "name": "hihat"
+      },
+      {
+        "url": "PRESET_HH_HIHAT",
+        "name": "hihat open"
+      },
+      {
+        "url": "http://mikehelland.com/omg/closer/helpme.mp3",
+        "name": "helpme"
+      },
+      {
+        "url": "http://mikehelland.com/omg/closer/climb2.mp3",
+        "name": "climb2"
+      }
+    ],
+    "name": "Closer Verse",
+    "type": "SOUNDSET",
+    "created_at": 1502038099267,
+    "last_modified": 1502038099267,
+    "id": 184
+  },
+  {
+    "data": [
+      {
+        "url": "http://mikehelland.com/omg/loser/drums.mp3",
+        "name": "drums"
+      },
+      {
+        "url": "http://mikehelland.com/omg/loser/bass.mp3",
+        "name": "bass"
+      },
+      {
+        "url": "http://mikehelland.com/omg/loser/marimbell.mp3",
+        "name": "marimbell"
+      },
+      {
+        "url": "http://mikehelland.com/omg/loser/sitarhi.mp3",
+        "name": "sitarhi"
+      },
+      {
+        "url": "http://mikehelland.com/omg/loser/sitarlo.mp3",
+        "name": "sitarlo"
+      },
+      {
+        "url": "http://mikehelland.com/omg/loser/steeldrums.mp3",
+        "name": "steeldrums"
+      },
+      {
+        "url": "http://mikehelland.com/omg/loser/stringhi.mp3",
+        "name": "stringhi"
+      },
+      {
+        "url": "http://mikehelland.com/omg/loser/stringlo.mp3",
+        "name": "stringlo"
+      }
+    ],
+    "name": "Loser",
+    "type": "SOUNDSET",
+    "created_at": 1501789529513,
+    "last_modified": 1501789529513,
+    "id": 179
+  },
+  {
+    "data": [
+      {
+        "url": "http://mikehelland.com/omg/joe/THICKAS/A.mp3",
+        "name": "A"
+      },
+      {
+        "url": "http://mikehelland.com/omg/joe/THICKAS/B.mp3",
+        "name": "B"
+      },
+      {
+        "url": "http://mikehelland.com/omg/joe/THICKAS/C.mp3",
+        "name": "C"
+      },
+      {
+        "url": "http://mikehelland.com/omg/joe/THICKAS/D.mp3",
+        "name": "D"
+      },
+      {
+        "url": "http://mikehelland.com/omg/joe/THICKAS/E.mp3",
+        "name": "E"
+      },
+      {
+        "url": "http://mikehelland.com/omg/joe/THICKAS/F.mp3",
+        "name": "F"
+      },
+      {
+        "url": "http://mikehelland.com/omg/joe/THICKAS/G.mp3",
+        "name": "G"
+      },
+      {
+        "url": "http://mikehelland.com/omg/joe/THICKAS/RIBBIT.mp3",
+        "name": "RIBBIT"
+      }
+    ],
+    "name": "THICK",
+    "type": "SOUNDSET",
+    "user_id": "1",
+    "username": "m                   ",
+    "chromatic": false,
+    "created_at": 1511045796173,
+    "last_modified": 1511045796173,
+    "defaultSurface": "PRESET_VERTICAL",
+    "id": 62
+  },
+  {
+    "data": [
+      {
+        "url": "http://mikehelland.com/omg/joe/SYNTHKEYS/A.mp3",
+        "name": "A"
+      },
+      {
+        "url": "http://mikehelland.com/omg/joe/SYNTHKEYS/B.mp3",
+        "name": "B"
+      },
+      {
+        "url": "http://mikehelland.com/omg/joe/SYNTHKEYS/C.mp3",
+        "name": "C"
+      },
+      {
+        "url": "http://mikehelland.com/omg/joe/SYNTHKEYS/D.mp3",
+        "name": "D"
+      },
+      {
+        "url": "http://mikehelland.com/omg/joe/SYNTHKEYS/E.mp3",
+        "name": "E"
+      },
+      {
+        "url": "http://mikehelland.com/omg/joe/SYNTHKEYS/F.mp3",
+        "name": "F"
+      },
+      {
+        "url": "http://mikehelland.com/omg/joe/SYNTHKEYS/G.mp3",
+        "name": "G"
+      },
+      {
+        "url": "http://mikehelland.com/omg/joe/SYNTHKEYS/RIBBIT.mp3",
+        "name": "RIBBIT"
+      }
+    ],
+    "name": "SYNTHKEYS",
+    "type": "SOUNDSET",
+    "created_at": 1500930424314,
+    "last_modified": 1500930424314,
+    "id": 61
+  },
+  {
+    "data": [
+      {
+        "url": "http://mikehelland.com/omg/joe/SLIDEGIT/merp.mp3",
+        "name": "merp"
+      },
+      {
+        "url": "http://mikehelland.com/omg/joe/SLIDEGIT/merrrrrrrrr.mp3",
+        "name": "merrrrrrrrr"
+      },
+      {
+        "url": "http://mikehelland.com/omg/joe/SLIDEGIT/mwerrp.mp3",
+        "name": "mwerrp"
+      },
+      {
+        "url": "http://mikehelland.com/omg/joe/SLIDEGIT/neeshoop.mp3",
+        "name": "neeshoop"
+      },
+      {
+        "url": "http://mikehelland.com/omg/joe/SLIDEGIT/nernerner.mp3",
+        "name": "nernerner"
+      },
+      {
+        "url": "http://mikehelland.com/omg/joe/SLIDEGIT/ner ner ner.mp3",
+        "name": "ner ner ner"
+      },
+      {
+        "url": "http://mikehelland.com/omg/joe/SLIDEGIT/shwoop ner.mp3",
+        "name": "shwoop ner"
+      },
+      {
+        "url": "http://mikehelland.com/omg/joe/SLIDEGIT/wer e wer.mp3",
+        "name": "wer e wer"
+      }
+    ],
+    "name": "SLIDEGIT",
+    "type": "SOUNDSET",
+    "created_at": 1500930332187,
+    "last_modified": 1500930332187,
+    "id": 60
+  },
+  {
+    "data": [
+      {
+        "url": "http://mikehelland.com/omg/joe/KAOSVOX/GAUNT.mp3",
+        "name": "GAUNT"
+      },
+      {
+        "url": "http://mikehelland.com/omg/joe/KAOSVOX/GAUNTz.mp3",
+        "name": "GAUNTz"
+      },
+      {
+        "url": "http://mikehelland.com/omg/joe/KAOSVOX/LET.mp3",
+        "name": "LET"
+      },
+      {
+        "url": "http://mikehelland.com/omg/joe/KAOSVOX/LETz.mp3",
+        "name": "LETz"
+      },
+      {
+        "url": "http://mikehelland.com/omg/joe/KAOSVOX/NO.mp3",
+        "name": "NO"
+      },
+      {
+        "url": "http://mikehelland.com/omg/joe/KAOSVOX/NOz.mp3",
+        "name": "NOz"
+      },
+      {
+        "url": "http://mikehelland.com/omg/joe/KAOSVOX/TECH.mp3",
+        "name": "TECH"
+      },
+      {
+        "url": "http://mikehelland.com/omg/joe/KAOSVOX/TECHz.mp3",
+        "name": "TECHz"
+      }
+    ],
+    "name": "KAOSVOX",
+    "type": "SOUNDSET",
+    "created_at": 1500930180420,
+    "last_modified": 1500930180420,
+    "id": 59
+  },
+  {
+    "data": [
+      {
+        "url": "http://mikehelland.com/omg/joe/FUNKKEYS/A.mp3",
+        "name": "A"
+      },
+      {
+        "url": "http://mikehelland.com/omg/joe/FUNKKEYS/B.mp3",
+        "name": "B"
+      },
+      {
+        "url": "http://mikehelland.com/omg/joe/FUNKKEYS/C.mp3",
+        "name": "C"
+      },
+      {
+        "url": "http://mikehelland.com/omg/joe/FUNKKEYS/D.mp3",
+        "name": "D"
+      },
+      {
+        "url": "http://mikehelland.com/omg/joe/FUNKKEYS/E.mp3",
+        "name": "E"
+      },
+      {
+        "url": "http://mikehelland.com/omg/joe/FUNKKEYS/F.mp3",
+        "name": "F"
+      },
+      {
+        "url": "http://mikehelland.com/omg/joe/FUNKKEYS/G.mp3",
+        "name": "G"
+      },
+      {
+        "url": "http://mikehelland.com/omg/joe/FUNKKEYS/RIBBIT.mp3",
+        "name": "RIBBIT"
+      }
+    ],
+    "name": "FUNKKEYS",
+    "type": "SOUNDSET",
+    "created_at": 1500930041082,
+    "last_modified": 1500930041082,
+    "id": 58
+  },
+  {
+    "data": [
+      {
+        "url": "http://mikehelland.com/omg/phil/dm.mp3",
+        "name": "Dm"
+      },
+      {
+        "url": "http://mikehelland.com/omg/phil/c.mp3",
+        "name": "C"
+      },
+      {
+        "url": "http://mikehelland.com/omg/phil/bb.mp3",
+        "name": "Bb"
+      },
+      {
+        "url": "http://mikehelland.com/omg/phil/guitar1.mp3",
+        "name": "guitar chord"
+      }
+    ],
+    "name": "Philin' It",
+    "type": "SOUNDSET",
+    "created_at": 1500420823220,
+    "last_modified": 1500420823220,
+    "id": 57
+  },
+  {
+    "data": [
+      {
+        "url": "http://mikehelland.com/omg/joe/1/bass1.mp3",
+        "name": "bass1"
+      },
+      {
+        "url": "http://mikehelland.com/omg/joe/1/bass2.mp3",
+        "name": "bass2"
+      },
+      {
+        "url": "http://mikehelland.com/omg/joe/1/snare.mp3",
+        "name": "snare"
+      },
+      {
+        "url": "http://mikehelland.com/omg/joe/1/roll.mp3",
+        "name": "roll"
+      },
+      {
+        "url": "http://mikehelland.com/omg/joe/1/basssnare.mp3",
+        "name": "basssnare"
+      },
+      {
+        "url": "http://mikehelland.com/omg/joe/1/clap.mp3",
+        "name": "clap"
+      },
+      {
+        "url": "http://mikehelland.com/omg/joe/1/crash.mp3",
+        "name": "crash"
+      },
+      {
+        "url": "http://mikehelland.com/omg/joe/1/tom.mp3",
+        "name": "tom"
+      }
+    ],
+    "name": "Stuhff 1",
+    "type": "SOUNDSET",
+    "created_at": 1499819479901,
+    "last_modified": 1499819479901,
+    "id": 51
+  },
+  {
+    "data": [
+      {
+        "url": "http://mikehelland.com/omg/robort/clap.mp3",
+        "name": "clap"
+      },
+      {
+        "url": "http://mikehelland.com/omg/robort/rim.mp3",
+        "name": "rim"
+      },
+      {
+        "url": "http://mikehelland.com/omg/robort/cymbal.mp3",
+        "name": "cymbal"
+      },
+      {
+        "url": "http://mikehelland.com/omg/robort/cowbell.mp3",
+        "name": "cowbell"
+      },
+      {
+        "url": "http://mikehelland.com/omg/robort/clave.mp3",
+        "name": "clave"
+      },
+      {
+        "url": "http://mikehelland.com/omg/robort/maraca.mp3",
+        "name": "maraca"
+      },
+      {
+        "url": "http://mikehelland.com/omg/robort/conga%20low.mp3",
+        "name": "conga low"
+      },
+      {
+        "url": "http://mikehelland.com/omg/robort/conga%20mid.mp3",
+        "name": "conga mid"
+      }
+    ],
+    "name": "Kai Kit 2",
+    "type": "SOUNDSET",
+    "created_at": 1499814295473,
+    "last_modified": 1499814295473,
+    "id": 50
+  },
+  {
+    "data": [
+      {
+        "url": "http://mikehelland.com/omg/robort/kick.mp3",
+        "name": "kick"
+      },
+      {
+        "url": "http://mikehelland.com/omg/robort/snare.mp3",
+        "name": "snare"
+      },
+      {
+        "url": "http://mikehelland.com/omg/robort/hh%20open.mp3",
+        "name": "hh open"
+      },
+      {
+        "url": "http://mikehelland.com/omg/robort/hh%20closed.mp3",
+        "name": "hh closed"
+      },
+      {
+        "url": "http://mikehelland.com/omg/robort/hh%20open%20choked.mp3",
+        "name": "hh open choked"
+      },
+      {
+        "url": "http://mikehelland.com/omg/robort/tom%20hi.mp3",
+        "name": "tom hi"
+      },
+      {
+        "url": "http://mikehelland.com/omg/robort/tom%20mid.mp3",
+        "name": "tom mid"
+      },
+      {
+        "url": "http://mikehelland.com/omg/robort/tom%20low.mp3",
+        "name": "tom low"
+      }
+    ],
+    "name": "Kai Kit 1",
+    "type": "SOUNDSET",
+    "created_at": 1499813882517,
+    "last_modified": 1499813882517,
+    "id": 49
+  }
+]
