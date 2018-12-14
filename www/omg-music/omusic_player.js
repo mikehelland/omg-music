@@ -1141,6 +1141,13 @@ OMusicPlayer.prototype.getTotalSubbeats = function () {
     return this.beats * this.subbeats * this.measures;
 };
 
+OMusicPlayer.prototype.rescaleSection = function (section, chord) {
+    var p = this;
+    section.parts.forEach(function (part) {
+        p.rescale(part, section.song.data.keyParameters, chord || 0);
+    });
+};
+
 OMusicPlayer.prototype.rescaleSong = function (rootNote, ascale, chord) {
     var p = this;
     var song = this.song.data;
@@ -1151,10 +1158,7 @@ OMusicPlayer.prototype.rescaleSong = function (rootNote, ascale, chord) {
         song.ascale = ascale;
     }
     this.song.sections.forEach(function (section) {
-        section.parts.forEach(function (part) {
-            p.rescale(part, song.keyParameters,
-                    chord || 0);
-        });
+        p.rescaleSection(section, chord || 0);
     });
 };
 
@@ -1624,7 +1628,7 @@ function OMGSong(div, data, headerOnly) {
     if (data.arrangement) {
         for (var i = 0; i < data.arrangement.length; i++) {
             for (var j = 0; j < this.sections.length; j++) {
-                if (this.sections[j].data.name === data.arrangement[i].name) {
+                if (data.arrangement[i] && this.sections[j].data.name === data.arrangement[i].name) {
                     this.arrangement.push({section: this.sections[j], data: data.arrangement[i]});
                     break;
                 }

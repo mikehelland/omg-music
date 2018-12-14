@@ -5,12 +5,10 @@ if (typeof omg === "undefined") {
     console.log("No OMG Obejcts for embedded_viewer.js, not good!");
 }
 
-function omg_embedded_viewer_loadData(params) {
-    console.log("starting")
-    console.log(params);
+function OMGEmbeddedViewer(params) {
     var div = params.div;
     var data = params.data;
-    var viewer = {};
+    var viewer = this;
     viewer.div = div;
     div.style.position = "relative";
     //div.style.overflowX = "scroll";
@@ -27,7 +25,7 @@ function omg_embedded_viewer_loadData(params) {
     viewer.datetimeDiv = document.createElement("div");
 
     viewer.playButton.innerHTML = "&#9654";
-    viewer.editButton.innerHTML = "ReMix";
+    viewer.editButton.innerHTML = "Edit";
     viewer.shareButton.innerHTML = "Share";
     viewer.tipButton.innerHTML = "Tip";
     viewer.voteButton.innerHTML = "&#x2B06";
@@ -97,195 +95,9 @@ function omg_embedded_viewer_loadData(params) {
     viewer.beatMarker.style.height = height + "px";
     viewer.beatMarker.style.marginLeft = padding / 2 + "px";
 
-
     omg.ui.omgUrl = "omg-music/";
     omg.ui.setupNoteImages();
-
-    viewer.loadSong = function (song) {
-        var flexDiv = document.createElement("div");
-        flexDiv.className = "omg-song-data";
-        flexDiv.style.height = height + "px";
-        viewer.div.appendChild(flexDiv);
-
-        song.sections.forEach(function (section, isection) {
-            var sectionDiv = document.createElement("div");
-            sectionDiv.className = "omg-section-data";
-            flexDiv.appendChild(sectionDiv);
-            //section.div = sectionDiv;
-            viewer.loadSection(sectionDiv, section);
-        });
-        setTimeout(function () {
-            viewer.drawSectionCanvases(song);
-        }, 1000);
-        
-    };
-    viewer.drawSectionCanvases = function (song) {
-        song.sections.forEach(function (section, isection) {
-            viewer.drawPartsCanvases(section);
-        });
-    };
-    viewer.drawPartsCanvases = function (section) {
-        try {
-            var height = section.parts[0].div.clientHeight;
-            var width = section.parts[0].div.clientWidth;
-            section.parts.forEach(function (part) {
-                viewer.drawPart(part, width, height);
-            });
-        } catch (e) {
-            console.log(e);
-        }
-    };
-    viewer.loadSection = function (div, section) {
-        section.parts.forEach(function (part) {
-            part.div = document.createElement("div");
-            part.div.className = "omg-part";
-            div.appendChild(part.div);
-
-        });
-                            
-        //viewer.loadPart(div, part);
-
-        var height = section.parts[0].div.clientHeight;
-        var width = section.parts[0].div.clientWidth;
-
-        section.parts.forEach(function (part) {
-            part.canvas = document.createElement("canvas");
-            part.canvas.width = 0;
-            part.canvas.height = 0;
-            part.canvas.className = "omg-viewer-part-canvas";
-            part.div.appendChild(part.canvas);
-
-            //part.div.height = height;
-            //part.div.width = width;
-        });
-    };
-    viewer.loadPart = function (div, part) {
-
-    };
-    viewer.drawPart = function (part, width, height) {
-        var partDiv = part.div;
-
-
-        part.canvas.height = part.canvas.clientHeight;
-        part.canvas.width = part.canvas.clientWidth - 16;
-
-        var params = {};
-        params.canvas = partDiv;
-        params.keepCanvasDirty = true; // so each part doesn't clear the rest
-        params.data = part; //part.data;
-
-        if (!part.ui) {
-            if (part.data.surface.url === "PRESET_SEQUENCER") {
-                part.ui = new OMGDrumMachine(part.canvas, part)
-                part.ui.captionWidth = 0;
-                part.ui.highContrast = false;
-            } else {
-                part.ui = new OMGMelodyMaker(part.canvas, part)
-                part.ui.highContrast = false;
-            }            
-        }
-        part.ui.draw();
-    };
-
-    viewer.loadPlayer = function (dataToPlay) {
-        if (!dataToPlay || !dataToPlay.type) {
-            return false;
-        }
-
-        var soundSet = false;
-        if (dataToPlay.type === "SOUNDSET") {
-            soundSet = true;
-            viewer.div.className = "omg-soundset";
-        } else {
-            viewer.player = new OMusicPlayer();
-            viewer.song = viewer.player.makeOMGSong(dataToPlay);
-            var info = viewer.player.prepareSong(viewer.song);
-            if (!info) {
-                console.log("couldn't prepare data");
-                console.log(dataToPlay);
-                return false;
-            }
-            viewer.info = info;
-        }
-
-        if (dataToPlay.type === "SONG") {
-            viewer.div.className = "omg-song";
-            viewer.loadSong(viewer.song);
-        }
-        if (dataToPlay.type === "SECTION") {
-            viewer.div.className = "omg-section";
-            var section = viewer.song.sections[0]; //dataToPlay;
-
-            var flexDiv = document.createElement("div");
-            flexDiv.className = "omg-section-data";
-            flexDiv.style.height = height + "px";
-            viewer.div.appendChild(flexDiv);
-
-            viewer.loadSection(flexDiv, section);
-            viewer.drawPartsCanvases(section);
-
-        }
-        if (dataToPlay.type === "PART") {
-            viewer.div.className = "omg-part-data";
-            var part = viewer.song.sections[0].parts[0];
-            viewer.loadPart(viewer.div, part);
-            part.div.style.width = viewer.div.clientWidth - 16 + "px";
-            part.div.style.height = height + "px";
-            viewer.drawPart(part);
-        }
-
-        viewer.titleDiv.innerHTML = dataToPlay.title || "(untitled)";
-        viewer.userDiv.innerHTML = dataToPlay.username || "(unknown)";
-        viewer.datetimeDiv.innerHTML = getTimeCaption(dataToPlay.created_at);
-
-        if (soundSet) {
-
-        } else {
-            viewer.totalBeatsInSong = info.totalSubbeats;
-            var pxPerBeat = (viewer.div.clientWidth - padding) / viewer.totalBeatsInSong;
-
-            viewer.player.onBeatPlayedListeners.push(function (isubbeat, isection) {
-                viewer.beatMarker.style.width = pxPerBeat * (1 + isubbeat + isection * beatsInSection) + "px";
-            });
-
-            viewer.editButton.onclick = function () {
-                window.location = "music-maker.htm?id=" + dataToPlay.id;
-            };
-
-        }
-        viewer.tipButton.onclick = function () {
-            window.location = "bitcoin:1Jdam2fBZxfhWLB8yP69Zbw6fLzRpweRjc?amount=0.004";
-        };
-    };
-
-
-    viewer.queryStringParameters = (function () {
-        var loadParams = {};
-        var params = document.location.search;
-        var nvp;
-
-        if (params.length > 1) {
-            params = params.slice(1).split("&");
-            for (var ip = 0; ip < params.length; ip++) {
-                nvp = params[ip].split("=");
-                loadParams[nvp[0]] = nvp[1];
-            }
-        }
-        return loadParams;
-    })();
-
-    viewer.getDataById = function (id, callback, errorCallback) {
-        var xhr = new XMLHttpRequest();
-        xhr.open("GET", "/data/" + id, true);
-        xhr.onreadystatechange = function () {
-            if (xhr.readyState === 4) {
-                var ojson = JSON.parse(xhr.responseText);
-                callback(ojson);
-            }
-        };
-        xhr.send();
-    };
-
+    
     viewer.playButton.onclick = function () {
         var pbClass = viewer.playButton.className;
         viewer.player.onStop = function () {
@@ -309,30 +121,232 @@ function omg_embedded_viewer_loadData(params) {
 
         } else {
             viewer.playButton.className = pbClass + " loader";
-            viewer.player.load(viewer.info, function (info) {
-                viewer.player.play(info);
-            });
+            viewer.player.play(viewer.song);
+            //viewer.player.load(viewer.info, function (info) {
+            //    viewer.player.play(info);
+            //});
         }
     };
+    
+    viewer.titleDiv.innerHTML = data.title || "(untitled)";
+    viewer.userDiv.innerHTML = data.username || "(unknown)";
+    viewer.datetimeDiv.innerHTML = getTimeCaption(data.created_at);
+
+    viewer.tipButton.onclick = function () {
+        window.location = "bitcoin:1Jdam2fBZxfhWLB8yP69Zbw6fLzRpweRjc?amount=0.004";
+    };
+    viewer.editButton.onclick = function () {
+        window.location = "/techno-gauntlet/?id=" + data.id;
+    };
+
+    var br = document.createElement("br");
+    viewer.div.appendChild(br);
+    
+    viewer.canvas = document.createElement("canvas");
+    viewer.canvas.className = "omg-viewer-canvas";
+    viewer.div.appendChild(viewer.canvas);
+    viewer.canvas.width = viewer.canvas.clientWidth;
+    viewer.canvas.height = viewer.canvas.clientHeight;
+    viewer.context = viewer.canvas.getContext("2d");
+
+    viewer.load(data);
+}
+
+OMGEmbeddedViewer.prototype.load = function (data) {
+    var className = "omg-viewer-" + data.type.toLowerCase();
+    this.div.classList.add(className);
+
+    if (data.type === "SOUNDSET") {
+        //todo this.loadSoundSet(data);
+        return;
+    }
+
+    this.player = new OMusicPlayer();
+    this.song = this.player.makeOMGSong(data);
+    this.song.loop = this.song.arrangement.length === 0;
+
+    this.getDrawingData();
+    this.draw();
+};
+
+OMGEmbeddedViewer.prototype.getDrawingData = function () {
+    var viewer = this;
+    var beatParameters = this.song.data.beatParameters;
+    this.beatParameters = beatParameters;
+    this.totalSubbeats = beatParameters.subbeats * beatParameters.beats * beatParameters.measures;
+    
+    this.drawingData = {sections: []};
+    this.song.sections.forEach(function (section, isection) {
+        var chordedData = [];
+        chordedData.sectionName = section.data.name;
+        for (var ic = 0; ic < section.data.chordProgression.length; ic++) {
+            viewer.player.rescaleSection(section, section.data.chordProgression[ic]);            
+            var sectionData = viewer.getSectionDrawingData(section);
+            chordedData.push(sectionData);
+        }        
+        viewer.drawingData.sections.push(chordedData);
+    });
+    
+    var arrangement = [];
+    if (this.song.arrangement && this.song.arrangement.length > 0) {
+        for (var ia = 0; ia < this.song.arrangement.length; ia++) {
+            for (var isection = 0; isection < this.drawingData.sections.length; isection++) {
+                if (this.drawingData.sections[isection].sectionName === this.song.arrangement[ia].data.name) {
+                    for (var ir = -1; ir < (this.song.arrangement[ia].data.repeat || 0); ir++) {
+                        for (var ic = 0; ic < this.drawingData.sections[isection].length; ic++) {
+                            arrangement.push(this.drawingData.sections[isection][ic]);
+                        }
+                    }
+                }
+            }
+        }
+    }
+    else {
+        for (var isection = 0; isection < this.drawingData.sections.length; isection++) {
+            for (var ic = 0; ic < this.drawingData.sections[isection].length; ic++) {
+                arrangement.push(this.drawingData.sections[isection][ic]);
+            }
+        }
+    }
+    this.drawingData.sections = arrangement;
+    
+    if (this.drawingData.sections.length > 0) {
+        this.sectionLength = Math.max(40, this.canvas.width / this.drawingData.sections.length);
+        this.measureLength = this.sectionLength / this.beatParameters.measures;
+        this.subbeatLength = this.sectionLength / this.totalSubbeats;
+    }
+
+};
+
+OMGEmbeddedViewer.prototype.getSectionDrawingData = function (section) {
+    var viewer = this;
+    var sectionData = {tracks: [], notes: [], section: section};
+    section.parts.forEach(function (part) {
+        if (part.data.audioParameters.mute) {
+            return;
+        }
+
+        if (part.data.surface.url === "PRESET_SEQUENCER") {
+            for (var i = 0; i < part.data.tracks.length; i++) {
+                if (part.data.tracks[i].audioParameters.mute) {
+                    continue;
+                }
+                for (var j = 0; j < viewer.totalSubbeats; j++) {
+                    if (part.data.tracks[i].data[j]) {
+                        sectionData.tracks.push(part.data.tracks[i]);
+                        break;
+                    }
+                }
+            }
+        }
+        else {
+            if (part.data.notes && part.data.notes.length > 0) {
+                sectionData.notes.push(JSON.parse(JSON.stringify(part.data.notes)));
+            }
+        }
+    });
+    
+    if (sectionData.tracks.length > 0) {
+        if (sectionData.notes.length === 0) {
+            sectionData.trackHeight = viewer.canvas.height / sectionData.tracks.length;
+        }
+        else {
+            sectionData.trackHeight = viewer.canvas.height / 2 / sectionData.tracks.length;
+            sectionData.notesHeight = viewer.canvas.height / 2;
+        }
+    }
+    else {
+        sectionData.notesHeight = viewer.canvas.height;
+    }
+    return sectionData;
+}
+
+OMGEmbeddedViewer.prototype.draw = function () {
+    var usedBeats;
+    var marginX, marginY;
+    var value;
+    for (var isection = 0; isection < this.drawingData.sections.length; isection++) {
+        
+        for (var itrack = this.drawingData.sections[isection].tracks.length - 1; itrack >= 0 ; itrack--) {
+            for (var i = 0; i < this.totalSubbeats; i++) {
+                value = this.drawingData.sections[isection].tracks[itrack].data[i];
+                marginX = 1;
+                marginY = this.trackHeight > 5 ? 1 : 0;
+                if (typeof value === "number" && value > 0 && value < 1) {
+                    this.context.fillStyle =  i % this.beatParameters.beats == 0 ? "#DDDDDD" : "white";
+                    this.context.fillRect(isection * this.sectionLength + i * this.subbeatLength + marginX, 
+                                        this.canvas.height - itrack * this.drawingData.sections[isection].trackHeight - marginY, 
+                                        this.subbeatLength - marginX * 2, -1 * this.drawingData.sections[isection].trackHeight + marginY * 2);
+                    marginY = (this.drawingData.sections[isection].trackHeight - this.drawingData.sections[isection].trackHeight * value) / 3;
+                    marginX = (this.subbeatLength - this.subbeatLength * value) / 3;
+                    console.log("value", value, this.subbeatLength, this.subbeatLength * value, value, this.subbeatLength - this.subbeatLength * value)
+                }
+                this.context.fillStyle =  value ? "black" : 
+                                            (i % this.beatParameters.beats == 0 ? "#DDDDDD" : "white");
+                this.context.fillRect(isection * this.sectionLength + i * this.subbeatLength + marginX, 
+                                    this.canvas.height - itrack * this.drawingData.sections[isection].trackHeight - marginY, 
+                                    this.subbeatLength - marginX * 2, -1 * this.drawingData.sections[isection].trackHeight + marginY * 2);
+            }
+        }
+        for (var inotes = 0; inotes < this.drawingData.sections[isection].notes.length; inotes++) {
+            usedBeats = 0;
+            for (var inote = 0; inote < this.drawingData.sections[isection].notes[inotes].length; inote++) {
+                
+                this.context.drawImage(
+                    omg.ui.getImageForNote(this.drawingData.sections[isection].notes[inotes][inote]),
+                    isection * this.sectionLength + this.subbeatLength * usedBeats * this.beatParameters.subbeats, 
+                    (88 - this.drawingData.sections[isection].notes[inotes][inote].scaledNote) / 88 * this.drawingData.sections[isection].notesHeight
+                );
+                usedBeats += this.drawingData.sections[isection].notes[inotes][inote].beats;
+                if (usedBeats * this.beatParameters.subbeats >= this.totalSubbeats) {
+                    break;
+                }
+            }
+        }
+        
+        if (isection > 0) {
+            this.context.beginPath();
+            this.context.lineWidth = 1;
+            this.context.strokeStyle = "black";
+            this.context.moveTo(isection * this.sectionLength, 0);
+            this.context.lineTo(isection * this.sectionLength, this.canvas.height);
+            this.context.stroke();
+        }
+
+        this.context.beginPath();
+        this.context.lineWidth = 1;
+        this.context.strokeStyle = "#AAAAAA";
+        for (var imeasure = 1; imeasure < this.beatParameters.measures; imeasure++) {
+            this.context.moveTo(isection * this.sectionLength + imeasure * this.measureLength, 0);
+            this.context.lineTo(isection * this.sectionLength + imeasure * this.measureLength, this.canvas.height);
+        }
+        this.context.stroke();
+
+    }
+};
+
+/*
+        if (soundSet) {
+
+        } else {
+            viewer.totalBeatsInSong = info.totalSubbeats;
+            var pxPerBeat = (viewer.div.clientWidth - padding) / viewer.totalBeatsInSong;
+
+            viewer.player.onBeatPlayedListeners.push(function (isubbeat, isection) {
+                viewer.beatMarker.style.width = pxPerBeat * (1 + isubbeat + isection * beatsInSection) + "px";
+            });
+
+
+        }
+    };
+
+
 
     console.log("loading player")
     console.log(data);
     viewer.loadPlayer(data);
-}
+}*/
 
-function omg_embedded_viewer_loadURL(params) {
-    omg.server.getHTTP(params.url, function (result) {
-        params.data = result;
-        omg_embedded_viewer_loadData(div, result);
-    });
-}
-
-function omg_embedded_viewer_loadId(params) {
-    omg.server.getId(params.id, function (result) {
-        params.data = result;
-        omg_embedded_viewer_loadData(params);
-    });
-}
 
 
 function getTimeCaption(timeMS) {

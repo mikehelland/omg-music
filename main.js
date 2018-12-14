@@ -248,12 +248,12 @@ app.delete('/data/:id', function (req, res) {
     }); 
 });
 
-app.get('/viewer.htm', function (req, res) {
+app.get('/play/:id', function (req, res) {
     var db = app.get('db');
-    db.things.findDoc({id: req.query.id}, function (err, docs) {
+    db.things.findDoc({id: req.params.id}, function (err, docs) {
         if (err) {
            res.send(err);
-        } else {http://openmusic.gallery/viewer.htm
+        } else {
            res.send(viewer(docs));
         }
     });

@@ -726,9 +726,11 @@ tg.showSaveFragment = function () {
     
     omg.server.post(json, function (response) {
         var saved = true; //??
-        var savedUrl = location.origin + "/techno-gauntlet/?id=" + response.id;
+        var savedUrl = location.origin + "/play/" + response.id;
         var div = document.getElementById("saved-url");
         div.value = savedUrl;
+        var a = document.getElementById("saved-url-link");
+        a.href = savedUrl;
             //if (callback) {
             //    callback(response.id);
             //}
