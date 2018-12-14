@@ -190,6 +190,7 @@ tg.playButton.onclick = function () {
         tg.player.stop();
     }
     else {
+        tg.player.loopSection = tg.song.sections.indexOf(tg.currentSection);
         tg.player.play(tg.song);
     }
 };
@@ -312,12 +313,13 @@ tg.drawPlayButton = function (subbeat) {
     //context.fillText(tg.player.latencyMonitor, 10, tg.playButton.height / 2 + 10);
 
 };
-tg.player.onBeatPlayedListeners.push(function (isubbeat, isection) {
+tg.player.onBeatPlayedListeners.push(function (isubbeat, section) {
     tg.drawPlayButton(isubbeat);
     if (isubbeat === 0) {
-        var chordsCaption = tg.makeChordsCaption();
-        tg.chordsButton.innerHTML = chordsCaption;
-        tg.chordsEditorView.innerHTML = chordsCaption;   
+        if (tg.currentSection !== section) {
+            tg.loadSection(section);
+        }
+        tg.setSongControlsUI();
     }
 });
 tg.drawPlayButton();
@@ -1252,6 +1254,11 @@ tg.newBlankSong = function () {
     tg.loadSong(blankSong);
 };
 
+/*
+ * Section Fragment
+ */
+
+
 tg.sectionButton = document.getElementById("main-fragment-section-button");
 tg.sectionButton.onclick = function () {
     tg.hideDetails();
@@ -1274,8 +1281,9 @@ document.getElementById("copy-section-button").onclick = function () {
 };
 tg.sectionFragment.renameInput = document.getElementById("section-rename-input");
 tg.sectionFragment.renameInput.onclick = function () {
-    tg.currentSection.name = tg.sectionFragment.renameInput.value;
-    tg.setSongControlsUI();
+    //?
+    //tg.currentSection.name = tg.sectionFragment.renameInput.value;
+    //tg.setSongControlsUI();
 };
 ["Intro", "Preverse", "Verse", "Prechorus", 
     "Chorus", "Bridge", "Solo", "Breakdown", 
@@ -1284,7 +1292,9 @@ tg.sectionFragment.renameInput.onclick = function () {
         presetNameDiv.className = "preset-name-list-item";
         presetNameDiv.innerHTML = sectionName;
         presetNameDiv.onclick = function () {
-            tg.sectionFragment.updateSectionName(sectionName);
+            if (sectionName !== tg.sectionFragment.contextMenuSection.data.name) {
+                tg.sectionFragment.updateSectionName(sectionName);
+            }
         };
         tg.sectionFragment.presetNameListDiv.appendChild(presetNameDiv);
     });
@@ -1296,7 +1306,7 @@ tg.sectionFragment.contextMenuRemove.onclick = function (e) {
     var index = tg.song.sections.indexOf(tg.sectionFragment.contextMenuSection);
     if (tg.song.sections.length > 1) {
         tg.song.sections.splice(index, 1);
-        tg.sectionFragment.div.removeChild(index);
+        tg.sectionFragment.listDiv.removeChild(tg.sectionFragment.contextMenuSectionDiv);
     }
     
 };
@@ -1306,22 +1316,36 @@ tg.sectionFragment.renameInput.onclick = function (e) {
 };
 tg.sectionFragment.renameInput.onkeypress = function (e) {
     if (e.keyCode === 13) {
-        tg.sectionFragment.updateSectionName(e.target.value);
+        if (e.target.value !== tg.sectionFragment.contextMenuSection.data.name) {
+            tg.sectionFragment.updateSectionName(e.target.value);
+        }
+        tg.sectionFragment.presetNameMenuDiv.style.display = "none";
     }
 };
 
 tg.sectionFragment.updateSectionName = (sectionName) => {
+    var names = tg.song.sections.map(section => section.data.name);
+    sectionName = omg.util.getUniqueName(sectionName, names);
+  
+    for (var i = 0; i < tg.song.arrangement.length; i++) {
+        if (tg.song.arrangement[i].data.name === tg.sectionFragment.contextMenuSection.data.name) {
+            tg.song.arrangement[i].data.name = sectionName;
+            tg.song.arrangement[i].updateCaption();
+        }
+    }
     tg.sectionFragment.contextMenuSection.data.name = sectionName;
     tg.sectionFragment.contextMenuNameDiv.innerHTML = sectionName;
     tg.sectionFragment.presetNameMenuDiv.style.display = "none";
     tg.setSongControlsUI();
 };
-tg.sectionFragment.updateSelectedSection = (sectionDiv) => {
+
+tg.sectionFragment.updateSelectedSection = (sectionDiv, section) => {
     if (tg.sectionFragment.selectedSection) {
         tg.sectionFragment.selectedSection.classList.remove("selected-option");
     }
     sectionDiv.classList.add("selected-option");
     tg.sectionFragment.selectedSection = sectionDiv;
+    tg.sectionFragment.lastSelectedSection = section;
 };
 tg.sectionFragment.addSectionListItem = (section) => {
     var sectionDiv = document.createElement("div");
@@ -1350,16 +1374,32 @@ tg.sectionFragment.addSectionListItem = (section) => {
 
         tg.sectionFragment.contextMenuSection = section;
         tg.sectionFragment.contextMenuNameDiv = sectionNameDiv;
+        tg.sectionFragment.contextMenuSectionDiv = sectionDiv;
         tg.sectionFragment.renameInput.value = section.data.name;
+        
+        var inArrangement = false;
+        for (var i = 0; i < tg.song.arrangement.length; i++) {
+            if (tg.song.arrangement[i].data.name === section.data.name) {
+                inArrangement = true;
+                break;
+            }
+        }
+        if (inArrangement || tg.song.sections.length === 1) {
+            tg.sectionFragment.contextMenuRemove.style.display = "none";
+        }
+        else {
+            tg.sectionFragment.contextMenuRemove.style.display = "block";
+        }
     };
 
     sectionDiv.onclick = function () {
         tg.loadSection(section);
-        tg.sectionFragment.updateSelectedSection(sectionDiv);
+        tg.player.loopSection = tg.song.sections.indexOf(section);
+        tg.sectionFragment.updateSelectedSection(sectionDiv, section);
         tg.setSongControlsUI();
     };
     if (section === tg.currentSection) {
-        tg.sectionFragment.updateSelectedSection(sectionDiv);
+        tg.sectionFragment.updateSelectedSection(sectionDiv, section);
     }
     sectionDiv.appendChild(sectionRenameDiv);
     sectionDiv.appendChild(sectionNameDiv);
@@ -1374,6 +1414,7 @@ tg.sectionFragment.addSectionListItem = (section) => {
         }
         tg.song.arrangement.push({section: section, data: {repeat: 0, name: section.data.name}});
         tg.sectionFragment.addArrangementListItem(tg.song.arrangement[tg.song.arrangement.length - 1]);
+        tg.sectionFragment.updateArrangementElements();
     };
     sectionDiv.appendChild(addToArrangementButton);
     
@@ -1387,16 +1428,16 @@ tg.sectionFragment.addArrangementListItem = (arrangementItem) => {
     sectionDiv.className = "section-list-item";
     arrangementItem.div = sectionDiv;
 
-    var sectionNameDiv = document.createElement("div");
-    sectionNameDiv.className = "section-list-item-name";
-    var updateCaption = function () {
+    arrangementItem.sectionNameDiv = document.createElement("div");
+    arrangementItem.sectionNameDiv.className = "section-list-item-name";
+    arrangementItem.updateCaption = function () {
         var caption = (arrangementItem.data.name || "(Untitled)");
         if (arrangementItem.data.repeat > 0) {
             caption += " x" + (arrangementItem.data.repeat + 1);
         }
-        sectionNameDiv.innerHTML = caption;
+        arrangementItem.sectionNameDiv.innerHTML = caption;
     };
-    updateCaption();
+    arrangementItem.updateCaption();
 
     var moveUpDiv = document.createElement("div");
     moveUpDiv.className = "arrangement-move-button";
@@ -1431,7 +1472,7 @@ tg.sectionFragment.addArrangementListItem = (arrangementItem) => {
     repeatUpDiv.onclick = function (e) {
         e.stopPropagation();
         arrangementItem.data.repeat++;
-        updateCaption();
+        arrangementItem.updateCaption();
     };
     var repeatDownDiv = document.createElement("div");
     repeatDownDiv.className = "arrangement-move-button";
@@ -1440,24 +1481,30 @@ tg.sectionFragment.addArrangementListItem = (arrangementItem) => {
         e.stopPropagation();
         if (arrangementItem.data.repeat > 0) {
             arrangementItem.data.repeat--;
-            updateCaption();
+            arrangementItem.updateCaption();
         }
     };
 
-
     sectionDiv.onclick = function () {
         tg.loadSection(section);
-        tg.sectionFragment.updateSelectedSection(sectionDiv);
+        tg.player.loopSection = -1;
+        tg.song.loop = true;
+        if (!tg.player.playing) {
+            tg.player.startArrangementAt = tg.song.arrangement.indexOf(arrangementItem);
+            tg.player.play();
+        }
+        else {
+            tg.player.arrangementI = tg.song.arrangement.indexOf(arrangementItem);
+            tg.player.section = tg.song.arrangement[tg.player.arrangementI].section;
+        }
+        tg.sectionFragment.updateSelectedSection(sectionDiv, section);
         tg.setSongControlsUI();
     };
-    if (section === tg.currentSection) {
-        tg.sectionFragment.updateSelectedSection(sectionDiv);
-    }
     sectionDiv.appendChild(moveUpDiv);
     sectionDiv.appendChild(moveDownDiv);
     sectionDiv.appendChild(repeatDownDiv);
     sectionDiv.appendChild(repeatUpDiv);
-    sectionDiv.appendChild(sectionNameDiv);
+    sectionDiv.appendChild(arrangementItem.sectionNameDiv);
     
     var removeFromArrangementButton = document.createElement("div");
     removeFromArrangementButton.innerHTML = "&times;";
@@ -1465,6 +1512,7 @@ tg.sectionFragment.addArrangementListItem = (arrangementItem) => {
     removeFromArrangementButton.onclick = function () {
         tg.song.arrangement.splice(tg.song.arrangement.indexOf(arrangementItem), 1);
         tg.sectionFragment.arrangementDiv.removeChild(sectionDiv);
+        tg.sectionFragment.updateArrangementElements();
     };
     sectionDiv.appendChild(removeFromArrangementButton);
     
@@ -1472,7 +1520,39 @@ tg.sectionFragment.addArrangementListItem = (arrangementItem) => {
     return sectionDiv;
 };
 
+tg.sectionFragment.playArrangementButton = document.getElementById("section-arrangement-play");
+tg.sectionFragment.playArrangementButton.onclick = function () {
+    tg.player.loopSection = -1;
+    tg.player.arrangementI = -1;
+    tg.song.loop = false;
+    if (!tg.player.playing) {
+        tg.player.play();
+    }
+};
+tg.sectionFragment.emptyMessage = document.getElementById("section-arrangement-empty-message");
+
+tg.sectionFragment.onBeatPlayedListener = function (subbeat, section) {
+    if (subbeat > 0 || tg.sectionFragment.lastSelectedSection === section) {
+        return;
+    }
+    var div;
+    if (tg.player.loopSection === -1 ) {
+        div = tg.sectionFragment.arrangementDiv.children[tg.player.arrangementI];
+    }
+    else {
+        div = tg.sectionFragment.listDiv.children[tg.song.sections.indexOf(section)];
+    }
+    
+    if (div) {
+        tg.sectionFragment.updateSelectedSection(div, section);
+    }
+    else {
+        tg.sectionFragment.lastSelectedSection = section;
+    }
+};
+
 tg.showSectionFragment = function () {
+    tg.sectionFragment.lastSelectedSection = tg.currentSection;
     tg.sectionFragment.presetNameMenuDiv.style.display = "none";
     tg.sectionFragment.listDiv.innerHTML = "";
     tg.song.sections.forEach(section => {
@@ -1482,7 +1562,24 @@ tg.showSectionFragment = function () {
     tg.song.arrangement.forEach(section => {
         tg.sectionFragment.addArrangementListItem(section);
     });
+    tg.sectionFragment.updateArrangementElements();
     tg.sectionFragment.div.style.display = "block";
+    
+    tg.player.onBeatPlayedListeners.push(tg.sectionFragment.onBeatPlayedListener);
+    
+    tg.currentFragment = tg.sectionFragment;
+};
+
+tg.sectionFragment.onhide = function () {
+    var index = tg.player.onBeatPlayedListeners.indexOf(this.onBeatPlayedListener);
+    tg.player.onBeatPlayedListeners.splice(index, 1);
+};
+
+tg.sectionFragment.updateArrangementElements = function () {
+    tg.sectionFragment.playArrangementButton.style.display = tg.song.arrangement.length > 0 ?
+            "block" : "none";
+    tg.sectionFragment.emptyMessage.style.display = tg.song.arrangement.length > 0 ?
+            "none" : "block";
 };
 
 tg.copySection = function (name) {
@@ -1492,6 +1589,7 @@ tg.copySection = function (name) {
     newSectionData.name = omg.util.getUniqueName(newSectionData.name, names);
     var newSection = new OMGSection(null, newSectionData, tg.song);
     tg.loadSection(newSection);
+    tg.player.loopSection = tg.song.sections.indexOf(newSection);
     return newSection;
 };
 
@@ -1502,7 +1600,7 @@ tg.loadSection = function (section) {
         tg.setupPartButton(section.parts[j]);
         tg.player.loadPart(section.parts[j]);
     }
-    tg.player.loopSection = tg.song.sections.indexOf(section);
+    if (tg.player.loopSection)
     tg.setSongControlsUI();
 };
 

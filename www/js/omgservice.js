@@ -303,7 +303,6 @@ omg.ui.setupNoteImages = function () {
     }
     
     if (hasImgs) {
-        console.log("hasImgs")
         omg.ui.noteImages = noteImages;
         return;
     }

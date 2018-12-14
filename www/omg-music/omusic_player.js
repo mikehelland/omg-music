@@ -60,13 +60,12 @@ OMusicPlayer.prototype.play = function (song) {
         }
     }
 
-    // if there is no song already here, this'll blow
-    p.song.playingSection = 0;
-
     if (!p.song.sections || !p.song.sections.length) {
         console.log("no sections to play()");
         return -1;
     }
+
+    p.setupNextSection(typeof p.startArrangementAt !== "number");
 
     p.playing = true;
     p.loopStarted = Date.now();
@@ -93,15 +92,15 @@ OMusicPlayer.prototype._play = function () {
     p.subbeatLength = 1000 / (beatParameters.bpm / 60 * beatParameters.subbeats);
 
     if (p.loopSection > -1 && p.loopSection < p.song.sections.length) {
-        p.song.playingSection = p.loopSection;
+        p.section = p.song.sections[p.loopSection];
+        p.sectionI = p.loopSection;
     }
 
-    p.playBeat(p.song.sections[p.song.playingSection],
-            p.iSubBeat);
+    p.playBeat(p.section, p.iSubBeat);
 
     for (var il = 0; il < p.onBeatPlayedListeners.length; il++) {
         try {
-            p.onBeatPlayedListeners[il].call(null, p.iSubBeat, p.song.playingSection);
+            p.onBeatPlayedListeners[il].call(null, p.iSubBeat, p.section);
         } catch (ex) {
             console.log(ex);
         }
@@ -113,7 +112,7 @@ OMusicPlayer.prototype._play = function () {
     p.iSubBeat++;
     if (p.iSubBeat >= beatParameters.beats * beatParameters.subbeats * 
                                     beatParameters.measures) {
-        p.setupNextSection();
+        p.afterSection();
 
         if (p.negativeLatencyCounter > 0 && p.latency < 500) {
             p.latency += 20;
@@ -130,51 +129,107 @@ OMusicPlayer.prototype._play = function () {
         p.negativeLatencyCounter++
 };
 
-OMusicPlayer.prototype.setupNextSection = function () {
+OMusicPlayer.prototype.afterSection = function () {
     var p = this;
     p.iSubBeat = 0;
     p.loopStarted = Date.now();
 
+    if (p.nextUp) {
+        p.song = p.nextUp;
+        p.setupNextSection(true);
+        p.nextUp = null;
+        return;
+    }
+
     var nextChord = false;
-    if (p.song.sections[p.song.playingSection].data.chordProgression) {
+    if (p.section.data.chordProgression) {
         p.currentChordI++;
-        if (p.currentChordI < p.song.sections[p.song.playingSection].data.chordProgression.length) {
-            p.rescaleSong(null, null,
-                        p.song.sections[p.song.playingSection].data.chordProgression[p.currentChordI]);
+        if (p.currentChordI < p.section.data.chordProgression.length) {
+            p.rescaleSong(null, null, p.section.data.chordProgression[p.currentChordI]);
             nextChord = true;
         }
         else {
             p.currentChordI = 0;
-            p.rescaleSong(null, null,
-                        p.song.sections[p.song.playingSection].data.chordProgression[p.currentChordI]);
+            //todo rescale section!
+            p.rescaleSong(null, null, p.section.data.chordProgression[p.currentChordI]);
         }
     }
 
     if (!nextChord) {
-        p.lastSection = p.song.sections[p.song.playingSection];
+        p.lastSection = p.section;
 
-        if (p.loopSection == -1) {
-            p.song.playingSection++;
+        p.setupNextSection();
+    }
+};
+
+OMusicPlayer.prototype.setupNextSection = function (fromStart) {
+    var p = this;
+    if (fromStart) {
+        //p.loopSection = -1;
+        if (p.song.arrangement.length > 0) {
+            p.arrangementI = 0;
+            p.section = p.song.arrangement[p.arrangementI].section;
+            p.song.arrangement[p.arrangementI].repeated = 0;
         }
-
-        if (p.nextUp) {
-            p.song = p.nextUp;
-            p.song.playingSection = 0;
-            p.nextUp = null;
+        else {
+            p.sectionI = 0;
+            p.section = p.song.sections[p.sectionI];
         }
+        return;
+    }
 
-        p.nextSection = p.song.sections[p.song.playingSection];
-
-        if (p.song.playingSection >= p.song.sections.length) {
-            if (p.song.loop) {
-                p.song.playingSection = 0;
-                p.nextSection = p.song.sections[p.song.playingSection];
-            } else {
+    if (p.loopSection > -1) {
+        p.sectionI = p.loopSection;
+        p.section = p.song.sections[p.sectionI];
+        return;
+    }
+    
+    if (p.song.arrangement.length > 0) {
+        if (typeof p.startArrangementAt === "number") {
+            p.arrangementI = p.startArrangementAt;
+            p.startArrangementAt = undefined;
+            p.section = p.song.arrangement[p.arrangementI].section;
+            p.song.arrangement[p.arrangementI].repeated = 0;
+            return;
+        }
+        if (typeof p.arrangementI !== "number" || p.arrangementI === -1) {
+            p.arrangementI = 0;
+            p.section = p.song.arrangement[0].section;
+            return;
+        }
+        
+        if (p.song.arrangement[p.arrangementI].data.repeat) {
+            p.song.arrangement[p.arrangementI].repeated = 
+                    (p.song.arrangement[p.arrangementI].repeated || 0);
+            if (p.song.arrangement[p.arrangementI].repeated < p.song.arrangement[p.arrangementI].data.repeat) {
+                p.song.arrangement[p.arrangementI].repeated++;
+                return;
+            }
+            p.song.arrangement[p.arrangementI].repeated = 0;
+        }
+        p.arrangementI++;
+        if (p.arrangementI >= p.song.arrangement.length) {
+            p.arrangementI = 0;
+            if (!p.song.loop) {
                 p.stop();
-                p.nextSection = undefined;
             }
         }
+        p.section = p.song.arrangement[p.arrangementI].section;
+        p.song.arrangement[p.arrangementI].repeated = 0;
+        return;
     }
+
+    if (typeof p.sectionI !== "number") {
+        p.sectionI = -1; 
+    }
+    p.sectionI++;
+    if (p.sectionI >= p.song.sections.length) {
+        p.sectionI = 0;
+        if (!p.song.loop) {
+            p.stop();
+        }
+    }
+    p.section = p.song.sections[p.sectionI];
 };
 
 OMusicPlayer.prototype.stop = function () {
@@ -226,6 +281,7 @@ OMusicPlayer.prototype.loadMelody = function (part) {
     var section = part.section;
     var song = part.section ? part.section.song : undefined;
 
+    part.currentI = -1;
     p.rescale(part, song.data.keyParameters, 0); //section.data.chordProgression[p.currentChordI]
 
     if (data.soundSet && typeof data.soundSet.url === "string") {
@@ -260,7 +316,6 @@ OMusicPlayer.prototype.loadMelody = function (part) {
 
     if (soundsToLoad == 0) {
         part.loaded = true;
-        console.log(part.data.soundSet.name + " loaded");
     }
 
 };
@@ -402,6 +457,16 @@ OMusicPlayer.prototype.playBeatForMelody = function (iSubBeat, part) {
     if (part.liveNotes && part.liveNotes.length > 0) {
         this.playBeatWithLiveNote(iSubBeat, part);
         return;
+    }
+
+    if (part.currentI === -1) {
+        part.nextBeat = 0;
+        for (var i = 0; i < part.data.notes.length; i++) {
+            if (part.nextBeat < this.iSubBeat) {
+                part.nextBeat += part.data.notes[i].beats * this.song.data.beatParameters.subbeats;
+                part.currentI = i + 1;
+            }       
+        }
     }
 
     if (beatToPlay === part.nextBeat) {
@@ -783,8 +848,6 @@ OMusicPlayer.prototype.getSoundSet = function (url, callback) {
 
         if (xhr2.readyState == 4) {
             var ojson = JSON.parse(xhr2.responseText);
-            console.log("ojson")
-            console.log(ojson);
             if (ojson) {
                 p.downloadedSoundSets[url] = ojson;
                 p.loadSoundsFromSoundSet(ojson);
@@ -1139,12 +1202,6 @@ OMusicPlayer.prototype.endLiveNotes = function (part) {
     
     part.nextBeat = 0;
     part.currentI = -1;
-    for (var i = 0; i < part.data.notes.length; i++) {
-        if (part.nextBeat < this.iSubBeat) {
-            part.nextBeat += part.data.notes[i].beats * this.song.data.beatParameters.subbeats;
-            part.currentI = i + 1;
-        }       
-    }
 };
 
 OMusicPlayer.prototype.recordNote = function (part, note) {
