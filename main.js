@@ -80,20 +80,21 @@ passport.use("signup", new LocalStrategy(
 );
 
 
-var consoleSocket = io.of('/console');
-consoleSocket.on('connection', function(socket){
+var omgSocket = io.of("/omg-live");
+omgSocket.on("connection", function (socket) {
+    socket.on("startSession", function (data) {
+        socket.join(data);
+        console.log("joined ", data)
+    });
+    socket.on("leaveSession", function (data) {
+        socket.leave(data);
+        console.log("joined ", data)
+    });
+    socket.on("basic", function (data) {
+        io.of("/omg-live").to(data.room).emit("basic", data);
+        console.log("emit to room ", data)
+    });
 });
-var userSocket = io.of('/user');
-userSocket.on('connection', function(socket){
-  socket.on("playnote", function(data) {
-    consoleSocket.emit("playnote", data);
-  });
-
-  socket.on("programchange", function(data) {
-    consoleSocket.emit("programchange", data);
-  });
-});
-
 
 
 app.post("/login",

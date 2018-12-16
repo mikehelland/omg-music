@@ -106,10 +106,16 @@ OMusicPlayer.prototype._play = function () {
         }
     }
 
-    var timeToPlay = p.nextBeatTime;
-    p.nextBeatTime += p.subbeatLength / 1000;
-
     p.iSubBeat++;
+
+    var timeToPlay = p.nextBeatTime;
+    if (p.iSubBeat % 2 === 1) {
+        p.nextBeatTime += (p.subbeatLength + beatParameters.shuffle * p.subbeatLength) / 1000;
+    }
+    else {
+        p.nextBeatTime += (p.subbeatLength - beatParameters.shuffle * p.subbeatLength) / 1000;
+    }
+
     if (p.iSubBeat >= beatParameters.beats * beatParameters.subbeats * 
                                     beatParameters.measures) {
         p.afterSection();
@@ -512,6 +518,7 @@ OMusicPlayer.prototype.playBeatWithLiveNote = function (iSubBeat, part) {
             this.playNote(note, part);
             if (!part.data.audioParameters.mute) {
                 this.recordNote(part, note);
+                part.currentI = part.data.notes.indexOf(note) + 1;
             }
             part.liveNotes.nextIndex = index + 1;
         }
@@ -941,10 +948,10 @@ OMusicPlayer.prototype.playNote = function (note, part) {
         //this should be a timeout so it can be canceled if
         //a different note has played
         setTimeout(function () {
-            if (part.osc && part.playingI == playingI) {
+            if (part.osc && part.playingI === playingI) {
                 part.osc.frequency.setValueAtTime(0,
                         //p.subbeats * note.beats * p.subbeatLength * 0.85)
-                        p.nextBeatTime);
+                        p.nextBeatTime * 0.88);
             }
         }, p.song.data.beatParameters.subbeats * note.beats * p.subbeatLength * 0.85);
     }
@@ -1175,6 +1182,7 @@ OMusicPlayer.prototype.playLiveNotes = function (notes, part) {
     
     part.liveNotes = notes;
     if (notes.autobeat === 0 || !this.playing) {
+        part.playingI = -1;
         if (part.osc) {
             part.osc.frequency.setValueAtTime(this
                     .makeFrequency(notes[0].scaledNote) * part.data.audioParameters.warp, this.context.currentTime);
@@ -1187,6 +1195,7 @@ OMusicPlayer.prototype.playLiveNotes = function (notes, part) {
     }
     if (this.playing && !part.data.audioParameters.mute && notes.autobeat === 0) {
         this.recordNote(part, notes[0]);
+        part.currentI = part.data.notes.indexOf(notes[0]) + 1;
     }
 };
 

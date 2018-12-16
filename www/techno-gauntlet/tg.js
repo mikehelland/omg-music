@@ -79,7 +79,8 @@ tg.instrument = {
     div: document.getElementById("instrument-fragment"),
     editButton: document.getElementById("instrument-edit-button"),
     zoomButton: document.getElementById("instrument-zoom-button"),
-    canvas: document.getElementById("instrument-canvas")
+    canvas: document.getElementById("instrument-canvas"),
+    backgroundCanvas: document.getElementById("instrument-canvas-background")
 };
 
 tg.instrument.setMode = function (mode) {
@@ -125,12 +126,12 @@ tg.instrument.setup();
 tg.instrument.show = function (omgpart) {
     tg.instrument.div.style.display = "flex";
 
-    tg.instrument.mm = new OMGMelodyMaker(tg.instrument.canvas, omgpart, tg.player);
     tg.player.onBeatPlayedListeners.push(tg.instrument.onBeatPlayedListener);
 
-    tg.currentFragment = tg.sequencer;
-    tg.instrument.mm.readOnly = false;
-    tg.instrument.mm.draw();
+    tg.currentFragment = tg.instrument;
+    tg.instrument.mm = omgpart.mm;
+    tg.instrument.mm.setCanvasEvents();
+    tg.instrument.mm.backgroundDrawn = false;
     tg.instrument.setMode("WRITE");
 };
 
@@ -376,8 +377,9 @@ tg.showBeatsFragment = function () {
         bf.bpmRange.onmousedown = onBpmChange;
         bf.bpmRange.onchange = onBpmChange;
         var onShuffleChange = function (e) {
+            tg.song.data.beatParameters.shuffle = bf.shuffleRange.value / 100;
             bf.shuffleLabel.innerHTML = bf.shuffleRange.value;
-            tg.song.data.beatParameters.shuffle = bf.shuffleRange.value;
+            
         };
         bf.shuffleRange.ontouchmove = onShuffleChange;
         bf.shuffleRange.onmousemove = onShuffleChange;
@@ -394,12 +396,12 @@ tg.refreshBeatsFragment = function () {
     tg.beatsFragment.beatsLabel.innerHTML = tg.song.data.beatParameters.beats;
     tg.beatsFragment.measuresLabel.innerHTML = tg.song.data.beatParameters.measures;
     tg.beatsFragment.bpmLabel.innerHTML = tg.song.data.beatParameters.bpm;
-    tg.beatsFragment.shuffleLabel.innerHTML = tg.song.data.beatParameters.shuffle;
+    tg.beatsFragment.shuffleLabel.innerHTML = tg.song.data.beatParameters.shuffle * 100;
     tg.beatsFragment.subbeatsRange.value = tg.song.data.beatParameters.subbeats;
     tg.beatsFragment.beatsRange.value = tg.song.data.beatParameters.beats;
     tg.beatsFragment.measuresRange.value = tg.song.data.beatParameters.measures;
     tg.beatsFragment.bpmRange.value = tg.song.data.beatParameters.bpm;
-    tg.beatsFragment.shuffleRange.value = tg.song.data.beatParameters.shuffle;
+    tg.beatsFragment.shuffleRange.value = tg.song.data.beatParameters.shuffle * 100;
 
 };
 
@@ -667,9 +669,8 @@ tg.hideDetails = function (hideFragment) {
 
 tg.addPart = function (soundSet) {
     var blankPart = {soundSet: soundSet};
-    var omgpart = new OMGPart(undefined,blankPart,tg.currentSection);
-    tg.player.loadPart(omgpart);
-    var div = tg.setupPartButton(omgpart);
+    var part = new OMGPart(undefined,blankPart,tg.currentSection);
+    var div = tg.loadPart(part)
     div.getElementsByClassName("part-button")[0].onclick();
 };
 
@@ -743,6 +744,8 @@ tg.showPartOptionsFragment = function (part) {
     tg.partOptionsFragment.style.display = "block";
     
     var submixerButton = document.getElementById("part-options-submixer-button");
+    var liveModeButton = document.getElementById("part-options-omglive-mode");
+    var liveUrlInput = document.getElementById("part-options-omglive-url");
     var verticalButton = document.getElementById("part-options-vertical-surface");
     var sequencerButton = document.getElementById("part-options-sequencer-surface");
     var surfaceArea = document.getElementById("part-options-surface-area");
@@ -750,16 +753,46 @@ tg.showPartOptionsFragment = function (part) {
         verticalButton.style.display = "none";
         sequencerButton.style.display = "block";
         submixerButton.style.display = "none";
+        liveModeButton.style.display = "block";
     }
     else {
         sequencerButton.style.display = "none";
         verticalButton.style.display = "block";
         submixerButton.style.display = "block";
+        liveModeButton.style.display = "none";
     }
     if (part.osc) {
-        sequencerButton.style.display = "none";
-        
+        sequencerButton.style.display = "none";        
     }
+    liveUrlInput.style.display = part.omglive ? "block" : "none";
+    if (!part.liveUrl) {
+        part.liveUrl = tg.getOMGLiveRoomName(part);
+    }
+    liveUrlInput.value = part.liveUrl;
+    liveUrlInput.onkeypress = function (e) {
+        if (e.keyCode === 13) {
+            if (liveUrlInput.value !== part.liveUrl) {
+                tg.switchOMGLiveRoom(part, liveUrlInput.value);
+            }
+        }
+    };
+
+    
+    liveModeButton.onclick = function () {
+        if (part.omglive) {
+            part.socket.disconnect()
+            part.omglive = null;
+            
+            liveModeButton.innerHTML = "Turn on OMG Live Mode";
+            liveUrlInput.style.display = "none";
+        }
+        else {
+            liveModeButton.innerHTML = "Turn off OMG Live Mode";
+            liveUrlInput.style.display = "block";
+            
+            tg.turnOnLiveMode(part);
+        }
+    };
     
     verticalButton.onclick = function () {
         part.data.surface.url = "PRESET_VERTICAL";
@@ -1599,15 +1632,89 @@ tg.loadSection = function (section) {
     tg.currentSection = section;
     tg.partList.innerHTML = "";
     for (var j = 0; j < section.parts.length; j++) {
-        tg.setupPartButton(section.parts[j]);
-        tg.player.loadPart(section.parts[j]);
+        tg.loadPart(section.parts[j]);        
     }
     if (tg.player.loopSection)
     tg.setSongControlsUI();
 };
 
+tg.loadPart = function (part) {
+    var div = tg.setupPartButton(part);
+    tg.player.loadPart(part);
 
+    if (part.data.surface.url === "PRESET_VERTICAL") {
+        part.mm = new OMGMelodyMaker(tg.instrument.canvas, part, tg.player, tg.instrument.backgroundCanvas);
+        part.mm.readOnly = false;
+    }
+    
+    return div;
+}
 
+tg.turnOnLiveMode = function (part) {
+    part.omglive = {users: {}, notes: []};
+    part.omglive.notes.autobeat = 1;
+    part.socket = io("/omg-live");
+    part.socket.emit("startSession", part.liveUrl);
+    part.socket.on("basic", function (data) {
+        if (data.x === -1) {
+            var noteIndex = part.omglive.notes.indexOf(part.omglive.users[data.user].note);
+            part.omglive.notes.splice(noteIndex, 1);
+            delete part.omglive.users[data.user];
+            
+            if (part.omglive.notes.length > 0) {
+                tg.player.playLiveNotes(part.omglive.notes, part, 0);
+            }
+            else {
+                tg.player.endLiveNotes(part);
+            }
+        }
+        else {
+            tg.newOMGLiveData(part, data);
+        }
+    });
+};
+
+tg.newOMGLiveData = function (part, data) {
+    
+    var fret = Math.max(0, Math.min(part.mm.frets.length - 1,
+        part.mm.skipFretsBottom + Math.round((1 - data.y) * 
+            (part.mm.frets.length - 1 - part.mm.skipFretsTop - part.mm.skipFretsBottom))));
+
+    var noteNumber = part.mm.frets[fret].note;
+
+    var note = {beats: 0.25};
+    if (part.omglive.users[data.user]) {
+        note = part.omglive.users[data.user].note;
+    }
+    else {
+        part.omglive.notes.push(note);
+    }
+    note.note = fret - part.mm.frets.rootNote,
+    note.scaledNote = noteNumber;
+    data.note = note;
+
+    part.omglive.users[data.user] = data;
+    
+    tg.player.playLiveNotes(part.omglive.notes, part, 0);
+};
+
+tg.getOMGLiveRoomName = function (part) {
+    var roomName = "";
+    if (tg.user && tg.user.username) {
+        roomName += tg.user.username + "-";
+    }
+    if (tg.song.data.name) {
+        roomName += tg.song.data.name + "-";
+    }
+    roomName += part.data.soundSet.name.substr(0, part.data.soundSet.name.indexOf(" "));
+    return roomName;
+};
+
+tg.switchOMGLiveRoom = function (part, newRoom) {
+    part.socket.emit("leaveSession", part.liveUrl);
+    part.liveUrl = newRoom;
+    part.socket.emit("startSession", part.liveUrl);
+};
 
 // away we go
 // KEEP THIS LAST

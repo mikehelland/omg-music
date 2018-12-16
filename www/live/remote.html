@@ -14,7 +14,8 @@ body {
 
 <script src="/socket.io/socket.io.js"></script>
 <script>
-  var socket = io("/user");
+  var socket = io("/omg-live");
+//  socket.emit("joinChannel", "testing");
 </script>
 </head>
 
@@ -93,11 +94,13 @@ var drawCanvas = function (x, y) {
     
 };
 
+var room = "default-Sine";
 var canvasDownEvent = function (x, y) {
     isTouching = true;
     drawCanvas(x, y); 
     
-    socket.emit("playnote", {'user': username, 
+    socket.emit("basic", {room: room, 
+                'user': username, 
 		'x': x/canvas.width, 'y': y/canvas.height, 
 		'colorI': colorI, 'letter': letter});
 };
@@ -105,7 +108,8 @@ var canvasDownEvent = function (x, y) {
 var canvasMoveEvent = function (x, y) {
     if (isTouching){
         drawCanvas(x, y);    
-        socket.emit("playnote", {'user': username, 
+        socket.emit("basic", {room: room, 
+                        'user': username, 
 			'x': x/canvas.width, 'y': y/canvas.height, 
 			'colorI': colorI, 'letter': letter});
     }
@@ -115,7 +119,7 @@ var canvasEndEvent = function (x, y) {
     isTouching = false;    
     //canvas.width = canvas.width;
     drawCanvas(-1);
-    socket.emit("playnote", {'user': username, 'x':-1});
+    socket.emit("basic", {room: room, 'user': username, 'x':-1});
 };
 
 

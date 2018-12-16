@@ -175,11 +175,11 @@ body {
 	opacity:1;
 }
 
-#instrument-surface {
+/*#instrument-surface {
     height:99%;
     width:100%;
     display:none;
-}
+}*/
 #beats-fragment, #save-fragment, #add-part-fragment {
     text-align:center;
     font-size: 1.5em;
@@ -527,8 +527,20 @@ input {
     opacity:1 !important;
 }
 
-#sequencer-canvas, #instrument-canvas {
+#instrument-canvas, #instrument-canvas-background {
+    position:absolute;
+    top:0px;
+    left:0px;
+    height:100%;
+    width:100%;
+}
+
+#sequencer-canvas, #instrument-surface {
     flex-grow:1;
+    position:relative;
+}
+#instrument-canvas-background {
+    background:red;
 }
 
 #sequencer-beat-strength-loud {
