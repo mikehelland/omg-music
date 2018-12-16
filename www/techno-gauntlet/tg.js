@@ -746,6 +746,8 @@ tg.showPartOptionsFragment = function (part) {
     var submixerButton = document.getElementById("part-options-submixer-button");
     var liveModeButton = document.getElementById("part-options-omglive-mode");
     var liveUrlInput = document.getElementById("part-options-omglive-url");
+    var liveRoomInput = document.getElementById("part-options-omglive-room");
+    var liveModeDetails = document.getElementById("part-options-omglive-details");
     var verticalButton = document.getElementById("part-options-vertical-surface");
     var sequencerButton = document.getElementById("part-options-sequencer-surface");
     var surfaceArea = document.getElementById("part-options-surface-area");
@@ -764,34 +766,43 @@ tg.showPartOptionsFragment = function (part) {
     if (part.osc) {
         sequencerButton.style.display = "none";        
     }
-    liveUrlInput.style.display = part.omglive ? "block" : "none";
-    if (!part.liveUrl) {
-        part.liveUrl = tg.getOMGLiveRoomName(part);
-    }
-    liveUrlInput.value = part.liveUrl;
-    liveUrlInput.onkeypress = function (e) {
+
+    liveRoomInput.onkeypress = function (e) {
         if (e.keyCode === 13) {
-            if (liveUrlInput.value !== part.liveUrl) {
-                tg.switchOMGLiveRoom(part, liveUrlInput.value);
+            if (liveRoomInput.value !== part.liveRoom) {
+                tg.switchOMGLiveRoom(part, liveRoomInput.value);
+                liveUrlInput.value = window.origin + "/live/" + encodeURIComponent(part.liveRoom);
             }
         }
     };
 
+    var setLiveModeUI =  function () {
+        if (part.omglive) {
+            liveModeButton.innerHTML = "OMG Live Mode is ON";
+            liveModeDetails.style.display = "block";
+            
+            liveRoomInput.value = part.liveRoom;
+            liveUrlInput.value = window.origin + "/live/" + encodeURIComponent(part.liveRoom);
+        }
+        else {
+            liveModeButton.innerHTML = "OMG Live Mode is OFF";
+            liveModeDetails.style.display = "none";            
+        }
+    };
+    setLiveModeUI();
     
     liveModeButton.onclick = function () {
         if (part.omglive) {
             part.socket.disconnect()
             part.omglive = null;
-            
-            liveModeButton.innerHTML = "Turn on OMG Live Mode";
-            liveUrlInput.style.display = "none";
         }
         else {
-            liveModeButton.innerHTML = "Turn off OMG Live Mode";
-            liveUrlInput.style.display = "block";
-            
+            if (!part.liveRoom) {
+                part.liveRoom = tg.getOMGLiveRoomName(part);
+            }
             tg.turnOnLiveMode(part);
         }
+        setLiveModeUI();
     };
     
     verticalButton.onclick = function () {
@@ -1654,7 +1665,7 @@ tg.turnOnLiveMode = function (part) {
     part.omglive = {users: {}, notes: []};
     part.omglive.notes.autobeat = 1;
     part.socket = io("/omg-live");
-    part.socket.emit("startSession", part.liveUrl);
+    part.socket.emit("startSession", part.liveRoom);
     part.socket.on("basic", function (data) {
         if (data.x === -1) {
             var noteIndex = part.omglive.notes.indexOf(part.omglive.users[data.user].note);
@@ -1671,6 +1682,9 @@ tg.turnOnLiveMode = function (part) {
         else {
             tg.newOMGLiveData(part, data);
         }
+        if (!tg.player.playing && tg.currentFragment === tg.instrument) {
+            tg.instrument.mm.draw();
+        }
     });
 };
 
@@ -1684,6 +1698,11 @@ tg.newOMGLiveData = function (part, data) {
 
     var note = {beats: 0.25};
     if (part.omglive.users[data.user]) {
+        if (part.omglive.users[data.user].note.scaledNote === noteNumber) {
+            part.omglive.users[data.user].x = data.x;
+            part.omglive.users[data.user].y = data.y;
+            return;
+        }
         note = part.omglive.users[data.user].note;
     }
     else {
@@ -1695,7 +1714,7 @@ tg.newOMGLiveData = function (part, data) {
 
     part.omglive.users[data.user] = data;
     
-    tg.player.playLiveNotes(part.omglive.notes, part, 0);
+    tg.player.playLiveNotes(part.omglive.notes, part, 0);    
 };
 
 tg.getOMGLiveRoomName = function (part) {
@@ -1711,9 +1730,9 @@ tg.getOMGLiveRoomName = function (part) {
 };
 
 tg.switchOMGLiveRoom = function (part, newRoom) {
-    part.socket.emit("leaveSession", part.liveUrl);
-    part.liveUrl = newRoom;
-    part.socket.emit("startSession", part.liveUrl);
+    part.socket.emit("leaveSession", part.liveRoom);
+    part.liveRoom = newRoom;
+    part.socket.emit("startSession", part.liveRoom);
 };
 
 // away we go

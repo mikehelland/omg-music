@@ -1,30 +1,4 @@
-<!DOCTYPE html>
-<html>
-<head>
-	<meta name="viewport" content="width=device-width">
-<style>
-body {
-    margin:0px;
-    height:100%;
-}
-#main-canvas {position:absolute;
-             width:100%;
-             height:100%;}
-</style>
-
-<script src="/socket.io/socket.io.js"></script>
-<script>
-  var socket = io("/omg-live");
-//  socket.emit("joinChannel", "testing");
-</script>
-</head>
-
-<body>
-
-<canvas id="main-canvas">
-</canvas>
-
-<script>
+var socket = io("/omg-live");
 var canvas = document.getElementById("main-canvas");
 var ctx = canvas.getContext("2d");
 
@@ -35,19 +9,53 @@ var isTouching = false;
 var colors = [ "#FFFFFF", "#FF0000", "#FFFF00", "#00FF00", "#0000FF",
             "#FF8000", "#9E9E9E", "#00FFFF", "#800080", "#632DFF", "#63FF08" ];
 
+var shapes = [
+    {"shape": "circle", "draw": function (x, y, fill) {
+        ctx.lineWidth = 5;
+        ctx.beginPath();
+        ctx.arc(x, y, 20, 0, 2 * Math.PI);
+        ctx.stroke();
+    }},
+    {"shape": "fill_circle", "draw": function (x, y, fill) {
+        ctx.beginPath();
+        ctx.arc(x, y, 20, 0, 2 * Math.PI);
+        ctx.fill();
+    }},
+    {"shape": "square", "draw": function (x, y, fill) {
+        ctx.lineWidth = 5;
+        ctx.beginPath();
+        ctx.moveTo(x - 20, y - 20);
+        ctx.lineTo(x + 20, y - 20);
+        ctx.lineTo(x + 20, y + 20);
+        ctx.lineTo(x - 20, y + 20);
+        ctx.closePath();
+        ctx.stroke();
+    }},
+    {"shape": "fill_square", "draw": function (x, y, fill) {
+        ctx.beginPath();
+        ctx.moveTo(x - 20, y - 20);
+        ctx.lineTo(x + 20, y - 20);
+        ctx.lineTo(x + 20, y + 20);
+        ctx.lineTo(x - 20, y + 20);
+        ctx.closePath();
+        ctx.fill();
+    }}
+];
+
 var colorI = Math.floor(Math.random() * colors.length);
-var letter = String.fromCharCode(Math.floor(Math.random() * 26) + 65);
+var shapeI = Math.floor(Math.random() * shapes.length);
+
 if (window.location.search) {
    colorI = parseInt(window.location.search.substring(1));
 }
 
 var color = colors[colorI];
+var shape = shapes[shapeI].shape;
+var drawShape = shapes[shapeI].draw;
 var username = Math.random().toString(36).substr(2);
 
 
 window.onload = function () {
-	console.log("loaded!");
-	
 	setupCanvas();
 };
 
@@ -84,17 +92,20 @@ var drawCanvas = function (x, y) {
     
     ctx.font = "10pt Helvetica";
     ctx.fillStyle = "white";
-    ctx.fillText("Move your letter around", canvas.width / 2, canvas.height / 4);
+    ctx.fillText("Move your shape around", canvas.width / 2, canvas.height / 4);
     
-    ctx.font = "5em Helvetica";
     ctx.fillStyle = color;
+    ctx.strokeStyle = color;
     ctx.globalAlpha = isTouching ? 1.0 : 0.5;
-    ctx.fillText(letter, lastX, lastY);
+    
+    drawShape(lastX, lastY);
+    
+    //ctx.font = "5em Helvetica";
+    //ctx.fillText(letter, lastX, lastY);
     ctx.globalAlpha = 1.0;
     
 };
 
-var room = "default-Sine";
 var canvasDownEvent = function (x, y) {
     isTouching = true;
     drawCanvas(x, y); 
@@ -102,7 +113,7 @@ var canvasDownEvent = function (x, y) {
     socket.emit("basic", {room: room, 
                 'user': username, 
 		'x': x/canvas.width, 'y': y/canvas.height, 
-		'colorI': colorI, 'letter': letter});
+		'color': color, 'shape': shape});
 };
 
 var canvasMoveEvent = function (x, y) {
@@ -111,7 +122,7 @@ var canvasMoveEvent = function (x, y) {
         socket.emit("basic", {room: room, 
                         'user': username, 
 			'x': x/canvas.width, 'y': y/canvas.height, 
-			'colorI': colorI, 'letter': letter});
+			'color': color, 'shape': shape});
     }
 };
 
@@ -148,7 +159,3 @@ canvas.onmouseup = function (e) {
     canvasEndEvent(e.clientX, e.clientY);
 };
 
-</script>
-
-</body>
-</html>

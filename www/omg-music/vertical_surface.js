@@ -121,6 +121,10 @@ OMGMelodyMaker.prototype.draw = function () {
     if (this.mode === "EDIT" && this.noteEdittingDialog) {
         this.drawNoteEdittingDialog();
     }
+    
+    if (this.part.omglive) {
+        this.drawOMGLiveUsers();
+    }
 };
 
 OMGMelodyMaker.prototype.drawFrets = function () {
@@ -941,3 +945,46 @@ OMGMelodyMaker.prototype.setPart = function (part, welcomeStyle) {
     
 };
 
+
+OMGMelodyMaker.prototype.drawOMGLiveUsers = function () {
+    var user;
+    for (var user in this.part.omglive.users) {
+        user = this.part.omglive.users[user];
+        
+        if (user.shape === "circle") {
+            this.context.lineWidth = 5;
+            this.context.strokeStyle = user.color;
+            this.context.beginPath();
+            this.context.arc(user.x * this.canvas.width, user.y * this.canvas.height, 20, 0, 2 * Math.PI);
+            this.context.stroke();
+        }
+        if (user.shape === "fill_circle") {
+            this.context.fillStyle = user.color;
+            this.context.beginPath();
+            this.context.arc(user.x * this.canvas.width, user.y * this.canvas.height, 20, 0, 2 * Math.PI);
+            this.context.fill();
+        }
+        if (user.shape === "square") {
+            this.context.lineWidth = 5;
+            this.context.strokeStyle = user.color;
+            this.context.beginPath();
+            this.context.moveTo(user.x * this.canvas.width - 20, user.y * this.canvas.height - 20);
+            this.context.lineTo(user.x * this.canvas.width + 20, user.y * this.canvas.height - 20);
+            this.context.lineTo(user.x * this.canvas.width + 20, user.y * this.canvas.height + 20);
+            this.context.lineTo(user.x * this.canvas.width - 20, user.y * this.canvas.height + 20);
+            this.context.closePath();
+            this.context.stroke();
+        }
+        if (user.shape === "fill_square") {
+            this.context.fillStyle = user.color;
+            this.context.beginPath();
+            this.context.moveTo(user.x * this.canvas.width - 20, user.y * this.canvas.height - 20);
+            this.context.lineTo(user.x * this.canvas.width + 20, user.y * this.canvas.height - 20);
+            this.context.lineTo(user.x * this.canvas.width + 20, user.y * this.canvas.height + 20);
+            this.context.lineTo(user.x * this.canvas.width - 20, user.y * this.canvas.height + 20);
+            this.context.closePath();
+            this.context.fill();
+        }
+        
+    }
+};

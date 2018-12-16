@@ -500,6 +500,8 @@ button {
 input {
     font-size:1.0em;
     width:80%;
+    margin:0.5em auto;
+    padding:0.5em;
 }
 
 #sequencer-fragment, #instrument-fragment {

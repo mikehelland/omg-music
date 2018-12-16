@@ -148,8 +148,11 @@
                 <br>
                 <button id="part-options-submixer-button">Tracks Sub Mixer</button>
                 <button id="part-options-omglive-mode">OMG LIVE Mode</button>
-                <br>
-                <input id="part-options-omglive-url">
+                <div id="part-options-omglive-details">
+                    <input id="part-options-omglive-room">
+                    <div>Others can connect at:</div>
+                    <input id="part-options-omglive-url" readonly>
+                </div>
                 <hr>
                 <button id=part-options-add-fx-button>Add an effect</button>
                 <div id="part-options-available-fx">
@@ -175,6 +178,7 @@
         <div id="user-fragment" class="fragment">
             <div class="detail-fragment-body">
             <h2>User</h2>
+            <a href="/">OMG Home</a>
             <div id="user-login-signup">
                 <h3>You are not logged in. <span id="user-login-invalid">Invalid login</span>
                 </h3>

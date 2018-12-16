@@ -11,6 +11,7 @@ var cors = require("cors");
 var fs = require("fs");
 
 var viewer = require("./viewer.js");
+var remote = require("./remote.js");
 
 app.use(cors());
 
@@ -258,6 +259,10 @@ app.get('/play/:id', function (req, res) {
            res.send(viewer(docs));
         }
     });
+});
+
+app.get('/live/:room', function (req, res) {
+    res.send(remote(req.params.room));
 });
 
 app.use(express.static('www', {index: "index.htm"}));
