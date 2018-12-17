@@ -1,0 +1,29 @@
+/* 
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+
+
+
+    //backwards compatibility
+    if (!data.beatParameters) {
+        data.beatParameters = {"beats": data.beats || 4, 
+                    "subbeats": data.subbeats || 4,
+                    "measures": data.measures || 1, 
+                    "shuffle": data.shuffle || 0, 
+                    "subbeatMillis": data.subbeatMillis || 125
+                };
+    }
+    if (!data.keyParameters) {
+        data.keyParameters = {"rootNote": data.rootNote || 0, 
+                    "scale": data.ascale 
+                            || (data.scale ? data.scale.split(",") : 0) 
+                            || [0,2,4,5,7,9,11]};
+    }
+
+    if (!data.beatParameters.bpm && data.beatParameters.subbeatMillis) {
+        data.beatParameters.bpm = 1 / data.beatParameters.subbeatMillis * 60000 / 4;
+    }
+
+

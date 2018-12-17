@@ -599,3 +599,7 @@ input {
     margin:0.3em;
     font-size:0.8em;
 }
+
+.randomizer-title {
+    text-align: center;
+}

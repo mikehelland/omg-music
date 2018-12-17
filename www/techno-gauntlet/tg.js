@@ -150,8 +150,14 @@ tg.player = new OMusicPlayer();
 tg.getSong = function (callback) {
     
     var id = omg.util.getPageParams().id;
+    
     if (!id) {
-        var defaultSong = {
+        var defaultSong;
+        if (omg.util.getPageParams().hasOwnProperty("blank")) {
+            defaultSong = tg.newBlankSong();
+        }
+        else {
+            defaultSong = {
             "name":"default","type":"SONG","sections":[
                 {"type":"SECTION","name": "Intro", "parts":[
                         {"type":"PART","notes":[
@@ -163,8 +169,9 @@ tg.getSong = function (callback) {
                         {"type":"PART","tracks":[
                                 {"url":"hh_kick","data":[true,null,null,null,true,null,null,null,true,null,null,null,true],"name":"Kick","sound":"http://mikehelland.com/omg/drums/hh_kick.mp3"},{"url":"hh_clap","data":[null,null,null,null,true,null,null,null,null,null,null,null,true],"name":"Clap","sound":"http://mikehelland.com/omg/drums/hh_clap.mp3"},{"url":"rock_hihat_closed","data":[true,null,true,null,true,null,true,null,true,null,true,null,true,null,true],"name":"HiHat Closed","sound":"http://mikehelland.com/omg/drums/rock_hihat_closed.mp3"},{"url":"hh_hihat","data":[null,null,null,null,null,null,false,null,null,null,null,null,null,null,false],"name":"HiHat Open","sound":"http://mikehelland.com/omg/drums/hh_hihat.mp3"},{"url":"hh_tamb","data":[],"name":"Tambourine","sound":"http://mikehelland.com/omg/drums/hh_tamb.mp3"},{"url":"hh_tom_mh","data":[null,null,null,null,null,null,null,null,false,null,null,false,true,false],"name":"Tom H","sound":"http://mikehelland.com/omg/drums/hh_tom_mh.mp3"},{"url":"hh_tom_ml","data":[null,null,null,null,null,null,null,null,null,null,true],"name":"Tom M","sound":"http://mikehelland.com/omg/drums/hh_tom_ml.mp3"},{"url":"hh_tom_l","data":[null,null,null,null,null,null,null,null,null,null,null,null,null,null,true,false],"name":"Tom L","sound":"http://mikehelland.com/omg/drums/hh_tom_l.mp3"}],"surface":{"url":"PRESET_SEQUENCER"},"soundSet":{"id":1207,"url":"http://openmusic.gallery/data/1207","data":[{"url":"hh_kick","data":[true,null,null,null,true,null,null,null,true,null,null,null,true],"name":"Kick","sound":"http://mikehelland.com/omg/drums/hh_kick.mp3"},{"url":"hh_clap","data":[null,null,null,null,true,null,null,null,null,null,null,null,true],"name":"Clap","sound":"http://mikehelland.com/omg/drums/hh_clap.mp3"},{"url":"rock_hihat_closed","data":[true,null,true,null,true,null,true,null,true,null,true,null,true,null,true],"name":"HiHat Closed","sound":"http://mikehelland.com/omg/drums/rock_hihat_closed.mp3"},{"url":"hh_hihat","data":[null,null,null,null,null,null,false,null,null,null,null,null,null,null,false],"name":"HiHat Open","sound":"http://mikehelland.com/omg/drums/hh_hihat.mp3"},{"url":"hh_tamb","data":[],"name":"Tambourine","sound":"http://mikehelland.com/omg/drums/hh_tamb.mp3"},{"url":"hh_tom_mh","data":[null,null,null,null,null,null,null,null,false,null,null,false,true,false],"name":"Tom H","sound":"http://mikehelland.com/omg/drums/hh_tom_mh.mp3"},{"url":"hh_tom_ml","data":[null,null,null,null,null,null,null,null,null,null,true],"name":"Tom M","sound":"http://mikehelland.com/omg/drums/hh_tom_ml.mp3"},{"url":"hh_tom_l","data":[null,null,null,null,null,null,null,null,null,null,null,null,null,null,true,false],"name":"Tom L","sound":"http://mikehelland.com/omg/drums/hh_tom_l.mp3"}],"name":"Hip Kit","type":"SOUNDSET","prefix":"http://mikehelland.com/omg/drums/","lowNote":72,"postfix":".mp3","user_id":"1","approved":true,"username":"m                   ","chromatic":false,"created_at":1542271035794,"last_modified":1542271055684,"defaultSurface":"PRESET_SEQUENCER"},"audioParameters":{"pan":0,"warp":1,"volume":0.6,"delayTime":0.09870550161812297,"delayLevel":0.12297734627831715}}],"chordProgression":[0]}],
             "keyParameters":{"scale":[0,2,3,5,7,8,10],"rootNote":9},
-            "beatParameters":{"bpm":"108","beats":4,"shuffle":0,"measures":1,"subbeats":4}
-        };
+            "beatParameters":{"bpm":108,"beats":4,"shuffle":0,"measures":1,"subbeats":4}
+            };
+        }
         callback(defaultSong);
     }    
     else {
@@ -180,11 +187,22 @@ tg.loadSong = function (songData) {
     
     tg.loadSection(tg.song.sections[0])
     
-    tg.setSongControlsUI();
     document.getElementById("tool-bar-song-button").innerHTML = tg.song.data.name || "(Untitled)";
 
     tg.drawPlayButton();
     tg.songOptionsFragment.setup();
+    
+    tg.song.onKeyChangeListeners.push(function () {
+        tg.setSongControlsUI();
+    });
+    tg.song.onBeatChangeListeners.push(function () {
+        tg.setSongControlsUI();
+    });
+    tg.song.onPartAudioParametersChangeListeners.push(function (part) {
+        if (part.muteButton) {
+            part.muteButton.refresh();
+        }
+    });
 };
 
 tg.playButton.onclick = function () {
@@ -253,12 +271,19 @@ tg.setupPartButton = function (omgpart) {
     button.innerHTML = "M";
     button.onclick = function () {
         omgpart.data.audioParameters.mute = !omgpart.data.audioParameters.mute;
-        button.style.backgroundColor = omgpart.data.audioParameters.mute ? "#800000" : "#008000";
+        tg.song.partMuteChanged(omgpart);
     }
-    button.style.backgroundColor = omgpart.data.audioParameters.mute ?
-        "#800000" : "#008000";
+    button.refresh = function () {
+        button.style.backgroundColor = omgpart.data.audioParameters.mute ?
+            "#800000" : "#008000";
+    };
+    button.refresh();
+    
     partDiv.appendChild(button);
     tg.partList.appendChild(partDiv);
+    
+    omgpart.div = partDiv;
+    omgpart.muteButton = button;
     return partDiv;
 }
 
@@ -345,7 +370,7 @@ tg.showBeatsFragment = function () {
         
         var onSubeatsChange = function (e) {
             bf.subbeatsLabel.innerHTML = bf.subbeatsRange.value;
-            tg.song.data.beatParameters.subbeats = bf.subbeatsRange.value;
+            tg.song.data.beatParameters.subbeats = bf.subbeatsRange.value * 1;
         };
         bf.subbeatsRange.ontouchmove = onSubeatsChange;
         bf.subbeatsRange.onmousemove = onSubeatsChange;
@@ -353,7 +378,7 @@ tg.showBeatsFragment = function () {
         bf.subbeatsRange.onchange = onSubeatsChange;
         var onBeatsChange = function (e) {
             bf.beatsLabel.innerHTML = bf.beatsRange.value;
-            tg.song.data.beatParameters.beats = bf.beatsRange.value;
+            tg.song.data.beatParameters.beats = bf.beatsRange.value * 1;
         };
         bf.beatsRange.ontouchmove = onBeatsChange;
         bf.beatsRange.onmousemove = onBeatsChange;
@@ -361,7 +386,7 @@ tg.showBeatsFragment = function () {
         bf.beatsRange.onchange = onBeatsChange;
         var onMeasuresChange = function (e) {
             bf.measuresLabel.innerHTML = bf.measuresRange.value;
-            tg.song.data.beatParameters.measures = bf.measuresRange.value;
+            tg.song.data.beatParameters.measures = bf.measuresRange.value * 1;
         };
         bf.measuresRange.ontouchmove = onMeasuresChange;
         bf.measuresRange.onmousemove = onMeasuresChange;
@@ -369,7 +394,7 @@ tg.showBeatsFragment = function () {
         bf.measuresRange.onchange = onMeasuresChange;
         var onBpmChange = function (e) {
             bf.bpmLabel.innerHTML = bf.bpmRange.value;
-            tg.song.data.beatParameters.bpm = bf.bpmRange.value;
+            tg.song.data.beatParameters.bpm = bf.bpmRange.value * 1;
             tg.player.newBPM = bf.bpmRange.value;
             tg.setSongControlsUI();
         };
@@ -379,7 +404,7 @@ tg.showBeatsFragment = function () {
         bf.bpmRange.onchange = onBpmChange;
         var onShuffleChange = function (e) {
             tg.song.data.beatParameters.shuffle = bf.shuffleRange.value / 100;
-            bf.shuffleLabel.innerHTML = bf.shuffleRange.value;
+            bf.shuffleLabel.innerHTML = bf.shuffleRange.value * 1;
             
         };
         bf.shuffleRange.ontouchmove = onShuffleChange;
@@ -390,6 +415,10 @@ tg.showBeatsFragment = function () {
     tg.refreshBeatsFragment();
     tg.beatsFragment.style.display = "block";
     tg.newChosenButton(tg.beatsButton);
+    
+    tg.song.onBeatChangeListeners.push(function () {
+        tg.refreshBeatsFragment();
+    })
 };
 
 tg.refreshBeatsFragment = function () {
@@ -397,7 +426,7 @@ tg.refreshBeatsFragment = function () {
     tg.beatsFragment.beatsLabel.innerHTML = tg.song.data.beatParameters.beats;
     tg.beatsFragment.measuresLabel.innerHTML = tg.song.data.beatParameters.measures;
     tg.beatsFragment.bpmLabel.innerHTML = tg.song.data.beatParameters.bpm;
-    tg.beatsFragment.shuffleLabel.innerHTML = tg.song.data.beatParameters.shuffle * 100;
+    tg.beatsFragment.shuffleLabel.innerHTML = Math.round(tg.song.data.beatParameters.shuffle * 100);
     tg.beatsFragment.subbeatsRange.value = tg.song.data.beatParameters.subbeats;
     tg.beatsFragment.beatsRange.value = tg.song.data.beatParameters.beats;
     tg.beatsFragment.measuresRange.value = tg.song.data.beatParameters.measures;
@@ -664,8 +693,10 @@ tg.hideDetails = function (hideFragment) {
     if (tg.sequencer) tg.sequencer.div.style.display = "none";
     if (tg.instrument) tg.instrument.div.style.display = "none";
     
-    if (tg.currentFragment && tg.currentFragment.onhide) {
-        tg.currentFragment.onhide();
+    if (tg.currentFragment) {
+        tg.currentFragment.div.style.display = "none";
+        if (tg.currentFragment.onhide)
+            tg.currentFragment.onhide();
     }
     tg.currentFragment = null;
     
@@ -699,7 +730,7 @@ tg.showMixFragment = function () {
     }
     var divs = [];
     tg.mixFragment.innerHTML = "";
-    tg.currentSection.parts.forEach(function (part) {        
+    tg.currentSection.parts.forEach(function (part) {
         tg.makeMixerDiv(part, divs);
     });
     
@@ -710,6 +741,12 @@ tg.showMixFragment = function () {
     divs.forEach(function (child) {
         child.sizeCanvas();
         child.drawCanvas(child);
+    });
+    
+    tg.song.onPartAudioParametersChangeListeners.push(function (part) {
+        if (part.mixerDiv) {
+            part.mixerDiv.refresh();
+        }
     });
 };
 
@@ -918,7 +955,14 @@ tg.makeMixerDiv = function (part, divs) {
     captionDiv.innerHTML = part.name || (part.data.soundSet ? part.data.soundSet.name : "");
     captionDiv.className = "mixer-part-name";
     newContainerDiv.appendChild(captionDiv);
-
+    
+    newContainerDiv.refresh = function () {
+        volumeProperty.color = audioParameters.mute ? "#880000" : "#008800";
+        mixerVolumeCanvas.drawCanvas();
+        mixerWarpCanvas.drawCanvas();
+        mixerPanCanvas.drawCanvas();
+    };
+    part.mixerDiv = newContainerDiv;
 };
 
 tg.availableFX = ["Delay", "Chorus", "Phaser", "Overdrive", "Compressor", 
@@ -1241,7 +1285,7 @@ tg.showSongFragment = function () {
     tg.songFragment.tagsInput.value = tg.song.data.tags || "";
     
     document.getElementById("create-new-song-button").onclick = function () {
-        tg.newBlankSong();
+        tg.loadSong(tg.newBlankSong());
     };
         
     tg.songFragment.style.display = "block";
@@ -1305,14 +1349,13 @@ tg.setupAddPartTabs = function () {
 };
 
 tg.newBlankSong = function () {
-    var blankSong = {
+    return {
         "name":"","type":"SONG","sections":[
             {"name": "Intro", "type":"SECTION","parts":[],"chordProgression":[0]}
         ],
         "keyParameters":{"scale":[0,2,4,5,7,9,11],"rootNote":0},
-        "beatParameters":{"bpm":"120","beats":4,"shuffle":0,"measures":1,"subbeats":4}
+        "beatParameters":{"bpm":120,"beats":4,"shuffle":0,"measures":1,"subbeats":4}
     };
-    tg.loadSong(blankSong);
 };
 
 /*
@@ -1764,6 +1807,7 @@ tg.songOptionsFragment = {
     availableFXList: document.getElementById("song-options-available-fx"),
     fxList: document.getElementById("song-options-fx-list"),
     masterGain: document.getElementById("song-options-master-gain"),
+    changeableList: document.getElementById("song-options-changeable-list"),
     updateTabs: function (e) {
         if (tg.songOptionsFragment.lastTab) {
             tg.songOptionsFragment.lastTab.classList.remove("selected-option");
@@ -1796,6 +1840,11 @@ tg.songOptionsFragment.setup = function () {
     this.mixerVolumeCanvas.div.className = "fx-slider";
     this.masterGain.appendChild(this.mixerVolumeCanvas.div);
 
+    this.monkey = new OMGMonkey(tg.song, tg.currentSection);
+    this.monkey.changeables.forEach(changeable => {
+        tg.songOptionsFragment.setupMonkeyChangeable(changeable);
+    });
+
     tg.songOptionsFragment.fxTab.onclick = function (e) {
         tg.songOptionsFragment.fx.style.display = "block";
         tg.songOptionsFragment.random.style.display = "none";
@@ -1805,12 +1854,30 @@ tg.songOptionsFragment.setup = function () {
         tg.songOptionsFragment.fx.style.display = "none";
         tg.songOptionsFragment.random.style.display = "block";
         tg.songOptionsFragment.updateTabs(e);
+        
     };
     
     tg.songOptionsFragment.fxTab.onclick({target: tg.songOptionsFragment.fxTab});
 };
 
-
+tg.songOptionsFragment.setupMonkeyChangeable = function (changeable) {
+    var div = document.createElement("div");
+    var titleDiv = document.createElement("div");
+    titleDiv.className = "randomizer-title";
+    titleDiv.innerHTML = changeable.name;
+    var img = document.createElement("img");
+    img.src = "/img/monkey48.png";
+    var input = document.createElement("input");
+    input.type = "range";
+    input.onchange = function () {
+        console.log("changeable probablility", input.value);
+        changeable.probability = input.value / 100;
+    }
+    div.appendChild(titleDiv);
+    div.appendChild(img);
+    div.appendChild(input);
+    this.changeableList.appendChild(div);
+};
 
 
 // away we go

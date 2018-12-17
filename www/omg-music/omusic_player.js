@@ -1634,7 +1634,6 @@ OMusicPlayer.prototype.makeFXNodeForPart = function (fx, part) {
             }
             part.topAudioNode = fxNode;
         }
-        console.log("part.defaultTopAudioNode", part.defaultTopAudioNode)
         fxNode.connect(part.defaultTopAudioNode);
         part.fx.push(fxNode);
     }
@@ -1665,25 +1664,6 @@ function OMGSong(div, data, headerOnly) {
         this.data = data;
     }
 
-    //backwards compatibility
-    if (!data.beatParameters) {
-        data.beatParameters = {"beats": data.beats || 4, 
-                    "subbeats": data.subbeats || 4,
-                    "measures": data.measures || 1, 
-                    "shuffle": data.shuffle || 0, 
-                    "subbeatMillis": data.subbeatMillis || 125
-                };
-    }
-    if (!data.keyParameters) {
-        data.keyParameters = {"rootNote": data.rootNote || 0, 
-                    "scale": data.ascale 
-                            || (data.scale ? data.scale.split(",") : 0) 
-                            || [0,2,4,5,7,9,11]};
-    }
-    
-    if (!data.beatParameters.bpm && data.beatParameters.subbeatMillis) {
-        data.beatParameters.bpm = 1 / data.beatParameters.subbeatMillis * 60000 / 4;
-    }
     
     this.arrangement = [];
     if (data.arrangement) {
@@ -1700,7 +1680,36 @@ function OMGSong(div, data, headerOnly) {
     if (!data.fx) {
         data.fx = [];
     }
+    
+    if (!data.beatParameters) {
+        data.beatParameters = {};
+    }
+    data.beatParameters.subbeats = data.beatParameters.subbeats * 1 || 4;
+    data.beatParameters.beats = data.beatParameters.beats * 1 || 4;
+    data.beatParameters.measures = data.beatParameters.measures * 1 || 1;
+    data.beatParameters.bpm = data.beatParameters.bpm * 1 || 120;
+    data.beatParameters.shuffle = data.beatParameters.shuffle * 1 || 0;
+    
+    this.onKeyChangeListeners = [];
+    this.onBeatChangeListeners = [];
+    this.onPartAudioParametersChangeListeners = [];
 };
+
+OMGSong.prototype.keyChanged = function () {
+    var song = this;
+    this.onKeyChangeListeners.forEach(listener => listener(song.data.keyParameters));
+};
+
+OMGSong.prototype.tempoChanged = function () {
+    var song = this;
+    this.onBeatChangeListeners.forEach(listener => listener(song.data.beatParameters));
+};
+
+OMGSong.prototype.partMuteChanged = function (part) {
+    var song = this;
+    this.onPartAudioParametersChangeListeners.forEach(listener => listener(part));
+};
+
 
 OMGSong.prototype.setData = function (data) {
     this.data = data;
