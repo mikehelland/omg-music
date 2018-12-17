@@ -1052,47 +1052,29 @@ OMusicPlayer.prototype.makeOMGSong = function (data) {
 
     var className = data.constructor.name;
 
-    if (className == "OMGPart" || className == "OMGDrumpart") {
+    if (className == "OMGPart") {
 
         newSong = new OMGSong();
         newSection = new OMGSection(null, null, newSong);
         newSection.parts.push(data);
         data.section = newSection;
 
-        //todo this old, doesn't use data.beatParameters
-        if (data.data.beats) {
-            newSection.data.beats = data.data.beats;
-            newSong.data.beats = newSection.data.beats;
-        }            
-        if (data.data.subbeats) {
-            newSection.data.subbeats = data.data.subbeats;
-            newSong.data.subbeats = newSection.data.subbeats;
-        }   
-        if (data.data.measures) {
-            newSection.data.measures = data.data.measures;
-            newSong.data.measures = newSection.data.measures;
-        }   
-        if (data.data.subbeatMillis) {
-            newSection.data.subbeatMillis = data.data.subbeatMillis;
-            newSong.data.subbeatMillis = newSection.data.subbeatMillis;
+        if (data.data.beatParameters) {
+            newSection.data.beatParameters = data.data.beatParameters;
+            newSong.data.beatParameters = newSection.data.beatParameters;
         }
         return newSong;
     }
 
     if (className == "OMGSection") {
 
-        //todo needs to use beatParameters and keyParameters
         console.log("loading OMGSection!!")
         newSong = new OMGSong();
         newSong.sections.push(data);
-        if (newSection.data.beats)
-            newSong.data.beats = newSection.data.beats;
-        if (newSection.data.subbeats)
-            newSong.data.subbeats = newSection.data.subbeats;
-        if (newSection.data.measures)
-            newSong.data.measures = newSection.data.measures;
-        if (newSection.data.subbeatMillis)
-            newSong.data.subbeatMillis = newSection.data.subbeatMillis;
+        if (data.data.beatParameters)
+            newSong.data.beatParameters = data.data.beatParameters;
+        if (data.data.keyParameters)
+            newSong.data.keyParameters = data.data.keyParameters;
         
         data.song = newSong;
         return newSong;
@@ -1689,10 +1671,17 @@ function OMGSong(div, data, headerOnly) {
     data.beatParameters.measures = data.beatParameters.measures * 1 || 1;
     data.beatParameters.bpm = data.beatParameters.bpm * 1 || 120;
     data.beatParameters.shuffle = data.beatParameters.shuffle * 1 || 0;
+    if (!data.keyParameters) {
+        data.keyParameters = {};
+    }
+    data.keyParameters.rootNote = data.keyParameters.rootNote * 1 || 0;
+    data.keyParameters.scale = data.keyParameters.scale || [0,2,4,5,7,9,11];
     
     this.onKeyChangeListeners = [];
     this.onBeatChangeListeners = [];
     this.onPartAudioParametersChangeListeners = [];
+    this.onPartAddListeners = [];
+    this.onChordProgressionChangeListeners = [];
 };
 
 OMGSong.prototype.keyChanged = function () {
@@ -1706,8 +1695,15 @@ OMGSong.prototype.tempoChanged = function () {
 };
 
 OMGSong.prototype.partMuteChanged = function (part) {
-    var song = this;
     this.onPartAudioParametersChangeListeners.forEach(listener => listener(part));
+};
+
+OMGSong.prototype.chordProgressionChanged = function (section) {
+    this.onChordProgressionChangeListeners.forEach(listener => listener(section));
+};
+
+OMGSong.prototype.partAdded = function (part) {
+    this.onPartAddListeners.forEach(listener => listener(part));
 };
 
 
@@ -1747,21 +1743,6 @@ function OMGSection(div, data, song) {
     this.div = div;
     this.parts = [];
 
-    //backwards compatibility
-    //with technogauntlet and omg < 0.9
-    if (data) {
-        if (data.beats && !data.beatParameters) {
-            data.beatParameters = {"beats": data.beats, "subbeats": data.subbeats,
-                        "measures": data.measures || 1, "shuffle": data.shuffle || 0,
-                        "subbeatMillis": data.subbeatMillis || 125,
-                    };
-        }
-        if (data.rootNote && !data.keyParameters) {
-            data.keyParameters = {"rootNote": data.rootNote, 
-                        "scale": data.ascale || data.scale.split(",")};
-        }
-    }
-
     //if there is no song, but the section has key and beat parameters
     //make a song with those parameters
     if (data && (!song || !song.data)) {
@@ -1776,8 +1757,8 @@ function OMGSection(div, data, song) {
             if (data.beatParameters.measures) {
                 song.data.beatParameters.measures = data.beatParameters.measures;
             }
-            if (data.beatParameters.subbeatMillis) {
-                song.data.beatParameters.subbeatMillis = data.beatParameters.subbeatMillis;
+            if (data.beatParameters.bpm) {
+                song.data.beatParameters.bpm = data.beatParameters.bpm;
             }
         }
         if (data.keyParameters) {
@@ -1809,7 +1790,6 @@ function OMGSection(div, data, song) {
     for (var ip = 0; ip < this.data.parts.length; ip++) {
         partData = this.data.parts[ip];
         part = new OMGPart(null, partData, this);
-        //todo should part be put somewhere?
     }
 }
 
@@ -1841,23 +1821,17 @@ function OMGPart(div, data, section) {
         section.song.sections.push(section.song);
     }
 
-    this.data = data || {};
+    this.data = data || {type: "PART"};
     if (!this.data.fx) {
         this.data.fx = [];
     }
 
-    if (!this.data.partType) {
-        //if type is melody or bassline
-        //todo find where we use partType, and see if we really need them
-        this.data.partType = this.data.type;
-        this.data.type = "PART";
-    }
     if (!this.data.surface) {
         if (this.data.soundSet && this.data.soundSet.defaultSurface) {
             this.data.surface = {url: this.data.soundSet.defaultSurface};
         }
         else {
-            this.data.surface = {url: this.data.surfaceURL || "PRESET_VERTICAL"};
+            this.data.surface = {url: "PRESET_VERTICAL"};
         }
     }
     
@@ -1913,7 +1887,7 @@ OMGPart.prototype.makeAudioParameters = function (track) {
 };
 
 OMGPart.prototype.defaultDrumPart = function () {
-    return {"type": "PART", "partType": "DRUMBEAT",
+    return {"type": "PART", 
             "surface": {"url": "PRESET_SEQUENCER"},
             "soundset": {"url": "PRESET_HIPKIT", "name": "Hip Hop Drum Kit"},
             "tracks": [{"name": "kick", "sound": "PRESET_HH_KICK",

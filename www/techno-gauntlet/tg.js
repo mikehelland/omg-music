@@ -163,7 +163,7 @@ tg.getSong = function (callback) {
                         {"type":"PART","notes":[
                                 {"note":-4,"beats":1,"scaledNote":62},{"note":-3,"beats":1,"scaledNote":64},{"note":-2,"beats":1,"scaledNote":65},{"note":-1,"beats":1,"scaledNote":67}
                             ],
-                            "surface":{"url":"PRESET_VERTICAL"},"partType":"PART",
+                            "surface":{"url":"PRESET_VERTICAL"},
                             "soundSet":{"url":"PRESET_OSC_SINE","name":"Sine Oscillator","type":"SOUNDSET","octave":5,"lowNote":0,"highNote":108,"chromatic":true},
                             "audioParameters":{"pan":-0.5654761904761905,"warp":1,"volume":0.18825301204819278,"delayTime":0.3187702265372168,"delayLevel":0.45307443365695793}},
                         {"type":"PART","tracks":[
@@ -198,10 +198,16 @@ tg.loadSong = function (songData) {
     tg.song.onBeatChangeListeners.push(function () {
         tg.setSongControlsUI();
     });
+    tg.song.onChordProgressionChangeListeners.push(function () {
+        tg.setSongControlsUI();
+    });
     tg.song.onPartAudioParametersChangeListeners.push(function (part) {
         if (part.muteButton) {
             part.muteButton.refresh();
         }
+    });
+    tg.song.onPartAddListeners.push(function (part) {
+        tg.loadPart(part);
     });
 };
 

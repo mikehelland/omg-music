@@ -5,7 +5,7 @@
  */
 
 
-
+    //omgsong
     //backwards compatibility
     if (!data.beatParameters) {
         data.beatParameters = {"beats": data.beats || 4, 
@@ -27,3 +27,18 @@
     }
 
 
+    //omgsection
+    //backwards compatibility
+    //with technogauntlet and omg < 0.9
+    if (data) {
+        if (data.beats && !data.beatParameters) {
+            data.beatParameters = {"beats": data.beats, "subbeats": data.subbeats,
+                        "measures": data.measures || 1, "shuffle": data.shuffle || 0,
+                        "subbeatMillis": data.subbeatMillis || 125,
+                    };
+        }
+        if (data.rootNote && !data.keyParameters) {
+            data.keyParameters = {"rootNote": data.rootNote, 
+                        "scale": data.ascale || data.scale.split(",")};
+        }
+    }

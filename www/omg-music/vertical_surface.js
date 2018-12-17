@@ -60,9 +60,9 @@ OMGMelodyMaker.prototype.drawBackground = function () {
             
     this.setupNoteSize();
 
-    //if (!this.readOnly) {
+    if (!this.readOnly) {
         this.drawFrets();        
-    //}
+    }
 };
 
 OMGMelodyMaker.prototype.draw = function () {
