@@ -184,6 +184,7 @@ tg.loadSong = function (songData) {
     document.getElementById("tool-bar-song-button").innerHTML = tg.song.data.name || "(Untitled)";
 
     tg.drawPlayButton();
+    tg.songOptionsFragment.setup();
 };
 
 tg.playButton.onclick = function () {
@@ -636,6 +637,18 @@ tg.showAddPartFragment = function () {
     tg.newChosenButton(tg.addPartButton);
 };
 
+tg.showFragment = function (fragment, button) {
+    tg.hideDetails();
+    if (button) {
+        tg.newChosenButton(button);
+    }
+    fragment.div.style.display = fragment.display || "block";
+    tg.currentFragment = fragment;
+        if (fragment.onshow) {
+        fragment.onshow();
+    }
+}
+
 tg.hideDetails = function (hideFragment) {
     if (tg.beatsFragment) tg.beatsFragment.style.display = "none";
     if (tg.keyFragment) tg.keyFragment.style.display = "none";
@@ -848,8 +861,12 @@ tg.showPartOptionsFragment = function (part) {
         tg.showSubmixFragment(part);
     };
     
-    tg.setupAddFXButtons(part);
-    tg.setupPartOptionsFX(part);
+    tg.partFXListDiv = document.getElementById("part-options-fx-list");
+    tg.setupAddFXButtons(part, 
+            document.getElementById("part-options-add-fx-button"), 
+            document.getElementById("part-options-available-fx"), 
+            tg.partFXListDiv);
+    tg.setupPartOptionsFX(part, tg.partFXListDiv);
 };
 
 tg.showSubmixFragment = function (part) {
@@ -909,8 +926,7 @@ tg.availableFX = ["Delay", "Chorus", "Phaser", "Overdrive", "Compressor",
     "Wah Wah", "Bitcrusher", "Moog", "Ping Pong"
 ];
 
-tg.setupAddFXButtons = function (part) {
-    var availableFXDiv = document.getElementById("part-options-available-fx");
+tg.setupAddFXButtons = function (part, addButton, availableFXDiv, fxList) {
     availableFXDiv.style.display = "none";
     availableFXDiv.innerHTML = "";
     tg.availableFX.forEach(function (fx) {
@@ -918,13 +934,12 @@ tg.setupAddFXButtons = function (part) {
         fxDiv.className = "fx-button"
         fxDiv.innerHTML = fx;
         fxDiv.onclick = function () {
-            tg.addFXToPart(fx, part);
+            tg.addFXToPart(fx, part, fxList);
             addButton.onclick();
         };
         availableFXDiv.appendChild(fxDiv);
     });
     
-    var addButton = document.getElementById("part-options-add-fx-button");
     addButton.innerHTML = "Add FX";
     addButton.onclick = function () {
         if (availableFXDiv.style.display === "none") {
@@ -938,28 +953,27 @@ tg.setupAddFXButtons = function (part) {
     };
 };
 
-tg.addFXToPart = function (fxName, part) {
+tg.addFXToPart = function (fxName, part, fxList) {
     var fxNode = tg.player.addFXToPart(fxName, part);
-    
-    tg.setupFXDiv(fxNode, part);
+    tg.setupFXDiv(fxNode, part, fxList);
 };
 
-tg.setupPartOptionsFX = function (part) {
-    tg.fxListDiv = document.getElementById("part-options-fx-list");
-    tg.fxListDiv.innerHTML = "";
+tg.setupPartOptionsFX = function (part, fxListDiv) {
+    fxListDiv.innerHTML = "";
     part.fx.forEach(function (fx) {
-        tg.setupFXDiv(fx, part);
+        tg.setupFXDiv(fx, part, fxListDiv);
     });
 };
 
-tg.setupFXDiv = function (fx, part) {
+tg.setupFXDiv = function (fx, part, fxListDiv) {
+    if (!fxListDiv) debugger
     var holder = document.createElement("div");
     holder.className = "fx-controls";
     var captionDiv = document.createElement("div");
     captionDiv.className = "fx-controls-caption";
     captionDiv.innerHTML = fx.data.name;
     holder.appendChild(captionDiv);
-    tg.fxListDiv.appendChild(holder);
+    fxListDiv.appendChild(holder);
     tg.setupFXControls(fx, part, holder);
     
     var tools = document.createElement("div");
@@ -975,7 +989,7 @@ tg.setupFXDiv = function (fx, part) {
     var removeButton = document.createElement("div");
     removeButton.innerHTML = "Remove FX";
     removeButton.onclick = function () {
-        tg.fxListDiv.removeChild(holder);
+        fxListDiv.removeChild(holder);
         tg.player.removeFXFromPart(fx, part);
     };
     tools.appendChild(bypassButton);
@@ -998,6 +1012,7 @@ tg.setupFXControls = function (fx, part, fxDiv) {
             divs.push(slider);
         }
     });
+    fx.controlDivs = divs;
     divs.forEach((div) => {
         div.sizeCanvas();
         div.drawCanvas();
@@ -1734,6 +1749,69 @@ tg.switchOMGLiveRoom = function (part, newRoom) {
     part.liveRoom = newRoom;
     part.socket.emit("startSession", part.liveRoom);
 };
+
+tg.songOptionsButton = document.getElementById("song-options-button");
+tg.songOptionsButton.onclick = function () {
+    tg.showFragment(tg.songOptionsFragment, tg.songOptionsButton);
+};
+tg.songOptionsFragment = {
+    div: document.getElementById("song-options-fragment"),
+    fxTab: document.getElementById("song-options-fx-tab"),
+    randomTab: document.getElementById("song-options-random-tab"),
+    fx: document.getElementById("song-options-fx"),
+    random: document.getElementById("song-options-random"),
+    addFXButton: document.getElementById("song-options-add-fx-button"),
+    availableFXList: document.getElementById("song-options-available-fx"),
+    fxList: document.getElementById("song-options-fx-list"),
+    masterGain: document.getElementById("song-options-master-gain"),
+    updateTabs: function (e) {
+        if (tg.songOptionsFragment.lastTab) {
+            tg.songOptionsFragment.lastTab.classList.remove("selected-option");
+        }
+        tg.songOptionsFragment.lastTab = e.target;
+        e.target.classList.add("selected-option");
+    },
+    onshow: function () {
+        if (tg.songOptionsFragment.shownOnce) return;
+        tg.songOptionsFragment.shownOnce = true;
+        tg.song.fx.forEach(fx => {
+            fx.controlDivs.forEach((div) => {
+                div.sizeCanvas();
+                div.drawCanvas();            
+            });
+        });
+        this.mixerVolumeCanvas.sizeCanvas();
+        this.mixerVolumeCanvas.drawCanvas();
+
+    }
+};
+tg.songOptionsFragment.setup = function () {
+    
+    tg.setupAddFXButtons(tg.song, this.addFXButton, this.availableFXList, this.fxList);
+    tg.setupPartOptionsFX(tg.song, this.fxList);
+
+    var volumeProperty = {"property": "gain", "name": "Volume", "type": "slider", "min": 0, "max": 1.5, 
+            "color": "#008800", transform: "square"};
+    this.mixerVolumeCanvas = new SliderCanvas(null, volumeProperty, tg.song.postFXGain, tg.song);
+    this.mixerVolumeCanvas.div.className = "fx-slider";
+    this.masterGain.appendChild(this.mixerVolumeCanvas.div);
+
+    tg.songOptionsFragment.fxTab.onclick = function (e) {
+        tg.songOptionsFragment.fx.style.display = "block";
+        tg.songOptionsFragment.random.style.display = "none";
+        tg.songOptionsFragment.updateTabs(e);
+    };
+    tg.songOptionsFragment.randomTab.onclick = function (e) {
+        tg.songOptionsFragment.fx.style.display = "none";
+        tg.songOptionsFragment.random.style.display = "block";
+        tg.songOptionsFragment.updateTabs(e);
+    };
+    
+    tg.songOptionsFragment.fxTab.onclick({target: tg.songOptionsFragment.fxTab});
+};
+
+
+
 
 // away we go
 // KEEP THIS LAST

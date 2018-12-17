@@ -345,7 +345,7 @@ body {
 
 }
 
-#main-options-button {
+#song-options-button {
     flex-grow:0 !important; 
 }
 
@@ -408,11 +408,16 @@ body {
     background-color:#D00000;
 }
 
-#add-part-tabs {
+.detail-tab-row, #add-part-tabs {
     display:flex;
 }
 
-#add-part-tabs > div {
+.detail-tab-row {
+    text-align:center;
+    font-size: 1.5em;
+}
+
+.detail-tab, #add-part-tabs > div {
     flex-grow:1;
     border:1px solid #888888;
     cursor:pointer;
@@ -420,12 +425,12 @@ body {
     padding:1.2em;
     opacity:0.8;
 }
-#add-part-tabs > div:hover {
+.detail-tab:hover, #add-part-tabs > div:hover {
     opacity:1;
     background-color:#000022;
 }
 
-#add-part-oscillator, #add-part-gallery, #add-part-custom {
+.detail-tab-page, #add-part-oscillator, #add-part-gallery, #add-part-custom {
     display:none;
 }
 
@@ -441,7 +446,7 @@ body {
     opacity:1;
 }
 
-#part-options-available-fx {
+#song-options-available-fx, #part-options-available-fx {
     flex-wrap: wrap;
 }
 

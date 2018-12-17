@@ -29,13 +29,13 @@ function OMusicPlayer() {
         //return;
     }
 
-    p.compressor = p.context.createDynamicsCompressor();
+    /*p.compressor = p.context.createDynamicsCompressor();
     p.compressor.threshold.value = -50;
     p.compressor.knee.value = 40;
     p.compressor.ratio.value = 2;
     p.compressor.attack.value = 0;
     p.compressor.release.value = 0.25;
-    p.compressor.connect(p.context.destination);
+    p.compressor.connect(p.context.destination);*/
 
     p.onBeatPlayedListeners = [];
 
@@ -371,6 +371,10 @@ OMusicPlayer.prototype.playWhenReady = function (sections) {
 OMusicPlayer.prototype.prepareSong = function (song) {
     var p = this;
     
+    if (!song.madeAudioNodes) {
+        p.makeAudioNodesForSong(song);
+    }
+    
     var section;
     var part;
 
@@ -611,6 +615,7 @@ OMusicPlayer.prototype.makeFrequency = function (mapped) {
 };
 
 OMusicPlayer.prototype.initSound = function () {
+    return;
     var p = this;
     p.playedSound = true;
     try {
@@ -1272,7 +1277,7 @@ OMusicPlayer.prototype.makeAudioNodesForPart = function (part) {
     part.panner = p.context.createStereoPanner();
     part.gain = p.context.createGain();
     part.gain.connect(part.panner);
-    part.panner.connect(p.compressor);
+    part.panner.connect(part.section.song.preFXGain);
     part.defaultTopAudioNode = part.gain;
     part.topAudioNode = part.defaultTopAudioNode;
     part.gain.gain.setValueAtTime(part.data.audioParameters.gain, p.context.currentTime);
@@ -1287,6 +1292,26 @@ OMusicPlayer.prototype.makeAudioNodesForPart = function (part) {
     }
 };
 
+OMusicPlayer.prototype.makeAudioNodesForSong = function (song) {
+console.log("makeaudionodesforsong")
+    var p = this;
+    song.preFXGain = p.context.createGain();
+    song.postFXGain = p.context.createGain();
+    
+    song.preFXGain.connect(song.postFXGain);
+    song.postFXGain.connect(p.context.destination);
+    
+    song.defaultTopAudioNode = song.preFXGain;
+    
+    if (song.data.fx) {
+        for (var i = 0; i < song.data.fx.length; i++) {
+            p.makeFXNodeForPart(song.data.fx[i], song);        
+        }
+    }    
+    song.madeAudioNodes = true;
+};
+
+
 OMusicPlayer.prototype.addFXToPart = function (fx, part) {
     var node = this.makeFXNodeForPart(fx, part)
     if (node) {
@@ -1297,6 +1322,20 @@ OMusicPlayer.prototype.addFXToPart = function (fx, part) {
 
 OMusicPlayer.prototype.removeFXFromPart = function (fx, part) {
     var index = part.fx.indexOf(fx);
+    
+    if (part.preFXGain) {
+        var connectingNode = part.fx[index - 1] || part.preFXGain;
+        var connectedNode = part.fx[index + 1] || part.postFXGain;
+        fx.disconnect();
+        connectingNode.disconnect();
+        connectingNode.connect(connectedNode);
+    
+        part.fx.splice(index, 1);
+        index = part.data.fx.indexOf(fx.data);
+        part.data.fx.splice(index, 1);
+        return;
+    }
+    
     var connectedTo = part.fx[index + 1] || part.defaultTopAudioNode;
     fx.disconnect();
     part.fx.splice(index, 1);
@@ -1381,9 +1420,9 @@ OMusicPlayer.prototype.setupFX = function () {
         "makeData": function (init) {
             return {
                 name: "Overdrive",
-                outputGain: 0.5,         //0 to 1+
+                outputGain: 0.2,         //0 to 1+
                 drive: 0.7,              //0 to 1
-                curveAmount: 1,          //0 to 1
+                curveAmount: 0.8,          //0 to 1
                 algorithmIndex: 0,       //0 to 5, selects one of our drive algorithms
                 bypass: 0
             };
@@ -1570,9 +1609,19 @@ OMusicPlayer.prototype.makeFXNodeForPart = function (fx, part) {
         }
         fxNode = new fxInfo.audioClass(fxData);
     }
-    
+
     if (fxNode) {
         fxNode.data = fxData;
+
+        if (part.preFXGain) {
+            var connectingNode = part.fx[part.fx.length - 1] || part.preFXGain;
+            connectingNode.disconnect(part.postFXGain);
+            connectingNode.connect(fxNode);
+            fxNode.connect(part.postFXGain);
+            part.fx.push(fxNode);
+            return fxNode;
+        }
+            
         var lastFX = part.fx[part.fx.length - 1];
         if (lastFX) {
             lastFX.disconnect(part.defaultTopAudioNode);
@@ -1585,6 +1634,7 @@ OMusicPlayer.prototype.makeFXNodeForPart = function (fx, part) {
             }
             part.topAudioNode = fxNode;
         }
+        console.log("part.defaultTopAudioNode", part.defaultTopAudioNode)
         fxNode.connect(part.defaultTopAudioNode);
         part.fx.push(fxNode);
     }
@@ -1599,7 +1649,9 @@ OMusicPlayer.prototype.getSoundSetForSoundFont = function (name, url) {
 function OMGSong(div, data, headerOnly) {
     this.div = div;
     this.sections = [];
+    this.fx = [];
     this.loop = true;
+    this.gain = 1;
 
     if (headerOnly) {
         this.setHeaderData(data);
@@ -1643,6 +1695,10 @@ function OMGSong(div, data, headerOnly) {
                 }
             }
         }
+    }
+    
+    if (!data.fx) {
+        data.fx = [];
     }
 };
 
