@@ -48,8 +48,8 @@ OMGMonkey.prototype.getMuteFunctions = function () {
     return [
     function () {
         monkey.forRandomRandomParts(function (part) {
-            part.data.audioParameters.mute = 
-                    !part.data.audioParameters.mute;
+            part.data.audioParams.mute = 
+                    !part.data.audioParams.mute;
             monkey.song.partMuteChanged(part);
         });
     }
@@ -83,26 +83,26 @@ OMGMonkey.prototype.getKeyFunctions = function () {
     
     return [
     function (song) {
-        song.data.keyParameters.rootNote = Math.floor(Math.random() * 12);
+        song.data.keyParams.rootNote = Math.floor(Math.random() * 12);
         song.keyChanged();
     },
     function (song) {
-        song.data.keyParameters.rootNote += 1 + Math.floor(Math.random() * 2);
-        song.data.keyParameters.rootNote = song.data.keyParameters.rootNote % 12;
+        song.data.keyParams.rootNote += 1 + Math.floor(Math.random() * 2);
+        song.data.keyParams.rootNote = song.data.keyParams.rootNote % 12;
         song.keyChanged();
     },
     function (song) {
-        song.data.keyParameters.rootNote -= 1 + Math.floor(Math.random() * 2);
-        if (song.data.keyParameters.rootNote < 0) song.data.keyParameters.rootNote = 11;
+        song.data.keyParams.rootNote -= 1 + Math.floor(Math.random() * 2);
+        if (song.data.keyParams.rootNote < 0) song.data.keyParams.rootNote = 11;
         song.keyChanged();
     },
     function (song) {
-        song.data.keyParameters.scale = omg.ui.scales[Math.floor(Math.random() * omg.ui.scales.length)].value;
+        song.data.keyParams.scale = omg.ui.scales[Math.floor(Math.random() * omg.ui.scales.length)].value;
         song.keyChanged();
     },
     function (song) {
-        song.data.keyParameters.rootNote = Math.floor(Math.random() * 12);
-        song.data.keyParameters.scale = omg.ui.scales[Math.floor(Math.random() * omg.ui.scales.length)].value;
+        song.data.keyParams.rootNote = Math.floor(Math.random() * 12);
+        song.data.keyParams.scale = omg.ui.scales[Math.floor(Math.random() * omg.ui.scales.length)].value;
         song.keyChanged();
     }
 ]};
@@ -111,11 +111,11 @@ OMGMonkey.prototype.getTempoFunctions = function () {
     var monkey = this;
     return [
     function (song) {
-        if (monkey.song.data.beatParameters.shuffle == 0) {
+        if (monkey.song.data.beatParams.shuffle == 0) {
             monkey.changeShuffle(30);
         }
-        else if (monkey.song.data.beatParameters.shuffle > 0.15) {
-            monkey.changeShuffle(monkey.song.data.beatParameters.shuffle * -100);
+        else if (monkey.song.data.beatParams.shuffle > 0.15) {
+            monkey.changeShuffle(monkey.song.data.beatParams.shuffle * -100);
         }
         else {
             monkey.changeShuffle(2);
@@ -148,11 +148,11 @@ OMGMonkey.prototype.getTempoFunctions = function () {
 ]};
 
 OMGMonkey.prototype.changeTempo = function (bpmChange) {
-    this.song.data.beatParameters.bpm = Math.min(Math.max(this.song.data.beatParameters.bpm + bpmChange, 40), 200);
+    this.song.data.beatParams.bpm = Math.min(Math.max(this.song.data.beatParams.bpm + bpmChange, 40), 200);
     this.song.tempoChanged();
 };
 OMGMonkey.prototype.changeShuffle = function (change) {
-    this.song.data.beatParameters.shuffle = Math.min(Math.max(this.song.data.beatParameters.shuffle + change / 100, 0), 0.50);
+    this.song.data.beatParams.shuffle = Math.min(Math.max(this.song.data.beatParams.shuffle + change / 100, 0), 0.50);
     this.song.tempoChanged();
 };
 
@@ -213,11 +213,11 @@ OMGMonkey.prototype.getVolumePanFunctions = function () {
 };
 
 OMGMonkey.prototype.changeVolume = function (part, change) {
-    part.data.audioParameters.gain = Math.min(Math.max(part.data.audioParameters.gain + change / 10, 0.1), 0.95);
+    part.data.audioParams.gain = Math.min(Math.max(part.data.audioParams.gain + change / 10, 0.1), 0.95);
     this.song.partMuteChanged(part);
 };
 OMGMonkey.prototype.changePan = function (part, change) {
-    part.data.audioParameters.pan = Math.min(Math.max(part.data.audioParameters.pan + change / 10, -1), 1);
+    part.data.audioParams.pan = Math.min(Math.max(part.data.audioParams.pan + change / 10, -1), 1);
     this.song.partMuteChanged(part);
 };
 
@@ -225,7 +225,7 @@ OMGMonkey.prototype.changePan = function (part, change) {
 
 OMGMonkey.prototype.getChordsFunctions = function () {
     var monkey = this;
-    var scale = monkey.song.data.keyParameters.scale
+    var scale = monkey.song.data.keyParams.scale
     return [
     function () {
         var n = monkey.randomChord(scale);
@@ -294,8 +294,8 @@ OMGMonkey.prototype.getNewMelodyFunctions = function () {
     var monkey = this;
     return [
         function () {
-            var beatsLeft = monkey.song.data.beatParameters.beats * 
-                    monkey.song.data.beatParameters.measures;
+            var beatsLeft = monkey.song.data.beatParams.beats * 
+                    monkey.song.data.beatParams.measures;
             var notes = [];
             var note;
             var nextNoteNumber = Math.floor(Math.random() * 20) - 10;
@@ -314,10 +314,10 @@ OMGMonkey.prototype.getNewMelodyFunctions = function () {
 
 OMGMonkey.prototype.getRandomBeats = function () {
     var n = (Math.floor(Math.round(Math.random() * 
-            this.song.data.beatParameters.subbeats)) + 1) /
-            this.song.data.beatParameters.subbeats;
+            this.song.data.beatParams.subbeats)) + 1) /
+            this.song.data.beatParams.subbeats;
     if (Math.random() > 0.7) {
-        n = n * this.song.data.beatParameters.beats; 
+        n = n * this.song.data.beatParams.beats; 
     }
     return n;
 };

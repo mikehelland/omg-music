@@ -149,8 +149,8 @@ OMGDrumMachine.prototype.ondown = function (touch) {
     if (column < 0) {
         if (Date.now() - omgdrums.lastTrackNameClick < 500 &&
                 omgdrums.lastTrackNameI === trackI) {
-            var audioParameters = omgdrums.part.data.tracks[trackI].audioParameters;
-            audioParameters.mute = !audioParameters.mute;
+            var audioParams = omgdrums.part.data.tracks[trackI].audioParams;
+            audioParams.mute = !audioParams.mute;
         }
         if (trackI === this.selectedTrack) {
             this.selectedTrack = -1;
@@ -173,7 +173,7 @@ OMGDrumMachine.prototype.ondown = function (touch) {
             data = this.part.data.tracks[row].data;
         }
         else {
-            subbeat = column + row * this.beatParameters.subbeats;
+            subbeat = column + row * this.beatParams.subbeats;
             data = this.part.data.tracks[this.selectedTrack].data;
         }
 
@@ -212,7 +212,7 @@ OMGDrumMachine.prototype.onmove = function (touch) {
             data = omgdrums.part.data.tracks[row].data;
         }
         else {
-            subbeat = column + row * this.beatParameters.subbeats;
+            subbeat = column + row * this.beatParams.subbeats;
             data = omgdrums.part.data.tracks[this.selectedTrack].data;
         }
         data[subbeat] = data[subbeat] ? 0 : this.beatStrength;
@@ -237,10 +237,10 @@ OMGDrumMachine.prototype.setPart = function (part) {
 
     this.part = part;
     this.drumbeat = part.data;
-    this.beatParameters = part.section.song.data.beatParameters;
+    this.beatParams = part.section.song.data.beatParams;
 
-    this.totalBeats = this.beatParameters.measures * this.beatParameters.beats;
-    this.totalSubbeats = this.totalBeats * this.beatParameters.subbeats;
+    this.totalBeats = this.beatParams.measures * this.beatParams.beats;
+    this.totalSubbeats = this.totalBeats * this.beatParams.subbeats;
     
 };
 
@@ -270,7 +270,7 @@ OMGDrumMachine.prototype.drawFullView = function (subbeat) {
         for (var j = 0; j < this.totalSubbeats; j++) {
             var value = this.info[i].track.data[j];
             this.ctx.fillStyle = value >= 1 ? this.foreColor :
-                    (j % this.beatParameters.subbeats === 0) ? this.downbeatColor : this.beatColor;
+                    (j % this.beatParams.subbeats === 0) ? this.downbeatColor : this.beatColor;
 
             this.ctx.fillRect(this.left + this.captionWidth + this.columnWidth * j + 1, 
                     this.top + this.rowHeight * i + 1,
@@ -305,8 +305,8 @@ OMGDrumMachine.prototype.drawFullView = function (subbeat) {
 OMGDrumMachine.prototype.drawTrackView = function (subbeat) {
     var subbeatIndex;
     for (var i = 0; i < this.totalBeats; i++) {
-        for (var j = 0; j < this.beatParameters.subbeats; j++) {
-            subbeatIndex = j + i * this.beatParameters.subbeats;
+        for (var j = 0; j < this.beatParams.subbeats; j++) {
+            subbeatIndex = j + i * this.beatParams.subbeats;
             var value = this.drumbeat.tracks[this.selectedTrack].data[subbeatIndex];
             this.ctx.fillStyle = value >= 1 ? this.foreColor :
                     (j === 0) ? this.downbeatColor : this.beatColor;
@@ -352,7 +352,7 @@ OMGDrumMachine.prototype.drawCaptions = function () {
                     this.captionWidth, this.captionHeight);
 
         }
-        if (this.info[i].track.audioParameters.mute) {
+        if (this.info[i].track.audioParams.mute) {
             this.ctx.globalAlpha = 0.6;
             this.ctx.fillStyle = "#880000";
             this.ctx.fillRect(this.left, this.top + i * this.captionHeight, 
@@ -412,7 +412,7 @@ OMGDrumMachine.prototype.setInfo = function () {
     this.captionHeight = this.canvas.height / this.info.length;
     this.rowHeight = this.captionHeight;
     this.rowHeightTrack = this.canvas.height / (this.totalBeats);
-    this.columnWidthTrack = (this.width - this.captionWidth) / this.beatParameters.subbeats;
+    this.columnWidthTrack = (this.width - this.captionWidth) / this.beatParams.subbeats;
 
 
     for (i = 0; i < this.info.length; i++) {
@@ -438,7 +438,7 @@ OMGDrumMachine.prototype.setRowColumnSizes = function () {
         this.rowHeight = this.captionHeight;
     }
     else {
-        this.columnWidth = (this.width - this.captionWidth) / this.beatParameters.subbeats;
+        this.columnWidth = (this.width - this.captionWidth) / this.beatParams.subbeats;
         this.rowHeight = this.canvas.height / (this.totalBeats);
     }
 };

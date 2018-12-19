@@ -165,11 +165,11 @@ tg.getSong = function (callback) {
                             ],
                             "surface":{"url":"PRESET_VERTICAL"},
                             "soundSet":{"url":"PRESET_OSC_SINE","name":"Sine Oscillator","type":"SOUNDSET","octave":5,"lowNote":0,"highNote":108,"chromatic":true},
-                            "audioParameters":{"pan":-0.5654761904761905,"warp":1,"volume":0.18825301204819278,"delayTime":0.3187702265372168,"delayLevel":0.45307443365695793}},
+                            "audioParams":{"pan":-0.5654761904761905,"warp":1,"volume":0.18825301204819278,"delayTime":0.3187702265372168,"delayLevel":0.45307443365695793}},
                         {"type":"PART","tracks":[
-                                {"url":"hh_kick","data":[true,null,null,null,true,null,null,null,true,null,null,null,true],"name":"Kick","sound":"http://mikehelland.com/omg/drums/hh_kick.mp3"},{"url":"hh_clap","data":[null,null,null,null,true,null,null,null,null,null,null,null,true],"name":"Clap","sound":"http://mikehelland.com/omg/drums/hh_clap.mp3"},{"url":"rock_hihat_closed","data":[true,null,true,null,true,null,true,null,true,null,true,null,true,null,true],"name":"HiHat Closed","sound":"http://mikehelland.com/omg/drums/rock_hihat_closed.mp3"},{"url":"hh_hihat","data":[null,null,null,null,null,null,false,null,null,null,null,null,null,null,false],"name":"HiHat Open","sound":"http://mikehelland.com/omg/drums/hh_hihat.mp3"},{"url":"hh_tamb","data":[],"name":"Tambourine","sound":"http://mikehelland.com/omg/drums/hh_tamb.mp3"},{"url":"hh_tom_mh","data":[null,null,null,null,null,null,null,null,false,null,null,false,true,false],"name":"Tom H","sound":"http://mikehelland.com/omg/drums/hh_tom_mh.mp3"},{"url":"hh_tom_ml","data":[null,null,null,null,null,null,null,null,null,null,true],"name":"Tom M","sound":"http://mikehelland.com/omg/drums/hh_tom_ml.mp3"},{"url":"hh_tom_l","data":[null,null,null,null,null,null,null,null,null,null,null,null,null,null,true,false],"name":"Tom L","sound":"http://mikehelland.com/omg/drums/hh_tom_l.mp3"}],"surface":{"url":"PRESET_SEQUENCER"},"soundSet":{"id":1207,"url":"http://openmusic.gallery/data/1207","data":[{"url":"hh_kick","data":[true,null,null,null,true,null,null,null,true,null,null,null,true],"name":"Kick","sound":"http://mikehelland.com/omg/drums/hh_kick.mp3"},{"url":"hh_clap","data":[null,null,null,null,true,null,null,null,null,null,null,null,true],"name":"Clap","sound":"http://mikehelland.com/omg/drums/hh_clap.mp3"},{"url":"rock_hihat_closed","data":[true,null,true,null,true,null,true,null,true,null,true,null,true,null,true],"name":"HiHat Closed","sound":"http://mikehelland.com/omg/drums/rock_hihat_closed.mp3"},{"url":"hh_hihat","data":[null,null,null,null,null,null,false,null,null,null,null,null,null,null,false],"name":"HiHat Open","sound":"http://mikehelland.com/omg/drums/hh_hihat.mp3"},{"url":"hh_tamb","data":[],"name":"Tambourine","sound":"http://mikehelland.com/omg/drums/hh_tamb.mp3"},{"url":"hh_tom_mh","data":[null,null,null,null,null,null,null,null,false,null,null,false,true,false],"name":"Tom H","sound":"http://mikehelland.com/omg/drums/hh_tom_mh.mp3"},{"url":"hh_tom_ml","data":[null,null,null,null,null,null,null,null,null,null,true],"name":"Tom M","sound":"http://mikehelland.com/omg/drums/hh_tom_ml.mp3"},{"url":"hh_tom_l","data":[null,null,null,null,null,null,null,null,null,null,null,null,null,null,true,false],"name":"Tom L","sound":"http://mikehelland.com/omg/drums/hh_tom_l.mp3"}],"name":"Hip Kit","type":"SOUNDSET","prefix":"http://mikehelland.com/omg/drums/","lowNote":72,"postfix":".mp3","user_id":"1","approved":true,"username":"m                   ","chromatic":false,"created_at":1542271035794,"last_modified":1542271055684,"defaultSurface":"PRESET_SEQUENCER"},"audioParameters":{"pan":0,"warp":1,"volume":0.6,"delayTime":0.09870550161812297,"delayLevel":0.12297734627831715}}],"chordProgression":[0]}],
-            "keyParameters":{"scale":[0,2,3,5,7,8,10],"rootNote":9},
-            "beatParameters":{"bpm":108,"beats":4,"shuffle":0,"measures":1,"subbeats":4}
+                                {"url":"hh_kick","data":[true,null,null,null,true,null,null,null,true,null,null,null,true],"name":"Kick","sound":"http://mikehelland.com/omg/drums/hh_kick.mp3"},{"url":"hh_clap","data":[null,null,null,null,true,null,null,null,null,null,null,null,true],"name":"Clap","sound":"http://mikehelland.com/omg/drums/hh_clap.mp3"},{"url":"rock_hihat_closed","data":[true,null,true,null,true,null,true,null,true,null,true,null,true,null,true],"name":"HiHat Closed","sound":"http://mikehelland.com/omg/drums/rock_hihat_closed.mp3"},{"url":"hh_hihat","data":[null,null,null,null,null,null,false,null,null,null,null,null,null,null,false],"name":"HiHat Open","sound":"http://mikehelland.com/omg/drums/hh_hihat.mp3"},{"url":"hh_tamb","data":[],"name":"Tambourine","sound":"http://mikehelland.com/omg/drums/hh_tamb.mp3"},{"url":"hh_tom_mh","data":[null,null,null,null,null,null,null,null,false,null,null,false,true,false],"name":"Tom H","sound":"http://mikehelland.com/omg/drums/hh_tom_mh.mp3"},{"url":"hh_tom_ml","data":[null,null,null,null,null,null,null,null,null,null,true],"name":"Tom M","sound":"http://mikehelland.com/omg/drums/hh_tom_ml.mp3"},{"url":"hh_tom_l","data":[null,null,null,null,null,null,null,null,null,null,null,null,null,null,true,false],"name":"Tom L","sound":"http://mikehelland.com/omg/drums/hh_tom_l.mp3"}],"surface":{"url":"PRESET_SEQUENCER"},"soundSet":{"id":1207,"url":"http://openmusic.gallery/data/1207","data":[{"url":"hh_kick","data":[true,null,null,null,true,null,null,null,true,null,null,null,true],"name":"Kick","sound":"http://mikehelland.com/omg/drums/hh_kick.mp3"},{"url":"hh_clap","data":[null,null,null,null,true,null,null,null,null,null,null,null,true],"name":"Clap","sound":"http://mikehelland.com/omg/drums/hh_clap.mp3"},{"url":"rock_hihat_closed","data":[true,null,true,null,true,null,true,null,true,null,true,null,true,null,true],"name":"HiHat Closed","sound":"http://mikehelland.com/omg/drums/rock_hihat_closed.mp3"},{"url":"hh_hihat","data":[null,null,null,null,null,null,false,null,null,null,null,null,null,null,false],"name":"HiHat Open","sound":"http://mikehelland.com/omg/drums/hh_hihat.mp3"},{"url":"hh_tamb","data":[],"name":"Tambourine","sound":"http://mikehelland.com/omg/drums/hh_tamb.mp3"},{"url":"hh_tom_mh","data":[null,null,null,null,null,null,null,null,false,null,null,false,true,false],"name":"Tom H","sound":"http://mikehelland.com/omg/drums/hh_tom_mh.mp3"},{"url":"hh_tom_ml","data":[null,null,null,null,null,null,null,null,null,null,true],"name":"Tom M","sound":"http://mikehelland.com/omg/drums/hh_tom_ml.mp3"},{"url":"hh_tom_l","data":[null,null,null,null,null,null,null,null,null,null,null,null,null,null,true,false],"name":"Tom L","sound":"http://mikehelland.com/omg/drums/hh_tom_l.mp3"}],"name":"Hip Kit","type":"SOUNDSET","prefix":"http://mikehelland.com/omg/drums/","lowNote":72,"postfix":".mp3","user_id":"1","approved":true,"username":"m                   ","chromatic":false,"created_at":1542271035794,"last_modified":1542271055684,"defaultSurface":"PRESET_SEQUENCER"},"audioParams":{"pan":0,"warp":1,"volume":0.6,"delayTime":0.09870550161812297,"delayLevel":0.12297734627831715}}],"chordProgression":[0]}],
+            "keyParams":{"scale":[0,2,3,5,7,8,10],"rootNote":9},
+            "beatParams":{"bpm":108,"beats":4,"shuffle":0,"measures":1,"subbeats":4}
             };
         }
         callback(defaultSong);
@@ -201,7 +201,7 @@ tg.loadSong = function (songData) {
     tg.song.onChordProgressionChangeListeners.push(function () {
         tg.setSongControlsUI();
     });
-    tg.song.onPartAudioParametersChangeListeners.push(function (part) {
+    tg.song.onPartAudioParamsChangeListeners.push(function (part) {
         if (part.muteButton) {
             part.muteButton.refresh();
         }
@@ -232,8 +232,8 @@ tg.player.onStop = function () {
 };
 
 tg.setSongControlsUI = function () {
-    tg.keyButton.innerHTML = omg.ui.getKeyCaption(tg.song.data.keyParameters);
-    tg.beatsButton.innerHTML = tg.song.data.beatParameters.bpm + " bpm";
+    tg.keyButton.innerHTML = omg.ui.getKeyCaption(tg.song.data.keyParams);
+    tg.beatsButton.innerHTML = tg.song.data.beatParams.bpm + " bpm";
     var chordsCaption = tg.makeChordsCaption();
     tg.chordsButton.innerHTML = chordsCaption;
     tg.chordsEditorView.innerHTML = chordsCaption;
@@ -276,11 +276,11 @@ tg.setupPartButton = function (omgpart) {
     button.className = "part-mute-button";
     button.innerHTML = "M";
     button.onclick = function () {
-        omgpart.data.audioParameters.mute = !omgpart.data.audioParameters.mute;
+        omgpart.data.audioParams.mute = !omgpart.data.audioParams.mute;
         tg.song.partMuteChanged(omgpart);
     }
     button.refresh = function () {
-        button.style.backgroundColor = omgpart.data.audioParameters.mute ?
+        button.style.backgroundColor = omgpart.data.audioParams.mute ?
             "#800000" : "#008000";
     };
     button.refresh();
@@ -312,11 +312,11 @@ tg.drawPlayButton = function (subbeat) {
     context.globalAlpha = 0.6;
 
     var beatWidth = tg.playButton.width / 
-        (tg.song.data.beatParameters.measures * tg.song.data.beatParameters.beats);
+        (tg.song.data.beatParams.measures * tg.song.data.beatParams.beats);
 
     if (tg.player.playing) {
         context.fillStyle = "#00FF00";
-        context.fillRect(beatWidth * Math.floor(subbeat / tg.song.data.beatParameters.subbeats), 
+        context.fillRect(beatWidth * Math.floor(subbeat / tg.song.data.beatParams.subbeats), 
             0, beatWidth, tg.playButton.height);        
     }
     else {
@@ -328,10 +328,10 @@ tg.drawPlayButton = function (subbeat) {
     context.strokeStyle = "white";
     context.strokeRect(0, 0, tg.playButton.width, tg.playButton.height);
     for (var beat = 1; 
-            beat <= tg.song.data.beatParameters.beats * tg.song.data.beatParameters.measures; 
+            beat <= tg.song.data.beatParams.beats * tg.song.data.beatParams.measures; 
             beat++) {
         context.fillRect(beat * beatWidth, 0, 
-                    beat % tg.song.data.beatParameters.beats == 0 ? 2 : 1, 
+                    beat % tg.song.data.beatParams.beats == 0 ? 2 : 1, 
                     tg.playButton.height);
     }
     context.globalAlpha = 1.0;    
@@ -376,7 +376,7 @@ tg.showBeatsFragment = function () {
         
         var onSubeatsChange = function (e) {
             bf.subbeatsLabel.innerHTML = bf.subbeatsRange.value;
-            tg.song.data.beatParameters.subbeats = bf.subbeatsRange.value * 1;
+            tg.song.data.beatParams.subbeats = bf.subbeatsRange.value * 1;
         };
         bf.subbeatsRange.ontouchmove = onSubeatsChange;
         bf.subbeatsRange.onmousemove = onSubeatsChange;
@@ -384,7 +384,7 @@ tg.showBeatsFragment = function () {
         bf.subbeatsRange.onchange = onSubeatsChange;
         var onBeatsChange = function (e) {
             bf.beatsLabel.innerHTML = bf.beatsRange.value;
-            tg.song.data.beatParameters.beats = bf.beatsRange.value * 1;
+            tg.song.data.beatParams.beats = bf.beatsRange.value * 1;
         };
         bf.beatsRange.ontouchmove = onBeatsChange;
         bf.beatsRange.onmousemove = onBeatsChange;
@@ -392,7 +392,7 @@ tg.showBeatsFragment = function () {
         bf.beatsRange.onchange = onBeatsChange;
         var onMeasuresChange = function (e) {
             bf.measuresLabel.innerHTML = bf.measuresRange.value;
-            tg.song.data.beatParameters.measures = bf.measuresRange.value * 1;
+            tg.song.data.beatParams.measures = bf.measuresRange.value * 1;
         };
         bf.measuresRange.ontouchmove = onMeasuresChange;
         bf.measuresRange.onmousemove = onMeasuresChange;
@@ -400,7 +400,7 @@ tg.showBeatsFragment = function () {
         bf.measuresRange.onchange = onMeasuresChange;
         var onBpmChange = function (e) {
             bf.bpmLabel.innerHTML = bf.bpmRange.value;
-            tg.song.data.beatParameters.bpm = bf.bpmRange.value * 1;
+            tg.song.data.beatParams.bpm = bf.bpmRange.value * 1;
             tg.player.newBPM = bf.bpmRange.value;
             tg.setSongControlsUI();
         };
@@ -409,7 +409,7 @@ tg.showBeatsFragment = function () {
         bf.bpmRange.onmousedown = onBpmChange;
         bf.bpmRange.onchange = onBpmChange;
         var onShuffleChange = function (e) {
-            tg.song.data.beatParameters.shuffle = bf.shuffleRange.value / 100;
+            tg.song.data.beatParams.shuffle = bf.shuffleRange.value / 100;
             bf.shuffleLabel.innerHTML = bf.shuffleRange.value * 1;
             
         };
@@ -428,16 +428,16 @@ tg.showBeatsFragment = function () {
 };
 
 tg.refreshBeatsFragment = function () {
-    tg.beatsFragment.subbeatsLabel.innerHTML = tg.song.data.beatParameters.subbeats;
-    tg.beatsFragment.beatsLabel.innerHTML = tg.song.data.beatParameters.beats;
-    tg.beatsFragment.measuresLabel.innerHTML = tg.song.data.beatParameters.measures;
-    tg.beatsFragment.bpmLabel.innerHTML = tg.song.data.beatParameters.bpm;
-    tg.beatsFragment.shuffleLabel.innerHTML = Math.round(tg.song.data.beatParameters.shuffle * 100);
-    tg.beatsFragment.subbeatsRange.value = tg.song.data.beatParameters.subbeats;
-    tg.beatsFragment.beatsRange.value = tg.song.data.beatParameters.beats;
-    tg.beatsFragment.measuresRange.value = tg.song.data.beatParameters.measures;
-    tg.beatsFragment.bpmRange.value = tg.song.data.beatParameters.bpm;
-    tg.beatsFragment.shuffleRange.value = tg.song.data.beatParameters.shuffle * 100;
+    tg.beatsFragment.subbeatsLabel.innerHTML = tg.song.data.beatParams.subbeats;
+    tg.beatsFragment.beatsLabel.innerHTML = tg.song.data.beatParams.beats;
+    tg.beatsFragment.measuresLabel.innerHTML = tg.song.data.beatParams.measures;
+    tg.beatsFragment.bpmLabel.innerHTML = tg.song.data.beatParams.bpm;
+    tg.beatsFragment.shuffleLabel.innerHTML = Math.round(tg.song.data.beatParams.shuffle * 100);
+    tg.beatsFragment.subbeatsRange.value = tg.song.data.beatParams.subbeats;
+    tg.beatsFragment.beatsRange.value = tg.song.data.beatParams.beats;
+    tg.beatsFragment.measuresRange.value = tg.song.data.beatParams.measures;
+    tg.beatsFragment.bpmRange.value = tg.song.data.beatParams.bpm;
+    tg.beatsFragment.shuffleRange.value = tg.song.data.beatParams.shuffle * 100;
 
 };
 
@@ -490,14 +490,14 @@ tg.showKeyFragment = function () {
     omg.ui.keys.forEach(function (key) {
         var keyDiv = document.createElement("div");
         keyDiv.className = "key-select-button";
-        if (keyI === tg.song.data.keyParameters.rootNote) {
+        if (keyI === tg.song.data.keyParams.rootNote) {
             keyDiv.classList.add("selected-list-item");
             lastKey = keyDiv;
         }
         keyDiv.innerHTML = "<p>" + key + "</p>";;
         keyDiv.onclick = (function (i) {
             return function () {
-                tg.song.data.keyParameters.rootNote = i;
+                tg.song.data.keyParams.rootNote = i;
                 tg.setSongControlsUI();
                 
                 if (lastKey) {
@@ -514,14 +514,14 @@ tg.showKeyFragment = function () {
     omg.ui.scales.forEach(function (scale) {
         var scaleDiv = document.createElement("div");
         scaleDiv.className = "scale-select-button";
-        if (scale.value.join() === tg.song.data.keyParameters.scale.join()) {
+        if (scale.value.join() === tg.song.data.keyParams.scale.join()) {
             scaleDiv.classList.add("selected-list-item");
             lastScale = scaleDiv;
         }
         scaleDiv.innerHTML = "<p>" + scale.name + "</p>";
         scaleDiv.onclick = (function (newScale) {
             return function () {
-                tg.song.data.keyParameters.scale = newScale;
+                tg.song.data.keyParams.scale = newScale;
                 tg.setSongControlsUI();
                 if (lastScale) {
                     lastScale.classList.remove("selected-list-item");
@@ -561,10 +561,10 @@ tg.showChordsFragment = function () {
     }
     var chordsList = document.getElementById("chords-fragment-list");
     chordsList.innerHTML = "";
-    for (var i = tg.song.data.keyParameters.scale.length - 1; i >= 0; i--) {
+    for (var i = tg.song.data.keyParams.scale.length - 1; i >= 0; i--) {
         chordsList.appendChild(tg.makeChordButton(i));
     }
-    for (var i = 1; i < tg.song.data.keyParameters.scale.length; i++) {
+    for (var i = 1; i < tg.song.data.keyParams.scale.length; i++) {
         chordsList.appendChild(tg.makeChordButton(i * -1));
     }
 
@@ -603,8 +603,8 @@ tg.makeChordsCaption = function (chordI) {
     return chordsCaption;
 };
 tg.makeChordCaption = function (chordI) {
-    var index = chordI < 0 ? tg.song.data.keyParameters.scale.length + chordI : chordI;
-    var chord = tg.song.data.keyParameters.scale[index];
+    var index = chordI < 0 ? tg.song.data.keyParams.scale.length + chordI : chordI;
+    var chord = tg.song.data.keyParams.scale[index];
     var sign = chordI < 0 ? "-" : "";
     if (chord === 0) return sign + "I";
     if (chord === 2) return sign + "II";
@@ -749,7 +749,7 @@ tg.showMixFragment = function () {
         child.drawCanvas(child);
     });
     
-    tg.song.onPartAudioParametersChangeListeners.push(function (part) {
+    tg.song.onPartAudioParamsChangeListeners.push(function (part) {
         if (part.mixerDiv) {
             part.mixerDiv.refresh();
         }
@@ -936,17 +936,17 @@ tg.makeMixerDiv = function (part, divs) {
     var newContainerDiv = document.createElement("div");
     newContainerDiv.className = "mixer-part";
 
-    var audioParameters = part.audioParameters || part.data.audioParameters;
+    var audioParams = part.audioParams || part.data.audioParams;
     
     var volumeProperty = {"property": "gain", "name": "Volume", "type": "slider", "min": 0, "max": 1.5, 
-            "color": audioParameters.mute ?"#880000" : "#008800", transform: "square"};
+            "color": audioParams.mute ?"#880000" : "#008800", transform: "square"};
     var warpProperty = {"property": "warp", "name": "Warp", "type": "slider", "min": 0, "max": 2, resetValue: 1, "color": "#880088"};
     var panProperty = {"property": "pan", "name": "Pan", "type": "slider", "min": -1, "max": 1, resetValue: 0, "color": "#000088"};
-    var mixerVolumeCanvas = new SliderCanvas(null, volumeProperty, part.gain, audioParameters);
+    var mixerVolumeCanvas = new SliderCanvas(null, volumeProperty, part.gain, audioParams);
     mixerVolumeCanvas.div.className = "mixer-part-volume";
-    var mixerWarpCanvas = new SliderCanvas(null, warpProperty, null, audioParameters);
+    var mixerWarpCanvas = new SliderCanvas(null, warpProperty, null, audioParams);
     mixerWarpCanvas.div.className = "mixer-part-warp";
-    var mixerPanCanvas = new SliderCanvas(null, panProperty, part.panner, audioParameters);
+    var mixerPanCanvas = new SliderCanvas(null, panProperty, part.panner, audioParams);
     mixerPanCanvas.div.className = "mixer-part-pan";
 
     newContainerDiv.appendChild(mixerVolumeCanvas.div);
@@ -963,7 +963,7 @@ tg.makeMixerDiv = function (part, divs) {
     newContainerDiv.appendChild(captionDiv);
     
     newContainerDiv.refresh = function () {
-        volumeProperty.color = audioParameters.mute ? "#880000" : "#008800";
+        volumeProperty.color = audioParams.mute ? "#880000" : "#008800";
         mixerVolumeCanvas.drawCanvas();
         mixerWarpCanvas.drawCanvas();
         mixerPanCanvas.drawCanvas();
@@ -1359,8 +1359,8 @@ tg.newBlankSong = function () {
         "name":"","type":"SONG","sections":[
             {"name": "Intro", "type":"SECTION","parts":[],"chordProgression":[0]}
         ],
-        "keyParameters":{"scale":[0,2,4,5,7,9,11],"rootNote":0},
-        "beatParameters":{"bpm":120,"beats":4,"shuffle":0,"measures":1,"subbeats":4}
+        "keyParams":{"scale":[0,2,4,5,7,9,11],"rootNote":0},
+        "beatParams":{"bpm":120,"beats":4,"shuffle":0,"measures":1,"subbeats":4}
     };
 };
 

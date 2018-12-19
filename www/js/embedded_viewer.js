@@ -171,9 +171,9 @@ OMGEmbeddedViewer.prototype.load = function (data) {
 
 OMGEmbeddedViewer.prototype.getDrawingData = function () {
     var viewer = this;
-    var beatParameters = this.song.data.beatParameters;
-    this.beatParameters = beatParameters;
-    this.totalSubbeats = beatParameters.subbeats * beatParameters.beats * beatParameters.measures;
+    var beatParams = this.song.data.beatParams;
+    this.beatParams = beatParams;
+    this.totalSubbeats = beatParams.subbeats * beatParams.beats * beatParams.measures;
     
     this.drawingData = {sections: []};
     this.song.sections.forEach(function (section, isection) {
@@ -212,7 +212,7 @@ OMGEmbeddedViewer.prototype.getDrawingData = function () {
     
     if (this.drawingData.sections.length > 0) {
         this.sectionLength = Math.max(40, this.canvas.width / this.drawingData.sections.length);
-        this.measureLength = this.sectionLength / this.beatParameters.measures;
+        this.measureLength = this.sectionLength / this.beatParams.measures;
         this.subbeatLength = this.sectionLength / this.totalSubbeats;
     }
 
@@ -222,13 +222,13 @@ OMGEmbeddedViewer.prototype.getSectionDrawingData = function (section) {
     var viewer = this;
     var sectionData = {tracks: [], notes: [], section: section};
     section.parts.forEach(function (part) {
-        if (part.data.audioParameters.mute) {
+        if (part.data.audioParams.mute) {
             return;
         }
 
         if (part.data.surface.url === "PRESET_SEQUENCER") {
             for (var i = 0; i < part.data.tracks.length; i++) {
-                if (part.data.tracks[i].audioParameters.mute) {
+                if (part.data.tracks[i].audioParams.mute) {
                     continue;
                 }
                 for (var j = 0; j < viewer.totalSubbeats; j++) {
@@ -273,7 +273,7 @@ OMGEmbeddedViewer.prototype.draw = function () {
                 marginX = 1;
                 marginY = this.trackHeight > 5 ? 1 : 0;
                 if (typeof value === "number" && value > 0 && value < 1) {
-                    this.context.fillStyle =  i % this.beatParameters.beats == 0 ? "#DDDDDD" : "white";
+                    this.context.fillStyle =  i % this.beatParams.beats == 0 ? "#DDDDDD" : "white";
                     this.context.fillRect(isection * this.sectionLength + i * this.subbeatLength + marginX, 
                                         this.canvas.height - itrack * this.drawingData.sections[isection].trackHeight - marginY, 
                                         this.subbeatLength - marginX * 2, -1 * this.drawingData.sections[isection].trackHeight + marginY * 2);
@@ -282,7 +282,7 @@ OMGEmbeddedViewer.prototype.draw = function () {
                     console.log("value", value, this.subbeatLength, this.subbeatLength * value, value, this.subbeatLength - this.subbeatLength * value)
                 }
                 this.context.fillStyle =  value ? "black" : 
-                                            (i % this.beatParameters.beats == 0 ? "#DDDDDD" : "white");
+                                            (i % this.beatParams.beats == 0 ? "#DDDDDD" : "white");
                 this.context.fillRect(isection * this.sectionLength + i * this.subbeatLength + marginX, 
                                     this.canvas.height - itrack * this.drawingData.sections[isection].trackHeight - marginY, 
                                     this.subbeatLength - marginX * 2, -1 * this.drawingData.sections[isection].trackHeight + marginY * 2);
@@ -294,11 +294,11 @@ OMGEmbeddedViewer.prototype.draw = function () {
                 
                 this.context.drawImage(
                     omg.ui.getImageForNote(this.drawingData.sections[isection].notes[inotes][inote]),
-                    isection * this.sectionLength + this.subbeatLength * usedBeats * this.beatParameters.subbeats, 
+                    isection * this.sectionLength + this.subbeatLength * usedBeats * this.beatParams.subbeats, 
                     (88 - this.drawingData.sections[isection].notes[inotes][inote].scaledNote) / 88 * this.drawingData.sections[isection].notesHeight
                 );
                 usedBeats += this.drawingData.sections[isection].notes[inotes][inote].beats;
-                if (usedBeats * this.beatParameters.subbeats >= this.totalSubbeats) {
+                if (usedBeats * this.beatParams.subbeats >= this.totalSubbeats) {
                     break;
                 }
             }
@@ -316,7 +316,7 @@ OMGEmbeddedViewer.prototype.draw = function () {
         this.context.beginPath();
         this.context.lineWidth = 1;
         this.context.strokeStyle = "#AAAAAA";
-        for (var imeasure = 1; imeasure < this.beatParameters.measures; imeasure++) {
+        for (var imeasure = 1; imeasure < this.beatParams.measures; imeasure++) {
             this.context.moveTo(isection * this.sectionLength + imeasure * this.measureLength, 0);
             this.context.lineTo(isection * this.sectionLength + imeasure * this.measureLength, this.canvas.height);
         }

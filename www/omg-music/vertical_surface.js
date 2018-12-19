@@ -164,9 +164,9 @@ OMGMelodyMaker.prototype.drawFrets = function () {
 
 OMGMelodyMaker.prototype.setupNoteSize = function () {
     this.beatWidth = this.canvas.width / (
-            this.beatParameters.subbeats * 
-            this.beatParameters.beats * 
-            this.beatParameters.measures);
+            this.beatParams.subbeats * 
+            this.beatParams.beats * 
+            this.beatParams.measures);
 
     var noteImage;
     var noteHeight;
@@ -212,7 +212,7 @@ OMGMelodyMaker.prototype.setupNotesInfo = function () {
                     - noteInfo.image.height * 0.75;
         }
 
-        noteInfo.x = this.noteWidth + beatsUsed * this.beatParameters.subbeats * this.beatWidth; //i * noteWidth + noteWidth;
+        noteInfo.x = this.noteWidth + beatsUsed * this.beatParams.subbeats * this.beatWidth; //i * noteWidth + noteWidth;
 
         beatsUsed += noteInfo.note.beats;
         this.notesInfo.push(noteInfo);
@@ -321,7 +321,7 @@ OMGMelodyMaker.prototype.drawButtons = function (buttonRow, x, y, width, height)
 };
 
 OMGMelodyMaker.prototype.setupFretBoard = function () {
-    var keyParameters = this.part.section.song.data.keyParameters;
+    var keyParams = this.part.section.song.data.keyParams;
     var soundSet = this.data.soundSet;
     var rootNote;
     var bottomNote;
@@ -330,7 +330,7 @@ OMGMelodyMaker.prototype.setupFretBoard = function () {
     var chromatic = soundSet.chromatic;
     this.chromatic = chromatic;
     if (chromatic) {
-        rootNote = keyParameters.rootNote;
+        rootNote = keyParams.rootNote;
         bottomNote = soundSet.lowNote;
         topNote = soundSet.highNote;
         if (!topNote && soundSet.data && soundSet.data.length) {
@@ -345,7 +345,7 @@ OMGMelodyMaker.prototype.setupFretBoard = function () {
         octave = 0;
     }
 
-    var scale = keyParameters.scale; 
+    var scale = keyParams.scale; 
 
     var frets = [];
 
@@ -922,7 +922,7 @@ OMGMelodyMaker.prototype.setPart = function (part, welcomeStyle) {
 
     this.part = part;
     this.data = part.data;
-    this.beatParameters = part.section.song.data.beatParameters;
+    this.beatParams = part.section.song.data.beatParams;
 
     this.skipFretsTop = this.part.data.surface.skipTop || 0;
     this.skipFretsBottom = this.part.data.surface.skipBottom || 0;
