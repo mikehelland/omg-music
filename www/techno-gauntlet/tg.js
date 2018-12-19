@@ -1850,6 +1850,7 @@ tg.songOptionsFragment.setup = function () {
     this.monkey.changeables.forEach(changeable => {
         tg.songOptionsFragment.setupMonkeyChangeable(changeable);
     });
+    this.setupMonkeyWaitTime()
 
     tg.songOptionsFragment.fxTab.onclick = function (e) {
         tg.songOptionsFragment.fx.style.display = "block";
@@ -1867,23 +1868,72 @@ tg.songOptionsFragment.setup = function () {
 };
 
 tg.songOptionsFragment.setupMonkeyChangeable = function (changeable) {
+    if (!this.monkey.headDivs) {
+        this.monkey.headDivs = [];
+    }
     var div = document.createElement("div");
     var titleDiv = document.createElement("div");
     titleDiv.className = "randomizer-title";
     titleDiv.innerHTML = changeable.name;
     var img = document.createElement("img");
+    this.monkey.headDivs.push(img);
+    img.className = "monkey";
     img.src = "/img/monkey48.png";
+    img.onclick = function () {
+        img.className = "monkey-spin";
+        setTimeout(function () {
+            img.className = "monkey";
+        }, 1100);
+        var monkey = tg.songOptionsFragment.monkey;
+        monkey.getRandomElement(changeable.functions)();
+    };
     var input = document.createElement("input");
     input.type = "range";
+    input.value = 0;
     input.onchange = function () {
-        console.log("changeable probablility", input.value);
         changeable.probability = input.value / 100;
-    }
+    };
     div.appendChild(titleDiv);
     div.appendChild(img);
     div.appendChild(input);
     this.changeableList.appendChild(div);
 };
+
+tg.songOptionsFragment.setupMonkeyWaitTime = function (changeable) {
+    var div = document.createElement("div");
+    var titleDiv = document.createElement("div");
+    titleDiv.className = "randomizer-title";
+    titleDiv.innerHTML = "Wait time";
+    var img = document.createElement("img");
+    img.className = "monkey";
+    img.src = "/img/monkey48.png";
+    img.onclick = function () {
+        img.className = "monkey-spin";
+        setTimeout(function () {
+            img.className = "monkey";
+        }, 1100);
+        tg.songOptionsFragment.monkey.headDivs.forEach(div => {
+             div.className = "monkey-spin";
+             setTimeout(function () {
+                 div.className = "monkey";
+             }, 1100);
+        });
+        tg.songOptionsFragment.monkey.randomize();
+    };
+    var input = document.createElement("input");
+    input.type = "range";
+    input.value = 1;
+    input.min = 1;
+    input.max = 60 * 5;
+    input.onchange = function () {
+        tg.songOptionsFragment.monkey.loop = input.value;
+    };
+    div.appendChild(titleDiv);
+    div.appendChild(img);
+    div.appendChild(input);
+    this.changeableList.appendChild(div);
+};
+
 
 
 // away we go

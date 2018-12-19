@@ -80,27 +80,27 @@ OMGMonkey.prototype.forRandomRandomParts = function (callback) {
 
 
 OMGMonkey.prototype.getKeyFunctions = function () {
-    
+    var song = this.song;
     return [
-    function (song) {
+    function () {
         song.data.keyParams.rootNote = Math.floor(Math.random() * 12);
         song.keyChanged();
     },
-    function (song) {
+    function () {
         song.data.keyParams.rootNote += 1 + Math.floor(Math.random() * 2);
         song.data.keyParams.rootNote = song.data.keyParams.rootNote % 12;
         song.keyChanged();
     },
-    function (song) {
+    function () {
         song.data.keyParams.rootNote -= 1 + Math.floor(Math.random() * 2);
         if (song.data.keyParams.rootNote < 0) song.data.keyParams.rootNote = 11;
         song.keyChanged();
     },
-    function (song) {
+    function () {
         song.data.keyParams.scale = omg.ui.scales[Math.floor(Math.random() * omg.ui.scales.length)].value;
         song.keyChanged();
     },
-    function (song) {
+    function () {
         song.data.keyParams.rootNote = Math.floor(Math.random() * 12);
         song.data.keyParams.scale = omg.ui.scales[Math.floor(Math.random() * omg.ui.scales.length)].value;
         song.keyChanged();
