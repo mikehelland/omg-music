@@ -43,7 +43,7 @@
 	</div>
 	
         <div id="main-fragment-bottom-row">
-            <div id="song-options-button">&nbsp;&#9776;</div>
+            <div id="song-options-button">&#9776;</div>
             <div id="add-part-button">Add Part</div>
             <div id="mix-button">Mix</div>
         </div>
@@ -168,6 +168,9 @@
                     -->
                 </div>
                 <hr>
+                <button class="img-button" id="part-options-randomize">
+					<img style="vertical-align:middle" height="32" width="32" src="/img/monkey48.png"> Randomize</button>
+                <hr>
                 Clear or Remove<br>
                 <button id="part-options-clear-button">Clear Part Data</button>
                 <br>
@@ -227,9 +230,13 @@
             <br>
             <hr>
             <br>
-            Create a new blank song:
+            Create a new song:
             <br>
-            <button id="create-new-song-button">New Song</button>
+            <button id="create-new-song-button">New Blank Song</button>
+            <br>
+            <br>
+            <button class="img-button" id="create-random-song-button">
+				<img style="vertical-align:middle" height="32" width="32" src="/img/monkey48.png"> New Random Song</button>
             </div>
             
         </div>
@@ -265,8 +272,6 @@
                 <div id="song-options-fx-list"></div>
             </div>
             <div id="song-options-random" class="detail-fragment-body">
-                <br>
-                <div>Your song will randomly mutate while this page is visible</div>
                 <br>
                 <div id="song-options-changeable-list"></div>
             </div>

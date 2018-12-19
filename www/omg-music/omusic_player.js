@@ -290,17 +290,17 @@ OMusicPlayer.prototype.loadMelody = function (part) {
     part.currentI = -1;
     p.rescale(part, song.data.keyParams, 0); //section.data.chordProgression[p.currentChordI]
 
-    if (data.soundSet && typeof data.soundSet.url === "string") {
-        p.getSoundSet(data.soundSet.url, function (soundset) {
-            p.setupPartWithSoundSet(soundset, part, true);
-        });
-    }
-    else if (data.soundSet && data.soundSet.data) {
+    if (data.soundSet && data.soundSet.data) {
         if (!p.downloadedSoundSets[data.soundSet.name]) {
             p.downloadedSoundSets[data.soundSet.name] = data.soundSet;
             p.loadSoundsFromSoundSet(data.soundSet);
         }
         p.setupPartWithSoundSet(data.soundSet, part, true);
+    }
+    else if (data.soundSet && typeof data.soundSet.url === "string") {
+        p.getSoundSet(data.soundSet.url, function (soundset) {
+            p.setupPartWithSoundSet(soundset, part, true);
+        });
     }
     var soundsToLoad = 0;
 
@@ -558,7 +558,6 @@ OMusicPlayer.prototype.makeOsc = function (part) {
     }
 
     if (part.osc) {
-        console.log(part.osc)
         console.log("makeOsc, already exists");
         try {
             part.osc.stop(p.context.currentTime);
@@ -647,17 +646,6 @@ OMusicPlayer.prototype.loadSound = function (sound, part) {
         url = sound.slice(5);
     }
 
-    if (sound.indexOf("PRESET_") == 0) {
-        var preseturl;
-        if (!p.dev) {
-            preseturl = "http://mikehelland.com/omg/drums/";
-        } else {
-            preseturl = "http://localhost:8888/music/audio/";
-            //preseturl = "http://localhost:8889/audio/";
-        }
-        url = preseturl + sound.substring(7).toLowerCase() + ".mp3";
-    }
-
     p.loadedSounds[key] = "loading";
 
     var request = new XMLHttpRequest();
@@ -666,7 +654,6 @@ OMusicPlayer.prototype.loadSound = function (sound, part) {
 
     part.soundsLoading++;
 
-    // Decode asynchronously
     request.onload = function () {
         p.context.decodeAudioData(request.response, function (buffer) {
             p.loadedSounds[key] = buffer;
@@ -784,7 +771,7 @@ OMusicPlayer.prototype.setupPartWithSoundSet = function (ss, part, load) {
         if (!note.sound)
             continue;
 
-        if (load && !p.loadedSounds[note.sound]) {
+        if (load && !omg.loadedSounds[note.sound]) {
             p.loadSound(note.sound, part);
         }
     }
@@ -1052,6 +1039,10 @@ OMusicPlayer.prototype.makeOMGSong = function (data) {
 
     var className = data.constructor.name;
 
+    if (className == "OMGSong") {
+        return data;
+    }
+
     if (className == "OMGPart") {
 
         newSong = new OMGSong();
@@ -1068,7 +1059,6 @@ OMusicPlayer.prototype.makeOMGSong = function (data) {
 
     if (className == "OMGSection") {
 
-        console.log("loading OMGSection!!")
         newSong = new OMGSong();
         newSong.sections.push(data);
         if (data.data.beatParams)
@@ -1098,7 +1088,6 @@ OMusicPlayer.prototype.makeOMGSong = function (data) {
 
     if (data.type == "PART") {
         newPart = new OMGPart(null, data);
-        console.log("new part", newPart)
         return newPart.section.song;
     }
 
@@ -1275,7 +1264,6 @@ OMusicPlayer.prototype.makeAudioNodesForPart = function (part) {
 };
 
 OMusicPlayer.prototype.makeAudioNodesForSong = function (song) {
-console.log("makeaudionodesforsong")
     var p = this;
     song.preFXGain = p.context.createGain();
     song.postFXGain = p.context.createGain();
@@ -1623,7 +1611,7 @@ OMusicPlayer.prototype.makeFXNodeForPart = function (fx, part) {
 };
 
 OMusicPlayer.prototype.getSoundSetForSoundFont = function (name, url) {
-  return {"name": name,  "prefix": url, 
+  return {"name": name,  "prefix": url, "url": url,
             "type": "SOUNDSET", "soundFont": true, "lowNote": 21, "postfix": "", "chromatic": true, "defaultSurface": "PRESET_VERTICAL", "data": [ { "url": "A0.mp3", "name": "A0" }, { "url": "Bb0.mp3", "name": "Bb0" }, { "url": "B0.mp3", "name": "B0" }, { "url": "C1.mp3", "name": "C1" }, { "url": "Db1.mp3", "name": "Db1" }, { "url": "D1.mp3", "name": "D1" }, { "url": "Eb1.mp3", "name": "Eb1" }, { "url": "E1.mp3", "name": "E1" }, { "url": "F1.mp3", "name": "F1" }, { "url": "Gb1.mp3", "name": "Gb1" }, { "url": "G1.mp3", "name": "G1" }, { "url": "Ab1.mp3", "name": "Ab1" }, { "url": "A1.mp3", "name": "A1" }, { "url": "Bb1.mp3", "name": "Bb1" }, { "url": "B1.mp3", "name": "B1" }, { "url": "C2.mp3", "name": "C2" }, { "url": "Db2.mp3", "name": "Db2" }, { "url": "D2.mp3", "name": "D2" }, { "url": "Eb2.mp3", "name": "Eb2" }, { "url": "E2.mp3", "name": "E2" }, { "url": "F2.mp3", "name": "F2" }, { "url": "Gb2.mp3", "name": "Gb2" }, { "url": "G2.mp3", "name": "G2" }, { "url": "Ab2.mp3", "name": "Ab2" }, { "url": "A2.mp3", "name": "A2" }, { "url": "Bb2.mp3", "name": "Bb2" }, { "url": "B2.mp3", "name": "B2" }, { "url": "C3.mp3", "name": "C3" }, { "url": "Db3.mp3", "name": "Db3" }, { "url": "D3.mp3", "name": "D3" }, { "url": "Eb3.mp3", "name": "Eb3" }, { "url": "E3.mp3", "name": "E3" }, { "url": "F3.mp3", "name": "F3" }, { "url": "Gb3.mp3", "name": "Gb3" }, { "url": "G3.mp3", "name": "G3" }, { "url": "Ab3.mp3", "name": "Ab3" }, { "url": "A3.mp3", "name": "A3" }, { "url": "Bb3.mp3", "name": "Bb3" }, { "url": "B3.mp3", "name": "B3" }, { "url": "C4.mp3", "name": "C4" }, { "url": "Db4.mp3", "name": "Db4" }, { "url": "D4.mp3", "name": "D4" }, { "url": "Eb4.mp3", "name": "Eb4" }, { "url": "E4.mp3", "name": "E4" }, { "url": "F4.mp3", "name": "F4" }, { "url": "Gb4.mp3", "name": "Gb4" }, { "url": "G4.mp3", "name": "G4" }, { "url": "Ab4.mp3", "name": "Ab4" }, { "url": "A4.mp3", "name": "A4" }, { "url": "Bb4.mp3", "name": "Bb4" }, { "url": "B4.mp3", "name": "B4" }, { "url": "C5.mp3", "name": "C5" }, { "url": "Db5.mp3", "name": "Db5" }, { "url": "D5.mp3", "name": "D5" }, { "url": "Eb5.mp3", "name": "Eb5" }, { "url": "E5.mp3", "name": "E5" }, { "url": "F5.mp3", "name": "F5" }, { "url": "Gb5.mp3", "name": "Gb5" }, { "url": "G5.mp3", "name": "G5" }, { "url": "Ab5.mp3", "name": "Ab5" }, { "url": "A5.mp3", "name": "A5" }, { "url": "Bb5.mp3", "name": "Bb5" }, { "url": "B5.mp3", "name": "B5" }, { "url": "C6.mp3", "name": "C6" }, { "url": "Db6.mp3", "name": "Db6" }, { "url": "D6.mp3", "name": "D6" }, { "url": "Eb6.mp3", "name": "Eb6" }, { "url": "E6.mp3", "name": "E6" }, { "url": "F6.mp3", "name": "F6" }, { "url": "Gb6.mp3", "name": "Gb6" }, { "url": "G6.mp3", "name": "G6" }, { "url": "Ab6.mp3", "name": "Ab6" }, { "url": "A6.mp3", "name": "A6" }, { "url": "Bb6.mp3", "name": "Bb6" }, { "url": "B6.mp3", "name": "B6" }, { "url": "C7.mp3", "name": "C7" }, { "url": "Db7.mp3", "name": "Db7" }, { "url": "D7.mp3", "name": "D7" }, { "url": "Eb7.mp3", "name": "Eb7" }, { "url": "E7.mp3", "name": "E7" }, { "url": "F7.mp3", "name": "F7" }, { "url": "Gb7.mp3", "name": "Gb7" }, { "url": "G7.mp3", "name": "G7" }, { "url": "Ab7.mp3", "name": "Ab7" }, { "url": "A7.mp3", "name": "A7" }, { "url": "Bb7.mp3", "name": "Bb7" }, { "url": "B7.mp3", "name": "B7" }, { "url": "C8.mp3", "name": "C8" } ] }  
 };
 
@@ -1745,9 +1733,9 @@ function OMGSection(div, data, song) {
 
     //if there is no song, but the section has key and beat parameters
     //make a song with those parameters
-    if (data && (!song || !song.data)) {
+    if (!song) {
         song = new OMGSong();
-        if (data.beatParams) {
+        if (data && data.beatParams) {
             if (data.beatParams.beats) {
                 song.data.beatParams.beats = data.beatParams.beats;
             }
@@ -1761,7 +1749,7 @@ function OMGSection(div, data, song) {
                 song.data.beatParams.bpm = data.beatParams.bpm;
             }
         }
-        if (data.keyParams) {
+        if (data && data.keyParams) {
             if (typeof data.keyParams.rootNote === "number") {
                 song.data.keyParams.rootNote = data.keyParams.rootNote;
             }
@@ -1860,7 +1848,7 @@ function OMGPart(div, data, section) {
         }
     }
     
-    this.makeAudioParams();
+    this.makeAudioParams(false, this.data.soundSet.url.startsWith("PRESET_OSC"));
     
     if (this.data.id) {
         this.saved = true;
@@ -1868,7 +1856,7 @@ function OMGPart(div, data, section) {
     
 }
 
-OMGPart.prototype.makeAudioParams = function (track) {
+OMGPart.prototype.makeAudioParams = function (track, osc) {
     var obj = track || this.data;
     if (!obj.audioParams) obj.audioParams = {};
     
@@ -1878,7 +1866,7 @@ OMGPart.prototype.makeAudioParams = function (track) {
         obj.audioParams.gain = Math.pow(obj.audioParams.volume, 2);
     }
     if (typeof obj.audioParams.gain !== "number") {
-        obj.audioParams.gain = track ? 1 : 0.6;
+        obj.audioParams.gain = track ? 1 : osc ? 0.2 : 0.6;
     }
     if (typeof obj.audioParams.pan !== "number")
         obj.audioParams.pan = 0;
@@ -1889,7 +1877,7 @@ OMGPart.prototype.makeAudioParams = function (track) {
 OMGPart.prototype.defaultDrumPart = function () {
     return {"type": "PART", 
             "surface": {"url": "PRESET_SEQUENCER"},
-            "soundset": {"url": "PRESET_HIPKIT", "name": "Hip Hop Drum Kit"},
+            "soundSet": {"url": "PRESET_HIPKIT", "name": "Hip Hop Drum Kit"},
             "tracks": [{"name": "kick", "sound": "PRESET_HH_KICK",
                     "data": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]},

@@ -182,11 +182,14 @@ tg.getSong = function (callback) {
 };
 
 tg.loadSong = function (songData) {
+    tg.songOptionsFragment.shownOnce = false;
     tg.song = tg.player.makeOMGSong(songData);
     tg.player.prepareSong(tg.song);    
     
     tg.loadSection(tg.song.sections[0])
-    
+
+    tg.monkey = new OMGMonkey(tg.song, tg.currentSection);
+        
     document.getElementById("tool-bar-song-button").innerHTML = tg.song.data.name || "(Untitled)";
 
     tg.drawPlayButton();
@@ -209,6 +212,7 @@ tg.loadSong = function (songData) {
     tg.song.onPartAddListeners.push(function (part) {
         tg.loadPart(part);
     });
+
 };
 
 tg.playButton.onclick = function () {
@@ -362,6 +366,13 @@ tg.showBeatsFragment = function () {
     if (!tg.beatsFragment) {
         tg.beatsFragment = document.getElementById("beats-fragment");
         var bf= tg.beatsFragment;
+        bf.div = bf;
+        
+        bf.onhide = function () {
+            tg.song.onBeatChangeListeners.splice(
+                tg.song.onBeatChangeListeners.indexOf(bf.listener), 1);
+        };
+        
         bf.subbeatsLabel = document.getElementById("subbeats-label");
         bf.beatsLabel = document.getElementById("beats-label");
         bf.measuresLabel = document.getElementById("measures-label");
@@ -422,9 +433,11 @@ tg.showBeatsFragment = function () {
     tg.beatsFragment.style.display = "block";
     tg.newChosenButton(tg.beatsButton);
     
-    tg.song.onBeatChangeListeners.push(function () {
+    tg.beatsFragment.listener = function () {
         tg.refreshBeatsFragment();
-    })
+    };
+    tg.song.onBeatChangeListeners.push(tg.beatsFragment.listener);
+    tg.currentFragment = tg.beatsFragment;
 };
 
 tg.refreshBeatsFragment = function () {
@@ -658,7 +671,7 @@ tg.showAddPartFragment = function () {
             newDiv.innerHTML = name.split("_").join(" ");
             tg.soundFontList.appendChild(newDiv);
             newDiv.onclick = function () {
-                var soundSet = tg.player.getSoundSetForSoundFont(newDiv.innerHTML + " (" + tg.gallerySelect.selectedOptions[0].innerHTML + ")", 
+                var soundSet = tg.player.getSoundSetForSoundFont(newDiv.innerHTML, 
                     tg.gallerySelect.value + name + "-mp3/");
                 tg.addPart(soundSet);
             };
@@ -733,6 +746,11 @@ tg.addOsc = function (type) {
 tg.showMixFragment = function () {
     if (!tg.mixFragment) {
         tg.mixFragment = document.getElementById("mix-fragment");
+        tg.mixFragment.div = tg.mixFragment;
+        tg.mixFragment.onhide = function () {
+            tg.song.onPartAudioParamsChangeListeners.splice(
+                    tg.song.onPartAudioParamsChangeListeners.indexOf(tg.mixFragment.listener), 1);
+        };
     }
     var divs = [];
     tg.mixFragment.innerHTML = "";
@@ -749,11 +767,13 @@ tg.showMixFragment = function () {
         child.drawCanvas(child);
     });
     
-    tg.song.onPartAudioParamsChangeListeners.push(function (part) {
+    tg.mixFragment.listener = (part) => {
         if (part.mixerDiv) {
             part.mixerDiv.refresh();
         }
-    });
+    };
+    tg.song.onPartAudioParamsChangeListeners.push(tg.mixFragment.listener);
+    tg.currentFragment = tg.mixFragment;
 };
 
 tg.showSaveFragment = function () {
@@ -807,6 +827,22 @@ tg.showPartOptionsFragment = function (part) {
     var verticalButton = document.getElementById("part-options-vertical-surface");
     var sequencerButton = document.getElementById("part-options-sequencer-surface");
     var surfaceArea = document.getElementById("part-options-surface-area");
+    var randomizeButton = document.getElementById("part-options-randomize");
+    var randomizeImg = randomizeButton.getElementsByTagName("img")[0];
+    
+    randomizeButton.onclick = function () {
+        if (part.data.surface.url === "PRESET_VERTICAL") {
+            part.data.notes = tg.monkey.newMelody();
+            tg.player.rescale(part, tg.song.data.keyParams, 
+                tg.currentSection.data.chordProgression[tg.player.currentChordI]);
+        }
+        else {
+            tg.monkey.getRandomElement(tg.monkey.getSequencerFunctions(part))();
+        }
+        randomizeImg.className = "monkey-spin";
+        setTimeout(function () {randomizeImg.className = "monkey";}, 1100);
+    };
+    
     if (part.data.surface.url === "PRESET_VERTICAL") {
         verticalButton.style.display = "none";
         sequencerButton.style.display = "block";
@@ -1292,6 +1328,13 @@ tg.showSongFragment = function () {
     
     document.getElementById("create-new-song-button").onclick = function () {
         tg.loadSong(tg.newBlankSong());
+    };
+    var randomizeButton = document.getElementById("create-random-song-button");
+    randomizeButton.onclick = function () {
+        tg.loadSong(tg.monkey.newSong());
+        var randomizeImg = randomizeButton.getElementsByTagName("img")[0];
+        randomizeImg.className = "monkey-spin";
+        setTimeout(()=> randomizeImg.className = "monkey", 1100);
     };
         
     tg.songFragment.style.display = "block";
@@ -1840,17 +1883,21 @@ tg.songOptionsFragment.setup = function () {
     tg.setupAddFXButtons(tg.song, this.addFXButton, this.availableFXList, this.fxList);
     tg.setupPartOptionsFX(tg.song, this.fxList);
 
+    if (this.mixerVolumeCanvas) {
+        this.masterGain.innerHTML = "";
+    }
     var volumeProperty = {"property": "gain", "name": "Volume", "type": "slider", "min": 0, "max": 1.5, 
             "color": "#008800", transform: "square"};
     this.mixerVolumeCanvas = new SliderCanvas(null, volumeProperty, tg.song.postFXGain, tg.song);
     this.mixerVolumeCanvas.div.className = "fx-slider";
     this.masterGain.appendChild(this.mixerVolumeCanvas.div);
 
-    this.monkey = new OMGMonkey(tg.song, tg.currentSection);
-    this.monkey.changeables.forEach(changeable => {
+    this.changeableList.innerHTML = "";
+    
+    this.setupMonkeyWaitTime();
+    tg.monkey.changeables.forEach(changeable => {
         tg.songOptionsFragment.setupMonkeyChangeable(changeable);
     });
-    this.setupMonkeyWaitTime()
 
     tg.songOptionsFragment.fxTab.onclick = function (e) {
         tg.songOptionsFragment.fx.style.display = "block";
@@ -1861,22 +1908,21 @@ tg.songOptionsFragment.setup = function () {
         tg.songOptionsFragment.fx.style.display = "none";
         tg.songOptionsFragment.random.style.display = "block";
         tg.songOptionsFragment.updateTabs(e);
-        
     };
     
     tg.songOptionsFragment.fxTab.onclick({target: tg.songOptionsFragment.fxTab});
 };
 
 tg.songOptionsFragment.setupMonkeyChangeable = function (changeable) {
-    if (!this.monkey.headDivs) {
-        this.monkey.headDivs = [];
+    if (!tg.monkey.headDivs) {
+        tg.monkey.headDivs = [];
     }
     var div = document.createElement("div");
     var titleDiv = document.createElement("div");
     titleDiv.className = "randomizer-title";
     titleDiv.innerHTML = changeable.name;
     var img = document.createElement("img");
-    this.monkey.headDivs.push(img);
+    tg.monkey.headDivs.push(img);
     img.className = "monkey";
     img.src = "/img/monkey48.png";
     img.onclick = function () {
@@ -1884,8 +1930,7 @@ tg.songOptionsFragment.setupMonkeyChangeable = function (changeable) {
         setTimeout(function () {
             img.className = "monkey";
         }, 1100);
-        var monkey = tg.songOptionsFragment.monkey;
-        monkey.getRandomElement(changeable.functions)();
+        tg.monkey.getRandomElement(changeable.functions)();
     };
     var input = document.createElement("input");
     input.type = "range";
@@ -1903,7 +1948,7 @@ tg.songOptionsFragment.setupMonkeyWaitTime = function (changeable) {
     var div = document.createElement("div");
     var titleDiv = document.createElement("div");
     titleDiv.className = "randomizer-title";
-    titleDiv.innerHTML = "Wait time";
+    titleDiv.innerHTML = "Auto Off";
     var img = document.createElement("img");
     img.className = "monkey";
     img.src = "/img/monkey48.png";
@@ -1912,21 +1957,29 @@ tg.songOptionsFragment.setupMonkeyWaitTime = function (changeable) {
         setTimeout(function () {
             img.className = "monkey";
         }, 1100);
-        tg.songOptionsFragment.monkey.headDivs.forEach(div => {
+        tg.monkey.headDivs.forEach(div => {
              div.className = "monkey-spin";
              setTimeout(function () {
                  div.className = "monkey";
              }, 1100);
         });
-        tg.songOptionsFragment.monkey.randomize();
+        tg.monkey.randomize();
     };
     var input = document.createElement("input");
     input.type = "range";
-    input.value = 1;
-    input.min = 1;
+    input.value = 0;
+    input.min = 0;
     input.max = 60 * 5;
     input.onchange = function () {
-        tg.songOptionsFragment.monkey.loop = input.value;
+        var start = false;
+        titleDiv.innerHTML = "Auto " + (input.value > 0 ? input.value + " seconds" : "Off");
+        if (!tg.monkey.loop && input.value > 0) {
+            start = true;
+        }
+        tg.monkey.loop = input.value * 1;
+        if (start) {
+            tg.monkey.randomize();
+        }
     };
     div.appendChild(titleDiv);
     div.appendChild(img);

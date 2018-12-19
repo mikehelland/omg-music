@@ -2,16 +2,16 @@ function OMGMonkey(song, section) {
     
     this.song = song;
     this.section = section;
-    this.loop = -1;
+    this.loop = 0;
     
     var monkey = this;
     this.changeables = [
+        {name: "Notes and Beats", probability: 0, functions: monkey.getPartDataFunctions()},
         {name: "Tempo", probability: 0, functions: monkey.getTempoFunctions()},
         {name: "Mute", probability: 0, functions: monkey.getMuteFunctions()},
         {name: "Volume/Pan", probability: 0, functions: monkey.getVolumePanFunctions()},
         {name: "Chords", probability: 0, functions: monkey.getChordsFunctions()},
         {name: "New Part", probability: 0, functions: monkey.getNewPartFunctions()}, 
-        //{name: "Notes and Beats", probability: 0, functions: monkey.getPartDataFunctions()},
         {name: "Key Signature", probability: 0, functions: monkey.getKeyFunctions()}
     ];
 }
@@ -264,6 +264,8 @@ OMGMonkey.prototype.changeChords = function (chords) {
 
 OMGMonkey.prototype.getNewPartFunctions = function () {
     var monkey = this;
+    //pick a random part from the gallery
+    //pick a random soundset from the gallery and fill it
     return [
     function () {
         //todo get soundfonts from somewhere else
@@ -272,21 +274,26 @@ OMGMonkey.prototype.getNewPartFunctions = function () {
         var sf = sfs[Math.floor(Math.random() * sfs.length)];
         var i = Math.floor(Math.random() * omg.ui.soundFontNames.length);
         var s = omg.ui.soundFontNames[i];
-        var soundSet = OMusicPlayer.prototype.getSoundSetForSoundFont(s, sf + s + "-mp3/");
+        var soundSet = OMusicPlayer.prototype.getSoundSetForSoundFont(
+                s.split("_").join(" "), sf + s + "-mp3/");
         var blankPart = {soundSet: soundSet, notes: monkey.newMelody()};
         var part = new OMGPart(undefined,blankPart,monkey.section);
         monkey.song.partAdded(part);
-
-        
-      //pick a random part from the gallery
-        //pick a random soundset/soundfont from the gallery and fill it
-        //pick an oscillator and fill it
+    },
+    function () {
+        var type = monkey.getRandomElement(["Sine", "Square", "Triangle", "Sawtooth"]);
+        var soundSet = {"url":"PRESET_OSC_" + type.toUpperCase(),"name": type + " Oscillator",
+            "type":"SOUNDSET","octave":5,"lowNote":0,"highNote":108,"chromatic":true};
+        var blankPart = {soundSet: soundSet, notes: monkey.newMelody()};
+        var part = new OMGPart(undefined,blankPart,monkey.section);
+        monkey.song.partAdded(part);
     }
     ];
 };
 
 OMGMonkey.prototype.newMelody = function () {
-    return this.getRandomElement(this.getNewMelodyFunctions())();
+    var melody = this.getRandomElement(this.getNewMelodyFunctions())();
+    return melody;
     
 };
 
@@ -313,10 +320,10 @@ OMGMonkey.prototype.getNewMelodyFunctions = function () {
 };
 
 OMGMonkey.prototype.getRandomBeats = function () {
-    var n = (Math.floor(Math.round(Math.random() * 
-            this.song.data.beatParams.subbeats)) + 1) /
+    var n = (Math.floor(Math.random() * 
+            this.song.data.beatParams.subbeats) + 1) /
             this.song.data.beatParams.subbeats;
-    if (Math.random() > 0.7) {
+    if (Math.random() > 0.8) {
         n = n * this.song.data.beatParams.beats; 
     }
     return n;
@@ -324,7 +331,7 @@ OMGMonkey.prototype.getRandomBeats = function () {
 
 OMGMonkey.prototype.getRandomNote = function () {
     return {
-        rest: Math.random > 0.7,
+        rest: Math.random() > 0.7,
         beats: this.getRandomBeats()
     };
 };
@@ -344,4 +351,117 @@ OMGMonkey.prototype.getRandomNoteNumber = function (n) {
         d = Math.floor(Math.random() * 5) - 2;
     }
     return n + d;
+};
+
+OMGMonkey.prototype.getPartDataFunctions = function () {
+    var monkey = this;
+    return [
+        function () {
+            monkey.forRandomRandomParts(part => {
+                if (part.data.surface.url === "PRESET_VERTICAL") {
+                    monkey.getRandomElement(monkey.getMelodyFunctions(part))();
+                }
+                else {
+                    monkey.getRandomElement(monkey.getSequencerFunctions(part))();
+                }
+            });
+        }
+    ];
+};
+
+OMGMonkey.prototype.getMelodyFunctions = function (part) {
+    var monkey = this;
+    return [
+        function () {
+            part.data.notes = monkey.newMelody();
+            OMusicPlayer.prototype.rescale(part, 
+                    monkey.song.data.keyParams, monkey.section.data.chordProgression[0]);
+        }, 
+        function () {
+            if (part.data.notes.length === 0) {
+                part.data.notes = monkey.newMelody();
+            }
+            else {
+                var note = monkey.getRandomElement(part.data.notes);
+                note.note += (Math.floor(Math.random() * 5) + 1) *
+                                Math.random() > 0.5 ? 1 : -1;
+            }
+        }
+    ];
+};
+
+OMGMonkey.prototype.getSequencerFunctions = function (part) {
+    var monkey = this;
+    return [
+        function () {
+            part.data.tracks.forEach(track => {
+                for (var i = 0; i < track.data.length; i++) {
+                    if (Math.random() < 0.1) {
+                        track.data[i] = monkey.getRandomBeatStrength();
+                    }
+                }
+            });
+        },
+        function () {
+            var track = monkey.getRandomElement(part.data.tracks);
+            for (var i = 0; i < track.data.length; i++) {
+                if (Math.random() < 0.1) {
+                    track.data[i] = monkey.getRandomBeatStrength();
+                }
+            }
+        },
+        function () {
+            part.data.tracks.forEach(track => {
+                for (var i = 0; i < track.data.length; i++) {
+                    if (Math.random() < 0.1) {
+                        track.data[i] = 0;
+                    }
+                }
+            });
+        },
+        function () {
+            var track = monkey.getRandomElement(part.data.tracks);
+            if (Math.random() < 0.1) {
+                track.data[i] = 0;
+            }
+        },
+        function () {
+            var track = monkey.getRandomElement(part.data.tracks);
+            for (var i = 0; i < track.data.length; i++) {
+                track.data[i] = i % monkey.song.data.beatParams.subbeats == 0 ? 1 : 0;
+            }
+        },
+        function () {
+            var track = monkey.getRandomElement(part.data.tracks);
+            for (var i = 0; i < track.data.length; i++) {
+                track.data[i] = i % (monkey.song.data.beatParams.subbeats / 2) == 0 ? 1 : 0;
+            }
+        },
+        function () {
+            var track = monkey.getRandomElement(part.data.tracks);
+            track.audioParams.mute = !track.audioParams.mute;
+        }
+    ];
+};
+
+OMGMonkey.prototype.getRandomBeatStrength = function () {
+    return this.getRandomElement([1, 0.5, 0.25]);
+};
+
+OMGMonkey.prototype.newSong = function () {
+    this.section = new OMGSection();
+    this.song = this.section.song;
+    var partCount = Math.floor(Math.random() * 5) + 1;
+    var part;
+    for (var i = 0; i < partCount; i++) {
+        this.getRandomElement(this.getNewPartFunctions())();
+        part = this.section.parts[this.section.parts.length - 1];
+        part.data.audioParams.gain = Math.min(Math.max(Math.random(), 0.05),
+            part.data.soundSet.url.startsWith("PRESET_OSC") ? 0.5 : 0.9);
+        part.data.audioParams.pan = Math.random() * Math.random() > 0.5 ? 1 : -1;
+    }
+    this.getRandomElement(this.getChordsFunctions())();
+    this.getRandomElement(this.getKeyFunctions())();
+    this.getRandomElement(this.getTempoFunctions())();
+    return this.song;
 };

@@ -346,6 +346,7 @@ body {
 }
 
 #song-options-button {
+	margin-left:2px;
     flex-grow:0 !important; 
 }
 
@@ -499,6 +500,11 @@ body {
 button {
     font-size:0.9em;
     padding:0.4em;
+    width:100%;
+}
+.img-button {
+	padding:0px;
+    font-size:0.9em;
     width:100%;
 }
 
