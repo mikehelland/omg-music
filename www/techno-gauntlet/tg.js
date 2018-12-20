@@ -1395,6 +1395,56 @@ tg.setupAddPartTabs = function () {
     };
     
     galleryTab.onclick({target: galleryTab});
+    
+    document.getElementById("add-custom-soundset-button").onclick = function () {
+        tg.addCustomSoundSet();
+    };
+  
+};
+
+tg.addCustomSoundSet = function () {
+    var msg = document.getElementById("add-custom-soundset-warning");
+    var nameInput = document.getElementById("add-part-custom-name");
+    var name = nameInput.value;
+    if (!name) {
+        msg.style.display = "block";
+        return;
+    }
+    var urls = [];
+    var url;
+    var caption;
+    var paths;
+    var dotIndex;
+    for (var i = 1; i <= 8; i++) {
+        url = document.getElementById("add-part-url-input" + i).value;
+        if (url) {
+            paths = url.split("/");
+            caption = paths[paths.length - 1];
+            dotIndex = caption.indexOf(".");
+            if (dotIndex > -1) {
+                caption = caption.substr(0, dotIndex);
+            }
+            urls.push({url: url, name: caption});
+        }
+    }
+    if (urls.length === 0) {
+        msg.style.display = "block";
+        return;
+    }
+
+    for (var i = 1; i <= 8; i++) {
+        document.getElementById("add-part-url-input" + i).value = "";
+    }
+    nameInput.value = "";
+    msg.style.display = "none";
+    
+    var soundSet = {type: "SOUNDSET",
+        url: "custom",
+        name: name,
+        data: urls,
+        defaultSurface: "PRESET_VERTICAL"
+    };
+    tg.addPart(soundSet);
 };
 
 tg.newBlankSong = function () {

@@ -11,8 +11,8 @@
 
 <div id="main-fragment">
 
-	<canvas id="play-button">PLAY</canvas>
-	<div id="tool-bar">
+    <canvas id="play-button">PLAY</canvas>
+    <div id="tool-bar">
             <div id="main-fragment-user-button">
                 <span class="tool-bar-caption">User</span>
                 <span id="tool-bar-user-button">Login</span>
@@ -26,22 +26,22 @@
                 <span id="tool-bar-section-button">Intro</span>
             </div>
             <div id="save-button">Save</div>
-	</div>
+    </div>
 
-	<div id="song-controls">
-		<div id="beats-button"></div>
-		<div id="key-button"></div>
-		<div id="chords-button">I</div>
-	</div>
+    <div id="song-controls">
+        <div id="beats-button"></div>
+        <div id="key-button"></div>
+        <div id="chords-button">I</div>
+    </div>
 
-	<div id="part-list">
-		<!--<div class="part">
-			<div class="part-options-button">|||</div>
-			<div class="part-button">Hip Hop Drumkit</div>
-			<div class="part-mute-button">M</div>
-		</div>-->
-	</div>
-	
+    <div id="part-list">
+        <!--<div class="part">
+            <div class="part-options-button">|||</div>
+            <div class="part-button">Hip Hop Drumkit</div>
+            <div class="part-mute-button">M</div>
+        </div>-->
+    </div>
+    
         <div id="main-fragment-bottom-row">
             <div id="song-options-button">&#9776;</div>
             <div id="add-part-button">Add Part</div>
@@ -112,10 +112,26 @@
                 </div>
             </div>
             <div id="add-part-custom">
-                <h5>Add a sound using a URL:</h5>
-                <!--<input id="add-part-url-input" placeholder="Web address to sound"><button>Go</button> -->
+                <div class="detail-fragment-body">
+                <br>
+                <div>Add sounds by URL:</div>
+                <input class="soundset-url-input" id="add-part-custom-name" placeholder="Part Name"><br>
+                <div id="add-custom-soundset-warning">Give a name and at least one URL</div>
+                <hr>
+                <input class="soundset-url-input" id="add-part-url-input1" placeholder="URL to sound 1"><br>
+                <input class="soundset-url-input" id="add-part-url-input2" placeholder="URL to sound 2 (Optional)"><br>
+                <input class="soundset-url-input" id="add-part-url-input3" placeholder="URL to sound 3 (Optional)"><br>
+                <input class="soundset-url-input" id="add-part-url-input4" placeholder="URL to sound 4 (Optional)"><br>
+                <input class="soundset-url-input" id="add-part-url-input5" placeholder="URL to sound 5 (Optional)"><br>
+                <input class="soundset-url-input" id="add-part-url-input6" placeholder="URL to sound 6 (Optional)"><br>
+                <input class="soundset-url-input" id="add-part-url-input7" placeholder="URL to sound 7 (Optional)"><br>
+                <input class="soundset-url-input" id="add-part-url-input8" placeholder="URL to sound 8 (Optional)"><br>
+                <button id="add-custom-soundset-button">Add</button>
+                <br>
+                <br>
                 <div>
-                    <a href="../soundset-editor.htm" target="out">Make a custom SoundSet</a>
+                    Go to <a href="../soundset-editor.htm" target="out">Advanced Editor</a>
+                </div>
                 </div>
             </div>
             <div id="add-part-gallery">
@@ -169,7 +185,7 @@
                 </div>
                 <hr>
                 <button class="img-button" id="part-options-randomize">
-					<img style="vertical-align:middle" height="32" width="32" src="/img/monkey48.png"> Randomize</button>
+                    <img style="vertical-align:middle" height="32" width="32" src="/img/monkey48.png"> Randomize</button>
                 <hr>
                 Clear or Remove<br>
                 <button id="part-options-clear-button">Clear Part Data</button>
@@ -236,7 +252,7 @@
             <br>
             <br>
             <button class="img-button" id="create-random-song-button">
-				<img style="vertical-align:middle" height="32" width="32" src="/img/monkey48.png"> New Random Song</button>
+                <img style="vertical-align:middle" height="32" width="32" src="/img/monkey48.png"> New Random Song</button>
             </div>
             
         </div>

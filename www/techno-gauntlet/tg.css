@@ -75,10 +75,10 @@ body {
 }
 
 #play-button {
-	/*background-color:#800000;*/
-	font-size:1.5em;
-	text-align:center;
-	/*padding:10px;*/
+    /*background-color:#800000;*/
+    font-size:1.5em;
+    text-align:center;
+    /*padding:10px;*/
         height:1.7em;
     cursor: pointer;
 }
@@ -101,12 +101,12 @@ body {
 #tool-bar div:hover {
     opacity:1;
 }
-#save-button {	
-       	flex-grow:0 !important;
+#save-button {  
+        flex-grow:0 !important;
 }
 
 #key-button, #chords-button {
-	border-left:1px solid #000088;
+    border-left:1px solid #000088;
         cursor: pointer;
 }
 #beats-button {
@@ -114,23 +114,23 @@ body {
 }
 
 .part, #song-controls {
-	right:2px;
-	display:flex;
-	border:1px solid #000088;
-	border-radius:5px;
-	margin:1px;
+    right:2px;
+    display:flex;
+    border:1px solid #000088;
+    border-radius:5px;
+    margin:1px;
 }
 
 .part {
-	flex-grow:1;
+    flex-grow:1;
         cursor: pointer;
 }
 
 #song-controls div {
-	float:clear;
-	padding:10px;
-	flex:1 1 0;
-	text-align:center;
+    float:clear;
+    padding:10px;
+    flex:1 1 0;
+    text-align:center;
         opacity:0.65;
 }
 
@@ -139,9 +139,9 @@ body {
 }
 
 #part-list {
-	flex-grow:1;
-	display:flex;
-	flex-direction:column;
+    flex-grow:1;
+    display:flex;
+    flex-direction:column;
 }
 
 .part-button, .part-mute-button, .part-options-button {
@@ -155,24 +155,24 @@ body {
 }
 
 .part-button {
-	flex-grow:8;
-	text-align:center;
-	background-color:#444444;
-	padding:20px;
+    flex-grow:8;
+    text-align:center;
+    background-color:#444444;
+    padding:20px;
 }
 
 .part-mute-button {
-	background-color:green;
+    background-color:green;
         opacity:1 !important;
 }
 .part-mute-button:hover {
-	opacity:0.65 !important;
+    opacity:0.65 !important;
 }
 #main-fragment-bottom-row div, #song-controls div, .part div {
-	opacity:0.65;
+    opacity:0.65;
 }
 #main-fragment-bottom-row div:hover, #song-controls div:hover, .part div:hover {
-	opacity:1;
+    opacity:1;
 }
 
 /*#instrument-surface {
@@ -346,7 +346,7 @@ body {
 }
 
 #song-options-button {
-	margin-left:2px;
+    margin-left:2px;
     flex-grow:0 !important; 
 }
 
@@ -503,16 +503,25 @@ button {
     width:100%;
 }
 .img-button {
-	padding:0px;
+    padding:0px;
     font-size:0.9em;
     width:100%;
 }
 
 input {
     font-size:1.0em;
-    width:80%;
+    width:100%;
     margin:0.5em auto;
     padding:0.5em;
+    box-sizing: border-box;
+}
+#add-part-custom {
+    font-size: 0.7em !important;
+}
+
+.soundset-url-input {
+    margin:0.1em auto !important;
+    padding:0.1em !important;
 }
 
 #sequencer-fragment, #instrument-fragment {
@@ -617,4 +626,9 @@ input {
 
 .monkey-spin {
     animation: spin 750ms linear 1;
+}
+
+#add-custom-soundset-warning {
+    color:red;
+    display:none;
 }

@@ -647,6 +647,12 @@ OMusicPlayer.prototype.loadSound = function (sound, part) {
     }
 
     p.loadedSounds[key] = "loading";
+    
+    var saved = localStorage.getItem(key);
+    if (saved) {
+        p.loadedSounds[key] = saved;
+        p.onSoundLoaded(true, part);
+    }
 
     var request = new XMLHttpRequest();
     request.open('GET', url, true);
@@ -658,6 +664,7 @@ OMusicPlayer.prototype.loadSound = function (sound, part) {
         p.context.decodeAudioData(request.response, function (buffer) {
             p.loadedSounds[key] = buffer;
             p.onSoundLoaded(true, part);
+            localStorage.setItem(key, buffer);
         }, function () {
             console.log("error loading sound url: " + url);
             p.onSoundLoaded(false, part);
