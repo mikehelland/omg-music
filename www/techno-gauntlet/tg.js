@@ -2071,7 +2071,8 @@ omg.midi.onnoteoff = function (noteNumber) {
         if (part.activeMIDINotes.length === 0) {
             tg.player.endLiveNotes(part);
         }
-        else if (tg.player.playing && part.activeMIDINotes.autobeat > 0) {
+        else if (i === 0 || 
+                (tg.player.playing && part.activeMIDINotes.autobeat > 0)) {
             tg.player.playLiveNotes(part.activeMIDINotes, part, 0); 
         }
     });

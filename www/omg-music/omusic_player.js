@@ -54,6 +54,9 @@ OMusicPlayer.prototype.play = function (song) {
     if (!p.context)
         return;
 
+    if (p.context.state === "suspended")
+        p.context.resume();
+
     if (song) {
         if (!p.prepareSong(song)) {
             return;
@@ -1171,6 +1174,9 @@ OMusicPlayer.prototype.setSubbeatMillis = function (subbeatMillis) {
 };
 
 OMusicPlayer.prototype.playLiveNotes = function (notes, part) {
+
+    if (this.context.state === "suspended")
+        this.context.resume();
     
     if (part.liveNotes && part.liveNotes.liveAudio) {
             part.liveNotes.liveAudio.bufferGain.gain.setTargetAtTime(0, this.context.currentTime, 0.001);
