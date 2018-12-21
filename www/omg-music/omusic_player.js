@@ -711,7 +711,9 @@ OMusicPlayer.prototype.rescale = function (part, keyParams, chord) {
 
     for (var i = 0; i < data.notes.length; i++) {
         onote = data.notes[i];
-        if (onote.rest) {
+        if (onote.rest || 
+                typeof onote.note !== "number" || 
+                onote.note !== Math.round(onote.note)) {
             continue;
         }
 

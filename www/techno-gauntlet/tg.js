@@ -2037,6 +2037,38 @@ tg.songOptionsFragment.setupMonkeyWaitTime = function (changeable) {
     this.changeableList.appendChild(div);
 };
 
+tg.activeMIDINotes = [];
+tg.activeMIDINotes.autobeat = 1;
+omg.midi.noteOff = function (noteNumber) {
+    for (var i = 0; i< tg.activeMIDINotes.length; i++) {
+        if (tg.activeMIDINotes[i].scaledNote === noteNumber) {
+            tg.activeMIDINotes.splice(i, 1);
+        }
+    }
+    if (tg.activeMIDINotes.length === 0) {
+        tg.player.endLiveNotes(tg.currentSection.parts[0]);
+    }
+    else {
+        tg.player.playLiveNotes(tg.activeMIDINotes, tg.currentSection.parts[0], 0); 
+    }
+};
+
+omg.midi.noteOn = function (noteNumber) {
+    var part = tg.currentSection.parts[0];
+    var note = {beats: 0.25, scaledNote: noteNumber};
+    tg.activeMIDINotes.splice(0, 0, note);    
+    tg.player.playLiveNotes(tg.activeMIDINotes, part, 0); 
+    for (var i = 0; i < part.mm.frets.length; i++) {
+        if (part.mm.frets[i].note === noteNumber) {
+            note.note = i - part.mm.frets.rootNote;
+            break;
+        }
+        if (part.mm.frets[i].note > noteNumber) {
+            note.note = i - part.mm.frets.rootNote - 0.5;
+            break;
+        }
+    }
+}
 
 
 // away we go
