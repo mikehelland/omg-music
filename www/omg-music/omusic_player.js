@@ -648,12 +648,24 @@ OMusicPlayer.prototype.loadSound = function (sound, part) {
 
     p.loadedSounds[key] = "loading";
     
-    var saved = localStorage.getItem(key);
-    if (saved) {
-        p.loadedSounds[key] = saved;
-        p.onSoundLoaded(true, part);
-    }
+    var saved = omg.util.getSavedSound(key, function (buffer) {
+        if (!buffer) {
+            p.downloadSound(url, key, part);
+        }
+        else {
+            p.context.decodeAudioData(buffer, function (buffer) {
+                p.loadedSounds[key] = buffer;
+                p.onSoundLoaded(true, part);
+            }, function () {
+                console.log("error loading sound url: " + url);
+                p.onSoundLoaded(false, part);
+            });
+        }
+    });
+};
 
+OMusicPlayer.prototype.downloadSound = function (url, key, part) {
+    var p = this;
     var request = new XMLHttpRequest();
     request.open('GET', url, true);
     request.responseType = 'arraybuffer';
@@ -661,17 +673,17 @@ OMusicPlayer.prototype.loadSound = function (sound, part) {
     part.soundsLoading++;
 
     request.onload = function () {
+        var data = request.response.slice(0);
         p.context.decodeAudioData(request.response, function (buffer) {
             p.loadedSounds[key] = buffer;
             p.onSoundLoaded(true, part);
-            localStorage.setItem(key, buffer);
+            omg.util.saveSound(key, data);
         }, function () {
             console.log("error loading sound url: " + url);
             p.onSoundLoaded(false, part);
         });
     }
     request.send();
-
 };
 
 OMusicPlayer.prototype.onSoundLoaded = function (success, part) {

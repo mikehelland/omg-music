@@ -110,7 +110,7 @@ omg.util.makeQueryString = function (parameters) {
     return string.slice(0, string.length - 1);
 };
 
-omg.util. getTimeCaption = function (timeMS) {
+omg.util.getTimeCaption = function (timeMS) {
 
     if (!timeMS) {
         return "";
@@ -134,7 +134,7 @@ omg.util. getTimeCaption = function (timeMS) {
                 "Nov", "Dec"];
     var monthday = months[date.getMonth()] + " " + date.getDate();
     if (days < 365) {
-	    return monthday;
+        return monthday;
     }
     return monthday + " " + date.getFullYear();
 };
@@ -162,6 +162,37 @@ omg.util.getUniqueName = function (name, names) {
     }
     return omg.util.getUniqueName(name + " 2", names);
 };
+
+omg.util.getSavedSound = function (sound, callback) {
+    try {
+    var request = indexedDB.open("omg_sounds", 1);
+    request.onupgradeneeded = function (e) {
+        var db = e.target.result;
+        db.createObjectStore("saved_sounds");
+    };
+    request.onsuccess = function(e) {
+        var db = e.target.result;
+        var trans = db.transaction("saved_sounds");
+        var request = trans.objectStore("saved_sounds").get(sound);
+        request.onsuccess = function (e) {
+            callback(request.result);
+        }
+    };
+    } catch (e) {
+        callback();
+    }
+};
+
+omg.util.saveSound = function (sound, data) {
+    try {
+    indexedDB.open("omg_sounds").onsuccess = function(e) {
+        var db = e.target.result;
+        var trans = db.transaction(["saved_sounds"], "readwrite");
+        trans.objectStore("saved_sounds").put(data, sound);
+    };
+    } catch (e) {console.log(e);}
+};
+
 
 /*
  * UI stuff
