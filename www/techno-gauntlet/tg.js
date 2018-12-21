@@ -821,6 +821,8 @@ tg.showPartOptionsFragment = function (part) {
     
     var submixerButton = document.getElementById("part-options-submixer-button");
     var liveModeButton = document.getElementById("part-options-omglive-mode");
+    var midiButton = document.getElementById("part-options-midi-button");
+    var midiBreak = document.getElementById("part-options-midi-break");
     var liveUrlInput = document.getElementById("part-options-omglive-url");
     var liveRoomInput = document.getElementById("part-options-omglive-room");
     var liveModeDetails = document.getElementById("part-options-omglive-details");
@@ -829,6 +831,26 @@ tg.showPartOptionsFragment = function (part) {
     var surfaceArea = document.getElementById("part-options-surface-area");
     var randomizeButton = document.getElementById("part-options-randomize");
     var randomizeImg = randomizeButton.getElementsByTagName("img")[0];
+    
+    midiButton.onclick = function () {
+        var index = tg.midiParts.indexOf(part);
+        var on = false;
+        if (index === -1) {
+            part.activeMIDINotes = [];
+            part.activeMIDINotes.autobeat = 1;
+            tg.midiParts.push(part);
+            on = true;
+        }
+        else {
+            tg.midiParts.splice(index, 1);
+        }
+        midiButton.innerHTML = "MIDI Input is " + (on ? "ON" : "OFF");
+    };
+    midiButton.style.display = omg.midi.api && 
+            part.data.surface.url === "PRESET_VERTICAL" && 
+            part.data.soundSet.chromatic ? "block" : "none";
+    midiBreak.style.display = midiButton.style.display;
+    midiButton.innerHTML = "MIDI Input is " + (tg.midiParts.indexOf(part) > -1 ? "ON" : "OFF");
     
     randomizeButton.onclick = function () {
         if (part.data.surface.url === "PRESET_VERTICAL") {
@@ -2037,38 +2059,76 @@ tg.songOptionsFragment.setupMonkeyWaitTime = function (changeable) {
     this.changeableList.appendChild(div);
 };
 
-tg.activeMIDINotes = [];
-tg.activeMIDINotes.autobeat = 1;
-omg.midi.noteOff = function (noteNumber) {
-    for (var i = 0; i< tg.activeMIDINotes.length; i++) {
-        if (tg.activeMIDINotes[i].scaledNote === noteNumber) {
-            tg.activeMIDINotes.splice(i, 1);
+tg.midiParts = [];
+omg.midi.onnoteoff = function (noteNumber) {
+    tg.midiParts.forEach(part => {
+        for (var i = 0; i< part.activeMIDINotes.length; i++) {
+            if (part.activeMIDINotes[i].scaledNote === noteNumber) {
+                part.activeMIDINotes.splice(i, 1);
+                break;
+            }
         }
-    }
-    if (tg.activeMIDINotes.length === 0) {
-        tg.player.endLiveNotes(tg.currentSection.parts[0]);
-    }
-    else {
-        tg.player.playLiveNotes(tg.activeMIDINotes, tg.currentSection.parts[0], 0); 
+        if (part.activeMIDINotes.length === 0) {
+            tg.player.endLiveNotes(part);
+        }
+        else if (tg.player.playing && part.activeMIDINotes.autobeat > 0) {
+            tg.player.playLiveNotes(part.activeMIDINotes, part, 0); 
+        }
+    });
+};
+
+omg.midi.onnoteon = function (noteNumber) {
+    tg.midiParts.forEach(part => {
+        var note = {beats: 0.25, scaledNote: noteNumber};
+        part.activeMIDINotes.splice(0, 0, note);    
+        tg.player.playLiveNotes(part.activeMIDINotes, part, 0); 
+        for (var i = 0; i < part.mm.frets.length; i++) {
+            if (part.mm.frets[i].note === noteNumber) {
+                note.note = i - part.mm.frets.rootNote;
+                break;
+            }
+            if (part.mm.frets[i].note > noteNumber) {
+                note.note = i - part.mm.frets.rootNote - 0.5;
+                break;
+            }
+        }
+    });
+};
+
+omg.midi.onplay = function () {
+    if (!tg.player.playing) {
+        tg.player.play();
     }
 };
 
-omg.midi.noteOn = function (noteNumber) {
-    var part = tg.currentSection.parts[0];
-    var note = {beats: 0.25, scaledNote: noteNumber};
-    tg.activeMIDINotes.splice(0, 0, note);    
-    tg.player.playLiveNotes(tg.activeMIDINotes, part, 0); 
-    for (var i = 0; i < part.mm.frets.length; i++) {
-        if (part.mm.frets[i].note === noteNumber) {
-            note.note = i - part.mm.frets.rootNote;
-            break;
-        }
-        if (part.mm.frets[i].note > noteNumber) {
-            note.note = i - part.mm.frets.rootNote - 0.5;
-            break;
-        }
+omg.midi.onstop = function () {
+    if (tg.player.playing) {
+        tg.player.stop();
     }
-}
+};
+
+omg.midi.onmessage = function (control, value) {
+    if (control === 91) {
+        value = Math.floor(value / 128 * 4);
+        if (value === 1) value = 4;
+        else if (value === 3) value = 1;
+        tg.midiParts.forEach(part => part.activeMIDINotes.autobeat = value);
+    }
+    else if (control === 7) {
+        tg.midiParts.forEach(part => {
+            part.data.audioParams.gain = 1.5 * Math.pow(value / 127, 2);
+            part.gain.gain.value = part.data.audioParams.gain;
+            tg.song.partMuteChanged(part);
+        });
+    }
+    else if (control === 10) {
+        tg.midiParts.forEach(part => {
+            part.data.audioParams.pan = (value - 64) / 64;
+            part.panner.pan.value = part.data.audioParams.pan;
+            tg.song.partMuteChanged(part);
+        });
+    }
+};
 
 
 // away we go

@@ -23,27 +23,37 @@ omg.midi = {
         }
     },
     onMessage: function (event) {
-        var str = "MIDI message received at timestamp " + event.timestamp + "[" + event.data.length + " bytes]: ";
-        for (var i=0; i<event.data.length; i++) {
-        str += "0x" + event.data[i].toString(16) + " ";
-        }
-        console.log( str );
   
         // Mask off the lower nibble (MIDI channel, which we don't care about)
         switch (event.data[0] & 0xf0) {
             case 0x90:
                 if (event.data[2]!=0) {  // if velocity != 0, this is a note-on message
-                    omg.midi.noteOn(event.data[1]);
+                    omg.midi.onnoteon(event.data[1]);
                     return;
                 }
                 // if velocity == 0, fall thru: it's a note-off.  MIDI's weird, y'all.
             case 0x80:
-                omg.midi.noteOff(event.data[1]);
-            return;
+                omg.midi.onnoteoff(event.data[1]);
+                return;
+            case 0xb0:
+                switch (event.data[1]) {
+                    case 24:
+                        omg.midi.onplay();
+                        return;
+                    case 23:
+                        omg.midi.onstop();
+                        return;
+                    default:
+                        omg.midi.onmessage(event.data[1], event.data[2]);
+                }
+                return;
         }
     },
-    noteOn: function (note) {console.log(note)},
-    noteOff: function (note) {console.log(note)}
+    onnoteon: function (note) {console.log(note)},
+    onnoteoff: function (note) {console.log(note)},
+    onmessage: function (control, value) {console.log(control, value)},
+    onplay: function () {},
+    onstop: function () {}
 };
 
 
