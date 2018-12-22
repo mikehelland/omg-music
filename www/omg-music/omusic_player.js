@@ -616,25 +616,6 @@ OMusicPlayer.prototype.makeFrequency = function (mapped) {
     return Math.pow(2, (mapped - 69.0) / 12.0) * 440.0;
 };
 
-OMusicPlayer.prototype.initSound = function () {
-    return;
-    var p = this;
-    p.playedSound = true;
-    try {
-        var osc = p.context.createOscillator();
-        osc.connect(p.context.destination);
-        osc.frequency.setValueAtTime(0, p.context.currentTime);
-        osc.start(p.context.currentTime);
-
-        setTimeout(function () {
-            osc.stop(p.context.currentTime);
-            osc.disconnect(p.context.destination);
-
-        }, 500);
-    } catch (ex) {
-        console.log("error initializing web audio api");
-    }
-};
 
 OMusicPlayer.prototype.loadSound = function (sound, part) {
     var p = this;
@@ -1937,11 +1918,11 @@ OMGPart.prototype.makeTracks = function () {
     if (this.data.soundSet && this.data.soundSet.data) {
         var that = this;
         this.data.soundSet.data.forEach(function (sound) {
-            that.data.tracks.push(sound);
-            sound.sound = (that.data.soundSet.prefix || "") +
+            var track = {name: sound.name, data: [], 
+                    audioParams: {gain: 1, pan: 0, warp: 1}};
+            track.sound = (that.data.soundSet.prefix || "") +
                     sound.url + (that.data.soundSet.postfix || "");
-            sound.data = [];
-            sound.audioParams = {gain: 1, pan: 0, warp: 1};
+            that.data.tracks.push(track);
         });
     }
 };

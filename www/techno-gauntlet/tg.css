@@ -549,7 +549,7 @@ input {
     opacity:1 !important;
 }
 
-#instrument-canvas, #instrument-canvas-background {
+.surface-canvas, #instrument-canvas, #instrument-canvas-background {
     position:absolute;
     top:0px;
     left:0px;
@@ -557,7 +557,7 @@ input {
     width:100%;
 }
 
-#sequencer-canvas, #instrument-surface {
+#sequencer-surface, #instrument-surface {
     flex-grow:1;
     position:relative;
 }

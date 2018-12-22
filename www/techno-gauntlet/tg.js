@@ -16,7 +16,7 @@ tg.sequencer = {
     fullStrengthButton: document.getElementById("sequencer-beat-strength-loud"),
     mediumStrengthButton: document.getElementById("sequencer-beat-strength-medium"),
     softStrengthButton: document.getElementById("sequencer-beat-strength-soft"),
-    canvas: document.getElementById("sequencer-canvas")
+    surface: document.getElementById("sequencer-surface")
 };
 
 tg.sequencer.setup = function () {
@@ -28,51 +28,56 @@ tg.sequencer.setup = function () {
         s.currentStrength.classList.remove("sequencer-toolbar-beat-strength-selected");
         e.target.classList.add("sequencer-toolbar-beat-strength-selected");
         s.currentStrength = e.target;
-        s.drumMachine.beatStrength = 1;
+        s.part.drumMachine.beatStrength = 1;
     };
     s.mediumStrengthButton.onclick = function (e) {
         s.currentStrength.classList.remove("sequencer-toolbar-beat-strength-selected");
         e.target.classList.add("sequencer-toolbar-beat-strength-selected");
         s.currentStrength = e.target;
-        s.drumMachine.beatStrength = 0.50;
+        s.part.drumMachine.beatStrength = 0.50;
     };
     s.softStrengthButton.onclick = function (e) {
         s.currentStrength.classList.remove("sequencer-toolbar-beat-strength-selected");
         e.target.classList.add("sequencer-toolbar-beat-strength-selected");
         s.currentStrength = e.target;
-        s.drumMachine.beatStrength = 0.25;
+        s.part.drumMachine.beatStrength = 0.25;
     };
     
     s.onBeatPlayedListener = function (isubbeat, isection) {
-        s.drumMachine.draw(isubbeat);
+        s.part.drumMachine.draw(isubbeat);
     };
 };
 tg.sequencer.setup();
 
-tg.sequencer.show = function (omgpart) {
+tg.sequencer.show = function (part) {
     var s = tg.sequencer;
-    
-    var beatStrength = 1;
-    if (s.drumMachine) {
-        beatStrength = s.drumMachine.beatStrength;
+    s.beatStrength = 1;
+    if (s.part && s.part.drumMachine) {
+        s.beatStrength = s.part.drumMachine.beatStrength;
     }
-    
-    s.drumMachine = new OMGDrumMachine(s.canvas, omgpart);
-    s.drumMachine.captionWidth = window.innerWidth / 2 / 8;
-    s.drumMachine.readOnly = false;
-    s.drumMachine.beatStrength = beatStrength;
+    s.part = part;
+
+    if (!part.drumMachine) {
+        part.drumMachine = new OMGDrumMachine(s.surface, part);
+        part.drumMachine.captionWidth = window.innerWidth / 2 / 8;
+        part.drumMachine.readOnly = false;
+    }
+    part.drumMachine.backgroundDrawn = false;
+
+    part.drumMachine.beatStrength = s.beatStrength;
     
     tg.player.onBeatPlayedListeners.push(s.onBeatPlayedListener);
     
     tg.hideDetails();
     s.div.style.display = "flex";
-    s.drumMachine.draw();
+    part.drumMachine.draw();
     tg.currentFragment = tg.sequencer;
 };
 
 tg.sequencer.onhide = function () {
     var index = tg.player.onBeatPlayedListeners.indexOf(this.onBeatPlayedListener);
     tg.player.onBeatPlayedListeners.splice(index, 1);
+    this.part.drumMachine.hide();
 };
 
 tg.instrument = {

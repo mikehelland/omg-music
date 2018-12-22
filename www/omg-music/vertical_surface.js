@@ -1,5 +1,3 @@
-
-
 function OMGMelodyMaker(canvas, part, player, backgroundCanvas) {
     this.canvas = canvas;
     this.context = canvas.getContext("2d");
@@ -11,12 +9,9 @@ function OMGMelodyMaker(canvas, part, player, backgroundCanvas) {
         this.bgCanvas = this.canvas;
         this.bgContext = this.context;
     }
-    //
-    //this.bottomFretBottom = 30;
-    //this.topFretTop = 10;
+
     this.bottomFretBottom = 0;
     this.topFretTop = 0;
-    this.instrument = "Sine Wave"; //?
     this.selectedColor = "#4fa5d5";
     this.autoAddRests = true;
     this.player = player;
@@ -633,8 +628,6 @@ OMGMelodyMaker.prototype.onup = function (touch) {
 };    
 
 OMGMelodyMaker.prototype.ondownInWriteMode = function (touch) {
-    //auto play policy?
-    //if (omgmm.player && !omgmm.player.playedSound) omgmm.player.initSound();
     
     var fret = this.getFret(touch.y);
     var noteNumber = this.frets[fret].note;

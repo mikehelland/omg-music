@@ -31,10 +31,16 @@ omg.ui.totalOffsets = function (element, parent) {
 
 
 
-function OMGDrumMachine(canvas, part, params) {
+function OMGDrumMachine(div, part, params) {
 
-    this.canvas = canvas;
-    this.ctx = canvas.getContext("2d");
+    this.bgCanvas = document.createElement("canvas");
+    this.bgCanvas.className = "surface-canvas";
+    div.appendChild(this.bgCanvas);
+    this.canvas = document.createElement("canvas");
+    this.canvas.className = "surface-canvas";
+    div.appendChild(this.canvas);
+    this.ctx = this.canvas.getContext("2d");
+    this.bgCtx = this.bgCanvas.getContext("2d");
 
     if (!params) params = {};
     this.readOnly = params.readOnly || true;
@@ -158,6 +164,7 @@ OMGDrumMachine.prototype.ondown = function (touch) {
         else {
             this.selectedTrack = trackI;
         }
+        this.backgroundDrawn = false;
         this.setRowColumnSizes();
         omgdrums.lastTrackNameClick = Date.now();
         omgdrums.lastTrackNameI = trackI;
@@ -244,52 +251,83 @@ OMGDrumMachine.prototype.setPart = function (part) {
     
 };
 
+OMGDrumMachine.prototype.drawBackground = function () {
+    
+    var canvas = this.bgCanvas;
+    var context = this.bgContext;
+    canvas.width = canvas.clientWidth;
+    canvas.height = canvas.clientHeight;
+
+    if (!this.info) {
+        this.setInfo();
+    }
+        
+    if (this.selectedTrack > -1) {
+        this.drawTrackViewBackground();
+    }
+    else {
+        this.drawFullViewBackground();
+    }
+
+};
+
+
 OMGDrumMachine.prototype.draw = function (subbeat) {
 
     if (!this.drumbeat || !this.drumbeat.tracks || !this.drumbeat.tracks.length)
         return;
 
-    if (!this.info) {
-        this.setInfo();
+    if (this.hidden) {
+        this.bgCanvas.style.display = "block";
+        this.canvas.style.display = "block";
+    }
+
+    if (!this.backgroundDrawn) {
+        this.drawBackground();
+        this.backgroundDrawn = true;
     }
 
     this.canvas.width = this.width;
-    
-    this.drawCaptions();
 
+    this.drawCaptions();
+    
     if (this.selectedTrack > -1) {
         this.drawTrackView(subbeat);
     }
     else {
         this.drawFullView(subbeat);
-    }
+    }    
 };
 
 OMGDrumMachine.prototype.drawFullView = function (subbeat) {
     for (var i = 0; i < this.info.length; i++) {
         for (var j = 0; j < this.totalSubbeats; j++) {
             var value = this.info[i].track.data[j];
-            this.ctx.fillStyle = value >= 1 ? this.foreColor :
-                    (j % this.beatParams.subbeats === 0) ? this.downbeatColor : this.beatColor;
-
-            this.ctx.fillRect(this.left + this.captionWidth + this.columnWidth * j + 1, 
-                    this.top + this.rowHeight * i + 1,
-                    this.columnWidth - 2, this.rowHeight - 2);
-
-            if (value > 0  && value < 1) {
-                if (value >= 0.5) {
-                    this.beatMarginX = this.columnWidth / 10;
-                    this.beatMarginY = this.rowHeight / 10;
-                }
-                else {
-                    this.beatMarginX = this.columnWidth / 5;
-                    this.beatMarginY = this.rowHeight / 5
-                }
-                this.ctx.fillStyle = this.foreColor;
-                this.ctx.fillRect(this.left + this.captionWidth + this.columnWidth * j + this.beatMarginX, 
-                        this.top + this.rowHeight * i + this.beatMarginY,
-                        this.columnWidth - this.beatMarginX * 2, this.rowHeight - this.beatMarginY * 2);
+            
+            if (!value) {
+                continue;
+            };
+            
+            if (typeof value !== "number") {
+                value = 1;
             }
+
+            if (value === 1) {
+                this.beatMarginX = 1;
+                this.beatMarginY = 1;
+            }
+            else if (value >= 0.5) {
+                this.beatMarginX = this.columnWidth / 10;
+                this.beatMarginY = this.rowHeight / 10;
+            }
+            else {
+                this.beatMarginX = this.columnWidth / 5;
+                this.beatMarginY = this.rowHeight / 5
+            }
+            this.ctx.fillStyle = this.foreColor;
+            this.ctx.fillRect(this.left + this.captionWidth + this.columnWidth * j + this.beatMarginX, 
+                    this.top + this.rowHeight * i + this.beatMarginY,
+                    this.columnWidth - this.beatMarginX * 2, this.rowHeight - this.beatMarginY * 2);
         }
     }
 
@@ -308,28 +346,39 @@ OMGDrumMachine.prototype.drawTrackView = function (subbeat) {
         for (var j = 0; j < this.beatParams.subbeats; j++) {
             subbeatIndex = j + i * this.beatParams.subbeats;
             var value = this.drumbeat.tracks[this.selectedTrack].data[subbeatIndex];
-            this.ctx.fillStyle = value >= 1 ? this.foreColor :
-                    (j === 0) ? this.downbeatColor : this.beatColor;
-
-            this.ctx.fillRect(this.left + this.captionWidth + this.columnWidth * j + 1, 
-                    this.top + this.rowHeight * i + 1,
-                    this.columnWidth - 2, this.rowHeight - 2);
-
-            if (value > 0  && value < 1) {
-                if (value >= 0.5) {
-                    this.beatMarginX = this.columnWidth / 10;
-                    this.beatMarginY = this.rowHeight / 10;
+            if (!value) {
+                if (subbeatIndex === subbeat) {
+                    this.ctx.globalAlpha = 0.5;
+                    this.ctx.fillStyle = "#4fa5d5";    
+                    this.ctx.fillRect(this.left + this.captionWidth + this.columnWidth * j + 1, 
+                            this.top + this.rowHeight * i + 1,
+                            this.columnWidth - 2, this.rowHeight - 2);
+                    this.ctx.globalAlpha = 1;
                 }
-                else {
-                    this.beatMarginX = this.columnWidth / 5;
-                    this.beatMarginY = this.rowHeight / 5
-                }
-                this.ctx.fillStyle = this.foreColor;
-                this.ctx.fillRect(this.left + this.captionWidth + this.columnWidth * j + this.beatMarginX, 
-                    this.top + this.rowHeight * i + this.beatMarginY,
-                    this.columnWidth - this.beatMarginX * 2, this.rowHeight - this.beatMarginY * 2);
+                continue;
+            }
+            
+            if (typeof value !== "number") {
+                value = 1;
+            }
+            
+            if (value === 1) {
+                this.beatMarginX = 1;
+                this.beatMarginY = 1;
+            }
+            else if (value >= 0.5) {
+                this.beatMarginX = this.columnWidth / 10;
+                this.beatMarginY = this.rowHeight / 10;
+            }
+            else {
+                this.beatMarginX = this.columnWidth / 5;
+                this.beatMarginY = this.rowHeight / 5
             }
 
+            this.ctx.fillStyle = this.foreColor;
+            this.ctx.fillRect(this.left + this.captionWidth + this.columnWidth * j + this.beatMarginX, 
+                this.top + this.rowHeight * i + this.beatMarginY,
+                this.columnWidth - this.beatMarginX * 2, this.rowHeight - this.beatMarginY * 2);
 
             if (subbeatIndex === subbeat) {
                 this.ctx.globalAlpha = 0.5;
@@ -342,6 +391,34 @@ OMGDrumMachine.prototype.drawTrackView = function (subbeat) {
         }
     }    
 };
+
+OMGDrumMachine.prototype.drawFullViewBackground = function (subbeat) {
+    for (var i = 0; i < this.info.length; i++) {
+        for (var j = 0; j < this.totalSubbeats; j++) {
+            this.bgCtx.fillStyle = (j % this.beatParams.subbeats === 0) ? 
+                    this.downbeatColor : this.beatColor;
+
+            this.bgCtx.fillRect(this.left + this.captionWidth + this.columnWidth * j + 1, 
+                    this.top + this.rowHeight * i + 1,
+                    this.columnWidth - 2, this.rowHeight - 2);
+
+        }
+    }
+};
+
+OMGDrumMachine.prototype.drawTrackViewBackground = function (subbeat) {
+    for (var i = 0; i < this.totalBeats; i++) {
+        for (var j = 0; j < this.beatParams.subbeats; j++) {
+            this.bgCtx.fillStyle = (j === 0) ? 
+                    this.downbeatColor : this.beatColor;
+
+            this.bgCtx.fillRect(this.left + this.captionWidth + this.columnWidth * j + 1, 
+                    this.top + this.rowHeight * i + 1,
+                    this.columnWidth - 2, this.rowHeight - 2);
+        }
+    }    
+};
+
 
 OMGDrumMachine.prototype.drawCaptions = function () {
     for (var i = 0; i < this.info.length; i++) {
@@ -452,3 +529,9 @@ OMGDrumMachine.prototype.getCaptionY = function (i, length) {
     }
     return this.captionHeight * (i + 1) / length - this.fontHeight / 2;
 }
+
+OMGDrumMachine.prototype.hide = function () {
+    this.canvas.style.display = "none";
+    this.bgCanvas.style.display = "none";
+    this.hidden = true;
+};
