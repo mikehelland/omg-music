@@ -164,6 +164,10 @@ omg.util.getUniqueName = function (name, names) {
 };
 
 omg.util.getSavedSound = function (sound, callback) {
+    if (omg.util.noDB) {
+        callback();
+        return;
+    }
     try {
     var request = indexedDB.open("omg_sounds", 1);
     request.onupgradeneeded = function (e) {
@@ -178,12 +182,19 @@ omg.util.getSavedSound = function (sound, callback) {
             callback(request.result);
         }
     };
+    request.onerror = function (e) {
+        omg.util.noDB = true;
+        callback();
+    };
     } catch (e) {
+        console.warn("getSavedSound threw an error", e);
+        omg.util.noDB = true;
         callback();
     }
 };
 
 omg.util.saveSound = function (sound, data) {
+    if (omg.util.noDB) return;
     try {
     indexedDB.open("omg_sounds").onsuccess = function(e) {
         var db = e.target.result;

@@ -121,7 +121,16 @@ function OMGEmbeddedViewer(params) {
 
         } else {
             viewer.playButton.className = pbClass + " loader";
-            viewer.player.play(viewer.song);
+            if (viewer.prepared) {
+                viewer.player.play();
+            }
+            else {                
+                viewer.player.prepareSong(viewer.song, function () {
+                    viewer.prepared = true;
+                    viewer.player.play();
+                });
+            }
+            
             //viewer.player.load(viewer.info, function (info) {
             //    viewer.player.play(info);
             //});
@@ -279,7 +288,6 @@ OMGEmbeddedViewer.prototype.draw = function () {
                                         this.subbeatLength - marginX * 2, -1 * this.drawingData.sections[isection].trackHeight + marginY * 2);
                     marginY = (this.drawingData.sections[isection].trackHeight - this.drawingData.sections[isection].trackHeight * value) / 3;
                     marginX = (this.subbeatLength - this.subbeatLength * value) / 3;
-                    console.log("value", value, this.subbeatLength, this.subbeatLength * value, value, this.subbeatLength - this.subbeatLength * value)
                 }
                 this.context.fillStyle =  value ? "black" : 
                                             (i % this.beatParams.beats == 0 ? "#DDDDDD" : "white");

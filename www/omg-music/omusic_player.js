@@ -14,20 +14,9 @@ function OMusicPlayer() {
     
     p.latency = 20;
     p.latencyMonitor = 0;
-    if (!window.AudioContext)
-        window.AudioContext = window.webkitAudioContext;
-
-    try {
-        p.context = new AudioContext();
-        if (!p.context.createGain)
-            p.context.createGain = p.context.createGainNode;
-        p.tuna = new Tuna(p.context);
-    } catch (e) {
-        var nowebaudio = document.getElementById("no-web-audio");
-        if (nowebaudio)
-            nowebaudio.style.display = "inline-block";
-        //return;
-    }
+    
+    p.context = p.getAudioContext();
+    p.tuna = omg.tuna;
 
     /*p.compressor = p.context.createDynamicsCompressor();
     p.compressor.threshold.value = -50;
@@ -49,6 +38,27 @@ function OMusicPlayer() {
     p.setupFX();
 }
 
+OMusicPlayer.prototype.getAudioContext = function () {
+    if (omg.audioContext) {
+        return omg.audioContext;
+    }
+
+    if (!window.AudioContext)
+        window.AudioContext = window.webkitAudioContext;
+
+    try {
+        omg.audioContext = new AudioContext();
+        if (!omg.audioContext.createGain)
+            omg.audioContext.createGain = omg.audioContext.createGainNode;
+        omg.tuna = new Tuna(omg.audioContext);
+    } catch (e) {
+        console.warn("no web audio");
+        return null;
+    }
+
+    return omg.audioContext;
+};
+
 OMusicPlayer.prototype.play = function (song) {
     var p = this;
     if (!p.context)
@@ -64,7 +74,7 @@ OMusicPlayer.prototype.play = function (song) {
     }
 
     if (!p.song.sections || !p.song.sections.length) {
-        console.log("no sections to play()");
+        console.warn("no sections to play()");
         return -1;
     }
 
@@ -263,27 +273,21 @@ OMusicPlayer.prototype.stop = function () {
     }
 };
 
-OMusicPlayer.prototype.loadPart = function (part) {
+OMusicPlayer.prototype.loadPart = function (part, soundsNeeded) {
     var p = this;
-
-    var type = part.data.type;
-    var surface = part.data.surface ? part.data.surface.url : part.data.surfaceURL;
-
-    part.soundsLoading = 0;
-    part.loaded = false;
 
     if (!part.panner) {
         this.makeAudioNodesForPart(part);
     }
 
-    if (surface === "PRESET_SEQUENCER") {
-        this.loadDrumbeat(part);
+    if (part.data.surface.url === "PRESET_SEQUENCER") {
+        this.loadDrumbeat(part, soundsNeeded);
     } else {
-        this.loadMelody(part);
+        this.loadMelody(part, soundsNeeded);
     }
 };
 
-OMusicPlayer.prototype.loadMelody = function (part) {
+OMusicPlayer.prototype.loadMelody = function (part, soundsNeeded) {
     var p = this;
 
     var data = part.data;
@@ -292,37 +296,48 @@ OMusicPlayer.prototype.loadMelody = function (part) {
     var song = part.section ? part.section.song : undefined;
 
     part.currentI = -1;
-    p.rescale(part, song.data.keyParams, 0); //section.data.chordProgression[p.currentChordI]
 
     if (data.soundSet && data.soundSet.data) {
         if (!p.downloadedSoundSets[data.soundSet.name]) {
             p.downloadedSoundSets[data.soundSet.name] = data.soundSet;
-            p.loadSoundsFromSoundSet(data.soundSet);
         }
-        p.setupPartWithSoundSet(data.soundSet, part, true);
+        part.soundSet = data.soundSet;
+        p.prepareMelody(part, soundsNeeded);
     }
     else if (data.soundSet && typeof data.soundSet.url === "string") {
-        p.getSoundSet(data.soundSet.url, function (soundset) {
-            p.setupPartWithSoundSet(soundset, part, true);
-        });
+        if (data.soundSet.url.startsWith("PRESET_OSC")) {
+            part.soundSet = {osc: true};
+        }
+        else {
+            p.getSoundSet(data.soundSet.url, function (soundSet) {
+                part.soundSet = soundSet;
+                p.prepareMelody(part, soundsNeeded);
+            });
+        }
     }
+  
+};
+
+OMusicPlayer.prototype.prepareMelody = function (part, soundsNeeded) {
+    var p = this;
+    
+    this.setupPartWithSoundSet(part.soundSet, part);
+    
+    if (this.loadFullSoundSets) {
+        this.loadSoundsFromSoundSet(part.soundSet);
+        return;
+    }
+
     var soundsToLoad = 0;
-
-    for (var ii = 0; ii < data.notes.length; ii++) {
-        note = data.notes[ii];
-
-        if (note.rest)
-            continue;
-
-        if (!note.sound)
-            continue;
-
-        if (p.loadedSounds[note.sound])
-            continue;
-
-        soundsToLoad++;
-        p.loadSound(note.sound, part);
-    }
+    var chordsDone = [];
+    part.section.data.chordProgression.forEach(chord => {
+        if (chordsDone.indexOf(chord) > -1) {
+            return;
+        }
+        chordsDone.push(chord);
+        p.rescale(part, part.section.song.data.keyParams, chord, soundsNeeded);
+        
+    });
 
     if (soundsToLoad == 0) {
         part.loaded = true;
@@ -330,24 +345,29 @@ OMusicPlayer.prototype.loadMelody = function (part) {
 
 };
 
-OMusicPlayer.prototype.loadDrumbeat = function (part) {
-    var soundsAlreadyLoaded = 0;
+OMusicPlayer.prototype.loadDrumbeat = function (part, soundsNeeded) {
 
     var tracks = part.data.tracks;
-
+    var empty;
     for (var i = 0; i < tracks.length; i++) {
-        if (!tracks[i].sound) {
-            soundsAlreadyLoaded++;
-        } else if (this.loadedSounds[tracks[i].sound]) {
-            //tracks[i].audio = p.loadedSounds[tracks[i].sound];
-            soundsAlreadyLoaded++;
-        } else {
-            this.loadSound(tracks[i].sound, part);
+        if (!this.loadFullSoundSets) {
+            empty = true;
+            for (var j = 0; j < tracks[i].data.length; j++) {
+                if (tracks[i].data[j]) {
+                    empty = false;
+                    break;
+                }
+            }
+            if (empty) {
+                continue;
+            }
+        }
+
+        if (tracks[i].sound && !soundsNeeded[tracks[i].sound]) {
+            soundsNeeded[tracks[i].sound] = true;
         }
     }
-    if (soundsAlreadyLoaded == tracks.length) {
-        part.loaded = true;
-    }
+
     if (part.data.soundSet && !part.soundSet) {
         part.soundSet = part.data.soundSet;
     }
@@ -374,7 +394,7 @@ OMusicPlayer.prototype.playWhenReady = function (sections) {
     }
 };
 
-OMusicPlayer.prototype.prepareSong = function (song) {
+OMusicPlayer.prototype.prepareSong = function (song, callback) {
     var p = this;
     
     if (!song.madeAudioNodes) {
@@ -384,22 +404,40 @@ OMusicPlayer.prototype.prepareSong = function (song) {
     var section;
     var part;
 
+    var soundsNeeded = {};
+
     for (var isection = 0; isection < song.sections.length; isection++) {
 
         section = song.sections[isection];
         for (var ipart = 0; ipart < section.parts.length; ipart++) {
             part = section.parts[ipart];
-            p.loadPart(part);
+            p.loadPart(part, soundsNeeded);
         }
     }
 
-    if (p.playing) {
-        p.nextUp = song;
-        return false;
+    var finish = function () {
+        if (p.playing) {
+            p.nextUp = song;
+        }
+        else {
+            p.song = song;
+        }
+        if (callback) callback();
+    };
+    
+    if (Object.keys(soundsNeeded).length === 0) {
+        finish();
+        return;
     }
-
-    p.song = song;
-    return true;
+    
+    for (var sound in soundsNeeded) {
+        p.loadSound(sound, function (sound) {
+            delete soundsNeeded[sound];
+            if (Object.keys(soundsNeeded).length === 0) {
+                finish();
+            }
+        });
+    }
 };
 
 
@@ -416,12 +454,7 @@ OMusicPlayer.prototype.playBeat = function (section, iSubBeat) {
 OMusicPlayer.prototype.playBeatForPart = function (iSubBeat, part) {
     var p = this;
 
-    if (!part.loaded) {
-        p.loadPart(part);
-    }
-
-    var surface = part.data.surface ? part.data.surface.url : part.data.surfaceURL;
-    if (surface === "PRESET_SEQUENCER") {
+    if (part.data.surface.url === "PRESET_SEQUENCER") {
         p.playBeatForDrumPart(iSubBeat, part);
     } else {
         p.playBeatForMelody(iSubBeat, part);
@@ -487,7 +520,7 @@ OMusicPlayer.prototype.playBeatForMelody = function (iSubBeat, part) {
 
     if (beatToPlay === part.nextBeat) {
         if (!data.notes) {
-            console.log("something wrong here");
+            console.warn("something wrong here");
             return;
         }
         var note = data.notes[part.currentI];
@@ -574,9 +607,6 @@ OMusicPlayer.prototype.makeOsc = function (part) {
     }
 
     part.osc = p.context.createOscillator();
-    part.osc.onended = () => {
-        console.log("HEY BUD! WE ENDED!");
-    };
 
     var soundsetURL = part.data.soundSet.url ||
             "PRESET_OSC_TRIANGLE_SOFT_DELAY";
@@ -620,7 +650,7 @@ OMusicPlayer.prototype.makeFrequency = function (mapped) {
 };
 
 
-OMusicPlayer.prototype.loadSound = function (sound, part) {
+OMusicPlayer.prototype.loadSound = function (sound, onload) {
     var p = this;
 
     if (!sound || !p.context) {
@@ -628,6 +658,12 @@ OMusicPlayer.prototype.loadSound = function (sound, part) {
     }
     var key = sound;
     var url = sound;
+    onload = onload || function () {};
+    
+    if (p.loadedSounds[key]) {
+        onload(key);
+        return;
+    }
     
     if (url.startsWith("http:")) {
         url = sound.slice(5);
@@ -637,52 +673,42 @@ OMusicPlayer.prototype.loadSound = function (sound, part) {
     
     var saved = omg.util.getSavedSound(key, function (buffer) {
         if (!buffer) {
-            p.downloadSound(url, key, part);
+            p.downloadSound(url, key, onload);
         }
         else {
             p.context.decodeAudioData(buffer, function (buffer) {
                 p.loadedSounds[key] = buffer;
-                p.onSoundLoaded(true, part);
+                onload(key);
             }, function () {
-                console.log("error loading sound url: " + url);
-                p.onSoundLoaded(false, part);
+                console.warn("error loading sound url: " + url);
+                onload(key);
             });
         }
     });
 };
 
-OMusicPlayer.prototype.downloadSound = function (url, key, part) {
+OMusicPlayer.prototype.downloadSound = function (url, key, onload) {
     var p = this;
     var request = new XMLHttpRequest();
     request.open('GET', url, true);
     request.responseType = 'arraybuffer';
 
-    part.soundsLoading++;
-
     request.onload = function () {
         var data = request.response.slice(0);
         p.context.decodeAudioData(request.response, function (buffer) {
             p.loadedSounds[key] = buffer;
-            p.onSoundLoaded(true, part);
+            onload(key);
             omg.util.saveSound(key, data);
         }, function () {
-            console.log("error loading sound url: " + url);
-            p.onSoundLoaded(false, part);
+            console.warn("error loading sound url: " + url);
+            onload(key);
         });
     }
     request.send();
 };
 
-OMusicPlayer.prototype.onSoundLoaded = function (success, part) {
-    var p = this;
 
-    part.soundsLoading--;
-    if (part.soundsLoading < 1) {
-        part.loaded = true;
-    }
-};
-
-OMusicPlayer.prototype.rescale = function (part, keyParams, chord) {
+OMusicPlayer.prototype.rescale = function (part, keyParams, chord, soundsNeeded) {
     var p = this;
 
     var data = part.data;
@@ -719,10 +745,16 @@ OMusicPlayer.prototype.rescale = function (part, keyParams, chord) {
                 octave * 12 + keyParams.rootNote;
 
         onote.scaledNote = newNote;
-    }
-
-    if (part.soundSet) {
-        p.setupPartWithSoundSet(part.soundSet, part, true);
+        
+        if (part.soundSet && !part.soundSet.osc) {
+            p.updateNoteSound(onote, part.soundSet);
+        }
+        
+        if (soundsNeeded && onote.sound && 
+                !omg.loadedSounds[onote.sound] &&
+                !soundsNeeded[onote.sound]) {
+            soundsNeeded[onote.sound] = true;
+        }
     }
 };
 
@@ -744,47 +776,40 @@ OMusicPlayer.prototype.setupPartWithSoundSet = function (ss, part, load) {
     }
 
     part.soundSet = ss;
-    var note;
+};
+
+
+
+OMusicPlayer.prototype.updateNoteSound = function (note, soundSet) {
     var noteIndex;
 
-    var prefix = ss.prefix || "";
-    var postfix = ss.postfix || "";
+    if (note.rest)
+        return;
 
-    for (var ii = 0; ii < part.data.notes.length; ii++) {
-        note = part.data.notes[ii];
-
-        if (note.rest)
-            continue;
-
-        if (ss.chromatic) {
-            noteIndex = note.scaledNote - ss.lowNote;
-            if (noteIndex < 0) {
-                noteIndex = noteIndex % 12 + 12;
-            } else {
-                while (noteIndex >= ss.data.length) {
-                    noteIndex = noteIndex - 12;
-                }
+    if (soundSet.chromatic) {
+        noteIndex = note.scaledNote - soundSet.lowNote;
+        if (noteIndex < 0) {
+            noteIndex = noteIndex % 12 + 12;
+        } else {
+            while (noteIndex >= soundSet.data.length) {
+                noteIndex = noteIndex - 12;
             }
         }
-        else {
-            noteIndex = note.note;
-        }
-
-        if (!ss.data[noteIndex]) {
-            continue;
-        }
-        note.sound = prefix + ss.data[noteIndex].url + postfix;
-
-        if (!note.sound)
-            continue;
-
-        if (load && !omg.loadedSounds[note.sound]) {
-            p.loadSound(note.sound, part);
-        }
     }
+    else {
+        noteIndex = note.note;
+    }
+
+    if (!soundSet.data[noteIndex]) {
+        return;
+    }
+    note.sound = (soundSet.prefix || "") + 
+                soundSet.data[noteIndex].url + 
+                (soundSet.postfix || "");
 
 };
 
+//is this used?
 OMusicPlayer.prototype.setupDrumPartWithSoundSet = function (ss, part, load) {
     var p = this;
 
@@ -842,9 +867,7 @@ OMusicPlayer.prototype.getSoundSet = function (url, callback) {
     }
 
     if (url.indexOf("PRESET_") == 0) {
-        dl = p.getPresetSoundSet(url);
-        p.downloadedSoundSets[url] = dl;
-        callback(dl);
+        callback(url);
         return;
     }
 
@@ -856,7 +879,6 @@ OMusicPlayer.prototype.getSoundSet = function (url, callback) {
             var ojson = JSON.parse(xhr2.responseText);
             if (ojson) {
                 p.downloadedSoundSets[url] = ojson;
-                p.loadSoundsFromSoundSet(ojson);
                 callback(ojson);
             } else {
                 callback(ojson);
@@ -870,61 +892,10 @@ OMusicPlayer.prototype.getSoundSet = function (url, callback) {
 OMusicPlayer.prototype.loadSoundsFromSoundSet = function (soundSet) {
     for (var i = 0; i < soundSet.data.length; i++) {
         this.loadSound((soundSet.prefix || "") + soundSet.data[i].url + 
-            (soundSet.postfix || ""), {});
+            (soundSet.postfix || ""));
     }
 };
 
-
-OMusicPlayer.prototype.getPresetSoundSet = function (preset) {
-    var p = this;
-
-    var oret;
-    if (preset == "PRESET_BASS") {
-        oret = {"name": "Electric Bass", "id": 1540004, "lowNote": 28, "chromatic": true,
-            "data": [
-                    {"url": "e", "caption": "E2"}, {"url": "f", "caption": "F2"}, {"url": "fs", "caption": "F#2"}, {"url": "g", "caption": "G2"}, {"url": "gs", "caption": "G#2"}, {"url": "a", "caption": "A2"},
-                    {"url": "bf", "caption": "Bb2"}, {"url": "b", "caption": "B2"}, {"url": "c", "caption": "C3"}, {"url": "cs", "caption": "C#3"}, {"url": "d", "caption": "D3"}, {"url": "ds", "caption": "Eb3"},
-                    {"url": "e2", "caption": "E3"}, {"url": "f2", "caption": "F3"}, {"url": "fs2", "caption": "F#3"}, {"url": "g2", "caption": "G3"}, {"url": "gs2", "caption": "G#3"}, {"url": "a2", "caption": "A3"},
-                    {"url": "bf2", "caption": "Bb3"}, {"url": "b2", "caption": "B3"}, {"url": "c2", "caption": "C4"}
-                ], "prefix": "http://mikehelland.com/omg/bass1/bass_",
-                "postfix": ".mp3"};
-
-        if (p.dev) {
-            oret.data.prefix = "http://localhost/mp3/bass_";
-        }
-    }
-    if (preset == "PRESET_HIP") {
-        oret = {"name": "PRESET_HIP", "id": 0,
-            "data": {"name": "PRESET_HIP", "data": [
-                    {"url": "PRESET_HH_KICK", "caption": "kick"},
-                    {"url": "PRESET_HH_CLAP", "caption": "clap"},
-                    {"url": "PRESET_ROCK_HIHAT_CLOSED", "caption": "hihat closed"},
-                    {"url": "PRESET_HH_HIHAT", "caption": "hihat open"},
-                    {"url": "PRESET_HH_TAMB", "caption": "tambourine"},
-                    {"url": "PRESET_HH_TOM_MH", "caption": "h tom"},
-                    {"url": "PRESET_HH_TOM_ML", "caption": "m tom"},
-                    {"url": "PRESET_HH_TOM_L", "caption": "l tom"}
-                ]}};
-
-    }
-    if (preset == "PRESET_ROCK") {
-        oret = {"name": "PRESET_ROCK", "id": 0,
-            "data": {"name": "PRESET_ROCK", "data": [
-                    {"url": "PRESET_ROCK_KICK", "caption": "kick"},
-                    {"url": "PRESET_ROCK_SNARE", "caption": "snare"},
-                    {"url": "PRESET_ROCK_HIHAT_CLOSED", "caption": "hihat closed"},
-                    {"url": "PRESET_ROCK_HIHAT_OPEN", "caption": "hihat open"},
-                    {"url": "PRESET_ROCK_CRASH", "caption": "crash"},
-                    {"url": "PRESET_ROCK_TOM_H", "caption": "h tom"},
-                    {"url": "PRESET_ROCK_TOM_ML", "caption": "m tom"},
-                    {"url": "PRESET_ROCK_TOM_L", "caption": "l tom"}
-                ]}};
-
-    }
-
-
-    return oret;
-};
 
 OMusicPlayer.prototype.playNote = function (note, part) {
     var p = this;
@@ -1134,7 +1105,9 @@ OMusicPlayer.prototype.getTotalSubbeats = function () {
 OMusicPlayer.prototype.rescaleSection = function (section, chord) {
     var p = this;
     section.parts.forEach(function (part) {
-        p.rescale(part, section.song.data.keyParams, chord || 0);
+        if (part.data.surface.url === "PRESET_VERTICAL" && part.data.soundSet.chromatic) {
+            p.rescale(part, section.song.data.keyParams, chord || 0);
+        }
     });
     section.chord = chord;
 };
@@ -1859,7 +1832,7 @@ function OMGPart(div, data, section) {
         }
     }
     
-    this.makeAudioParams(false, this.data.soundSet.url.startsWith("PRESET_OSC"));
+    this.makeAudioParams(false, (this.data.soundSet.url || "").startsWith("PRESET_OSC"));
     
     if (this.data.id) {
         this.saved = true;

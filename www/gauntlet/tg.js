@@ -155,6 +155,7 @@ tg.chordsEditorView = document.getElementById("chords-fragment-chords-view");
 tg.sectionCaptionDiv = document.getElementById("tool-bar-section-button");
 
 tg.player = new OMusicPlayer();
+tg.player.loadFullSoundSets = true;
 
 tg.getSong = function (callback) {
     var id = omg.util.getPageParams().id;
