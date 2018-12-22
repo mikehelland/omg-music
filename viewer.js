@@ -45,7 +45,7 @@ return `<!DOCTYPE html>
       
       <p>Make your own music with OpenMusic.Gallery:</p>
       <div class="site-tools">
-            <a target="_blank" href="/techno-gauntlet/">
+            <a target="_blank" href="/gauntlet/">
                       <img src="/img/technogauntlet.png">Go to Techno GAUNTLET
             </a> <span class="tools-seperator">|</span>
             <a href="/docs/what_is_open_music.htm"><img src="/favicon.ico">What is open music?</a>
@@ -59,9 +59,9 @@ return `<!DOCTYPE html>
          <span class="main-title-open">Open</span><span class="main-title-media">Music</span><span class="main-title-gallery">.Gallery</span>
       </a>
 
-	   <div class="main-description">
-		  Find, create, and customize music for your project.
-	   </div>
+       <div class="main-description">
+          Find, create, and customize music for your project.
+       </div>
 
          <div class="main-title-bar-right">
             <div class="title-bar-user-controls"></div>

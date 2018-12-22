@@ -136,7 +136,7 @@ function OMGEmbeddedViewer(params) {
         window.location = "bitcoin:1Jdam2fBZxfhWLB8yP69Zbw6fLzRpweRjc?amount=0.004";
     };
     viewer.editButton.onclick = function () {
-        window.location = "/techno-gauntlet/?id=" + data.id;
+        window.location = "/gauntlet/?id=" + data.id;
     };
 
     var br = document.createElement("br");

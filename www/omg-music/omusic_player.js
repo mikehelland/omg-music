@@ -77,6 +77,7 @@ OMusicPlayer.prototype.play = function (song) {
     p.nextBeatTime = p.context.currentTime + (p.latency / 1000);
 
     p.currentChordI = 0;
+    p.rescaleSection(p.section, p.section.data.chordProgression[0]);
 
     this._play();
 
@@ -154,13 +155,13 @@ OMusicPlayer.prototype.afterSection = function () {
     if (p.section.data.chordProgression) {
         p.currentChordI++;
         if (p.currentChordI < p.section.data.chordProgression.length) {
-            p.rescaleSong(null, null, p.section.data.chordProgression[p.currentChordI]);
             nextChord = true;
         }
         else {
             p.currentChordI = 0;
-            //todo rescale section!
-            p.rescaleSong(null, null, p.section.data.chordProgression[p.currentChordI]);
+        }
+        if (p.section.chord !== p.section.data.chordProgression[p.currentChordI]) {
+            p.rescaleSection(p.section, p.section.data.chordProgression[p.currentChordI]);
         }
     }
 
@@ -347,7 +348,9 @@ OMusicPlayer.prototype.loadDrumbeat = function (part) {
     if (soundsAlreadyLoaded == tracks.length) {
         part.loaded = true;
     }
-
+    if (part.data.soundSet && !part.soundSet) {
+        part.soundSet = part.data.soundSet;
+    }
 };
 
 OMusicPlayer.prototype.playWhenReady = function (sections) {
@@ -739,7 +742,6 @@ OMusicPlayer.prototype.setupPartWithSoundSet = function (ss, part, load) {
     if (part.data.soundSet && !part.data.soundSet.octave) {
         part.data.soundSet.octave = ss.octave;
     }
-
 
     part.soundSet = ss;
     var note;
@@ -1134,6 +1136,7 @@ OMusicPlayer.prototype.rescaleSection = function (section, chord) {
     section.parts.forEach(function (part) {
         p.rescale(part, section.song.data.keyParams, chord || 0);
     });
+    section.chord = chord;
 };
 
 OMusicPlayer.prototype.rescaleSong = function (rootNote, ascale, chord) {

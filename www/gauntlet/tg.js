@@ -128,13 +128,17 @@ tg.instrument.setup = function () {
 };
 tg.instrument.setup();
 
-tg.instrument.show = function (omgpart) {
+tg.instrument.show = function (part) {
     tg.instrument.div.style.display = "flex";
 
     tg.player.onBeatPlayedListeners.push(tg.instrument.onBeatPlayedListener);
 
     tg.currentFragment = tg.instrument;
-    tg.instrument.mm = omgpart.mm;
+    if (!part.mm) {
+        part.mm = new OMGMelodyMaker(tg.instrument.canvas, part, tg.player, tg.instrument.backgroundCanvas);
+        part.mm.readOnly = false;
+    }
+    tg.instrument.mm = part.mm;
     tg.instrument.mm.setCanvasEvents();
     tg.instrument.mm.backgroundDrawn = false;
     tg.instrument.setMode("WRITE");
@@ -153,7 +157,6 @@ tg.sectionCaptionDiv = document.getElementById("tool-bar-section-button");
 tg.player = new OMusicPlayer();
 
 tg.getSong = function (callback) {
-    
     var id = omg.util.getPageParams().id;
     
     if (!id) {
@@ -189,7 +192,7 @@ tg.getSong = function (callback) {
 tg.loadSong = function (songData) {
     tg.songOptionsFragment.shownOnce = false;
     tg.song = tg.player.makeOMGSong(songData);
-    tg.player.prepareSong(tg.song);    
+    tg.player.prepareSong(tg.song);
     
     tg.loadSection(tg.song.sections[0])
 
@@ -226,7 +229,7 @@ tg.playButton.onclick = function () {
     }
     else {
         tg.player.loopSection = tg.song.sections.indexOf(tg.currentSection);
-        tg.player.play(tg.song);
+        tg.player.play();
     }
 };
 
@@ -738,6 +741,7 @@ tg.hideDetails = function (hideFragment) {
 tg.addPart = function (soundSet) {
     var blankPart = {soundSet: soundSet};
     var part = new OMGPart(undefined,blankPart,tg.currentSection);
+    tg.player.loadPart(part);
     var div = tg.loadPart(part)
     div.getElementsByClassName("part-button")[0].onclick();
 };
@@ -1835,9 +1839,8 @@ tg.loadSection = function (section) {
 
 tg.loadPart = function (part) {
     var div = tg.setupPartButton(part);
-    tg.player.loadPart(part);
 
-    if (part.data.surface.url === "PRESET_VERTICAL") {
+    if (part.data.surface.url === "PRESET_VERTICAL" && !part.mm) {
         part.mm = new OMGMelodyMaker(tg.instrument.canvas, part, tg.player, tg.instrument.backgroundCanvas);
         part.mm.readOnly = false;
     }
