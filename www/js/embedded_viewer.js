@@ -13,7 +13,7 @@ function OMGEmbeddedViewer(params) {
     div.style.position = "relative";
     //div.style.overflowX = "scroll";
 
-    var padding = 8;
+    viewer.padding = 8;
 
     viewer.playButton = document.createElement("div");
     viewer.editButton = document.createElement("div");
@@ -91,18 +91,21 @@ function OMGEmbeddedViewer(params) {
     viewer.leftOffset = viewer.sectionMargin;
 
     viewer.beatMarker = viewer.div.getElementsByClassName("beat-marker")[0];
+    viewer.beatMarker.style.display = "none";
     viewer.beatMarker.style.marginTop = viewer.playButton.clientHeight + 8 + "px";
-    viewer.beatMarker.style.height = height + "px";
-    viewer.beatMarker.style.marginLeft = padding / 2 + "px";
+    //viewer.beatMarker.style.height = height + "px";
+    viewer.beatMarker.style.marginLeft = viewer.padding / 2 + "px";
+
 
     omg.ui.omgUrl = "omg-music/";
     omg.ui.setupNoteImages();
-    
+        
     viewer.playButton.onclick = function () {
+        
         var pbClass = viewer.playButton.className;
         viewer.player.onStop = function () {
             viewer.playButton.className = pbClass;
-            viewer.playButton.innerHTML = "&#9654;";        
+            viewer.playButton.innerHTML = "&#9654;";
             if (typeof params.onStop === "function") {
                 params.onStop();
             }
@@ -117,10 +120,16 @@ function OMGEmbeddedViewer(params) {
 
         if (viewer.player.playing) {
             viewer.player.stop();
-            viewer.beatMarker.style.width = "0px";
+            viewer.beatMarker.style.display = "none";
 
         } else {
+            viewer.beatMarker.style.display = "block";
+            viewer.subbeatsPlayed = 0;
             viewer.playButton.className = pbClass + " loader";
+            viewer.player.onloop = function () {
+                viewer.subbeatsPlayed = 0;
+            };
+
             if (viewer.prepared) {
                 viewer.player.play();
             }
@@ -176,6 +185,17 @@ OMGEmbeddedViewer.prototype.load = function (data) {
 
     this.getDrawingData();
     this.draw();
+    
+    //var pxPerBeat = (this.div.clientWidth - padding) / this.totalBeatsInSong;
+    var pxPerBeat = (this.div.clientWidth - this.padding) / (this.totalSubbeats * this.drawingData.sections.length);
+    var viewer = this;
+    var beatsInSection = this.song.data.beatParams.measures * this.song.data.beatParams.beats * this.song.data.beatParams.subbeats;
+    viewer.subbeatsPlayed = 0;
+    viewer.beatMarker.style.width = pxPerBeat + "px";
+    viewer.player.onBeatPlayedListeners.push(function (isubbeat, isection) {
+         viewer.beatMarker.style.left = pxPerBeat * viewer.subbeatsPlayed++ + "px";
+    });
+
 };
 
 OMGEmbeddedViewer.prototype.getDrawingData = function () {
@@ -333,27 +353,6 @@ OMGEmbeddedViewer.prototype.draw = function () {
     }
 };
 
-/*
-        if (soundSet) {
-
-        } else {
-            viewer.totalBeatsInSong = info.totalSubbeats;
-            var pxPerBeat = (viewer.div.clientWidth - padding) / viewer.totalBeatsInSong;
-
-            viewer.player.onBeatPlayedListeners.push(function (isubbeat, isection) {
-                viewer.beatMarker.style.width = pxPerBeat * (1 + isubbeat + isection * beatsInSection) + "px";
-            });
-
-
-        }
-    };
-
-
-
-    console.log("loading player")
-    console.log(data);
-    viewer.loadPlayer(data);
-}*/
 
 
 

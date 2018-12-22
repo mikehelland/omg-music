@@ -233,6 +233,9 @@ OMusicPlayer.prototype.setupNextSection = function (fromStart) {
             if (!p.song.loop) {
                 p.stop();
             }
+            else {
+                if (p.onloop) p.onloop();
+            }
         }
         p.section = p.song.arrangement[p.arrangementI].section;
         p.song.arrangement[p.arrangementI].repeated = 0;
@@ -247,6 +250,9 @@ OMusicPlayer.prototype.setupNextSection = function (fromStart) {
         p.sectionI = 0;
         if (!p.song.loop) {
             p.stop();
+        }
+        else {
+            if (p.onloop) p.onloop();
         }
     }
     p.section = p.song.sections[p.sectionI];

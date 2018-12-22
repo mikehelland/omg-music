@@ -43,36 +43,36 @@
 .omg-music-controls-edit-button:hover, .omg-music-controls-button:hover {
    border:1px solid #808080;
    border-radius:100%;
-   	
+    
 }
 
 .omg-music-controls-play-button {  
     text-align:center;
-	position:relative;
-	display:inline-block;
-	height:38px;
-	width:38px;
-	border:3px solid #888888;
-	border-radius:100%;
-	font-size:1.7em;
-	font-style:bold;
-	cursor:pointer;
+    position:relative;
+    display:inline-block;
+    height:38px;
+    width:38px;
+    border:3px solid #888888;
+    border-radius:100%;
+    font-size:1.7em;
+    font-style:bold;
+    cursor:pointer;
 }
 
 .omg-music-controls-play-button:hover {
-	border:3px solid black;
+    border:3px solid black;
 }
 
 .omg-music-controls-edit-button:active, .omg-music-controls-button:active {
-	border:1px solid white;
-	color:white;
-	background:black;
+    border:1px solid white;
+    color:white;
+    background:black;
 }
 
 .omg-music-controls-play-button:active {
-	border:3px solid white;
-	color:white;
-	background:black;
+    border:3px solid white;
+    color:white;
+    background:black;
 }
 
 .omg-music-controls-button-blink {
@@ -86,13 +86,13 @@
 
 
 .beat-marker {
-	position:absolute;
-	background-color:#4fa5d5;
-	top:0px;
-   left:0px;
-	height:100%;
-	width:0px;
-	opacity:0.6;
+    position:absolute;
+    background-color:#4fa5d5;
+    top:0px;
+    left:0px;
+    bottom:0px;
+    width:0px;
+    opacity:0.6;
 }
 
 #play-button {
@@ -144,10 +144,10 @@
 
 
 .site-tools {
-	background:#F8F8F8;
-	font-family: Helvetica, Arial, sans-serif;
-	font-size: 12px;
-	padding:1%;
+    background:#F8F8F8;
+    font-family: Helvetica, Arial, sans-serif;
+    font-size: 12px;
+    padding:1%;
 }
 
 
