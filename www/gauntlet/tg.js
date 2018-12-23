@@ -999,10 +999,7 @@ tg.partOptionsFragment = {
     surfaceArea:  document.getElementById("part-options-surface-area"),
     randomizeButton:  document.getElementById("part-options-randomize"),
     removeButton: document.getElementById("part-options-remove-button"),
-    clearButton: document.getElementById("part-options-clear-button"),
-    eqH: document.getElementById("part-eq-h"),
-    eqM: document.getElementById("part-eq-m"),
-    eqL: document.getElementById("part-eq-l")    
+    clearButton: document.getElementById("part-options-clear-button")
 };
 tg.partOptionsFragment.setup = function () {
     var f = this;
@@ -1115,17 +1112,6 @@ tg.partOptionsFragment.onshow = function (part) {
     var f = this;
     f.part = part;
 
-    var eqh = {"property": "gain", "name": "EQ High", "type": "slider", "min": 0, "max": 1.5, 
-            "color": "#008800", transform: "square", dataProperty: "eqHigh"};
-    var eqm = {"property": "gain", "name": "EQ Mid", "type": "slider", "min": 0, "max": 1.5, 
-            "color": "#008800", transform: "square", dataProperty: "eqMid"};
-    var eql = {"property": "gain", "name": "EQ Low", "type": "slider", "min": 0, "max": 1.5, 
-            "color": "#008800", transform: "square", dataProperty: "eqLow"};
-
-    new SliderCanvas(f.eqH, eqh, part.eqHGain, part.data.audioParams).sizeCanvas();
-    new SliderCanvas(f.eqM, eqm, part.eqMGain, part.data.audioParams).sizeCanvas();
-    new SliderCanvas(f.eqL, eql, part.eqLGain, part.data.audioParams).sizeCanvas();
-
     f.midiButton.style.display = omg.midi.api && 
             part.data.surface.url === "PRESET_VERTICAL" && 
             part.data.soundSet.chromatic ? "block" : "none";
@@ -1186,7 +1172,7 @@ tg.availableFX = ["Delay", "Chorus", "Phaser", "Overdrive", "Compressor",
 tg.setupAddFXButtons = function (part, addButton, availableFXDiv, fxList) {
     availableFXDiv.style.display = "none";
     availableFXDiv.innerHTML = "";
-    tg.availableFX.forEach(function (fx) {
+    for (let fx in tg.player.fx) {
         var fxDiv = document.createElement("div");
         fxDiv.className = "fx-button"
         fxDiv.innerHTML = fx;
@@ -1195,7 +1181,7 @@ tg.setupAddFXButtons = function (part, addButton, availableFXDiv, fxList) {
             addButton.onclick();
         };
         availableFXDiv.appendChild(fxDiv);
-    });
+    }
     
     addButton.innerHTML = "Add FX";
     addButton.onclick = function () {

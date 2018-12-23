@@ -609,7 +609,7 @@ OMusicPlayer.prototype.makeOsc = function (part) {
         try {
             part.osc.stop(p.context.currentTime);
             part.osc.disconnect(part.gain);
-            part.gain.disconnect(part.topAudioNode);
+            part.gain.disconnect(part.preFXGain);
         } catch (e) {
         }
     }
@@ -629,7 +629,7 @@ OMusicPlayer.prototype.makeOsc = function (part) {
         part.osc.type = "triangle";
     }
 
-    part.osc.connect(part.topAudioNode);
+    part.osc.connect(part.preFXGain);
 
     part.osc.frequency.setValueAtTime(0, p.context.currentTime);
     part.osc.start(p.context.currentTime);
@@ -640,8 +640,7 @@ OMusicPlayer.prototype.makeOsc = function (part) {
         //total hack, this is why things should be processed ala AudioContext, not our own thread
         /*setTimeout(function () {
             part.osc.stop(p.context.currentTime);
-            part.osc.disconnect(part.gain);
-            part.gain.disconnect(part.topAudioNode);
+            part.osc.disconnect(part.preFXGain);
 
             part.oscStarted = false;
             part.osc = null;
@@ -977,7 +976,7 @@ OMusicPlayer.prototype.playSound = function (sound, part, audioParams, strength)
         }
 
         source.bufferGain.gain.setValueAtTime(gain, p.context.currentTime);
-        source.bufferGain.connect(part.topAudioNode);
+        source.bufferGain.connect(part.preFXGain);
 
         source.playbackRate.value = warp;
 
@@ -1239,11 +1238,11 @@ OMusicPlayer.prototype.makeAudioNodesForPart = function (part) {
     var p = this;
     part.panner = p.context.createStereoPanner();
     part.gain = p.context.createGain();
-    p.makeEQ(part); // connects itself between gain and panner
-    //part.gain.connect(part.panner);
+    part.preFXGain = p.context.createGain();
+    part.postFXGain = part.gain;
+    part.preFXGain.connect(part.postFXGain);
+    part.gain.connect(part.panner);
     part.panner.connect(part.section.song.preFXGain);
-    part.defaultTopAudioNode = part.gain;
-    part.topAudioNode = part.defaultTopAudioNode;
     part.gain.gain.setValueAtTime(part.data.audioParams.gain, p.context.currentTime);
     part.panner.pan.setValueAtTime(part.data.audioParams.pan, p.context.currentTime);
 
@@ -1260,12 +1259,9 @@ OMusicPlayer.prototype.makeAudioNodesForSong = function (song) {
     var p = this;
     song.preFXGain = p.context.createGain();
     song.postFXGain = p.context.createGain();
-    
     song.preFXGain.connect(song.postFXGain);
     song.postFXGain.connect(p.context.destination);
-    
-    song.defaultTopAudioNode = song.preFXGain;
-    
+        
     if (song.data.fx) {
         for (var i = 0; i < song.data.fx.length; i++) {
             p.makeFXNodeForPart(song.data.fx[i], song);        
@@ -1286,40 +1282,90 @@ OMusicPlayer.prototype.addFXToPart = function (fx, part) {
 OMusicPlayer.prototype.removeFXFromPart = function (fx, part) {
     var index = part.fx.indexOf(fx);
     
-    if (part.preFXGain) {
-        var connectingNode = part.fx[index - 1] || part.preFXGain;
-        var connectedNode = part.fx[index + 1] || part.postFXGain;
-        fx.disconnect();
-        connectingNode.disconnect();
-        connectingNode.connect(connectedNode);
-    
-        part.fx.splice(index, 1);
-        index = part.data.fx.indexOf(fx.data);
-        part.data.fx.splice(index, 1);
-        return;
-    }
-    
-    var connectedTo = part.fx[index + 1] || part.defaultTopAudioNode;
+    var connectingNode = part.fx[index - 1] || part.preFXGain;
+    var connectedNode = part.fx[index + 1] || part.postFXGain;
     fx.disconnect();
+    connectingNode.disconnect();
+    connectingNode.connect(connectedNode);
+
     part.fx.splice(index, 1);
-    if (index === 0) {
-        part.topAudioNode = part.fx[0] || part.defaultTopAudioNode;
-        if (part.osc) {
-            part.osc.disconnect();
-            part.osc.connect(part.topAudioNode);
-        }
-    }
-    else {
-        part.fx[index - 1].disconnect();
-        part.fx[index - 1].connect(part.fx[index] || part.defaultTopAudioNode);
-    }
     index = part.data.fx.indexOf(fx.data);
     part.data.fx.splice(index, 1);
+
 };
 
 OMusicPlayer.prototype.setupFX = function () {
     var p = this;
+        
     p.fx = {};
+    p.fx["EQ"] = {"make" : function (data) {
+            var input = p.context.createGain();
+            p.makeEQ(input);
+            input.connect = function (to) {
+                console.log("input.connect!")
+                input.output.connect(to);
+            };
+            input.disconnect = function (from) {
+                console.log("input.disconnect!")
+                input.output.disconnect(from);
+            };
+            Object.defineProperty(input, 'highGain', {
+                set: function(value) {
+                    data.highGain = value;
+                    if (!data.bypass) {
+                        console.log("setting hgain", data);
+                        input.eqHGain.gain.value = value;
+                    }
+                }
+            });
+            Object.defineProperty(input, 'midGain', {
+                set: function(value) {
+                    data.midGain = value;
+                    if (!data.bypass)
+                        input.eqMGain.gain.value = value;
+                }
+            });
+            Object.defineProperty(input, 'lowGain', {
+                set: function(value) {
+                    data.lowGain = value;
+                    if (!data.bypass)
+                        input.eqLGain.gain.value = value;
+                }
+            });
+            Object.defineProperty(input, 'bypass', {
+                get: function() {
+                    return data.bypass;
+                },
+                set: function(value) {
+                    console.log("bypass", value)
+                    input.eqHGain.gain.value = value ? 1 : data.highGain;
+                    input.eqMGain.gain.value = value ? 1 : data.midGain;
+                    input.eqLGain.gain.value = value ? 1 : data.lowGain;
+                    data.bypass = value;
+                    console.log("bypass", data)
+                }
+            });
+            input.highGain = data.highGain;
+            input.midGain = data.midGain;
+            input.lowGain = data.lowGain;
+            input.bypass = data.bypass;
+            return input;
+        },
+        "makeData": function (init) {
+            return {
+                name: "EQ",
+                highGain: 1,
+                midGain: 1, 
+                lowGain: 1,
+                bypass: 0
+            };                        
+        },
+        "controls": [
+            {"property": "highGain", "name": "EQ High", "type": "slider", "min": 0, "max": 1.5, transform: "square"},
+            {"property": "midGain", "name": "EQ Mid", "type": "slider", "min": 0, "max": 1.5, transform: "square"},
+            {"property": "lowGain", "name": "EQ Low", "type": "slider", "min": 0, "max": 1.5, transform: "square"}
+        ]
+    };
     p.fx["Delay"] = {"audioClass" : p.tuna.Delay,
         "makeData": function (init) {
             return {
@@ -1573,36 +1619,24 @@ OMusicPlayer.prototype.makeFXNodeForPart = function (fx, part) {
         if (makeData) {
             fxData = fxInfo.makeData();
         }
-        fxNode = new fxInfo.audioClass(fxData);
+        if (fxInfo.audioClass) {
+            fxNode = new fxInfo.audioClass(fxData);
+        }
+        else {
+            fxNode = fxInfo.make(fxData);
+        }
     }
 
     if (fxNode) {
         fxNode.data = fxData;
 
-        if (part.preFXGain) {
-            var connectingNode = part.fx[part.fx.length - 1] || part.preFXGain;
-            connectingNode.disconnect(part.postFXGain);
-            connectingNode.connect(fxNode);
-            fxNode.connect(part.postFXGain);
-            part.fx.push(fxNode);
-            return fxNode;
-        }
-            
-        var lastFX = part.fx[part.fx.length - 1];
-        if (lastFX) {
-            lastFX.disconnect(part.defaultTopAudioNode);
-            lastFX.connect(fxNode);
-        }
-        else {
-            if (part.osc) {
-                part.osc.disconnect(part.topAudioNode);
-                part.osc.connect(fxNode);
-            }
-            part.topAudioNode = fxNode;
-        }
-        fxNode.connect(part.defaultTopAudioNode);
+        var connectingNode = part.fx[part.fx.length - 1] || part.preFXGain;
+        connectingNode.disconnect(part.postFXGain);
+        connectingNode.connect(fxNode);
+        fxNode.connect(part.postFXGain);
         part.fx.push(fxNode);
     }
+    
     return fxNode;
 };
 
@@ -1929,8 +1963,7 @@ OMusicPlayer.prototype.makeEQ = function (part) {
     // andre.michelle@gmail.com
 
     var context = this.context;
-    var sourceNode = part.gain;
-
+    
     // EQ Properties
     //
     var gainDb = -40.0;
@@ -1954,9 +1987,9 @@ OMusicPlayer.prototype.makeEQ = function (part) {
     part.eqLInvert = context.createGain();
     part.eqLInvert.gain.value = -1.0;
 
-    sourceNode.connect(part.eqL);
-    sourceNode.connect(part.eqM);
-    sourceNode.connect(part.eqH);
+    part.connect(part.eqL);
+    part.connect(part.eqM);
+    part.connect(part.eqH);
 
     part.eqH.connect(part.eqHInvert);
     part.eqL.connect(part.eqLInvert);
@@ -1968,38 +2001,22 @@ OMusicPlayer.prototype.makeEQ = function (part) {
     part.eqMGain = context.createGain();
     part.eqHGain = context.createGain();
 
-    if (typeof part.data.audioParams.eqHigh !== "number")
-        part.data.audioParams.eqHigh = 1;
-    if (typeof part.data.audioParams.eqMid !== "number")
-        part.data.audioParams.eqMid = 1;
-    if (typeof part.data.audioParams.eqLow !== "number")
-        part.data.audioParams.eqLow = 1;
-    console.log(part.data.audioParams.eqHigh);
-    part.eqHGain.gain.value = part.data.audioParams.eqHigh;
-    part.eqMGain.gain.value = part.data.audioParams.eqMid;
-    part.eqLGain.gain.value = part.data.audioParams.eqLow;
+    if (typeof part.highGain !== "number")
+        part.highGain = 1;
+    if (typeof part.midGain !== "number")
+        part.midGain = 1;
+    if (typeof part.lowGain !== "number")
+        part.lowGain = 1;
+    part.eqHGain.gain.value = part.highGain;
+    part.eqMGain.gain.value = part.midGain;
+    part.eqLGain.gain.value = part.lowGain;
 
     part.eqL.connect(part.eqLGain);
     part.eqM.connect(part.eqMGain);
     part.eqH.connect(part.eqHGain);
 
-    part.eqSum = context.createGain();
-    part.eqLGain.connect(part.eqSum);
-    part.eqMGain.connect(part.eqSum);
-    part.eqHGain.connect(part.eqSum);
-    part.eqSum.connect(part.panner);
-
-    // Input
-    //
-    var f = function changeGain(string,type)
-    {
-      var value = parseFloat(string) / 100.0;
-      
-      switch(type)
-      {
-        case 'lowGain': lGain.gain.value = value; break;
-        case 'midGain': mGain.gain.value = value; break;
-        case 'highGain': hGain.gain.value = value; break;
-      }
-    }
+    part.output = context.createGain();
+    part.eqLGain.connect(part.output);
+    part.eqMGain.connect(part.output);
+    part.eqHGain.connect(part.output);
 };
