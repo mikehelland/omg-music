@@ -369,7 +369,9 @@ OMusicPlayer.prototype.loadDrumbeat = function (part, soundsNeeded) {
             }
         }
 
-        if (tracks[i].sound && !soundsNeeded[tracks[i].sound]) {
+        if (soundsNeeded && tracks[i].sound && 
+                !omg.loadedSounds[tracks[i].sound] &&
+                !soundsNeeded[tracks[i].sound]) {
             soundsNeeded[tracks[i].sound] = true;
         }
     }
@@ -560,7 +562,7 @@ OMusicPlayer.prototype.playBeatWithLiveNote = function (iSubBeat, part) {
             var note = {note: part.liveNotes[index].note,
                 scaledNote: part.liveNotes[index].scaledNote,
                 beats: part.liveNotes.autobeat / part.section.song.data.beatParams.subbeats};
-            if (part.soundSet) {
+            if (part.soundSet && !part.soundSet.osc) {
                 note.sound = this.getSound(part.soundSet, part.liveNotes[index]);
             }
 
@@ -1237,7 +1239,8 @@ OMusicPlayer.prototype.makeAudioNodesForPart = function (part) {
     var p = this;
     part.panner = p.context.createStereoPanner();
     part.gain = p.context.createGain();
-    part.gain.connect(part.panner);
+    p.makeEQ(part); // connects itself between gain and panner
+    //part.gain.connect(part.panner);
     part.panner.connect(part.section.song.preFXGain);
     part.defaultTopAudioNode = part.gain;
     part.topAudioNode = part.defaultTopAudioNode;
@@ -1391,7 +1394,7 @@ OMusicPlayer.prototype.setupFX = function () {
             {"property": "outputGain", "name": "Output Gain", "type": "slider", "min": 0, "max": 1.5},
             {"property": "drive", "name": "Drive", "type": "slider", "min": 0, "max": 1},
             {"property": "curveAmount", "name": "Curve Amount", "type": "slider", "min": 0, "max": 1},
-            {"property": "algorithmIndex", "name": "Type", "type": "slider", "min": 0, "max": 5}
+            {"property": "algorithmIndex", "name": "Type", "type": "options", "options": [0,1,2,3,4,5]}
         ]
     };
     p.fx["Compressor"] = {"audioClass": p.tuna.Compressor,
@@ -1415,7 +1418,7 @@ OMusicPlayer.prototype.setupFX = function () {
             {"property": "release", "name": "Release", "type": "slider", "min": 0, "max": 3000},
             {"property": "ratio", "name": "Ratio", "type": "slider", "min": 0, "max": 20},
             {"property": "knee", "name": "Knee", "type": "slider", "min": 0, "max": 40},
-            {"property": "automakeup", "name": "Auto Makeup", "type": "check"}
+            {"property": "automakeup", "name": "Auto Makeup", "type": "options", "options": [false, true]}
         ]
     };
     p.fx["Reverb"] = {"audioClass": p.tuna.Convolver,
@@ -1452,7 +1455,8 @@ OMusicPlayer.prototype.setupFX = function () {
             {"property": "frequency", "name": "Frequency", "type": "slider", "min": 20, "max": 22050},
             {"property": "Q", "name": "Q", "type": "slider", "min": 0.001, "max": 100},
             {"property": "gain", "name": "Gain", "type": "slider", "min": -40, "max": 40},
-            {"property": "filterType", "name": "Filter Type", "type": "options"},
+            {"property": "filterType", "name": "Filter Type", "type": "options", 
+                "options": ["lowpass", "highpass", "bandpass", "lowshelf", "highshelf", "peaking", "notch", "allpass"]},
         ]
     };
     p.fx["Cabinet"] = {"audioClass": p.tuna.Cabinet,
@@ -1460,7 +1464,7 @@ OMusicPlayer.prototype.setupFX = function () {
             return {
                 name: "Cabinet",
                 makeupGain: 1,                                 //0 to 20
-                impulsePath: "impulses/impulse_guitar.wav",    //path to your speaker impulse
+                impulsePath: "/omg-music/impulses/impulse_guitar.wav",    //path to your speaker impulse
                 bypass: 0
             };
         },
@@ -1498,7 +1502,7 @@ OMusicPlayer.prototype.setupFX = function () {
             };
         },
         "controls": [
-            {"property": "automode", "name": "Auto Mode", "type": "check"},
+            {"property": "automode", "name": "Auto Mode", "type": "options", "options": [false, true]},
             {"property": "baseFrequency", "name": "Base Frequency", "type": "slider", "min": 0, "max": 1},
             {"property": "excursionOctaves", "name": "Excursion Octaves", "type": "slider", "min": 1, "max": 6},
             {"property": "sweep", "name": "Sweep", "type": "slider", "min": 0, "max": 1},
@@ -1516,8 +1520,9 @@ OMusicPlayer.prototype.setupFX = function () {
             };
         },
         "controls": [
-            {"property": "bits", "name": "Bits", "type": "slider", "min": 1, "max": 16},
-            {"property": "normfreq", "name": "Normal Frequency", "type": "slider", "min": 0, "max": 1}
+            {"property": "bits", "name": "Bits", "type": "options", "options": [1,2,4,8,16]},
+            {"property": "normfreq", "name": "Normal Frequency", "type": "slider", "min": 0, "max": 1, "transform": "square"},
+            {"property": "bufferSize", "name": "Buffer Size", "type": "options", "options": [256,512,1024,2048,4096,8192,16384]}
         ]
     };
     p.fx["Moog"] = {"audioClass": p.tuna.MoogFilter,
@@ -1531,7 +1536,8 @@ OMusicPlayer.prototype.setupFX = function () {
         },
         "controls": [
             {"property": "cutoff", "name": "Cutoff", "type": "slider", "min": 0, "max": 1},
-            {"property": "resonance", "name": "Resonance", "type": "slider", "min": 0, "max": 4}
+            {"property": "resonance", "name": "Resonance", "type": "slider", "min": 0, "max": 4},
+            {"property": "bufferSize", "name": "Buffer Size", "type": "options", "options": [256,512,1024,2048,4096,8192,16384]}
         ]
     };
     p.fx["Ping Pong"] = {"audioClass": p.tuna.PingPongDelay,
@@ -1909,3 +1915,91 @@ OMGPart.prototype.makeTracks = function () {
     }
 };
 
+OMusicPlayer.prototype.makeEQ = function (part) {
+    
+
+    // https://codepen.io/andremichelle/pen/RNwamZ/
+    // How to hack an equalizer with two biquad filters
+    //
+    // 1. Extract the low frequencies (highshelf)
+    // 2. Extract the high frequencies (lowshelf)
+    // 3. Subtract low and high frequencies (add invert) from the source for the mid frequencies.
+    // 4. Add everything back together
+    //
+    // andre.michelle@gmail.com
+
+    var context = this.context;
+    var sourceNode = part.gain;
+
+    // EQ Properties
+    //
+    var gainDb = -40.0;
+    var bandSplit = [360,3600];
+
+    part.eqH = context.createBiquadFilter();
+    part.eqH.type = "lowshelf";
+    part.eqH.frequency.value = bandSplit[0];
+    part.eqH.gain.value = gainDb;
+
+    part.eqHInvert = context.createGain();
+    part.eqHInvert.gain.value = -1.0;
+
+    part.eqM = context.createGain();
+
+    part.eqL = context.createBiquadFilter();
+    part.eqL.type = "highshelf";
+    part.eqL.frequency.value = bandSplit[1];
+    part.eqL.gain.value = gainDb;
+
+    part.eqLInvert = context.createGain();
+    part.eqLInvert.gain.value = -1.0;
+
+    sourceNode.connect(part.eqL);
+    sourceNode.connect(part.eqM);
+    sourceNode.connect(part.eqH);
+
+    part.eqH.connect(part.eqHInvert);
+    part.eqL.connect(part.eqLInvert);
+
+    part.eqHInvert.connect(part.eqM);
+    part.eqLInvert.connect(part.eqM);
+
+    part.eqLGain = context.createGain();
+    part.eqMGain = context.createGain();
+    part.eqHGain = context.createGain();
+
+    if (typeof part.data.audioParams.eqHigh !== "number")
+        part.data.audioParams.eqHigh = 1;
+    if (typeof part.data.audioParams.eqMid !== "number")
+        part.data.audioParams.eqMid = 1;
+    if (typeof part.data.audioParams.eqLow !== "number")
+        part.data.audioParams.eqLow = 1;
+    console.log(part.data.audioParams.eqHigh);
+    part.eqHGain.gain.value = part.data.audioParams.eqHigh;
+    part.eqMGain.gain.value = part.data.audioParams.eqMid;
+    part.eqLGain.gain.value = part.data.audioParams.eqLow;
+
+    part.eqL.connect(part.eqLGain);
+    part.eqM.connect(part.eqMGain);
+    part.eqH.connect(part.eqHGain);
+
+    part.eqSum = context.createGain();
+    part.eqLGain.connect(part.eqSum);
+    part.eqMGain.connect(part.eqSum);
+    part.eqHGain.connect(part.eqSum);
+    part.eqSum.connect(part.panner);
+
+    // Input
+    //
+    var f = function changeGain(string,type)
+    {
+      var value = parseFloat(string) / 100.0;
+      
+      switch(type)
+      {
+        case 'lowGain': lGain.gain.value = value; break;
+        case 'midGain': mGain.gain.value = value; break;
+        case 'highGain': hGain.gain.value = value; break;
+      }
+    }
+};
