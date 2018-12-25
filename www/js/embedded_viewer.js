@@ -96,9 +96,6 @@ function OMGEmbeddedViewer(params) {
     //viewer.beatMarker.style.height = height + "px";
     viewer.beatMarker.style.marginLeft = viewer.padding / 2 + "px";
 
-
-    omg.ui.omgUrl = "omg-music/";
-    omg.ui.setupNoteImages();
         
     viewer.playButton.onclick = function () {
         
@@ -316,14 +313,21 @@ OMGEmbeddedViewer.prototype.draw = function () {
                                     this.subbeatLength - marginX * 2, -1 * this.drawingData.sections[isection].trackHeight + marginY * 2);
             }
         }
+        this.context.fillStyle = "black";
+        this.context.font = "28pt serif";
         for (var inotes = 0; inotes < this.drawingData.sections[isection].notes.length; inotes++) {
             usedBeats = 0;
             for (var inote = 0; inote < this.drawingData.sections[isection].notes[inotes].length; inote++) {
                 
-                this.context.drawImage(
+                /*this.context.drawImage(
                     omg.ui.getImageForNote(this.drawingData.sections[isection].notes[inotes][inote]),
                     isection * this.sectionLength + this.subbeatLength * usedBeats * this.beatParams.subbeats, 
                     (88 - this.drawingData.sections[isection].notes[inotes][inote].scaledNote) / 88 * this.drawingData.sections[isection].notesHeight
+                );*/
+                this.context.fillText(
+                    omg.ui.getTextForNote(this.drawingData.sections[isection].notes[inotes][inote]),
+                    isection * this.sectionLength + this.subbeatLength * usedBeats * this.beatParams.subbeats, 
+                    30 + (88 - this.drawingData.sections[isection].notes[inotes][inote].scaledNote) / 88 * this.drawingData.sections[isection].notesHeight
                 );
                 usedBeats += this.drawingData.sections[isection].notes[inotes][inote].beats;
                 if (usedBeats * this.beatParams.subbeats >= this.totalSubbeats) {
