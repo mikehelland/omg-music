@@ -456,7 +456,9 @@ omg.ui.getChordProgressionText = function (section) {
     return chordsText;
 };
 
-omg.ui.useUnicodeNotes = navigator.userAgent.indexOf("Android") === -1;
+omg.ui.useUnicodeNotes = navigator.userAgent.indexOf("Android") === -1 
+    && navigator.userAgent.indexOf("iPhone") === -1 
+    && navigator.userAgent.indexOf("iPad") === -1 ;
 if (!omg.ui.useUnicodeNotes) {
     omg.ui.setupNoteImages();
 }
