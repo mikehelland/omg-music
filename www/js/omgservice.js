@@ -215,6 +215,16 @@ if (!omg.ui)
 
 omg.ui.omgUrl = "/omg-music/"; // omg-music/";
 
+omg.ui.noteImageUrls = [[2, "note_half", "note_rest_half"],
+    [1.5, "note_dotted_quarter", "note_rest_dotted_quarter"],
+    [1, "note_quarter", "note_rest_quarter"],
+    [0.75, "note_dotted_eighth", "note_rest_dotted_eighth"],
+    [0.5, "note_eighth", "note_rest_eighth"], //, "note_eighth_upside"],
+    [0.375, "note_dotted_sixteenth", "note_rest_dotted_sixteenth"],
+    [0.25, "note_sixteenth", "note_rest_sixteenth"], //, "note_sixteenth_upside"],
+    [0.125, "note_thirtysecond", "note_rest_thirtysecond"],
+    [-1, "note_no_file", "note_no_file"]];
+    
 omg.ui.noteNames = ["C-", "C#-", "D-", "Eb-", "E-", "F-", "F#-", "G-", "G#-", "A-", "Bb-", "B-",
     "C0", "C#0", "D0", "Eb0", "E0", "F0", "F#0", "G0", "G#0", "A0", "Bb0", "B0",
     "C1", "C#1", "D1", "Eb1", "E1", "F1", "F#1", "G1", "G#1", "A1", "Bb1", "B1",
@@ -271,6 +281,111 @@ omg.ui.totalOffsets = function (element, parent) {
     };
 };
 
+omg.ui.getImageForNote = function (note, highContrast) {
+
+    var index = (note.rest ? 2 : 0) + (highContrast ? 1 : 0)
+    var draw_noteImage = omg.ui.noteImages[8][index];
+    if (note.beats == 2.0) {
+        draw_noteImage = omg.ui.noteImages[0][index];
+    }
+    if (note.beats == 1.5) {
+        draw_noteImage = omg.ui.noteImages[1][index];
+    }
+    if (note.beats == 1.0) {
+        draw_noteImage = omg.ui.noteImages[2][index];
+    }
+    if (note.beats == 0.75) {
+        draw_noteImage = omg.ui.noteImages[3][index];
+    }
+    if (note.beats == 0.5) {
+        draw_noteImage = omg.ui.noteImages[4][index];
+    }
+    if (note.beats == 0.375) {
+        draw_noteImage = omg.ui.noteImages[5][index];
+    }
+    if (note.beats == 0.25) {
+        draw_noteImage = omg.ui.noteImages[6][index];
+    }
+    if (note.beats == 0.125) {
+        draw_noteImage = omg.ui.noteImages[7][index];
+    }
+
+    return draw_noteImage;
+
+};
+
+omg.ui.getNoteImageUrl = function (i, j, highContrast) {
+    var fileName = omg.ui.noteImageUrls[i][j];
+    if (fileName) {
+        return "img/notes/" + (highContrast ? "w_" : "") + fileName + ".png";
+    }
+};
+
+omg.ui.setupNoteImages = function () {
+    if (omg.ui.noteImages)
+        return;
+
+    if (!omg.ui.noteImageUrls)
+        omg.ui.getImageUrlForNote({beats: 1});
+
+    var noteImages = [];
+    var hasImgs = true;
+    var img, img2;
+    for (var i = 0; i < omg.ui.noteImageUrls.length; i++) {
+        img = document.getElementById("omg_" + omg.ui.noteImageUrls[i][1]);
+        img2 = document.getElementById("omg_" + omg.ui.noteImageUrls[i][2]);
+        if (img && img2) {
+            noteImages.push([img, img, img2, img2]);
+        }
+        else {
+            hasImgs = false;
+            break;
+        }
+    }
+
+    if (hasImgs) {
+        omg.ui.noteImages = noteImages;
+        return;
+    }
+
+    noteImages = [];
+    var loadedNotes = 0;
+    var areAllNotesLoaded = function () {
+        loadedNotes++;
+        if (loadedNotes == omg.ui.noteImageUrls.length * 4) {
+            omg.ui.noteImages = noteImages;
+        }
+    };
+
+    for (var i = 0; i < omg.ui.noteImageUrls.length; i++) {
+
+        var noteImage = new Image();
+        noteImage.onload = areAllNotesLoaded;
+        noteImage.src = omg.ui.omgUrl + omg.ui.getNoteImageUrl(i, 1);
+
+        var noteWhiteImage = new Image();
+        noteWhiteImage.onload = areAllNotesLoaded;
+        noteWhiteImage.src = omg.ui.omgUrl + omg.ui.getNoteImageUrl(i, 1, true);
+
+        var restImage = new Image();
+        restImage.onload = areAllNotesLoaded;
+        restImage.src = omg.ui.omgUrl + omg.ui.getNoteImageUrl(i, 2);
+
+        var restWhiteImage = new Image();
+        restWhiteImage.onload = areAllNotesLoaded;
+        restWhiteImage.src = omg.ui.omgUrl + omg.ui.getNoteImageUrl(i, 2, true);
+
+        var imageBundle = [noteImage, noteWhiteImage, restImage, restWhiteImage];
+        var upsideDown = omg.ui.getNoteImageUrl(i, 3);
+        if (upsideDown) {
+            var upsideImage = new Image();
+            upsideImage.src = omg.ui.omgUrl + upsideDown;
+            imageBundle.push(upsideImage);
+        }
+
+        noteImages.push(imageBundle);
+    }
+};
 
 omg.ui.getTextForNote = function (note, highContrast) {
 
@@ -341,3 +456,7 @@ omg.ui.getChordProgressionText = function (section) {
     return chordsText;
 };
 
+omg.ui.useUnicodeNotes = navigator.userAgent.indexOf("Android") === -1;
+if (!omg.ui.useUnicodeNotes) {
+    omg.ui.setupNoteImages();
+}
