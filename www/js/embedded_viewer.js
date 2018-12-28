@@ -318,17 +318,20 @@ OMGEmbeddedViewer.prototype.draw = function () {
         for (var inotes = 0; inotes < this.drawingData.sections[isection].notes.length; inotes++) {
             usedBeats = 0;
             for (var inote = 0; inote < this.drawingData.sections[isection].notes[inotes].length; inote++) {
-                
-                /*this.context.drawImage(
-                    omg.ui.getImageForNote(this.drawingData.sections[isection].notes[inotes][inote]),
-                    isection * this.sectionLength + this.subbeatLength * usedBeats * this.beatParams.subbeats, 
-                    (88 - this.drawingData.sections[isection].notes[inotes][inote].scaledNote) / 88 * this.drawingData.sections[isection].notesHeight
-                );*/
-                this.context.fillText(
-                    omg.ui.getTextForNote(this.drawingData.sections[isection].notes[inotes][inote]),
-                    isection * this.sectionLength + this.subbeatLength * usedBeats * this.beatParams.subbeats, 
-                    30 + (88 - this.drawingData.sections[isection].notes[inotes][inote].scaledNote) / 88 * this.drawingData.sections[isection].notesHeight
-                );
+                if (omg.ui.useUnicodeNotes) {
+                    this.context.fillText(
+                        omg.ui.getTextForNote(this.drawingData.sections[isection].notes[inotes][inote]),
+                        isection * this.sectionLength + this.subbeatLength * usedBeats * this.beatParams.subbeats, 
+                        30 + (88 - this.drawingData.sections[isection].notes[inotes][inote].scaledNote) / 88 * this.drawingData.sections[isection].notesHeight
+                    );
+                }
+                else {
+                    this.context.drawImage(
+                        omg.ui.getImageForNote(this.drawingData.sections[isection].notes[inotes][inote]),
+                        isection * this.sectionLength + this.subbeatLength * usedBeats * this.beatParams.subbeats, 
+                        (88 - this.drawingData.sections[isection].notes[inotes][inote].scaledNote) / 88 * this.drawingData.sections[isection].notesHeight
+                    );
+                }
                 usedBeats += this.drawingData.sections[isection].notes[inotes][inote].beats;
                 if (usedBeats * this.beatParams.subbeats >= this.totalSubbeats) {
                     break;
