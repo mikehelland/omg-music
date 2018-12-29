@@ -15,9 +15,6 @@ tg.sectionCaptionDiv = document.getElementById("tool-bar-section-button");
 
 tg.backButton = document.getElementById("back-button");
 
-tg.player = new OMusicPlayer();
-tg.player.loadFullSoundSets = true;
-
 
 /*
  * A couple quick navigation methods
@@ -250,16 +247,6 @@ tg.playButton.onclick = function () {
     }
 };
 
-tg.player.onPlay = function () {
-    tg.drawPlayButton(0);
-};
-tg.player.onStop = function () {
-    tg.drawPlayButton();
-    var chordsCaption = tg.makeChordsCaption();
-    tg.chordsButton.innerHTML = chordsCaption;
-    tg.chordsEditorView.innerHTML = chordsCaption;
-};
-
 tg.setSongControlsUI = function () {
     tg.keyButton.innerHTML = omg.ui.getKeyCaption(tg.song.data.keyParams);
     tg.beatsButton.innerHTML = tg.song.data.beatParams.bpm + " bpm";
@@ -319,68 +306,53 @@ tg.setupPartButton = function (omgpart) {
     return partDiv;
 }
 
-tg.playButton.width = tg.playButton.clientWidth
-tg.playButton.height = tg.playButton.clientHeight
+//tg.playButton.width = tg.playButton.clientWidth
+//tg.playButton.height = tg.playButton.clientHeight
+tg.playButtonContext = tg.playButton.getContext("2d");
 tg.drawPlayButton = function (subbeat) {
-    tg.playButton.width = tg.playButton.width;
-    var context = tg.playButton.getContext("2d");
-
     if (!tg.song) {
-        context.fillStyle = "white";
-        context.font = "bold 30px sans-serif";
-        var caption = "LOADING...";
-        var measures = context.measureText(caption);
-        context.fillText(caption, tg.playButton.width / 2 - measures.width / 2, 
-                        tg.playButton.height / 2 - measures.height / 2);
         return;
     }
-    
-    context.globalAlpha = 0.6;
+    tg.playButton.width = tg.playButton.width;
+
+    tg.playButtonContext.globalAlpha = 0.6;
 
     var beatWidth = tg.playButton.width / 
         (tg.song.data.beatParams.measures * tg.song.data.beatParams.beats);
 
     if (tg.player.playing) {
-        context.fillStyle = "#00FF00";
-        context.fillRect(beatWidth * Math.floor(subbeat / tg.song.data.beatParams.subbeats), 
+        tg.playButtonContext.fillStyle = "#00FF00";
+        tg.playButtonContext.fillRect(beatWidth * Math.floor(subbeat / tg.song.data.beatParams.subbeats), 
             0, beatWidth, tg.playButton.height);        
     }
     else {
-        context.fillStyle = "#FF0000";
-        context.fillRect(0, 0, tg.playButton.width, tg.playButton.height);        
+        tg.playButtonContext.fillStyle = "#FF0000";
+        tg.playButtonContext.fillRect(0, 0, tg.playButton.width, tg.playButton.height);        
     }
 
-    context.fillStyle = "white";
-    context.strokeStyle = "white";
-    context.strokeRect(0, 0, tg.playButton.width, tg.playButton.height);
+    tg.playButtonContext.fillStyle = "white";
+    tg.playButtonContext.strokeStyle = "white";
+    tg.playButtonContext.strokeRect(0, 0, tg.playButton.width, tg.playButton.height);
     for (var beat = 1; 
             beat <= tg.song.data.beatParams.beats * tg.song.data.beatParams.measures; 
             beat++) {
-        context.fillRect(beat * beatWidth, 0, 
+        tg.playButtonContext.fillRect(beat * beatWidth, 0, 
                     beat % tg.song.data.beatParams.beats == 0 ? 2 : 1, 
                     tg.playButton.height);
     }
-    context.globalAlpha = 1.0;    
+    tg.playButtonContext.globalAlpha = 1.0;    
     
-    context.font = "bold 30px sans-serif";
+    tg.playButtonContext.font = "bold 30px sans-serif";
     var caption = tg.player.playing ? "STOP" : "PLAY";
-    measures = context.measureText(caption);
-    context.fillText(caption, tg.playButton.width / 2 - measures.width / 2, 
+    measures = tg.playButtonContext.measureText(caption);
+    tg.playButtonContext.fillText(caption, tg.playButton.width / 2 - measures.width / 2, 
                         tg.playButton.height / 2 + 10);
                         
     //context.font = "bold 10px sans-serif";
     //context.fillText(tg.player.latencyMonitor, 10, tg.playButton.height / 2 + 10);
 
 };
-tg.player.onBeatPlayedListeners.push(function (isubbeat, section) {
-    tg.drawPlayButton(isubbeat);
-    if (isubbeat === 0) {
-        if (tg.currentSection !== section) {
-            tg.loadSection(section);
-        }
-        tg.setSongControlsUI();
-    }
-});
+
 tg.drawPlayButton();
 
 
@@ -2106,7 +2078,7 @@ tg.newOMGLiveData = function (part, data) {
 tg.getOMGLiveRoomName = function (part) {
     var roomName = "";
     if (tg.user && tg.user.username) {
-        roomName += tg.user.username + "-";
+        roomName += tg.user.username.trim() + "-";
     }
     if (tg.song.data.name) {
         roomName += tg.song.data.name + "-";
@@ -2128,7 +2100,7 @@ tg.switchOMGLiveRoom = function (part, newRoom) {
 */
 
 tg.midiParts = [];
-omg.midi.onnoteoff = function (noteNumber) {
+tg.onmidinoteoff = function (noteNumber) {
     tg.midiParts.forEach(part => {
         for (var i = 0; i< part.activeMIDINotes.length; i++) {
             if (part.activeMIDINotes[i].scaledNote === noteNumber) {
@@ -2146,7 +2118,7 @@ omg.midi.onnoteoff = function (noteNumber) {
     });
 };
 
-omg.midi.onnoteon = function (noteNumber) {
+tg.onmidinoteon = function (noteNumber) {
     tg.midiParts.forEach(part => {
         var note = {beats: 0.25, scaledNote: noteNumber};
         part.activeMIDINotes.splice(0, 0, note);    
@@ -2164,19 +2136,19 @@ omg.midi.onnoteon = function (noteNumber) {
     });
 };
 
-omg.midi.onplay = function () {
+tg.onmidiplay = function () {
     if (!tg.player.playing) {
         tg.player.play();
     }
 };
 
-omg.midi.onstop = function () {
+tg.onmidistop = function () {
     if (tg.player.playing) {
         tg.player.stop();
     }
 };
 
-omg.midi.onmessage = function (control, value) {
+tg.onmidimessage = function (control, value) {
     if (control === 91) {
         value = Math.floor(value / 128 * 4);
         if (value === 1) value = 4;
@@ -2247,13 +2219,10 @@ tg.loadSong = function (songData) {
     tg.player.prepareSong(tg.song);
     
     tg.loadSection(tg.song.sections[0])
-
-    tg.monkey = new OMGMonkey(tg.song, tg.currentSection);
         
     document.getElementById("tool-bar-song-button").innerHTML = tg.song.data.name || "(Untitled)";
 
     tg.drawPlayButton();
-    tg.songOptionsFragment.setup();
     
     tg.song.onKeyChangeListeners.push(function () {
         tg.setSongControlsUI();
@@ -2272,6 +2241,11 @@ tg.loadSong = function (songData) {
     tg.song.onPartAddListeners.push(function (part) {
         tg.loadPart(part);
     });
+    
+    if (tg.fullySetup) {
+        tg.monkey = new OMGMonkey(tg.song, tg.currentSection);
+        tg.songOptionsFragment.setup();
+    }
 
 };
 
@@ -2288,7 +2262,7 @@ tg.loadSection = function (section) {
 tg.loadPart = function (part) {
     var div = tg.setupPartButton(part);
 
-    if (part.data.surface.url === "PRESET_VERTICAL" && !part.mm) {
+    if (part.data.surface.url === "PRESET_VERTICAL" && !part.mm && typeof OMGMelodyMaker !== "undefined") {
         part.mm = new OMGMelodyMaker(tg.instrument.canvas, part, tg.player, tg.instrument.backgroundCanvas);
         part.mm.readOnly = false;
     }
@@ -2299,12 +2273,55 @@ tg.loadPart = function (part) {
 
 
 // away we go
-// KEEP THIS LAST
-tg.getSong(function (song) {
-    tg.loadSong(song);
-});
-omg.server.getHTTP("/user/", function (res) {
-    if (res) {
-        tg.onlogin(res);
-    }
-});
+tg.onpreready = function () {
+    tg.player = new OMusicPlayer();
+    tg.player.loadFullSoundSets = true;
+
+    tg.player.onPlay = function () {
+        tg.drawPlayButton(0);
+    };
+    tg.player.onStop = function () {
+        tg.drawPlayButton();
+        var chordsCaption = tg.makeChordsCaption();
+        tg.chordsButton.innerHTML = chordsCaption;
+        tg.chordsEditorView.innerHTML = chordsCaption;
+    };
+    
+    tg.player.onBeatPlayedListeners.push(function (isubbeat, section) {
+        tg.drawPlayButton(isubbeat);
+        if (isubbeat === 0) {
+            if (tg.currentSection !== section) {
+                tg.loadSection(section);
+            }
+            tg.setSongControlsUI();
+        }
+    });
+        
+    tg.getSong(function (song) {
+        tg.loadSong(song);
+    });
+    omg.server.getHTTP("/user/", function (res) {
+        if (res) {
+            tg.onlogin(res);
+        }
+    });
+};
+tg.onready = function () {
+    tg.monkey = new OMGMonkey(tg.song, tg.currentSection);
+    tg.songOptionsFragment.setup();
+    omg.midi.onnoteoff = tg.onmidinoteoff;
+    omg.midi.onnoteon = tg.onmidinoteon;
+    omg.midi.onmessage = tg.onmidimessage;
+    omg.midi.onplay = tg.onmidiplay;
+    omg.midi.onstop = tg.onmidistop;
+    tg.fullySetup = true;
+    
+    tg.currentSection.parts.forEach(part => {
+        if (part.data.surface.url === "PRESET_VERTICAL" && !part.mm && typeof OMGMelodyMaker !== "undefined") {
+            part.mm = new OMGMelodyMaker(tg.instrument.canvas, part, tg.player, tg.instrument.backgroundCanvas);
+            part.mm.readOnly = false;
+        }
+    });
+
+};
+

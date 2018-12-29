@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" type="text/css" href="tg.css">
-    <link rel="stylesheet" type="text/css" href="/css/search.css">
+    <!--<link rel="stylesheet" type="text/css" href="/css/search.css">-->
     <title>Techno GAUNTLET</title>
 </head>
 <body>
@@ -12,6 +12,24 @@
 <div id="main-fragment">
 
     <canvas id="play-button">PLAY</canvas>
+    <script>
+    (function () {
+    var canvas = document.getElementById("play-button");
+    var context = canvas.getContext("2d");
+    canvas.width = canvas.clientWidth;
+    canvas.height = canvas.clientHeight;
+    context.fillStyle = "#FF0000";
+    context.globalAlpha = 0.6;
+    context.fillRect(0, 0, canvas.width, canvas.height);
+    context.globalAlpha = 1;
+    context.fillStyle = "white";
+    context.font = "bold 30px sans-serif";
+    var caption = "LOADING...";
+    var measures = context.measureText(caption);
+    context.fillText(caption, canvas.width / 2 - measures.width / 2, 
+                    canvas.height / 2 + 10);
+    })();
+    </script>
     <div id="tool-bar">
             <div id="main-fragment-user-button">
                 <span class="tool-bar-caption">User</span>
@@ -299,17 +317,22 @@
         <div id="back-button">&lt; Back</div>
     </div>
 
-    
+    <script src="tg.js"></script>
     <script src="/js/omgservice.js"></script>
-    <script src="/js/user.js"></script>
     <script src="/omg-music/tuna-min.js"></script>
     <script src="/omg-music/omusic_player.js"></script>
+    <script>
+    tg.onpreready();
+    </script>
     <script src="/omg-music/sequencer_surface.js"></script>
     <script src="/omg-music/vertical_surface.js"></script>
     <script src="/omg-music/webmidi.js"></script>
     <script src="/omg-music/monkey.js"></script>
-    <script src="tg.js"></script>
-    <script src="/socket.io/socket.io.js"></script>
+    <script>
+    tg.onready()
+    </script>
+
+    <script async src="/socket.io/socket.io.js"></script>
 
 </body>
 </html>
