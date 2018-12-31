@@ -218,7 +218,7 @@
         <div id="user-fragment" class="fragment">
             <div class="detail-fragment-body">
             <h2>User</h2>
-            <a href="/">OMG Home</a>
+            <a href="/">OMG Home</a> - <a href="#" onclick="document.body.requestFullscreen()">Go Fullscreen</a>
             <div id="user-login-signup">
                 <h3>You are not logged in. <span id="user-login-invalid">Invalid login</span>
                 </h3>
@@ -317,22 +317,8 @@
         <div id="back-button">&lt; Back</div>
     </div>
 
-    <script src="tg.js"></script>
-    <script src="/js/omgservice.js"></script>
-    <script src="/omg-music/tuna-min.js"></script>
-    <script src="/omg-music/omusic_player.js"></script>
-    <script>
-    tg.onpreready();
-    </script>
-    <script src="/omg-music/sequencer_surface.js"></script>
-    <script src="/omg-music/vertical_surface.js"></script>
-    <script src="/omg-music/webmidi.js"></script>
-    <script src="/omg-music/monkey.js"></script>
-    <script>
-    tg.onready()
-    </script>
-
-    <script async src="/socket.io/socket.io.js"></script>
+    <script src="/omg-music/omgclasses.js"></script>
+    <script src="tg-preload.js"></script>
 
 </body>
 </html>

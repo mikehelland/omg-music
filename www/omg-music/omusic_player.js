@@ -18,6 +18,8 @@ function OMusicPlayer() {
     p.context = p.getAudioContext();
     p.tuna = omg.tuna;
 
+    this.auditioningParts = [];
+
     /*p.compressor = p.context.createDynamicsCompressor();
     p.compressor.threshold.value = -50;
     p.compressor.knee.value = 40;
@@ -147,6 +149,58 @@ OMusicPlayer.prototype._play = function () {
     p.latencyMonitor = Math.round((timeToPlay - p.context.currentTime) * 1000);
     if (p.latencyMonitor < 0)
         p.negativeLatencyCounter++
+};
+
+OMusicPlayer.prototype.auditionPart = function (part) {
+    this.auditioningParts.push(part);
+    if (this.auditioningParts.length === 1) {
+        this.iSubBeat = 0;
+        this.nextBeatTime = this.context.currentTime + (this.latency / 1000);
+        this._audition();
+    }
+};
+
+OMusicPlayer.prototype.auditionEnd = function (part) {
+    var index = this.auditioningParts.indexOf(part);
+    if (index > -1) {
+        this.auditioningParts.splice(index, 1);
+    }
+};
+
+OMusicPlayer.prototype._audition = function () {
+    
+    if (this.playing) {
+        this.auditioningParts.length = 0;
+        return;
+    }
+    
+    var p = this;
+    var beatParams = p.song.data.beatParams;
+
+    p.subbeatLength = 1000 / (beatParams.bpm / 60 * beatParams.subbeats);
+
+    for (part of p.auditioningParts) {
+        p.playBeatForMelody(p.iSubBeat, part);
+    }
+
+    p.iSubBeat++;
+
+    var timeToPlay = p.nextBeatTime;
+    if (p.iSubBeat % 2 === 1) {
+        p.nextBeatTime += (p.subbeatLength + beatParams.shuffle * p.subbeatLength) / 1000;
+    }
+    else {
+        p.nextBeatTime += (p.subbeatLength - beatParams.shuffle * p.subbeatLength) / 1000;
+    }
+
+    if (p.iSubBeat >= beatParams.beats * beatParams.subbeats * 
+                                    beatParams.measures) {
+        p.iSubBeat = 0;
+    }
+
+    if (p.auditioningParts.length > 0) {
+        setTimeout(function () {p._audition ();}, (p.nextBeatTime - p.context.currentTime) * 1000 - p.latency)
+    }
 };
 
 OMusicPlayer.prototype.afterSection = function () {
@@ -567,7 +621,7 @@ OMusicPlayer.prototype.playBeatWithLiveNote = function (iSubBeat, part) {
             }
 
             this.playNote(note, part);
-            if (!part.data.audioParams.mute) {
+            if (this.playing && !part.data.audioParams.mute) {
                 this.recordNote(part, note);
                 part.currentI = part.data.notes.indexOf(note) + 1;
             }
@@ -1148,7 +1202,7 @@ OMusicPlayer.prototype.playLiveNotes = function (notes, part) {
     }
     
     part.liveNotes = notes;
-    if (notes.autobeat === 0 || !this.playing) {
+    if (notes.autobeat === 0) {
         part.playingI = -1;
         if (part.osc) {
             part.osc.frequency.setValueAtTime(this
@@ -1159,10 +1213,17 @@ OMusicPlayer.prototype.playLiveNotes = function (notes, part) {
             notes[0].sound = this.getSound(part.soundSet, notes[0]);
             part.liveNotes.liveAudio = this.playSound(notes[0].sound, part);
         }
+        
+        if (this.playing && !part.data.audioParams.mute) {
+            this.recordNote(part, notes[0]);
+            part.currentI = part.data.notes.indexOf(notes[0]) + 1;
+        }
     }
-    if (this.playing && !part.data.audioParams.mute && notes.autobeat === 0) {
-        this.recordNote(part, notes[0]);
-        part.currentI = part.data.notes.indexOf(notes[0]) + 1;
+    else {
+        if (!this.playing && this.auditioningParts.indexOf(part) == -1) {
+            this.auditionPart(part);
+        }
+        
     }
 };
 
@@ -1182,6 +1243,10 @@ OMusicPlayer.prototype.endLiveNotes = function (part) {
     
     part.nextBeat = 0;
     part.currentI = -1;
+    
+    if (!this.playing && this.auditioningParts.indexOf(part) > -1) {
+        this.auditionEnd(part);
+    }
 };
 
 OMusicPlayer.prototype.recordNote = function (part, note) {
@@ -1643,310 +1708,6 @@ OMusicPlayer.prototype.makeFXNodeForPart = function (fx, part) {
 OMusicPlayer.prototype.getSoundSetForSoundFont = function (name, url) {
   return {"name": name,  "prefix": url, "url": url,
             "type": "SOUNDSET", "soundFont": true, "lowNote": 21, "postfix": "", "chromatic": true, "defaultSurface": "PRESET_VERTICAL", "data": [ { "url": "A0.mp3", "name": "A0" }, { "url": "Bb0.mp3", "name": "Bb0" }, { "url": "B0.mp3", "name": "B0" }, { "url": "C1.mp3", "name": "C1" }, { "url": "Db1.mp3", "name": "Db1" }, { "url": "D1.mp3", "name": "D1" }, { "url": "Eb1.mp3", "name": "Eb1" }, { "url": "E1.mp3", "name": "E1" }, { "url": "F1.mp3", "name": "F1" }, { "url": "Gb1.mp3", "name": "Gb1" }, { "url": "G1.mp3", "name": "G1" }, { "url": "Ab1.mp3", "name": "Ab1" }, { "url": "A1.mp3", "name": "A1" }, { "url": "Bb1.mp3", "name": "Bb1" }, { "url": "B1.mp3", "name": "B1" }, { "url": "C2.mp3", "name": "C2" }, { "url": "Db2.mp3", "name": "Db2" }, { "url": "D2.mp3", "name": "D2" }, { "url": "Eb2.mp3", "name": "Eb2" }, { "url": "E2.mp3", "name": "E2" }, { "url": "F2.mp3", "name": "F2" }, { "url": "Gb2.mp3", "name": "Gb2" }, { "url": "G2.mp3", "name": "G2" }, { "url": "Ab2.mp3", "name": "Ab2" }, { "url": "A2.mp3", "name": "A2" }, { "url": "Bb2.mp3", "name": "Bb2" }, { "url": "B2.mp3", "name": "B2" }, { "url": "C3.mp3", "name": "C3" }, { "url": "Db3.mp3", "name": "Db3" }, { "url": "D3.mp3", "name": "D3" }, { "url": "Eb3.mp3", "name": "Eb3" }, { "url": "E3.mp3", "name": "E3" }, { "url": "F3.mp3", "name": "F3" }, { "url": "Gb3.mp3", "name": "Gb3" }, { "url": "G3.mp3", "name": "G3" }, { "url": "Ab3.mp3", "name": "Ab3" }, { "url": "A3.mp3", "name": "A3" }, { "url": "Bb3.mp3", "name": "Bb3" }, { "url": "B3.mp3", "name": "B3" }, { "url": "C4.mp3", "name": "C4" }, { "url": "Db4.mp3", "name": "Db4" }, { "url": "D4.mp3", "name": "D4" }, { "url": "Eb4.mp3", "name": "Eb4" }, { "url": "E4.mp3", "name": "E4" }, { "url": "F4.mp3", "name": "F4" }, { "url": "Gb4.mp3", "name": "Gb4" }, { "url": "G4.mp3", "name": "G4" }, { "url": "Ab4.mp3", "name": "Ab4" }, { "url": "A4.mp3", "name": "A4" }, { "url": "Bb4.mp3", "name": "Bb4" }, { "url": "B4.mp3", "name": "B4" }, { "url": "C5.mp3", "name": "C5" }, { "url": "Db5.mp3", "name": "Db5" }, { "url": "D5.mp3", "name": "D5" }, { "url": "Eb5.mp3", "name": "Eb5" }, { "url": "E5.mp3", "name": "E5" }, { "url": "F5.mp3", "name": "F5" }, { "url": "Gb5.mp3", "name": "Gb5" }, { "url": "G5.mp3", "name": "G5" }, { "url": "Ab5.mp3", "name": "Ab5" }, { "url": "A5.mp3", "name": "A5" }, { "url": "Bb5.mp3", "name": "Bb5" }, { "url": "B5.mp3", "name": "B5" }, { "url": "C6.mp3", "name": "C6" }, { "url": "Db6.mp3", "name": "Db6" }, { "url": "D6.mp3", "name": "D6" }, { "url": "Eb6.mp3", "name": "Eb6" }, { "url": "E6.mp3", "name": "E6" }, { "url": "F6.mp3", "name": "F6" }, { "url": "Gb6.mp3", "name": "Gb6" }, { "url": "G6.mp3", "name": "G6" }, { "url": "Ab6.mp3", "name": "Ab6" }, { "url": "A6.mp3", "name": "A6" }, { "url": "Bb6.mp3", "name": "Bb6" }, { "url": "B6.mp3", "name": "B6" }, { "url": "C7.mp3", "name": "C7" }, { "url": "Db7.mp3", "name": "Db7" }, { "url": "D7.mp3", "name": "D7" }, { "url": "Eb7.mp3", "name": "Eb7" }, { "url": "E7.mp3", "name": "E7" }, { "url": "F7.mp3", "name": "F7" }, { "url": "Gb7.mp3", "name": "Gb7" }, { "url": "G7.mp3", "name": "G7" }, { "url": "Ab7.mp3", "name": "Ab7" }, { "url": "A7.mp3", "name": "A7" }, { "url": "Bb7.mp3", "name": "Bb7" }, { "url": "B7.mp3", "name": "B7" }, { "url": "C8.mp3", "name": "C8" } ] }  
-};
-
-function OMGSong(div, data, headerOnly) {
-    this.div = div;
-    this.sections = [];
-    this.fx = [];
-    this.loop = true;
-    this.gain = 1;
-
-    if (headerOnly) {
-        this.setHeaderData(data);
-    } else if (data) {
-        this.setData(data);
-        if (data.id) {
-            this.saved = true;
-        }
-    } else {
-        data = {type: "SONG", name: ""};
-        this.data = data;
-    }
-
-    
-    this.arrangement = [];
-    if (data.arrangement) {
-        for (var i = 0; i < data.arrangement.length; i++) {
-            for (var j = 0; j < this.sections.length; j++) {
-                if (data.arrangement[i] && this.sections[j].data.name === data.arrangement[i].name) {
-                    this.arrangement.push({section: this.sections[j], data: data.arrangement[i]});
-                    break;
-                }
-            }
-        }
-    }
-    
-    if (!data.fx) {
-        data.fx = [];
-    }
-    
-    if (!data.beatParams) {
-        data.beatParams = {};
-    }
-    data.beatParams.subbeats = data.beatParams.subbeats * 1 || 4;
-    data.beatParams.beats = data.beatParams.beats * 1 || 4;
-    data.beatParams.measures = data.beatParams.measures * 1 || 1;
-    data.beatParams.bpm = data.beatParams.bpm * 1 || 120;
-    data.beatParams.shuffle = data.beatParams.shuffle * 1 || 0;
-    if (!data.keyParams) {
-        data.keyParams = {};
-    }
-    data.keyParams.rootNote = data.keyParams.rootNote * 1 || 0;
-    data.keyParams.scale = data.keyParams.scale || [0,2,4,5,7,9,11];
-    
-    this.onKeyChangeListeners = [];
-    this.onBeatChangeListeners = [];
-    this.onPartAudioParamsChangeListeners = [];
-    this.onPartAddListeners = [];
-    this.onChordProgressionChangeListeners = [];
-};
-
-OMGSong.prototype.keyChanged = function () {
-    var song = this;
-    this.onKeyChangeListeners.forEach(listener => listener(song.data.keyParams));
-};
-
-OMGSong.prototype.tempoChanged = function () {
-    var song = this;
-    this.onBeatChangeListeners.forEach(listener => listener(song.data.beatParams));
-};
-
-OMGSong.prototype.partMuteChanged = function (part) {
-    this.onPartAudioParamsChangeListeners.forEach(listener => listener(part));
-};
-
-OMGSong.prototype.chordProgressionChanged = function (section) {
-    this.onChordProgressionChangeListeners.forEach(listener => listener(section));
-};
-
-OMGSong.prototype.partAdded = function (part) {
-    this.onPartAddListeners.forEach(listener => listener(part));
-};
-
-
-OMGSong.prototype.setData = function (data) {
-    this.data = data;
-
-    for (var i = 0; i < data.sections.length; i++) {
-        var ooo = new OMGSection(null, data.sections[i], this);
-    }
-
-    if (!this.data.name)
-        this.data.name = "";
-};
-
-OMGSong.prototype.getData = function () {
-
-    this.data.sections = [];
-    for (var ip = 0; ip < this.sections.length; ip++) {
-        this.data.sections[ip] = this.sections[ip].getData();
-    }
-    if (this.arrangement.length > 0) {
-        this.data.arrangement = [];
-        for (ip = 0; ip < this.arrangement.length; ip++) {
-            this.data.arrangement[ip] = this.arrangement[ip].data;
-        }
-    }
-    else {
-        delete this.data.arrangement;
-    }
-    return this.data;
-};
-
-function OMGSection(div, data, song) {
-    var partData;
-    var part;
-
-    this.div = div;
-    this.parts = [];
-
-    //if there is no song, but the section has key and beat parameters
-    //make a song with those parameters
-    if (!song) {
-        song = new OMGSong();
-        if (data && data.beatParams) {
-            if (data.beatParams.beats) {
-                song.data.beatParams.beats = data.beatParams.beats;
-            }
-            if (data.beatParams.subbeats) {
-                song.data.beatParams.subbeats = data.beatParams.subbeats;
-            }
-            if (data.beatParams.measures) {
-                song.data.beatParams.measures = data.beatParams.measures;
-            }
-            if (data.beatParams.bpm) {
-                song.data.beatParams.bpm = data.beatParams.bpm;
-            }
-        }
-        if (data && data.keyParams) {
-            if (typeof data.keyParams.rootNote === "number") {
-                song.data.keyParams.rootNote = data.keyParams.rootNote;
-            }
-            if (data.keyParams.scale) {
-                song.data.keyParams.scale = data.keyParams.scale;
-            }
-        }
-    }
-    this.song = song;
-    this.position = song.sections.length;
-    song.sections.push(this);        
-
-    if (data) {
-        this.data = data;
-        if (data.id) {
-            this.saved = true;
-        }
-    } else {
-        this.data = {type: "SECTION", parts: []};
-    }
-    
-    if (!this.data.chordProgression) {
-        this.data.chordProgression = [0];
-    }
-
-    for (var ip = 0; ip < this.data.parts.length; ip++) {
-        partData = this.data.parts[ip];
-        part = new OMGPart(null, partData, this);
-    }
-}
-
-OMGSection.prototype.getData = function () {
-    this.data.parts = [];
-    for (var ip = 0; ip < this.parts.length; ip++) {
-        this.data.parts[ip] = this.parts[ip].data;
-    }
-    return this.data;
-};
-
-function OMGPart(div, data, section) {
-    this.div = div;
-    this.fx = [];
-    if (!section || !section.data) {
-        console.log("new OMGPart() called without a section. Not good.");
-        try {throw new Exception();}
-        catch (e) {console.log(e);}
-        var song = new OMGSong();
-        section = new OMGSection(null, null, song);
-    }
-
-    this.section = section;
-    this.position = section.parts.length;
-    section.parts.push(this);        
-
-    if (!section.song || !section.song.data) {
-        section.song = new OMGSong();
-        section.song.sections.push(section.song);
-    }
-
-    this.data = data || {type: "PART"};
-    if (!this.data.fx) {
-        this.data.fx = [];
-    }
-
-    if (!this.data.surface) {
-        if (this.data.soundSet && this.data.soundSet.defaultSurface) {
-            this.data.surface = {url: this.data.soundSet.defaultSurface};
-        }
-        else {
-            this.data.surface = {url: "PRESET_VERTICAL"};
-        }
-    }
-    
-    if (!this.data.soundSet) {
-        this.data.soundSet = {
-            name: "Sine Oscillator",
-            url: "PRESET_OSC_SINE",
-            highNote: 108,
-            lowNote: 0,
-            chromatic: true,
-            octave: 5
-        };
-    }
-    
-    if (this.data.surface.url === "PRESET_VERTICAL") {
-        if (!this.data.notes) {
-            this.data.notes = [];
-        }     
-    }
-    else {
-        if (!this.data.tracks) {
-            this.makeTracks();
-        }
-        for (var i = 0; i < this.data.tracks.length; i++) {
-            this.makeAudioParams(this.data.tracks[i]);
-        }
-    }
-    
-    this.makeAudioParams(false, (this.data.soundSet.url || "").startsWith("PRESET_OSC"));
-    
-    if (this.data.id) {
-        this.saved = true;
-    }
-    
-}
-
-OMGPart.prototype.makeAudioParams = function (track, osc) {
-    var obj = track || this.data;
-    if (!obj.audioParams) obj.audioParams = {};
-    
-    //backwards compat, now we use gain instead of volume
-    if (typeof obj.audioParams.volume === "number" && 
-            typeof obj.audioParams.gain !== "number") {
-        obj.audioParams.gain = Math.pow(obj.audioParams.volume, 2);
-    }
-    if (typeof obj.audioParams.gain !== "number") {
-        obj.audioParams.gain = track ? 1 : osc ? 0.2 : 0.6;
-    }
-    if (typeof obj.audioParams.pan !== "number")
-        obj.audioParams.pan = 0;
-    if (typeof obj.audioParams.warp !== "number")
-        obj.audioParams.warp = 1;
-};
-
-OMGPart.prototype.defaultDrumPart = function () {
-    return {"type": "PART", 
-            "surface": {"url": "PRESET_SEQUENCER"},
-            "soundSet": {"url": "PRESET_HIPKIT", "name": "Hip Hop Drum Kit"},
-            "tracks": [{"name": "kick", "sound": "PRESET_HH_KICK",
-                    "data": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]},
-                {"name": "snare", "sound": "PRESET_HH_CLAP",
-                    "data": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]},
-                {"name": "closed hi-hat", "sound": "PRESET_ROCK_HIHAT_CLOSED",
-                    "data": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]},
-                {"name": "open hi-hat", "sound": "PRESET_HH_HIHAT",
-                    "data": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]},
-                {"name": "tambourine", "sound": "PRESET_HH_TAMB",
-                    "data": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]},
-                {"name": "h tom", "sound": "PRESET_HH_TOM_MH",
-                    "data": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]},
-                {"name": "m tom", "sound": "PRESET_HH_TOM_ML",
-                    "data": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]},
-                {"name": "l tom", "sound": "PRESET_HH_TOM_L",
-                    "data": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}
-            ]};
-};
-
-OMGPart.prototype.makeTracks = function () {
-    this.data.tracks = [];
-    if (this.data.soundSet && this.data.soundSet.data) {
-        var that = this;
-        this.data.soundSet.data.forEach(function (sound) {
-            var track = {name: sound.name, data: [], 
-                    audioParams: {gain: 1, pan: 0, warp: 1}};
-            track.sound = (that.data.soundSet.prefix || "") +
-                    sound.url + (that.data.soundSet.postfix || "");
-            that.data.tracks.push(track);
-        });
-    }
 };
 
 OMusicPlayer.prototype.makeEQ = function (part) {
