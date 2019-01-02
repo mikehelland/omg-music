@@ -333,6 +333,13 @@ OMusicPlayer.prototype.stop = function () {
     }
 };
 
+OMusicPlayer.prototype.loadSection = function (section, soundsNeeded) {
+    for (var ipart = 0; ipart < section.parts.length; ipart++) {
+        part = section.parts[ipart];
+        this.loadPart(part, soundsNeeded);
+    }
+};
+
 OMusicPlayer.prototype.loadPart = function (part, soundsNeeded) {
     var p = this;
 
@@ -470,11 +477,7 @@ OMusicPlayer.prototype.prepareSong = function (song, callback) {
 
     for (var isection = 0; isection < song.sections.length; isection++) {
 
-        section = song.sections[isection];
-        for (var ipart = 0; ipart < section.parts.length; ipart++) {
-            part = section.parts[ipart];
-            p.loadPart(part, soundsNeeded);
-        }
+        p.loadSection(song.sections[isection], soundsNeeded);
     }
 
     var finish = function () {
@@ -1164,6 +1167,9 @@ OMusicPlayer.prototype.getTotalSubbeats = function () {
 };
 
 OMusicPlayer.prototype.rescaleSection = function (section, chord) {
+    if (typeof chord !== "number") {
+        chord = section.data.chordProgression[this.currentChordI];
+    }
     var p = this;
     section.parts.forEach(function (part) {
         if (part.data.surface.url === "PRESET_VERTICAL" && part.data.soundSet.chromatic) {

@@ -455,8 +455,8 @@ tg.showKeyFragment = function () {
         keyDiv.onclick = (function (i) {
             return function () {
                 tg.song.data.keyParams.rootNote = i;
-                tg.setSongControlsUI();
-                
+                tg.song.keyChanged();
+
                 if (lastKey) {
                     lastKey.classList.remove("selected-list-item");
                 }
@@ -479,13 +479,13 @@ tg.showKeyFragment = function () {
         scaleDiv.onclick = (function (newScale) {
             return function () {
                 tg.song.data.keyParams.scale = newScale;
-                tg.setSongControlsUI();
+                tg.song.keyChanged();
+                
                 if (lastScale) {
                     lastScale.classList.remove("selected-list-item");
                 }
                 lastScale = scaleDiv;
                 scaleDiv.classList.add("selected-list-item");
-
             }
         }(scale.value));
 
@@ -1807,6 +1807,7 @@ tg.copySection = function (name) {
     newSectionData.name = omg.util.getUniqueName(newSectionData.name, names);
     var newSection = new OMGSection(null, newSectionData, tg.song);
     tg.loadSection(newSection);
+    tg.player.loadSection(newSection);
     tg.player.loopSection = tg.song.sections.indexOf(newSection);
     return newSection;
 };

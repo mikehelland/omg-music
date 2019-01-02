@@ -126,6 +126,7 @@ tg.loadSong = function (songData) {
     document.getElementById("tool-bar-song-button").innerHTML = tg.song.data.name || "(Untitled)";
     
     tg.song.onKeyChangeListeners.push(function () {
+        tg.player.rescaleSection(tg.currentSection);
         tg.setSongControlsUI();
     });
     tg.song.onBeatChangeListeners.push(function () {
@@ -167,7 +168,7 @@ tg.loadPart = function (part) {
         part.mm = new OMGMelodyMaker(tg.instrument.canvas, part, tg.player, tg.instrument.backgroundCanvas);
         part.mm.readOnly = false;
     }
-    
+
     return div;
 };
 
