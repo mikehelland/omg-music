@@ -70,8 +70,7 @@ return `<!DOCTYPE html>
       </div>
    </div>
 
-   <script src="/omg-music/sequencer_surface.js"></script>
-   <script src="/omg-music/vertical_surface.js"></script>
+   <script src="/omg-music/omgclasses.js"></script>
    <script src="/omg-music/tuna-min.js"></script>
    <script src="/omg-music/omusic_player.js"></script>
    <script src="/js/omgservice.js"></script>
