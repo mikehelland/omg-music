@@ -224,15 +224,14 @@ tg.getSong(function (song) {
     var scriptTag;
     ["/js/omgservice.js","/omg-music/tuna-min.js","/omg-music/omusic_player.js",
     "tg.js",
-    "/omg-music/sequencer_surface.js", "/omg-music/vertical_surface.js", ,
-    "/omg-music/monkey.js"].forEach(js => {
+    "/omg-music/sequencer_surface.js", "/omg-music/vertical_surface.js"].forEach(js => {
         scriptTag = document.createElement("script");
         scriptTag.src = js;
         scriptTag.async = false;
         document.body.appendChild(scriptTag);
     });
     
-    ["/socket.io/socket.io.js"].forEach(js => {
+    ["/omg-music/monkey.js", "/js/socketio.js"].forEach(js => {
         scriptTag = document.createElement("script");
         scriptTag.src = js;
         scriptTag.async = true;

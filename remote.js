@@ -15,7 +15,7 @@ body {margin:0px; height:100%;}
 <script>
 var room = "${room}";
 </script>
-<script src="/socket.io/socket.io.js"></script>
+<script src="/js/socketio.js"></script>
 <script src="/js/remote.js"></script>
 </body>
 </html>`

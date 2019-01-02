@@ -1,5 +1,8 @@
+var compression = require('compression');
 var express = require('express');
 var app = express();
+app.use(compression());
+
 var bodyParser = require('body-parser');
 var http = require('http').Server(app);
 var https = require('https');
@@ -68,8 +71,8 @@ passport.use("signup", new LocalStrategy(
                 return done(null, false);
             }
 
-			var newUser = {username: username, password: password, 
-				admin:false};
+            var newUser = {username: username, password: password, 
+                admin:false};
             db.users.save(newUser, function (err, saveResult) {
                 if (err) {
                     return done(err);
@@ -80,20 +83,16 @@ passport.use("signup", new LocalStrategy(
     })
 );
 
-
 var omgSocket = io.of("/omg-live");
 omgSocket.on("connection", function (socket) {
     socket.on("startSession", function (data) {
         socket.join(data);
-        console.log("joined ", data)
     });
     socket.on("leaveSession", function (data) {
         socket.leave(data);
-        console.log("joined ", data)
     });
     socket.on("basic", function (data) {
         io.of("/omg-live").to(data.room).emit("basic", data);
-        console.log("emit to room ", data)
     });
 });
 
@@ -232,14 +231,14 @@ app.post('/data/', function (req, res) {
 });
 app.delete('/data/:id', function (req, res) {
     if (req.user && req.user.admin) {
-		console.log(req.user);
+        console.log(req.user);
         req.body.user_id = req.user.id;
         req.body.username = req.user.username;
     }
     else {
-		res.send({"error": "access denied"});
-		return;
-	}
+        res.send({"error": "access denied"});
+        return;
+    }
 
     var db = app.get('db');
     db.things.destroy({id: req.params.id}, function (err, result) {
