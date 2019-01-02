@@ -113,7 +113,13 @@ tg.getSong = function (callback) {
 };
 
 tg.loadSong = function (songData) {
-    tg.song = new OMGSong(null, songData);
+    var className = songData.constructor.name;
+    if (className === "OMGSong") {
+        tg.song = songData;
+    }
+    else {
+        tg.song = new OMGSong(null, songData);
+    }
     
     tg.loadSection(tg.song.sections[0])
         
@@ -137,12 +143,9 @@ tg.loadSong = function (songData) {
         tg.loadPart(part);
     });
     
-    if (tg.fullySetup) {
-        tg.drawPlayButton();
-        tg.monkey = new OMGMonkey(tg.song, tg.currentSection);
-        tg.songOptionsFragment.shownOnce = false;
-        tg.songOptionsFragment.setup();
+    if (tg.player) {
         tg.player.prepareSong(tg.song);
+        tg.songOptionsFragment.isSetupForSong = false;
     }
 
 };
@@ -224,18 +227,10 @@ tg.getSong(function (song) {
     var scriptTag;
     ["/js/omgservice.js","/omg-music/tuna-min.js","/omg-music/omusic_player.js",
     "tg.js",
-    "/omg-music/sequencer_surface.js", "/omg-music/vertical_surface.js"].forEach(js => {
+    ].forEach(js => {
         scriptTag = document.createElement("script");
         scriptTag.src = js;
         scriptTag.async = false;
         document.body.appendChild(scriptTag);
-    });
-    
-    ["/omg-music/monkey.js", "/js/socketio.js"].forEach(js => {
-        scriptTag = document.createElement("script");
-        scriptTag.src = js;
-        scriptTag.async = true;
-        document.body.appendChild(scriptTag);
-    });
-    
+    });        
 });

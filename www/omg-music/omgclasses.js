@@ -25,6 +25,10 @@ function OMGSong(div, data, headerOnly) {
         this.data = {type: "SONG", name: ""};
         new OMGPart(null, data, new OMGSection(null, null, this));
     }
+    else {
+        data.type = "SONG";
+        this.data = data;
+    }
 
     data = this.data;
     this.arrangement = [];

@@ -618,6 +618,3 @@ omg.midi = {
     onstop: function () {}
 };
 
-if (navigator.requestMIDIAccess) {
-    navigator.requestMIDIAccess().then(omg.midi.onSuccess, omg.midi.onFailure );
-}

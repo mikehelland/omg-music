@@ -4,32 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" type="text/css" href="tg.css">
-    <!--<link rel="stylesheet" type="text/css" href="/css/search.css">-->
     <title>Techno GAUNTLET</title>
 </head>
 <body>
 
 <div id="main-fragment">
 
-    <canvas id="play-button">PLAY</canvas>
-    <script>
-    (function () {
-    var canvas = document.getElementById("play-button");
-    var context = canvas.getContext("2d");
-    canvas.width = canvas.clientWidth;
-    canvas.height = canvas.clientHeight;
-    context.fillStyle = "#FF0000";
-    context.globalAlpha = 0.6;
-    context.fillRect(0, 0, canvas.width, canvas.height);
-    context.globalAlpha = 1;
-    context.fillStyle = "white";
-    context.font = "bold 30px sans-serif";
-    var caption = "LOADING...";
-    var measures = context.measureText(caption);
-    context.fillText(caption, canvas.width / 2 - measures.width / 2, 
-                    canvas.height / 2 + 10);
-    })();
-    </script>
+    <canvas id="play-button-canvas"></canvas>
+    <div id="play-button-caption"></div>
     <div id="tool-bar">
             <div id="main-fragment-user-button">
                 <span class="tool-bar-caption">User</span>
@@ -206,7 +188,7 @@
                 </div>
                 <hr>
                 <button class="img-button" id="part-options-randomize">
-                    <img style="vertical-align:middle" height="32" width="32" src="/img/monkey48.png"> Randomize</button>
+                    <img style="vertical-align:middle" height="32" width="32" src=""> Randomize</button>
                 <hr>
                 Clear or Remove<br>
                 <button id="part-options-clear-button">Clear Part Data</button>
@@ -273,7 +255,7 @@
             <br>
             <br>
             <button class="img-button" id="create-random-song-button">
-                <img style="vertical-align:middle" height="32" width="32" src="/img/monkey48.png"> New Random Song</button>
+                <img style="vertical-align:middle" height="32" width="32" src=""> New Random Song</button>
             </div>
             
         </div>
@@ -302,7 +284,7 @@
             </div>
             <div id="song-options-fx" class="detail-fragment-body">
                 <br>
-                <div id="song-options-master-gain"></div>
+                <canvas id="song-options-master-gain"></canvas>
                 <hr>
                <button id="song-options-add-fx-button">Add FX</button>
                 <div id="song-options-available-fx"></div>
