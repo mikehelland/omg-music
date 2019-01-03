@@ -12,6 +12,7 @@
     "body-parser": "^1.15.0",
     "compression": "^1.7.3",
     "cookie-parser": "^1.4.1",
+    "cors": "^2.8.5",
     "express": "^4.13.4",
     "express-session": "^1.13.0",
     "massive": "^2.2.0",
