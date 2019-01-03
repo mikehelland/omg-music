@@ -269,8 +269,8 @@ OMGMonkey.prototype.getNewPartFunctions = function () {
     return [
     function () {
         //todo get soundfonts from somewhere else
-        var sfs = ["http://gleitz.github.io/midi-js-soundfonts/MusyngKite/",
-                   "http://gleitz.github.io/midi-js-soundfonts/FluidR3_GM/"];
+        var sfs = ["https://gleitz.github.io/midi-js-soundfonts/MusyngKite/",
+                   "https://gleitz.github.io/midi-js-soundfonts/FluidR3_GM/"];
         var sf = sfs[Math.floor(Math.random() * sfs.length)];
         var i = Math.floor(Math.random() * omg.ui.soundFontNames.length);
         var s = omg.ui.soundFontNames[i];
