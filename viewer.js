@@ -3,18 +3,21 @@ var viewer = function (result) {
     var resultCaption = "OpenMusic.Gallery";
     if (result) {
 
-        resultCaption = result.tags || result.name || "";
+        resultCaption = result.name || result.tags || "";
         var type = result.partType || result.type || "";
         if (resultCaption.length === 0) {
-                resultCaption = "(" + type.substring(0, 1).toUpperCase() + 
-                        type.substring(1).toLowerCase() + ")";
+            resultCaption = "(" + type.substring(0, 1).toUpperCase() + 
+                    type.substring(1).toLowerCase() + ")";
+        }
+        else {
+            resultCaption = '&quot;' + resultCaption + '&quot;';
         }
 
         if (result.username) {
-                resultCaption += " by " + result.username;
+            resultCaption += " by " + result.username.trim();
         }
 
-        resultCaption += " on OpenMusic.Gallery";
+        resultCaption += " on OMG";
     }
     var pageData = JSON.stringify(result);
 
