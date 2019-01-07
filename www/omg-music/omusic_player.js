@@ -342,15 +342,28 @@ OMusicPlayer.prototype.loadSection = function (section, soundsNeeded) {
 
 OMusicPlayer.prototype.loadPart = function (part, soundsNeeded) {
     var p = this;
-
+console.log("loading part")
     if (!part.panner) {
+        console.log("making nodes")
         this.makeAudioNodesForPart(part);
+    }
+
+    var download = false;
+    if (!soundsNeeded) {
+        download = true;
+        soundsNeeded = {};
     }
 
     if (part.data.surface.url === "PRESET_SEQUENCER") {
         this.loadDrumbeat(part, soundsNeeded);
     } else {
         this.loadMelody(part, soundsNeeded);
+    }
+    
+    if (download) {
+        for (var sound in soundsNeeded) {
+            p.loadSound(sound);
+        }
     }
 };
 
@@ -492,7 +505,7 @@ OMusicPlayer.prototype.prepareSong = function (song, callback) {
     
     if (Object.keys(soundsNeeded).length === 0) {
         finish();
-        return;
+        return true;
     }
     
     for (var sound in soundsNeeded) {
@@ -503,6 +516,7 @@ OMusicPlayer.prototype.prepareSong = function (song, callback) {
             }
         });
     }
+    return true;
 };
 
 

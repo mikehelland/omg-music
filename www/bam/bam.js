@@ -105,7 +105,7 @@ shareButton.onclick = function () {
 document.getElementById("omg-music-controls-next-button").onclick = function () {
     omgbam.nextButtonClick(function () {
         if (omgbam.musicMakerZoneType === "SONG") {
-            window.location = "viewer.htm?id=" + omgbam.song.data.id;
+            window.location = "/play/" + omgbam.song.data.id;
         }
     });
 };

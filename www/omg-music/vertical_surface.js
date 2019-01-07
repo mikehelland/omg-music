@@ -1,14 +1,13 @@
-function OMGMelodyMaker(canvas, part, player, backgroundCanvas) {
-    this.canvas = canvas;
-    this.context = canvas.getContext("2d");
-    if (backgroundCanvas) {
-        this.bgCanvas = backgroundCanvas;
-        this.bgContext = backgroundCanvas.getContext("2d");
-    }
-    else {
-        this.bgCanvas = this.canvas;
-        this.bgContext = this.context;
-    }
+function OMGMelodyMaker(div, part, player) {
+
+    this.bgCanvas = document.createElement("canvas");
+    this.bgCanvas.className = "surface-canvas";
+    div.appendChild(this.bgCanvas);
+    this.canvas = document.createElement("canvas");
+    this.canvas.className = "surface-canvas";
+    div.appendChild(this.canvas);
+    this.context = this.canvas.getContext("2d");
+    this.bgContext = this.bgCanvas.getContext("2d");
 
     this.bottomFretBottom = 0;
     this.topFretTop = 0;
@@ -41,20 +40,19 @@ function OMGMelodyMaker(canvas, part, player, backgroundCanvas) {
     this.setCanvasEvents();
 }
 
-OMGMelodyMaker.prototype.drawBackground = function () {
-    
+OMGMelodyMaker.prototype.drawBackground = function (w, h) {
     var canvas = this.bgCanvas;
     var context = this.bgContext;
-    canvas.width = canvas.clientWidth;
-    canvas.height = canvas.clientHeight;
- 
-    this.beatWidth = this.canvas.width / (
+    canvas.width = w || canvas.clientWidth;
+    canvas.height = h || canvas.clientHeight;
+    
+    this.beatWidth = canvas.width / (
             this.beatParams.subbeats * 
             this.beatParams.beats * 
             this.beatParams.measures);
-    this.restHeight = this.canvas.height / 2 - this.noteHeight / 2;
+    this.restHeight = canvas.height / 2 - this.noteHeight / 2;
 
-     this.frets.height = (this.canvas.height - this.topFretTop - this.bottomFretBottom) / 
+     this.frets.height = (canvas.height - this.topFretTop - this.bottomFretBottom) / 
             (this.frets.length - this.skipFretsBottom - this.skipFretsTop);
 
     context.fillStyle = this.highContrast ? this.color : this.backgroundColor;
@@ -66,18 +64,22 @@ OMGMelodyMaker.prototype.drawBackground = function () {
     }
 };
 
-OMGMelodyMaker.prototype.draw = function () {
+OMGMelodyMaker.prototype.draw = function (isubbeat, w, h) {
 
-    if (this.canvas !== this.bgCanvas) {
-        this.canvas.width = this.canvas.clientWidth;
-        this.canvas.height = this.canvas.clientHeight;
+    if (this.hidden) {
+        this.bgCanvas.style.display = "block";
+        this.canvas.style.display = "block";
+        this.hidden = false;
     }
-    
-    if (this.canvas === this.bgCanvas || !this.backgroundDrawn) {
-        this.drawBackground();
+
+    if (!this.backgroundDrawn) {
+        this.drawBackground(w, h);
         this.backgroundDrawn = true;
     }
     
+    this.canvas.width = w || this.canvas.clientWidth;
+    this.canvas.height = h || this.canvas.clientHeight;
+
     this.context.globalAlpha = 0.4;
     if (this.touchingXSection > -1) {
         this.context.fillStyle = "#808080";
@@ -143,20 +145,20 @@ OMGMelodyMaker.prototype.drawFrets = function () {
     this.bgContext.strokeStyle = this.highContrast ? this.backgroundColor : this.color;
     this.bgContext.beginPath();
     this.bgContext.moveTo(0, this.topFretTop);
-    this.bgContext.lineTo(this.canvas.width, this.topFretTop);
+    this.bgContext.lineTo(this.bgCanvas.width, this.topFretTop);
     for (var i = this.skipFretsBottom; i < this.frets.length - this.skipFretsTop; i++) {    
         ii = this.frets.length - i - this.skipFretsTop;;
         
         if (this.frets[i].octaveMarker) {
             this.bgContext.fillStyle = "#333333";
-            this.bgContext.fillRect(Math.round(this.canvas.width / 4), Math.round(this.topFretTop + (ii - 1) * this.frets.height),
-                Math.round(this.canvas.width / 2), this.frets.height);
+            this.bgContext.fillRect(Math.round(this.bgCanvas.width / 4), Math.round(this.topFretTop + (ii - 1) * this.frets.height),
+                Math.round(this.bgCanvas.width / 2), this.frets.height);
         }
         
         if (this.frets.current !== undefined && this.frets.current === i) {
         }
         this.bgContext.moveTo(0, Math.round(this.topFretTop + ii * this.frets.height));
-        this.bgContext.lineTo(this.canvas.width, Math.round(this.topFretTop + ii * this.frets.height));
+        this.bgContext.lineTo(this.bgCanvas.width, Math.round(this.topFretTop + ii * this.frets.height));
         this.bgContext.fillStyle = this.highContrast ? this.backgroundColor : this.color;
         this.bgContext.fillText(this.frets[i].caption, 4, 
             Math.round(this.topFretTop + ii * this.frets.height - this.frets.height / 3));
@@ -164,8 +166,8 @@ OMGMelodyMaker.prototype.drawFrets = function () {
     }
 
     for (i = 1; i < 4; i++) {
-        this.bgContext.moveTo(Math.round(i * this.canvas.width / 4), this.topFretTop);
-        this.bgContext.lineTo(Math.round(i * this.canvas.width / 4), this.canvas.height - this.bottomFretBottom);
+        this.bgContext.moveTo(Math.round(i * this.bgCanvas.width / 4), this.topFretTop);
+        this.bgContext.lineTo(Math.round(i * this.bgCanvas.width / 4), this.bgCanvas.height - this.bottomFretBottom);
     }
     this.bgContext.stroke();
     this.bgContext.closePath();    
@@ -361,8 +363,6 @@ OMGMelodyMaker.prototype.setupFretBoard = function () {
         frets.rootNote = 0;
     }
 
-    frets.height = (this.canvas.height - this.topFretTop - this.bottomFretBottom) / 
-            (frets.length - this.skipFretsBottom - this.skipFretsTop);
     this.frets = frets;
 
     var notes = this.data.notes;
@@ -985,4 +985,10 @@ OMGMelodyMaker.prototype.drawOMGLiveUsers = function () {
         }
         
     }
+};
+
+OMGMelodyMaker.prototype.hide = function () {
+    this.canvas.style.display = "none";
+    this.bgCanvas.style.display = "none";
+    this.hidden = true;
 };

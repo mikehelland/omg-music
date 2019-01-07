@@ -52,6 +52,12 @@ omg.server.post = function (data, callback) {
             data: data, callback: callback});
 };
 
+omg.server.postHTTP = function (url, data, callback) {
+    omg.server.http({method: "POST", 
+            url: url, 
+            data: data, callback: callback});
+};
+
 omg.server.getHTTP = function (url, callback) {
     omg.server.http({url: url, callback: callback});
 };

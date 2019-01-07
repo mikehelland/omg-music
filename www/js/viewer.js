@@ -165,6 +165,11 @@ viewer.playButton.onclick = function () {
         viewer.player.play();
         viewer.playButton.innerHTML = "Stop";
     }
+    if (!viewer.playButton.hasBeenClicked) {
+        omg.server.post("/playcount", {id: viewer.omgsong.data.id});
+        viewer.playButton.hasBeenClicked = true;
+    }
+
 };
 
 viewer.getDataById(viewer.queryStringParameters.id, function (dataToPlay) {

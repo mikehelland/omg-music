@@ -23,21 +23,11 @@ You can see it in action here: https://openmusic.gallery.
 
 *(Note: You should have `node.js` and `npm` installed.)*
 
-CD to the directory with the project files and edit `install.sh`. At the top it says:
-
-    ## IMPORANT! Set the password for the database in this environment variable
-    ## It is used by the app and by the ./create_database.sh
-
-    export OMG_DB_PW=password_here
-
-Change `password_here` to something better than that. Save the script and run it:
+This will install PostGres if you don't have it (you should have 9.4 or later):
 
     ./install.sh
 
-**IMPORTANT!:** *This requires Postgresql 9.4 or later!
-`install.sh` will install Postgresql only if there isn't another version installed, so you should check to see if it's 9.4 or later, and if not run `./install_database.sh`.*
-
-The last line of the `install.sh` runs the app by doing this:
+Run the app:
 
     node main.js
 

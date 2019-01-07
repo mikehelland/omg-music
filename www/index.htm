@@ -105,20 +105,13 @@
         
         
         <div class="select-area-bar">
-            <a href="#featured" id="select-featured-area-button" class="current-select-area-button">Featured</a>
+            <a href="#most-plays" id="select-most-plays-area-button" class="current-select-area-button">Most Plays</a>
             <!--<div id="select-popular-area-button" class="select-area-button">Most Popular</div>-->
             <a href="#most-recent" id="select-recent-area-button" class="select-area-button">Most Recent</a>
         </div>
                 
-        <div id="featured-area" class="frontpage-area">
-
-            <div id="song-example" class="omgviewer"><div class="beat-marker"></div></div>
-
-            <br>
-            <div id="drumbeat-example" class="omgviewer"><div class="beat-marker"></div></div>
-            
-            <br>
-            <div id="melody-example" class="omgviewer"><div class="beat-marker"></div></div>
+        <div id="most-plays-area" class="frontpage-area">
+            <div id ="most-plays-list"></div>
             
         </div>
         
@@ -167,44 +160,47 @@
 setupUserControls(document.getElementsByClassName("title-bar-user-controls")[0]);
 
 var fpa = {};
-fpa.featureArea = document.getElementById("featured-area");
+fpa.mostPlaysArea = document.getElementById("most-plays-area");
 fpa.mostRecentArea = document.getElementById("most-recent-area");
 
-fpa.featuredButton = document.getElementById("select-featured-area-button");
+fpa.mostPlaysButton = document.getElementById("select-most-plays-area-button");
 fpa.recentButton = document.getElementById("select-recent-area-button");
 
-fpa.showFeatureArea = function () {
-    fpa.featuredButton.className = "current-select-area-button";
+fpa.showMostPlaysArea = function () {
+    fpa.mostPlaysButton.className = "current-select-area-button";
     fpa.recentButton.className = "select-area-button";
 
     fpa.mostRecentArea.style.display = "none";
-    fpa.featureArea.style.display = "block";
+    fpa.mostPlaysArea.style.display = "block";
 
-    if (!fpa.loadedFeaturedArea) {
-            omg.server.getId(570, song => new OMGEmbeddedViewer({id: 570, height: 80,
-                        data: song,
-                        div: document.getElementById("song-example"), 
-                        onPlay: fpa.onPlay, onStop: fpa.onStop})
-                    );
-            omg.server.getId(622, song => new OMGEmbeddedViewer({id: 570, height: 80,
-                        data: song,
-                        div: document.getElementById("drumbeat-example"), 
-                        onPlay: fpa.onPlay, onStop: fpa.onStop})
-                    );
-            omg.server.getId(791, song => new OMGEmbeddedViewer({id: 570, height: 80,
-                        data: song,
-                        div: document.getElementById("melody-example"), 
-                        onPlay: fpa.onPlay, onStop: fpa.onStop})
-                    );
-            fpa.loadedFeaturedArea = true;
+    if (!fpa.loadedMostPlaysArea) {
+        fpa.loadedMostPlaysArea = true;
+        var list = document.getElementById("most-plays-list");
+        omg.server.getHTTP("/most-plays/", results => {
+            results.forEach(song => {
+                var div = document.createElement("div");
+                div.className = "omgviewer";
+
+                song.body.id = song.id;
+                var params = {id: song.id, height: 180,
+                    data: song.body,
+                    playcount: song.playcount,
+                    div: div, 
+                    onPlay: fpa.onPlay, onStop: fpa.onStop};
+
+                list.appendChild(div);
+                new OMGEmbeddedViewer(params);
+                
+            });
+        });
     }
 };
 fpa.showRecentArea = function () {
     fpa.recentButton.className = "current-select-area-button";
-    fpa.featuredButton.className = "select-area-button";
+    fpa.mostPlaysButton.className = "select-area-button";
 
     fpa.mostRecentArea.style.display = "block";
-    fpa.featureArea.style.display = "none";
+    fpa.mostPlaysArea.style.display = "none";
         
         fpa.search();
     //search(parameters);
@@ -270,11 +266,11 @@ fpa.search = function () {
     var filterType = document.getElementById("filter-type");
     var type = parameters.type || "";
     filterType.onchange = function () {
-    //todo set the location?
-    parameters.type = filterType.value;
+        //todo set the location?
+        parameters.type = filterType.value;
 
         parameters.resultList.innerHTML = "";
-    omg.search(parameters);
+        omg.search(parameters);
     };
     
     omg.search(parameters);
@@ -282,16 +278,16 @@ fpa.search = function () {
 };
 
 
-fpa.featuredButton.onclick = function () {
-    fpa.showFeatureArea();
+fpa.mostPlaysButton.onclick = function () {
+    fpa.showMostPlaysArea();
 };
 fpa.recentButton.onclick = function () {
     fpa.showRecentArea();
 };
 
 window.onload = function () {
-    if (window.location.hash.length === 0 || window.location.hash === "#featured") {
-            fpa.showFeatureArea();
+    if (window.location.hash.length === 0 || window.location.hash === "#most-plays") {
+            fpa.showMostPlaysArea();
     }
     console.log(window.location.hash);
     if (window.location.hash === "#most-recent") {

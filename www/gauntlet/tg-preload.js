@@ -165,7 +165,7 @@ tg.loadPart = function (part) {
     var div = tg.setupPartButton(part);
 
     if (part.data.surface.url === "PRESET_VERTICAL" && !part.mm && typeof OMGMelodyMaker !== "undefined") {
-        part.mm = new OMGMelodyMaker(tg.instrument.canvas, part, tg.player, tg.instrument.backgroundCanvas);
+        part.mm = new OMGMelodyMaker(tg.instrument.surface, part, tg.player, tg.instrument.backgroundCanvas);
         part.mm.readOnly = false;
     }
 

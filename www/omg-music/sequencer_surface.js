@@ -165,7 +165,6 @@ OMGDrumMachine.prototype.ondown = function (touch) {
             this.selectedTrack = trackI;
         }
         this.backgroundDrawn = false;
-        this.setRowColumnSizes();
         omgdrums.lastTrackNameClick = Date.now();
         omgdrums.lastTrackNameI = trackI;
     } else {
@@ -251,17 +250,21 @@ OMGDrumMachine.prototype.setPart = function (part) {
     
 };
 
-OMGDrumMachine.prototype.drawBackground = function () {
+OMGDrumMachine.prototype.drawBackground = function (w, h) {
     
-    var canvas = this.bgCanvas;
-    var context = this.bgContext;
-    canvas.width = canvas.clientWidth;
-    canvas.height = canvas.clientHeight;
+    this.bgCanvas.width = w || this.bgCanvas.clientWidth;
+    this.bgCanvas.height = h || this.bgCanvas.clientHeight;
 
     if (!this.info) {
         this.setInfo();
     }
-        
+
+    this.setRowColumnSizes();
+
+    var offsets = omg.ui.totalOffsets(this.canvas);
+    this.offsetLeft = offsets.left;
+    this.offsetTop = offsets.top;
+
     if (this.selectedTrack > -1) {
         this.drawTrackViewBackground();
     }
@@ -272,7 +275,7 @@ OMGDrumMachine.prototype.drawBackground = function () {
 };
 
 
-OMGDrumMachine.prototype.draw = function (subbeat) {
+OMGDrumMachine.prototype.draw = function (subbeat, w, h) {
 
     if (!this.drumbeat || !this.drumbeat.tracks || !this.drumbeat.tracks.length)
         return;
@@ -280,14 +283,16 @@ OMGDrumMachine.prototype.draw = function (subbeat) {
     if (this.hidden) {
         this.bgCanvas.style.display = "block";
         this.canvas.style.display = "block";
+        this.hidden = false;
     }
 
     if (!this.backgroundDrawn) {
-        this.drawBackground();
+        this.drawBackground(w, h);
         this.backgroundDrawn = true;
     }
 
-    this.canvas.width = this.width;
+    this.canvas.width = w || this.canvas.clientWidth;
+    this.canvas.height = h || this.canvas.clientHeight;
 
     this.drawCaptions();
     
@@ -451,15 +456,6 @@ OMGDrumMachine.prototype.drawCaptions = function () {
 
 OMGDrumMachine.prototype.setInfo = function () {
  
-    this.height = this.canvas.clientHeight;
-    this.width = this.canvas.clientWidth;
-    this.canvas.height = this.height;
-    this.canvas.width = this.width;
-
-    var offsets = omg.ui.totalOffsets(this.canvas);
-    this.offsetLeft = offsets.left;
-    this.offsetTop = offsets.top;
-
     this.info = [];
     var longestCaptionWidth = 0;
 
@@ -483,14 +479,9 @@ OMGDrumMachine.prototype.setInfo = function () {
     }
 
     if (this.captionWidth === undefined) {
-        this.captionWidth = this.canvas.width / 8; //, longestCaptionWidth + 4);
+        this.captionWidth = this.bgCanvas.width / 8; //, longestCaptionWidth + 4);
     }
-    this.columnWidth = (this.width - this.captionWidth) / this.totalSubbeats;
-    this.captionHeight = this.canvas.height / this.info.length;
-    this.rowHeight = this.captionHeight;
-    this.rowHeightTrack = this.canvas.height / (this.totalBeats);
-    this.columnWidthTrack = (this.width - this.captionWidth) / this.beatParams.subbeats;
-
+    this.captionHeight = this.bgCanvas.height / this.info.length;
 
     for (i = 0; i < this.info.length; i++) {
         var words = (this.info[i].name || "").split(" ");
@@ -511,12 +502,13 @@ OMGDrumMachine.prototype.setInfo = function () {
 
 OMGDrumMachine.prototype.setRowColumnSizes = function () {
     if (this.selectedTrack < 0) {
-        this.columnWidth = (this.width - this.captionWidth) / this.totalSubbeats;
+        this.columnWidth = (this.bgCanvas.width - this.captionWidth) / this.totalSubbeats;
         this.rowHeight = this.captionHeight;
     }
     else {
-        this.columnWidth = (this.width - this.captionWidth) / this.beatParams.subbeats;
-        this.rowHeight = this.canvas.height / (this.totalBeats);
+        this.columnWidth = (this.bgCanvas.width - this.captionWidth) / this.beatParams.subbeats;
+        this.rowHeight = this.bgCanvas.height / (this.totalBeats);
+        console.log(this.rowHeight);
     }
 };
 

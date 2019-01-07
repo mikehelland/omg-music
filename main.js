@@ -260,6 +260,57 @@ app.get('/play/:id', function (req, res) {
     });
 });
 
+app.get('/star/', function (req, res) {
+    if (!req.user) {
+        res.send("not logged in");
+        return;
+    }
+
+    var db = app.get('db');
+    db.stars.findDoc({user_id: req.user.id, thing_id: req.body.id}, {}, function (err, docs) {
+        if (err) {
+            res.send(err);
+        }
+        else {
+            res.send(docs);
+        }
+    });
+    
+});
+
+app.post("/playcount", function (req, res) {
+
+    var db = app.get('db');
+    db.run("update things set playcount = playcount + 1 where id=" + req.body.id, function(err, docs){
+        if (err) {
+            console.log(err);
+            if (err.routine === "errorMissingColumn") {
+                db.run("alter table things add column playcount bigint default 0");
+            }
+        }
+        res.send(err || docs)
+    });
+});
+
+app.get('/most-plays/', function (req, res) {
+    var db = app.get('db');
+    
+    var perPage = req.query.perPage || 20;
+    db.things.find({}, {
+        columns: ["playcount", "id", "body"],
+        order: "playcount desc",
+        offset: (parseInt(req.query.page || "1") - 1) * perPage,
+        limit: perPage
+    }, function (err, docs) {
+        if (err) {
+            res.send(err);
+        }
+        else {
+            res.send(docs);
+        }
+    });
+});
+
 app.get('/live/:room', function (req, res) {
     res.send(remote(req.params.room));
 });

@@ -424,3 +424,11 @@ body {background:white;}
     top:30%;
     margin:auto;
 }
+
+.surface-canvas {
+    position:absolute;
+    top:0px;
+    left:0px;
+    height:100%;
+    width:100%;
+}

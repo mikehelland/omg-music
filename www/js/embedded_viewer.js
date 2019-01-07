@@ -34,12 +34,15 @@ function OMGEmbeddedViewer(params) {
     viewer.playButton.className = "omg-music-controls-play-button";
     viewer.editButton.className = "omg-music-controls-edit-button";
     viewer.shareButton.className = "omg-music-controls-button";
-    viewer.tipButton.className = "omg-music-controls-button";
+    viewer.tipButton.className = "omg-music-controls-edit-button";
     viewer.voteButton.className = "omg-music-controls-button";
 
     viewer.div.appendChild(viewer.playButton);
-    if (data.id)
+    if (data.id) {
         viewer.div.appendChild(viewer.editButton);
+    }
+    viewer.div.appendChild(viewer.tipButton);
+
     //viewer.div.appendChild(viewer.shareButton);
 
     var result = data;
@@ -65,7 +68,6 @@ function OMGEmbeddedViewer(params) {
     rightData.className = "omg-thing-right-data";
     resultDiv.appendChild(rightData);
 
-    rightData.appendChild(viewer.tipButton);
     //rightData.appendChild(viewer.voteButton);
 
     resultData = document.createElement("span");
@@ -73,6 +75,14 @@ function OMGEmbeddedViewer(params) {
     resultData.innerHTML = (result.votes || "0") + " votes";
     //rightData.appendChild(resultData);
 
+    if (params.playcount) {
+        resultData = document.createElement("span");
+        resultData.className = "omg-thing-playcount";
+        resultData.innerHTML = params.playcount + " plays";
+        rightData.appendChild(resultData);        
+        rightData.appendChild(document.createElement("br"));
+    }
+    
     resultData = document.createElement("span");
     resultData.className = "omg-thing-created-at";
     //resultData.innerHTML = getTimeCaption(parseInt(result.created_at));
@@ -90,11 +100,13 @@ function OMGEmbeddedViewer(params) {
     viewer.sectionWidth = 200;
     viewer.leftOffset = viewer.sectionMargin;
 
-    viewer.beatMarker = viewer.div.getElementsByClassName("beat-marker")[0];
+    viewer.beatMarker = document.createElement("div");
+    viewer.beatMarker.className = "beat-marker";
     viewer.beatMarker.style.display = "none";
     viewer.beatMarker.style.marginTop = viewer.playButton.clientHeight + 8 + "px";
     //viewer.beatMarker.style.height = height + "px";
     viewer.beatMarker.style.marginLeft = viewer.padding / 2 + "px";
+    viewer.div.appendChild(viewer.beatMarker);
 
         
     viewer.playButton.onclick = function () {
@@ -137,9 +149,11 @@ function OMGEmbeddedViewer(params) {
                 });
             }
             
-            //viewer.player.load(viewer.info, function (info) {
-            //    viewer.player.play(info);
-            //});
+            if (!viewer.playButton.hasBeenClicked) {
+                viewer.playButton.hasBeenClicked = true;
+                
+                omg.server.postHTTP("/playcount", {id: data.id}, result=>console.log(result));
+            }
         }
     };
     

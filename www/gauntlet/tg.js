@@ -190,8 +190,7 @@ tg.instrument = {
     div: document.getElementById("instrument-fragment"),
     editButton: document.getElementById("instrument-edit-button"),
     zoomButton: document.getElementById("instrument-zoom-button"),
-    canvas: document.getElementById("instrument-canvas"),
-    backgroundCanvas: document.getElementById("instrument-canvas-background")
+    surface: document.getElementById("instrument-surface")
 };
 
 tg.instrument.setMode = function (mode) {
@@ -229,7 +228,7 @@ tg.instrument.setup = function () {
     };
     
     tg.instrument.onBeatPlayedListener = function (isubbeat, isection) {
-        tg.instrument.mm.draw(isubbeat);
+        tg.instrument.mm.draw();
     };
 };
 tg.instrument.setup();
@@ -241,7 +240,7 @@ tg.instrument.show = function (part) {
 
     tg.currentFragment = tg.instrument;
     if (!part.mm) {
-        part.mm = new OMGMelodyMaker(tg.instrument.canvas, part, tg.player, tg.instrument.backgroundCanvas);
+        part.mm = new OMGMelodyMaker(tg.instrument.surface, part, tg.player);
         part.mm.readOnly = false;
     }
     tg.instrument.mm = part.mm;
@@ -253,6 +252,8 @@ tg.instrument.show = function (part) {
 tg.instrument.onhide = function () {
     var index = tg.player.onBeatPlayedListeners.indexOf(this.onBeatPlayedListener);
     tg.player.onBeatPlayedListeners.splice(index, 1);
+    tg.instrument.mm.hide();
+
 };
 
 
