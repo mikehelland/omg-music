@@ -124,15 +124,14 @@
    position:absolute;
    right:8px; 
    top:6px;
+   text-align:right;
 }
 
 .omg-thing-created-at {
-   margin-left:10px;
    position:relative;
    width:90px;
    font-size:0.8em;
    font-family: Helvetica;
-   text-align:right;
    font-style:italic;
 }
 

@@ -86,7 +86,7 @@ function OMGEmbeddedViewer(params) {
     resultData = document.createElement("span");
     resultData.className = "omg-thing-created-at";
     //resultData.innerHTML = getTimeCaption(parseInt(result.created_at));
-    resultData.innerHTML = getTimeCaption(parseInt(result.last_modified));
+    resultData.innerHTML = omg.util.getTimeCaption(parseInt(result.last_modified));
     rightData.appendChild(resultData);
 
     var height = params.height || 150;
@@ -159,7 +159,7 @@ function OMGEmbeddedViewer(params) {
     
     viewer.titleDiv.innerHTML = data.title || "(untitled)";
     viewer.userDiv.innerHTML = data.username || "(unknown)";
-    viewer.datetimeDiv.innerHTML = getTimeCaption(data.created_at);
+    viewer.datetimeDiv.innerHTML = omg.util.getTimeCaption(data.created_at);
 
     viewer.tipButton.onclick = function () {
         window.location = "bitcoin:1Jdam2fBZxfhWLB8yP69Zbw6fLzRpweRjc?amount=0.004";
@@ -374,38 +374,3 @@ OMGEmbeddedViewer.prototype.draw = function () {
     }
 };
 
-
-
-
-function getTimeCaption(timeMS) {
-
-    if (!timeMS) {
-        return "";
-    }
-
-    var seconds = Math.round((Date.now() - timeMS) / 1000);
-    if (seconds < 60)
-        return seconds + " sec ago";
-
-    var minutes = Math.floor(seconds / 60);
-    if (minutes < 60)
-        return minutes + " min ago";
-
-    var hours = Math.floor(minutes / 60);
-    if (hours < 24)
-        return hours + " hr ago";
-
-    var days = Math.floor(hours / 24);
-    if (days < 7)
-        return days + " days ago";
-
-    var date = new Date(timeMS);
-    var months = ["Jan", "Feb", "Mar", "Apr", "May",
-        "Jun", "Jul", "Aug", "Sep", "Oct",
-        "Nov", "Dec"];
-    var monthday = months[date.getMonth()] + " " + date.getDate();
-    if (days < 365) {
-        return monthday;
-    }
-    return monthday + " " + date.getYear();
-};

@@ -296,7 +296,7 @@ app.get('/most-plays/', function (req, res) {
     var db = app.get('db');
     
     var perPage = req.query.perPage || 20;
-    db.things.find({}, {
+    db.things.find({"playcount >": 0}, {
         columns: ["playcount", "id", "body"],
         order: "playcount desc",
         offset: (parseInt(req.query.page || "1") - 1) * perPage,
