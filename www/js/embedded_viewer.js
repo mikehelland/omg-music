@@ -8,6 +8,12 @@ if (typeof omg === "undefined") {
 function OMGEmbeddedViewer(params) {
     var div = params.div;
     var data = params.data;
+    
+    if (!data.type) {
+        //don't know what to do with this data
+        return;
+    }
+    
     var viewer = this;
     viewer.div = div;
     div.style.position = "relative";

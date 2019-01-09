@@ -205,7 +205,9 @@ function OMGPart(div, data, section) {
         section.song.sections.push(section.song);
     }
 
-    this.data = data || {type: "PART"};
+    this.data = data || {};
+    this.data.type = this.data.type || "PART";
+    
     if (!this.data.fx) {
         this.data.fx = [];
     }
