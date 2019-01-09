@@ -12,8 +12,10 @@
     
     <style>
     #overview-visual .omg-song {padding: 8px;}
-    #overview-visual .omg-section {padding: 8px;}
+    #overview-visual .omg-section {padding: 8px; width:20%;}
     #overview-visual .omg-part {padding: 8px;}
+    body {font-size: 1.25em;}
+    li {padding:0.7em;}
     </style>
 </head>
 <body>
@@ -36,8 +38,8 @@
 <h1>OMG Basics</h1>
 <hr>
 
-<p><b>Overview:</b> A <a href="#song">Song</a> is made of 
-	<a href="#section">Sections</a>, and <em>Sections</em> are made of 
+<p><b>Overview:</b> A <em>Song</em> is made of 
+	<em>Sections</em>, and <em>Sections</em> are made of 
 	<em>Parts</em>.</p>
 
 
@@ -66,17 +68,26 @@
 		<div class="omg-part">Part</div>
 		<div class="omg-part">Part</div>
 	</div>
+        <div class="omg-section">
+        Section 
+        <div class="omg-part">Part</div>
+        <div class="omg-part">Part</div>
+        </div>
+
 	</div>
 </div>
 
-
-<p>There are two types of <em>Parts</em>:</p>
+<ul>
+<li><em>Sections</em> are played one after another.</li>
+<li><em>Parts</em> (such as melodies, basslines, and drumbeats) are played together in a <em>Section</em>.</li>
+</ul>
 
 <h2>
-Part: Drumbeat
+Examples
 </h2>
 
-	<div id="drum-example" class="omgviewer"><div class="beat-marker"></div></div>
+<strong>Drum Part</strong>
+<div id="drum-example" class="omgviewer"></div>
 
    <script src="/js/omgservice.js"></script>
    <script src="/omg-music/vertical_surface.js"></script>
@@ -84,44 +95,52 @@ Part: Drumbeat
    <script src="/omg-music/omusic_player.js"></script>
    <script src="/js/embedded_viewer.js"></script>
 
-<script>
-omg_embedded_viewer_loadId({div: document.getElementById("drum-example"), id: 316});
-</script>
 
 <hr>
-<h2>
-Part: Melody/Bassline
-</h2>
+<strong>Bass Part</strong>
 
-<div id="melody-example" class="omgviewer"><div class="beat-marker"></div></div>
-
-<script>
-omg_embedded_viewer_loadId({div: document.getElementById("melody-example"), id: 317});
-</script>
+<div id="melody-example" class="omgviewer"></div>
 
 <hr>
+<strong>Intro Section</strong>
 
-<a name="section"></a>
-<h2>Sections</h2>
-<p>A <em>Section</em> contains melodies, basslines, and drumbeats to be played at the same time.</p>
-
-<div id="section-example" class="omgviewer"><div class="beat-marker"></div></div>
-
-<script>
-omg_embedded_viewer_loadId({div: document.getElementById("section-example"), id: 284});
-</script>
+<div id="section-example" class="omgviewer"></div>
 
 
 <hr>
-
-<a name="song"></a>
-<h2>Songs</h2>
-<p>A <em>Song</em> contains a list of <em>Sections</em> to be played one after another.</p>
-
-<div id="song-example" class="omgviewer"><div class="beat-marker"></div></div>
+<strong>Song</strong>
+<div id="song-example" class="omgviewer"></div>
 
 <script>
-omg_embedded_viewer_loadId({div: document.getElementById("song-example"), id: 318});
+
+    omg.server.getId(1227, data => new OMGEmbeddedViewer({
+        id: data.id, height: 180,
+        data: data,
+        div: document.getElementById("drum-example") 
+        //onPlay: fpa.onPlay, onStop: fpa.onStop
+    }));
+    
+    omg.server.getId(1227, data => new OMGEmbeddedViewer({
+        id: data.id, height: 180,
+        data: data,
+        div: document.getElementById("melody-example") 
+        //onPlay: fpa.onPlay, onStop: fpa.onStop
+    }));
+    
+    omg.server.getId(1282, data => new OMGEmbeddedViewer({
+        id: data.id, height: 180,
+        data: data,
+        div: document.getElementById("section-example") 
+        //onPlay: fpa.onPlay, onStop: fpa.onStop
+    }));
+    
+    omg.server.getId(1283, data => new OMGEmbeddedViewer({
+        id: data.id, height: 180,
+        data: data,
+        div: document.getElementById("song-example") 
+        //onPlay: fpa.onPlay, onStop: fpa.onStop
+    }));
+    
 </script>
 
 <hr>
@@ -132,11 +151,11 @@ omg_embedded_viewer_loadId({div: document.getElementById("song-example"), id: 31
 
    <div class="main-create-area">
 	   
-      <a href="music-maker.htm" class="main-create-something">
-         Start with a Melody
+      <a href="/bam/" class="main-create-something">
+         Simple Editor
       </a>
-      <a href="music-maker.htm?type=drumbeat" class="main-create-something">
-         Start with a Beat
+      <a href="/gauntlet/" class="main-create-something">
+         Advanced Editor
       </a>
       
    </div>
@@ -144,9 +163,6 @@ omg_embedded_viewer_loadId({div: document.getElementById("song-example"), id: 31
 	<hr>
 	<h3>See Also</h3>
 	<h2>- <a href="what_is_open_music.htm">What is open music?</a></h2>
-	<h2>- Check Out the OMG <a target="_blank" href="https://play.google.com/store/apps/details?id=com.mikehelland.omgtechnogauntlet">
-		  Mobile App: Techno GAUNTLET</a></h2>
-	
 	<hr>
 	<h3>Back to <a href="/">OpenMusic.Gallery</a> home</h3>
 
@@ -155,6 +171,6 @@ omg_embedded_viewer_loadId({div: document.getElementById("song-example"), id: 31
    setupUserControls(document.getElementsByClassName("title-bar-user-controls")[0]);
    </script>
 
-
+   </div>
 </body>
 </html>
