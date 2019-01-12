@@ -456,7 +456,7 @@ tg.showKeyFragment = function () {
         keyDiv.onclick = (function (i) {
             return function () {
                 tg.song.data.keyParams.rootNote = i;
-                tg.song.keyChanged();
+                tg.keyChanged();
 
                 if (lastKey) {
                     lastKey.classList.remove("selected-list-item");
@@ -480,7 +480,7 @@ tg.showKeyFragment = function () {
         scaleDiv.onclick = (function (newScale) {
             return function () {
                 tg.song.data.keyParams.scale = newScale;
-                tg.song.keyChanged();
+                tg.keyChanged();
                 
                 if (lastScale) {
                     lastScale.classList.remove("selected-list-item");
@@ -497,6 +497,14 @@ tg.showKeyFragment = function () {
     tg.newChosenButton(tg.keyButton);
 };
 
+tg.keyChanged = function () {
+    tg.currentSection.parts.forEach(function (part) {
+        if (part.mm) {
+            part.mm.setupFretBoard();
+        }
+    });
+    tg.song.keyChanged();
+};
 
 
 /*
