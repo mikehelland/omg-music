@@ -342,9 +342,8 @@ OMusicPlayer.prototype.loadSection = function (section, soundsNeeded) {
 
 OMusicPlayer.prototype.loadPart = function (part, soundsNeeded) {
     var p = this;
-console.log("loading part")
+
     if (!part.panner) {
-        console.log("making nodes")
         this.makeAudioNodesForPart(part);
     }
 

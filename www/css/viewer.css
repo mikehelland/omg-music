@@ -125,12 +125,12 @@
    right:8px; 
    top:6px;
    text-align:right;
+   font-size:0.8em;
 }
 
 .omg-thing-created-at {
    position:relative;
    width:90px;
-   font-size:0.8em;
    font-family: Helvetica;
    font-style:italic;
 }

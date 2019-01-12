@@ -672,7 +672,7 @@ OMGMelodyMaker.prototype.onmoveInWriteMode = function (touch) {
 
         this.setTouchingXSection();
 
-        if (this.touchingXSection === 0) {
+        if (this.touchingXSection === 3) {
             this.notes.splice(this.notes.indexOf(touch.note), 1);
             touch.note = {};
             this.notes.push(touch.note);
@@ -836,7 +836,7 @@ OMGMelodyMaker.prototype.noteHitTest = function (x, y) {
 }
 
 OMGMelodyMaker.prototype.setTouchingXSection = function () {
-    this.touchingXSection = 0;
+    /*this.touchingXSection = 0;
     for (var t = 0; t < this.touches.length; t++) {
         if (this.touches[t].xsection > this.touchingXSection) {
             this.touchingXSection = this.touches[t].xsection;
@@ -844,7 +844,20 @@ OMGMelodyMaker.prototype.setTouchingXSection = function () {
     }
     this.notes.autobeat = this.touchingXSection === 1 ? 
         4 : this.touchingXSection === 3 ? 1 : this.touchingXSection;
-
+    return;*/
+    
+    this.touchingXSection = -1;
+    for (var t = 0; t < this.touches.length; t++) {
+        if (this.touches[t].xsection < 3 && this.touches[t].xsection > this.touchingXSection) {
+            this.touchingXSection = this.touches[t].xsection;
+        }
+    }
+    if (this.touchingXSection === -1) {
+        this.touchingXSection = 3;
+    }
+    this.notes.autobeat = this.touchingXSection === 0 ? 4 :
+            this.touchingXSection === 1 ? 2 :
+            this.touchingXSection === 2 ? 1 : 0;
 };
 
 OMGMelodyMaker.prototype.ondownInEdittingDialog = function (touch) {
