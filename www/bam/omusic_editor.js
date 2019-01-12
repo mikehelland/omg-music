@@ -2914,3 +2914,126 @@ function testData() {
     return {"tags":"slow easy","type":"SECTION","parts":[{"id":"3c068e87-5954-495b-850a-35feb209b8d2","type":"PART","notes":[{"note":10,"rest":false,"beats":0.5},{"note":7,"rest":false,"beats":0.5},{"rest":true,"beats":3.5},{"note":14,"rest":false,"beats":0.5},{"note":14,"rest":false,"beats":0.5},{"note":14,"rest":false,"beats":0.5},{"note":14,"rest":false,"beats":0.5},{"rest":true,"beats":0.5},{"note":11,"rest":false,"beats":0.5},{"note":11,"rest":false,"beats":0.5},{"rest":true,"beats":0.25}],"octave":3,"surface":{"url":"PRESET_VERTICAL","name":"","skipTop":0,"skipBottom":0},"soundSet":{"url":"PRESET_OSC_SINE_SOFT_DELAY","name":"Osc Soft Sine Delay","soundFont":false},"audioParams":{"pan":-0.1550399,"mute":false,"speed":1,"volume":0.67042214}},{"id":"9260285c-56b8-4061-adf3-4b33877f2b6b","type":"PART","notes":[{"note":-6,"rest":false,"beats":1},{"note":-6,"rest":false,"beats":1}],"octave":3,"surface":{"url":"PRESET_VERTICAL","name":"","skipTop":0,"skipBottom":0},"soundSet":{"url":"http://openmusic.gallery/data/413","name":"Slap Bass","soundFont":false},"audioParams":{"pan":0,"mute":false,"speed":1,"volume":0.41803226}},{"id":"555f9eee-f8b5-4f3a-bf79-3c6da491b658","type":"PART","tracks":[{"data":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"name":"kick","sound":"PRESET_HH_KICK","audioParams":{"pan":0,"mute":false,"speed":1,"volume":0.75}},{"data":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"name":"clap","sound":"PRESET_HH_CLAP","audioParams":{"pan":0,"mute":false,"speed":1,"volume":0.75}},{"data":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"name":"closed hi-hat","sound":"PRESET_ROCK_HIHAT_CLOSED","audioParams":{"pan":0,"mute":false,"speed":1,"volume":0.75}},{"data":[1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0],"name":"open hi-hat","sound":"PRESET_HH_HIHAT","audioParams":{"pan":0,"mute":false,"speed":1,"volume":0.75}},{"data":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"name":"tambourine","sound":"PRESET_HH_TAMB","audioParams":{"pan":0,"mute":false,"speed":1,"volume":0.75}},{"data":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"name":"h tom","sound":"PRESET_HH_TOM_MH","audioParams":{"pan":0,"mute":false,"speed":1,"volume":0.75}},{"data":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"name":"m tom","sound":"PRESET_HH_TOM_ML","audioParams":{"pan":0,"mute":false,"speed":1,"volume":0.75}},{"data":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"name":"l tom","sound":"PRESET_HH_TOM_L","audioParams":{"pan":0,"mute":false,"speed":1,"volume":0.75}}],"surface":{"url":"PRESET_SEQUENCER","name":"","skipTop":0,"skipBottom":0},"soundSet":{"url":"PRESET_HIPKIT","name":"Hip Hop Drum Kit","soundFont":false},"audioParams":{"pan":0.3440994,"mute":false,"speed":1,"volume":0.8371134}},{"id":"484e3268-b8e1-46c9-8f6a-7496c1f079cd","type":"PART","notes":[{"note":-7,"rest":false,"beats":4.5}],"octave":3,"surface":{"url":"PRESET_VERTICAL","name":"","skipTop":0,"skipBottom":0},"soundSet":{"url":"http://openmusic.gallery/data/744","name":"SUBBASS","soundFont":false},"audioParams":{"pan":0,"mute":false,"speed":1,"volume":0.63962644}}],"madeWith":"","created_at":1528686709198,"omgVersion":0.9,"keyParams":{"scale":[0,2,3,5,7,8,10],"rootNote":3},"last_modified":1528686709198,"beatParams":{"beats":4,"shuffle":0,"measures":2,"subbeats":4,"subbeatMillis":142},"chordProgression":[0,0,-1],"id":1150};
 //    return {"tags":"testosc","type":"SECTION","parts":[{"id":"db37262b-08d0-49ae-8d15-57e304c94457","type":"PART","notes":[{"note":13,"rest":false,"beats":0.75},{"note":16,"rest":false,"beats":0.25},{"note":18,"rest":false,"beats":0.25},{"note":20,"rest":false,"beats":0.25},{"note":22,"rest":false,"beats":0.5},{"note":23,"rest":false,"beats":0.5},{"rest":true,"beats":0.5},{"note":31,"rest":false,"beats":0.5},{"rest":true,"beats":1},{"note":30,"rest":false,"beats":0.5},{"note":29,"rest":false,"beats":0.5},{"rest":true,"beats":1},{"note":30,"rest":false,"beats":0.75}],"octave":3,"surface":{"url":"PRESET_VERTICAL","name":"","skipTop":0,"skipBottom":0},"soundSet":{"url":"PRESET_OSC_SINE_SOFT_DELAY","name":"Osc Soft Sine Delay","soundFont":false},"audioParams":{"pan":0,"mute":false,"speed":1,"volume":0.75}},{"id":"a0624867-fa0b-41a9-bc64-0ffb0ef01281","type":"PART","notes":[],"octave":3,"surface":{"url":"PRESET_VERTICAL","name":"","skipTop":0,"skipBottom":0},"soundSet":{"url":"http://openmusic.gallery/data/413","name":"Slap Bass","soundFont":false},"audioParams":{"pan":0,"mute":false,"speed":1,"volume":0.75}},{"id":"057b83ce-4b36-4490-b026-31e4cfe9a546","type":"PART","tracks":[{"data":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"name":"kick","sound":"PRESET_HH_KICK","audioParams":{"pan":0,"mute":false,"speed":1,"volume":0.75}},{"data":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"name":"clap","sound":"PRESET_HH_CLAP","audioParams":{"pan":0,"mute":false,"speed":1,"volume":0.75}},{"data":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"name":"closed hi-hat","sound":"PRESET_ROCK_HIHAT_CLOSED","audioParams":{"pan":0,"mute":false,"speed":1,"volume":0.75}},{"data":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"name":"open hi-hat","sound":"PRESET_HH_HIHAT","audioParams":{"pan":0,"mute":false,"speed":1,"volume":0.75}},{"data":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"name":"tambourine","sound":"PRESET_HH_TAMB","audioParams":{"pan":0,"mute":false,"speed":1,"volume":0.75}},{"data":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"name":"h tom","sound":"PRESET_HH_TOM_MH","audioParams":{"pan":0,"mute":false,"speed":1,"volume":0.75}},{"data":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"name":"m tom","sound":"PRESET_HH_TOM_ML","audioParams":{"pan":0,"mute":false,"speed":1,"volume":0.75}},{"data":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"name":"l tom","sound":"PRESET_HH_TOM_L","audioParams":{"pan":0,"mute":false,"speed":1,"volume":0.75}}],"surface":{"url":"PRESET_SEQUENCER","name":"","skipTop":0,"skipBottom":0},"soundSet":{"url":"PRESET_HIPKIT","name":"Hip Hop Drum Kit","soundFont":false},"audioParams":{"pan":0,"mute":false,"speed":1,"volume":0.75}}],"madeWith":"","created_at":1528700746966,"omgVersion":0.9,"keyParams":{"scale":[0,3,5,6,7,10],"rootNote":0},"last_modified":1528700746966,"beatParams":{"beats":4,"shuffle":0,"measures":2,"subbeats":4,"subbeatMillis":125},"chordProgression":[0],"id":1151};
 }
+
+
+function OMGDragAndDropHelper() {
+
+    // caller hooks
+    this.ondrag = function (div, x, y) {
+        return true; // return false to manually handle dragging
+    };
+    this.onstartnewlevel = function () {};
+    this.onshortclick = function (div) {};
+
+    this.longClickTimeMS = 250;
+    this.children = [];
+}
+
+OMGDragAndDropHelper.prototype.disable = function () {
+    this.children.forEach(function (div) {
+        div.onmousedown = undefined;
+        div.ontouchstart = undefined;
+    });
+};
+
+OMGDragAndDropHelper.prototype.setupChildDiv = function (div) {
+
+    this.children.push(div);
+    var ddh = this;
+    div.omgdd = {dragLevel: 0};
+
+    div.onmousedown = function (event) {
+        event.preventDefault();
+        ddh.ondown(div, event.clientX, event.clientY);
+    };
+    div.ontouchstart = function (event) {
+        event.preventDefault();
+        ddh.ondown(div, event.targetTouches[0].pageX, event.targetTouches[0].pageY);
+    };
+
+    div.omgdd.parentOffsets = omg.ui.totalOffsets(div.parentElement);
+
+    div.omgdd.onclick = div.onclick;
+    div.onclick = undefined;
+};
+
+OMGDragAndDropHelper.prototype.ondown = function (div, x, y) {
+
+    var ddh = this;
+    var divdd = div.omgdd;
+
+    divdd.dragLevel = 1; // 0 for off, 1 for short click then drag, 2 for long click and drag
+
+    divdd.firstX = x;
+    divdd.lastX = x;
+    divdd.lastY = y;
+
+    divdd.doClick = true;
+
+    ddh.onstartnewlevel(div);
+
+    // sense for a long click, and then move the drag level up and cancel the click
+    divdd.downTimeout = setTimeout(function () {
+
+        divdd.doClick = false;
+
+        if (Math.abs(divdd.lastX - divdd.firstX) < 15) {
+
+            divdd.dragLevel = 2;
+            ddh.onstartnewlevel(div);
+        }
+
+    }, ddh.longClickTimeMS);
+
+
+    div.parentElement.onmousemove = function (event) {
+        ddh.onmove(div, event.clientX, event.clientY);
+    };
+    div.parentElement.ontouchmove = function (e) {
+        ddh.onmove(div, e.targetTouches[0].pageX, e.targetTouches[0].pageY);
+    };
+    div.parentElement.ontouchend = function () {
+        ddh.onmouseup(div);
+    };
+    div.parentElement.onmouseup = function () {
+        ddh.onup(div);
+    };
+
+};
+
+
+OMGDragAndDropHelper.prototype.onmove = function (div, x, y) {
+
+    var px = (x - div.omgdd.parentOffsets.left) / div.parentElement.clientWidth;
+    var py = (y - div.omgdd.parentOffsets.top) / div.parentElement.clientHeight;
+    if (this.ondrag(div, x, y, px, py)) {
+        div.omgdd.resetZ = true;
+        div.style.zIndex = "1";
+        div.style.left = div.offsetLeft + x - div.omgdd.lastX + "px";
+        div.style.top = div.offsetTop + y - div.omgdd.lastY + "px";
+    }
+
+    div.omgdd.lastX = x;
+    div.omgdd.lastY = y;
+};
+
+OMGDragAndDropHelper.prototype.onup = function (div) {
+
+    div.omgdd.dragLevel = 0;
+
+    if (div.omgdd.resetZ) {
+        div.style.zIndex = "0";
+    }
+    div.parentElement.onmousemove = undefined;
+    div.parentElement.ontouchmove = undefined;
+    div.parentElement.ontouchend = undefined;
+    div.parentElement.onmouseup = undefined;
+
+    if (!div.omgdd.doClick)
+        return;
+
+    clearTimeout(div.omgdd.downTimeout);
+
+    this.onshortclick(div);
+    //div.omgdd.onclick();
+};
