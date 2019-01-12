@@ -1446,7 +1446,6 @@ tg.showSongFragment = function () {
     };
     var randomizeButton = document.getElementById("create-random-song-button");
     var randomizeImg = randomizeButton.getElementsByTagName("img")[0];
-    console.log(randomizeImg.getAttribute("src"));
     if (!randomizeImg.getAttribute("src")) {
         randomizeImg.src = "/img/monkey48.png";
     }

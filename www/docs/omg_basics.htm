@@ -16,6 +16,7 @@
     #overview-visual .omg-part {padding: 8px;}
     body {font-size: 1.25em;}
     li {padding:0.7em;}
+    .main-create-something {text-align:center; float:right;}
     </style>
 </head>
 <body>
@@ -81,96 +82,7 @@
 <li><em>Sections</em> are played one after another.</li>
 <li><em>Parts</em> (such as melodies, basslines, and drumbeats) are played together in a <em>Section</em>.</li>
 </ul>
-
-<h2>
-Examples
-</h2>
-
-<strong>Drum Part</strong>
-<div id="drum-example" class="omgviewer"></div>
-
-   <script src="/js/omgservice.js"></script>
-   <script src="/omg-music/vertical_surface.js"></script>
-   <script src="/omg-music/sequencer_surface.js"></script>
-   <script src="/omg-music/omgclasses.js"></script>
-   <script src="/omg-music/tuna-min.js"></script>
-   <script src="/omg-music/omusic_player.js"></script>
-   <script src="/js/embedded_viewer.js"></script>
-
-
-<hr>
-<strong>Bass Part</strong>
-
-<div id="melody-example" class="omgviewer"></div>
-
-<hr>
-<strong>Intro Section</strong>
-
-<div id="section-example" class="omgviewer"></div>
-
-
-<hr>
-<strong>Song</strong>
-<div id="song-example" class="omgviewer"></div>
-
-<script>
-//omg.server.url = "http://openmusic.gallery"
-    omg.server.getId(1277, data => new OMGEmbeddedViewer({
-        id: data.id, height: 180,
-        data: data,
-        div: document.getElementById("drum-example") 
-        //onPlay: fpa.onPlay, onStop: fpa.onStop
-    }));
-    
-    omg.server.getId(1284, data => new OMGEmbeddedViewer({
-        id: data.id, height: 180,
-        data: data,
-        div: document.getElementById("melody-example") 
-        //onPlay: fpa.onPlay, onStop: fpa.onStop
-    }));
-    
-    omg.server.getId(1282, data => new OMGEmbeddedViewer({
-        id: data.id, height: 180,
-        data: data,
-        div: document.getElementById("section-example") 
-        //onPlay: fpa.onPlay, onStop: fpa.onStop
-    }));
-    
-    omg.server.getId(1283, data => new OMGEmbeddedViewer({
-        id: data.id, height: 180,
-        data: data,
-        div: document.getElementById("song-example") 
-        //onPlay: fpa.onPlay, onStop: fpa.onStop
-    }));
-    
-</script>
-
-<hr>
-
-   <div class="main-invitation">
-      Making music is easier than you think! 
-   </div>   
-
-   <div class="main-create-area">
-	   
-      <a href="/bam/" class="main-create-something">
-         Simple Editor
-      </a>
-      <a href="/gauntlet/" class="main-create-something">
-         Advanced Editor
-      </a>
-      
-   </div>
-
-	<hr>
-	<h2><a href="what_is_open_music.htm">What is open music?</a></h2>
-	<hr>
-	<h3>Back to <a href="/">OpenMusic.Gallery</a> home</h3>
-
-   <script src="js/usercontrols.js"></script>
-   <script>
-   //setupUserControls(document.getElementsByClassName("title-bar-user-controls")[0]);
-   </script>
+<a href="examples.htm" class="main-create-something">Examples ></a>
 
    </div>
 </body>

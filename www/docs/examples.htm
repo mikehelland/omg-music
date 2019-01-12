@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<html>
+    <head>
+        <title>OMG Examples</title>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="/css/main.css" type="text/css" />
+        <link rel="stylesheet" href="/css/search.css" type="text/css" />
+        <link rel="stylesheet" href="/css/viewer.css" type="text/css" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body>
+           <div class="main-title-bar">
+         <div class="main-title-bar-content">
+         <a class="main-page-link" href="/index.htm">
+         <span class="main-title-open">Open</span><span class="main-title-media">Music</span><span class="main-title-gallery">.Gallery</span>
+         </a>
+
+         <div class="main-title-bar-right">
+            <div class="title-bar-user-controls"></div>
+         </div>
+      </div>
+
+   </div>
+
+   <div class="main-body">
+
+<h2>
+Examples
+</h2>
+
+<strong>Drum Part</strong>
+<div id="drum-example" class="omgviewer"></div>
+
+   <script src="/js/omgservice.js"></script>
+   <script src="/omg-music/vertical_surface.js"></script>
+   <script src="/omg-music/sequencer_surface.js"></script>
+   <script src="/omg-music/omgclasses.js"></script>
+   <script src="/omg-music/tuna-min.js"></script>
+   <script src="/omg-music/omusic_player.js"></script>
+   <script src="/js/embedded_viewer.js"></script>
+
+
+<hr>
+<strong>Bass Part</strong>
+
+<div id="melody-example" class="omgviewer"></div>
+
+<hr>
+<strong>Intro Section</strong>
+
+<div id="section-example" class="omgviewer"></div>
+
+
+<hr>
+<strong>Song</strong>
+<div id="song-example" class="omgviewer"></div>
+
+<script>
+omg.server.url = "http://openmusic.gallery"
+    omg.server.getId(1277, data => new OMGEmbeddedViewer({
+        id: data.id, height: 180,
+        data: data,
+        div: document.getElementById("drum-example") 
+        //onPlay: fpa.onPlay, onStop: fpa.onStop
+    }));
+    
+    omg.server.getId(1284, data => new OMGEmbeddedViewer({
+        id: data.id, height: 180,
+        data: data,
+        div: document.getElementById("melody-example") 
+        //onPlay: fpa.onPlay, onStop: fpa.onStop
+    }));
+    
+    omg.server.getId(1282, data => new OMGEmbeddedViewer({
+        id: data.id, height: 180,
+        data: data,
+        div: document.getElementById("section-example") 
+        //onPlay: fpa.onPlay, onStop: fpa.onStop
+    }));
+    
+    omg.server.getId(1283, data => new OMGEmbeddedViewer({
+        id: data.id, height: 180,
+        data: data,
+        div: document.getElementById("song-example") 
+        //onPlay: fpa.onPlay, onStop: fpa.onStop
+    }));
+    
+</script>
+
+<hr>
+
+   <div class="main-invitation">
+      Making music is easier than you think! 
+   </div>   
+
+   <div class="main-create-area">
+	   
+      <a href="/bam/" class="main-create-something">
+         Simple Editor
+      </a>
+      <a href="/gauntlet/" class="main-create-something">
+         Advanced Editor
+      </a>
+      
+   </div>
+
+	<hr>
+	<h3>Back to <a href="/">OpenMusic.Gallery</a> home</h3>
+
+   <script src="js/usercontrols.js"></script>
+   <script>
+   //setupUserControls(document.getElementsByClassName("title-bar-user-controls")[0]);
+   </script>
+
+    </div>
+    </body>
+</html>
