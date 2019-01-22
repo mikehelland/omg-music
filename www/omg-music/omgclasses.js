@@ -4,7 +4,7 @@ function OMGSong(div, data, headerOnly) {
     this.fx = [];
     this.loop = true;
     this.gain = 1;
-
+    
     if (headerOnly) {
         this.setHeaderData(data);
     }
@@ -31,6 +31,9 @@ function OMGSong(div, data, headerOnly) {
     }
 
     data = this.data;
+    
+    this.data.omgVersion = Math.max(1, (this.omgVersion || 0));
+
     this.arrangement = [];
     if (data.arrangement) {
         for (var i = 0; i < data.arrangement.length; i++) {

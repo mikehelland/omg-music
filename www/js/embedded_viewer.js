@@ -96,6 +96,7 @@ function OMGEmbeddedViewer(params) {
     rightData.appendChild(resultData);
 
     var height = params.height || 150;
+    
 
     viewer.shareButton.onclick = function () {
         omg.shareWindow.show();
@@ -181,7 +182,7 @@ function OMGEmbeddedViewer(params) {
     viewer.canvas.className = "omg-viewer-canvas";
     viewer.div.appendChild(viewer.canvas);
     viewer.canvas.width = viewer.canvas.clientWidth;
-    viewer.canvas.height = viewer.canvas.clientHeight;
+    viewer.canvas.height = height; //viewer.canvas.clientHeight;
     viewer.context = viewer.canvas.getContext("2d");
 
     viewer.load(data);

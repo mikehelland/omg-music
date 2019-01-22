@@ -216,6 +216,11 @@ app.post('/data/', function (req, res) {
         delete req.body.approved;
     }
 
+    if (typeof req.body.omgVersion !== "number" || req.body.omgVersion < 1) {
+        res.send({});
+        return;
+    }
+
     if (!req.body.created_at) {
         req.body.created_at = Date.now();
     }
