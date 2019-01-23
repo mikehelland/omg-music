@@ -786,6 +786,7 @@ tg.showMixFragment = function () {
 tg.showSubmixFragment = function (part) {
     if (!tg.mixFragment) {
         tg.mixFragment = document.getElementById("mix-fragment");
+        tg.mixFragment.div = tg.mixFragment;
     }
     var divs = [];
     tg.mixFragment.innerHTML = "";
