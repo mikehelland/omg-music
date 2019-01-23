@@ -1560,6 +1560,7 @@ OMusicPlayer.prototype.setupFX = function () {
                 dryLevel: 1,                            //0 to 1+
                 wetLevel: 1,                            //0 to 1+
                 level: 1,                               //0 to 1+, adjusts total output of both wet and dry
+                impulse: "/omg-music/impulses/ir_rev_short.wav"
             };
         },
         "controls": [
