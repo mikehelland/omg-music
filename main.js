@@ -33,7 +33,6 @@ app.use(require('express-session')({
 app.use(passport.initialize());
 app.use(passport.session());
 passport.serializeUser(function(user, done) {
-    console.log("user:"); console.log(user); 
     done(null, user.id);
 });
 passport.deserializeUser(function(id, done) {
@@ -52,7 +51,6 @@ passport.use("login", new LocalStrategy(
         db.users.findOne({username: username}, function (err, user) {
             if (err) return done(err);
 
-            console.log("login user:"); console.log(user);
             if (user && user.password.trim() === password) {
                 delete user.password;
                 return done(null, user);
@@ -231,15 +229,17 @@ app.post('/data/', function (req, res) {
 
     var db = app.get('db');
     db.saveDoc("things", req.body, function (err, result) {
-        console.log(err);
         if (!err) {
             res.send(result);
+        }
+        else {
+            res.send(err);
+            console.log(err);
         }
     }); 
 });
 app.delete('/data/:id', function (req, res) {
     if (req.user && req.user.admin) {
-        console.log(req.user);
         req.body.user_id = req.user.id;
         req.body.username = req.user.username;
     }
@@ -250,9 +250,12 @@ app.delete('/data/:id', function (req, res) {
 
     var db = app.get('db');
     db.things.destroy({id: req.params.id}, function (err, result) {
-        console.log(err);
         if (!err) {
             res.send(result);
+        }
+        else {
+            res.send(err);
+            console.log(err);
         }
     }); 
 });
@@ -323,9 +326,9 @@ app.post('/preview', upload.any(), (req, res) => {
     fs.writeFile("www/preview/" + req.body.id + ".png", req.files[0].buffer, (err) => {
         if (err) {
             console.log('Error: ', err);
-            res.status(500).send('An error occurred: ' + err.message);
+            res.status(500).send({"error": err.message});
         } else {
-            res.status(200).send('ok');
+            res.status(200).send({});
         }
     });
 });
