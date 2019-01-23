@@ -5,3 +5,4 @@ node_modules/
 nbproject/
 /nbproject/private/
 www/soundsets.json
+www/preview/*
