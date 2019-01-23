@@ -38,8 +38,13 @@ omg.server.http = function (params) {
     };
 
     if (params.data) {
-        xhr.setRequestHeader("Content-type", "application/json");
-        xhr.send(JSON.stringify(params.data));
+        if (params.data.constructor.name === "FormData") {
+            xhr.send(params.data);
+        }
+        else {
+            xhr.setRequestHeader("Content-type", "application/json");
+            xhr.send(JSON.stringify(params.data));
+        }
     }
     else {
         xhr.send();

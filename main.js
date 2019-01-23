@@ -3,6 +3,9 @@ var express = require('express');
 var app = express();
 app.use(compression());
 
+var multer = require('multer');
+const upload = multer();
+
 var bodyParser = require('body-parser');
 var http = require('http').Server(app);
 var https = require('https');
@@ -315,6 +318,18 @@ app.get('/most-plays/', function (req, res) {
         }
     });
 });
+
+app.post('/preview', upload.any(), (req, res) => {
+    fs.writeFile("www/preview/" + req.body.id + ".png", req.files[0].buffer, (err) => {
+        if (err) {
+            console.log('Error: ', err);
+            res.status(500).send('An error occurred: ' + err.message);
+        } else {
+            res.status(200).send('ok');
+        }
+    });
+});
+
 
 app.get('/live/:room', function (req, res) {
     res.send(remote(req.params.room));

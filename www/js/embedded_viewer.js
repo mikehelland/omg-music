@@ -6,6 +6,23 @@ if (typeof omg === "undefined") {
 }
 
 function OMGEmbeddedViewer(params) {
+
+    this.player = new OMusicPlayer();
+    this.song = this.player.makeOMGSong(params.data);
+    this.predraw = params.predraw;
+    
+    if (!params.canvas && params.div) {
+        this.setupControls(params);
+    }
+    else {
+        this.canvas = params.canvas;
+    }
+    
+    this.drawCanvas(params.data);
+};
+
+OMGEmbeddedViewer.prototype.setupControls = function (params) {
+    
     var div = params.div;
     var data = params.data;
     
@@ -93,10 +110,7 @@ function OMGEmbeddedViewer(params) {
     resultData.className = "omg-thing-created-at";
     //resultData.innerHTML = getTimeCaption(parseInt(result.created_at));
     resultData.innerHTML = omg.util.getTimeCaption(parseInt(result.last_modified));
-    rightData.appendChild(resultData);
-
-    var height = params.height || 150;
-    
+    rightData.appendChild(resultData);    
 
     viewer.shareButton.onclick = function () {
         omg.shareWindow.show();
@@ -114,7 +128,6 @@ function OMGEmbeddedViewer(params) {
     //viewer.beatMarker.style.height = height + "px";
     viewer.beatMarker.style.marginLeft = viewer.padding / 2 + "px";
     viewer.div.appendChild(viewer.beatMarker);
-
         
     viewer.playButton.onclick = function () {
         
@@ -178,41 +191,43 @@ function OMGEmbeddedViewer(params) {
     var br = document.createElement("br");
     viewer.div.appendChild(br);
     
+    var height = params.height || 150;
+
     viewer.canvas = document.createElement("canvas");
     viewer.canvas.className = "omg-viewer-canvas";
     viewer.div.appendChild(viewer.canvas);
     viewer.canvas.width = viewer.canvas.clientWidth;
     viewer.canvas.height = height; //viewer.canvas.clientHeight;
-    viewer.context = viewer.canvas.getContext("2d");
 
-    viewer.load(data);
-}
-
-OMGEmbeddedViewer.prototype.load = function (data) {
     var className = "omg-viewer-" + data.type.toLowerCase();
     this.div.classList.add(className);
+    this.song.loop = this.song.arrangement.length === 0;
 
+};
+
+OMGEmbeddedViewer.prototype.drawCanvas = function (data) {
+    
     if (data.type === "SOUNDSET") {
         //todo this.loadSoundSet(data);
         return;
     }
 
-    this.player = new OMusicPlayer();
-    this.song = this.player.makeOMGSong(data);
-    this.song.loop = this.song.arrangement.length === 0;
+    this.context = this.canvas.getContext("2d");
 
     this.getDrawingData();
     this.draw();
     
     //var pxPerBeat = (this.div.clientWidth - padding) / this.totalBeatsInSong;
-    var pxPerBeat = (this.div.clientWidth - this.padding) / (this.totalSubbeats * this.drawingData.sections.length);
-    var viewer = this;
-    var beatsInSection = this.song.data.beatParams.measures * this.song.data.beatParams.beats * this.song.data.beatParams.subbeats;
-    viewer.subbeatsPlayed = 0;
-    viewer.beatMarker.style.width = pxPerBeat + "px";
-    viewer.player.onBeatPlayedListeners.push(function (isubbeat, isection) {
-         viewer.beatMarker.style.left = pxPerBeat * viewer.subbeatsPlayed++ + "px";
-    });
+    if (this.div) {
+        var pxPerBeat = (this.div.clientWidth - this.padding) / (this.totalSubbeats * this.drawingData.sections.length);
+        var viewer = this;
+        var beatsInSection = this.song.data.beatParams.measures * this.song.data.beatParams.beats * this.song.data.beatParams.subbeats;
+        viewer.subbeatsPlayed = 0;
+        viewer.beatMarker.style.width = pxPerBeat + "px";
+        viewer.player.onBeatPlayedListeners.push(function (isubbeat, isection) {
+             viewer.beatMarker.style.left = pxPerBeat * viewer.subbeatsPlayed++ + "px";
+        });
+    }
 
 };
 
@@ -309,6 +324,10 @@ OMGEmbeddedViewer.prototype.getSectionDrawingData = function (section) {
 }
 
 OMGEmbeddedViewer.prototype.draw = function () {
+    if (this.predraw) {
+        this.predraw();
+    }
+    
     var usedBeats;
     var marginX, marginY;
     var value;

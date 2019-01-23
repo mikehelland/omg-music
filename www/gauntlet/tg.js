@@ -66,7 +66,6 @@ tg.hideDetails = function (hideFragment) {
     if (tg.addPartFragment) tg.addPartFragment.style.display = "none";
     if (tg.surface) tg.surface.style.display = "none";
     if (tg.mixFragment) tg.mixFragment.style.display = "none";
-    if (tg.saveFragment) tg.saveFragment.style.display = "none";
     if (tg.userFragment) tg.userFragment.style.display = "none";
     if (tg.songFragment) tg.songFragment.style.display = "none";
     if (tg.sectionFragment) tg.sectionFragment.div.style.display = "none";
@@ -848,18 +847,20 @@ tg.makeMixerDiv = function (part, divs) {
 */
 
 tg.saveButton.onclick = function () {
-    tg.showSaveFragment();
+    tg.showFragment(tg.saveFragment);
 };
-tg.showSaveFragment = function () {
-    if (!tg.saveFragment) {
-        tg.saveFragment = document.getElementById("save-fragment");
-    }
-    
-    tg.hideDetails();
-    tg.saveFragment.style.display = "block";
-    tg.newChosenButton(tg.saveButton);
-    
+tg.saveFragment = {
+    div: document.getElementById("save-fragment"),
+    canvas: document.getElementById("save-fragment-canvas"),
+    urlInput: document.getElementById("saved-url"),
+    urlLink: document.getElementById("saved-url-link")
+            
+};
+tg.saveFragment.onshow = function () {
+
     if (tg.song.data.id) {
+        // todo THIS SAVE STUFF!
+        // what if nothing's changed?
         delete tg.song.data.id;
     }
     var json = tg.song.getData();
@@ -876,21 +877,58 @@ tg.showSaveFragment = function () {
     }
     
     omg.server.post(json, function (response) {
-        var saved = true; //??
-        var savedUrl = location.origin + "/play/" + response.id;
-        var div = document.getElementById("saved-url");
-        div.value = savedUrl;
-        var a = document.getElementById("saved-url-link");
-        a.href = savedUrl;
-            //if (callback) {
-            //    callback(response.id);
-            //}
-    });
+        if (response.id) {
+            var savedUrl = location.origin + "/play/" + response.id;
+            tg.saveFragment.urlInput.value = savedUrl;
+            tg.saveFragment.urlLink.href = savedUrl;        
+            tg.saveFragment.onSave(response);
+        }
+        else {
+            tg.saveFragment.urlInput.value = "something went wrong";            
+        }
+    
+    });    
 };
 
+tg.saveFragment.onSave = function (data) {
+    var onloadScript = function () {
+        tg.saveFragment.drawAndPostCanvas(data);
+    };
+    
+    if (!tg.saveFragment.downloadedViewer) {
+        var scriptTag = document.createElement("script");
+        scriptTag.src = "/js/embedded_viewer.js";
+        scriptTag.async = false;
+        scriptTag.onload = onloadScript;
+        document.body.appendChild(scriptTag);
+        tg.saveFragment.downloadedViewer = true;
+    }
+    else {
+        onloadScript();
+    }
+    
+};
 
-
-
+tg.saveFragment.drawAndPostCanvas = function (data) {
+    var viewer = new OMGEmbeddedViewer({canvas: tg.saveFragment.canvas,
+        song: tg.song,
+        data: data,
+        height: 630,
+        width: 1200,
+        predraw: function () {
+            var context = tg.saveFragment.canvas.getContext("2d");
+            context.fillStyle = "#99FF99";
+            context.fillRect(0, 0, tg.saveFragment.canvas.width, tg.saveFragment.canvas.height);
+            //tg.saveFragment.canvas
+        }
+    });
+    tg.saveFragment.canvas.toBlob(function (blob) {
+        var fd = new FormData();
+        fd.append('id', data.id);
+        fd.append('image', blob);
+        omg.server.postHTTP("/preview", fd);
+    });
+};
 /*
  * PART OPTIONS FRAGMENT
  * 

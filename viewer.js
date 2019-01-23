@@ -27,7 +27,7 @@ return `<!DOCTYPE html>
 
    <link rel="stylesheet" href="/css/main.css" type="text/css" />
    <link rel="stylesheet" href="/css/viewer.css" type="text/css" />
-   <meta property="og:image" content="http://openmusic.gallery/img/section.jpg"/>
+   <meta property="og:image" content="http://openmusic.gallery/preview/${result.id}.png"/>
    <meta property="og:description" content="Find, create, and customize music for your project. For Free."/>
    <meta property="og:title" content="${resultCaption}"/>
 

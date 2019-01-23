@@ -691,3 +691,8 @@ input {
 
 #search-next-button {float: right; text-align:right;}
 
+#save-fragment-canvas {
+    width:100%;
+    height:200px;
+    display:none;
+}
