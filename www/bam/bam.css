@@ -432,3 +432,12 @@ body {background:white;}
     height:100%;
     width:100%;
 }
+
+.beat-marker {
+    position:absolute;
+    background-color:#4fa5d5;
+    opacity:0.4;
+    display:none;
+    cursor:pointer;
+    pointer-events:none;
+}

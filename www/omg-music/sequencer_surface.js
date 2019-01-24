@@ -1,4 +1,4 @@
-if (typeof omg != "object")
+if (typeof omg !== "object")
     omg = {};
 
 if (!omg.ui)
@@ -65,6 +65,10 @@ function OMGDrumMachine(div, part, params) {
     }
     
     this.setCanvasEvents();
+    
+    this.beatMarker = document.createElement("div");
+    this.beatMarker.className = "beat-marker";
+    div.appendChild(this.beatMarker);
 }
 
 OMGDrumMachine.prototype.setCanvasEvents = function () {
@@ -454,6 +458,28 @@ OMGDrumMachine.prototype.drawCaptions = function () {
     }
 };
 
+OMGDrumMachine.prototype.updateBeatMarker = function (subbeat) {
+    if (subbeat === -1) {
+        this.beatMarker.style.display = "none";
+        this.beatMarkerShowing = false;
+        return;
+    }
+        
+    if (this.selectedTrack > -1) {
+        this.beatMarker.style.left = this.captionWidth + this.columnWidth * (subbeat % this.beatParams.subbeats) + "px";
+        this.beatMarker.style.top = this.rowHeight * Math.floor(subbeat / this.beatParams.subbeats) + "px";        
+    }
+    else {
+        this.beatMarker.style.left = Math.round(this.captionWidth + this.columnWidth * subbeat) + 1 + "px";
+        this.beatMarker.style.top = "0px";
+    }
+    
+    if (!this.beatMarkerShowing) {
+        this.beatMarker.style.display = "block";            
+        this.beatMarkerShowing = true;
+    }
+};
+
 OMGDrumMachine.prototype.setInfo = function () {
  
     this.info = [];
@@ -501,15 +527,23 @@ OMGDrumMachine.prototype.setInfo = function () {
 };
 
 OMGDrumMachine.prototype.setRowColumnSizes = function () {
+    this.beatMarker.style.display = "none";
+    this.beatMarkerShowing = false;
+    
     if (this.selectedTrack < 0) {
         this.columnWidth = (this.bgCanvas.width - this.captionWidth) / this.totalSubbeats;
         this.rowHeight = this.captionHeight;
+        this.beatMarker.style.width = this.columnWidth - 2 + "px";
+        this.beatMarker.style.height = this.bgCanvas.height + "px";
+        this.beatMarker.style.top = "0px";
     }
     else {
         this.columnWidth = (this.bgCanvas.width - this.captionWidth) / this.beatParams.subbeats;
         this.rowHeight = this.bgCanvas.height / (this.totalBeats);
-        console.log(this.rowHeight);
+        this.beatMarker.style.width = this.columnWidth + "px";
+        this.beatMarker.style.height = this.rowHeight + "px";
     }
+
 };
 
 OMGDrumMachine.prototype.getCaptionY = function (i, length) {

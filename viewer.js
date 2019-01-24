@@ -4,10 +4,8 @@ var viewer = function (result) {
     if (result) {
 
         resultCaption = result.name || result.tags || "";
-        var type = result.partType || result.type || "";
         if (resultCaption.length === 0) {
-            resultCaption = "(" + type.substring(0, 1).toUpperCase() + 
-                    type.substring(1).toLowerCase() + ")";
+            resultCaption = "a song";
         }
         else {
             resultCaption = '&quot;' + resultCaption + '&quot;';
@@ -16,8 +14,9 @@ var viewer = function (result) {
         if (result.username) {
             resultCaption += " by " + result.username.trim();
         }
-
-        resultCaption += " on OMG";
+        else {
+            resultCaption += " on OMG";
+        }
     }
     var pageData = JSON.stringify(result);
 
@@ -33,8 +32,8 @@ return `<!DOCTYPE html>
    <meta property="og:image:width" content="1200" /> 
    <meta property="og:image:height" content="630" />
    <meta property="og:description" content="Find, create, and customize music for your project. For Free."/>
-   <meta property="og:title" content="${resultCaption}"/>
-
+   <meta property="og:title" content="Listen to ${resultCaption}"/>
+   <title>Listen to ${resultCaption} - OpenMusic.Gallery</title>
     <style>html,body {height:100%; margin:0; }
     </style>
 

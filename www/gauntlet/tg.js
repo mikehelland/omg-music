@@ -1,3 +1,6 @@
+//these should already be preloaded
+if (typeof tg !== "object") var tg = {}; 
+if (typeof omg !== "object") var omg = {}; 
 
 tg.playButton = document.getElementById("play-button-canvas");
 tg.playButtonCaption = document.getElementById("play-button-caption");
@@ -141,7 +144,7 @@ tg.sequencer.setup = function () {
     };
     
     s.onBeatPlayedListener = function (isubbeat, isection) {
-        s.part.drumMachine.draw(isubbeat);
+        s.part.drumMachine.updateBeatMarker(isubbeat);
     };
 };
 tg.sequencer.setup();
@@ -226,8 +229,8 @@ tg.instrument.setup = function () {
         ti.setMode(ti.mm.mode !== "ZOOM" ? "ZOOM" : "LIVE");
     };
     
-    tg.instrument.onBeatPlayedListener = function (isubbeat, isection) {
-        tg.instrument.mm.draw();
+    tg.instrument.onBeatPlayedListener = function (subbeat, isection) {
+        tg.instrument.mm.updateBeatMarker(subbeat);
     };
 };
 tg.instrument.setup();

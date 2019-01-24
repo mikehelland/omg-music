@@ -565,6 +565,7 @@ input {
 #sequencer-surface, #instrument-surface {
     flex-grow:1;
     position:relative;
+    overflow: hidden;
 }
 #instrument-canvas-background {
     background:red;
@@ -695,4 +696,13 @@ input {
     width:100%;
     height:200px;
     display:none;
+}
+
+.beat-marker {
+    position:absolute;
+    background-color:#4fa5d5;
+    opacity:0.4;
+    display:none;
+    cursor:pointer;
+    pointer-events:none;
 }

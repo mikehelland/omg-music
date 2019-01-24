@@ -321,6 +321,13 @@ OMusicPlayer.prototype.stop = function () {
     if (typeof (p.onStop) == "function") {
         p.onStop(p);
     }
+    
+    for (var il = 0; il < p.onBeatPlayedListeners.length; il++) {
+        try {
+            p.onBeatPlayedListeners[il].call(null, -1, p.section);
+        } catch (ex) {console.log(ex);}
+    }
+
 
     if (p.song && p.song.sections[p.song.playingSection]) {
         var parts = p.song.sections[p.song.playingSection].parts;

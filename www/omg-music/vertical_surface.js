@@ -3,12 +3,16 @@ function OMGMelodyMaker(div, part, player) {
     this.bgCanvas = document.createElement("canvas");
     this.bgCanvas.className = "surface-canvas";
     div.appendChild(this.bgCanvas);
+    this.beatCanvas = document.createElement("canvas");
+    this.beatCanvas.className = "surface-canvas";
+    div.appendChild(this.beatCanvas);
     this.canvas = document.createElement("canvas");
     this.canvas.className = "surface-canvas";
     div.appendChild(this.canvas);
     this.context = this.canvas.getContext("2d");
     this.bgContext = this.bgCanvas.getContext("2d");
-
+    this.beatContext = this.beatCanvas.getContext("2d");
+    
     this.bottomFretBottom = 0;
     this.topFretTop = 0;
     this.selectedColor = "#4fa5d5";
@@ -45,14 +49,18 @@ OMGMelodyMaker.prototype.drawBackground = function (w, h) {
     var context = this.bgContext;
     canvas.width = w || canvas.clientWidth;
     canvas.height = h || canvas.clientHeight;
+    this.beatCanvas.width = w || canvas.clientWidth;
+    this.beatCanvas.height = h || canvas.clientHeight;
+    this.beatContext.globalAlpha = 0.2;
+    this.beatContext.fillStyle = "#4fa5d5";
     
     this.beatWidth = canvas.width / (
             this.beatParams.subbeats * 
             this.beatParams.beats * 
             this.beatParams.measures);
     this.restHeight = canvas.height / 2 - this.noteHeight / 2;
-
-     this.frets.height = (canvas.height - this.topFretTop - this.bottomFretBottom) / 
+    
+    this.frets.height = (canvas.height - this.topFretTop - this.bottomFretBottom) / 
             (this.frets.length - this.skipFretsBottom - this.skipFretsTop);
 
     context.fillStyle = this.highContrast ? this.color : this.backgroundColor;
@@ -69,6 +77,7 @@ OMGMelodyMaker.prototype.draw = function (isubbeat, w, h) {
     if (this.hidden) {
         this.bgCanvas.style.display = "block";
         this.canvas.style.display = "block";
+        this.beatCanvas.style.display = "block";
         this.hidden = false;
     }
 
@@ -98,7 +107,7 @@ OMGMelodyMaker.prototype.draw = function (isubbeat, w, h) {
     this.setupNotesInfo();
 
     this.context.fillStyle = this.highContrast ? this.backgroundColor : this.color;
-    this.context.font = "28pt arial"
+    this.context.font = "28pt arial";
 
     for (var i = 0; i < this.notesInfo.length; i++) {
         if (omg.ui.useUnicodeNotes) {
@@ -106,17 +115,6 @@ OMGMelodyMaker.prototype.draw = function (isubbeat, w, h) {
         }
         else {
             this.context.drawImage(this.notesInfo[i].image, this.notesInfo[i].x, this.notesInfo[i].y - this.noteHeight * 0.75);
-        }
-
-        if (this.part.currentI - 1 == i) {
-            this.context.fillStyle = "#4fa5d5";
-
-            var oldAlpha = this.context.globalAlpha;
-            this.context.globalAlpha = 0.4;
-            this.context.fillRect(this.notesInfo[i].x, this.notesInfo[i].y - 30, 
-                    this.noteWidth, this.noteHeight);
-            this.context.globalAlpha = oldAlpha;
-            this.context.fillStyle = this.highContrast ? this.backgroundColor : this.color;
         }
 
         if (this.mode === "EDIT") {
@@ -1002,6 +1000,38 @@ OMGMelodyMaker.prototype.drawOMGLiveUsers = function () {
 
 OMGMelodyMaker.prototype.hide = function () {
     this.canvas.style.display = "none";
+    this.beatCanvas.style.display = "none";
     this.bgCanvas.style.display = "none";
     this.hidden = true;
+};
+
+OMGMelodyMaker.prototype.updateBeatMarker = function (subbeat) {
+    
+    if (subbeat === -1) {
+        this.beatContext.clearRect(0, 0, this.beatCanvas.width, this.beatCanvas.height);
+        return;
+    }
+    
+    if (this.touches.length > 0) {
+        this.draw();
+    }
+    
+    if (subbeat % this.beatParams.subbeats !== 0 && 
+            this.part.currentI - 1 === this.currentI) {
+        return;
+    }
+    
+    this.beatContext.clearRect(0, 0, this.beatCanvas.width, this.beatCanvas.height);
+
+    this.beatContext.fillRect((subbeat - subbeat % this.beatParams.subbeats) * this.beatWidth, 0, 
+            this.beatWidth * this.beatParams.subbeats, 
+            this.beatCanvas.height);
+    
+
+    this.currentI = this.part.currentI - 1;
+    if (this.notesInfo[this.currentI]) {
+        this.beatContext.fillRect(this.notesInfo[this.currentI].x, 
+                this.notesInfo[this.currentI].y - 30, 
+                this.noteWidth, this.noteHeight);
+    }
 };

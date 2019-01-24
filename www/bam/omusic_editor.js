@@ -2535,16 +2535,14 @@ OMusicEditor.prototype.songZoneBeatPlayed = function (isubbeat, isection) {
 
 OMusicEditor.prototype.partZoneBeatPlayed = function (isubbeat) {
     var bam = this;
-
-    //bam.part.canvas.update(isubbeat);
+    bam.part.ui.updateBeatMarker(isubbeat);
 };
 
 OMusicEditor.prototype.sectionZoneBeatPlayed = function (isubbeat) {
     var bam = this;
 
     bam.section.parts.forEach(function (part) {
-        //if (part.canvas)
-        //    part.canvas.update(isubbeat);
+        part.ui.updateBeatMarker(isubbeat);
     });
 };
 
