@@ -831,7 +831,7 @@ tg.makeMixerDiv = function (part, divs) {
     divs.push(mixerPanCanvas);
     
     var captionDiv = document.createElement("div");
-    captionDiv.innerHTML = part.name || (part.data.soundSet ? part.data.soundSet.name : "");
+    captionDiv.innerHTML = part.name || part.data.name;
     captionDiv.className = "mixer-part-name";
     newContainerDiv.appendChild(captionDiv);
     
@@ -952,11 +952,19 @@ tg.partOptionsFragment = {
     surfaceArea:  document.getElementById("part-options-surface-area"),
     randomizeButton:  document.getElementById("part-options-randomize"),
     removeButton: document.getElementById("part-options-remove-button"),
-    clearButton: document.getElementById("part-options-clear-button")
+    clearButton: document.getElementById("part-options-clear-button"),
+    nameInput: document.getElementById("part-options-name")
 };
 tg.partOptionsFragment.setup = function () {
     var f = this;
-        
+
+    f.nameInput.onkeypress = function (e) {
+        if (e.keyCode === 13) {
+            f.part.data.name = e.target.value;      
+            f.part.mainFragmentButton.innerHTML = e.target.value;
+        }
+    };
+
     f.midiButton.onclick = function () {
         if (!tg.midiParts) {
             tg.turnOnMIDI();
@@ -1073,6 +1081,8 @@ tg.partOptionsFragment.onshow = function (part) {
     if (!f.randomizeImg.getAttribute("src")) {
         f.randomizeImg.src = "/img/monkey48.png";
     }
+    
+    f.nameInput.value = part.data.name;
 
     f.midiButton.style.display = omg.midi.api && 
             part.data.surface.url === "PRESET_VERTICAL" && 
@@ -2120,7 +2130,7 @@ tg.getOMGLiveRoomName = function (part) {
     if (tg.song.data.name) {
         roomName += tg.song.data.name + "-";
     }
-    roomName += part.data.soundSet.name.substr(0, part.data.soundSet.name.indexOf(" "));
+    roomName += part.data.name.substr(0, part.data.name.indexOf(" "));
     return roomName;
 };
 

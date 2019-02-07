@@ -235,6 +235,10 @@ function OMGPart(div, data, section) {
         };
     }
     
+    if (!this.data.name) {
+        this.data.name = this.data.soundSet.name;
+    }
+    
     if (this.data.surface.url === "PRESET_VERTICAL") {
         if (!this.data.notes) {
             this.data.notes = [];

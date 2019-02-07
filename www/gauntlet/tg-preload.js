@@ -19,7 +19,7 @@ tg.setSongControlsUI = function () {
 };
 
 tg.setupPartButton = function (omgpart) {
-    partDiv = document.createElement("div");
+    var partDiv = document.createElement("div");
     partDiv.className = "part";
     
     var obutton;
@@ -33,7 +33,7 @@ tg.setupPartButton = function (omgpart) {
     
     var bigbutton = document.createElement("div");
     bigbutton.className = "part-button";
-    bigbutton.innerHTML = omgpart.data.soundSet.name;
+    bigbutton.innerHTML = omgpart.data.name;
     bigbutton.onclick = function (e) {
         tg.hideDetails();
         if (omgpart.data.surface.url === "PRESET_SEQUENCER") {
@@ -45,6 +45,7 @@ tg.setupPartButton = function (omgpart) {
         tg.newChosenButton(bigbutton);
     };
     partDiv.appendChild(bigbutton);
+    omgpart.mainFragmentButton = bigbutton;
     
     var button = document.createElement("div");
     button.className = "part-mute-button";
