@@ -200,7 +200,7 @@ var newBandit = function() {
 		bandit.y = (game.height - 100) * Math.random();
 		bandit.boss = true;
                 if (sound) {
-                    game.music.mutePart("boss", false);
+                    game.music.mutePart("Boss", false);
                 }
 		bandits.push(bandit);  
 	}
