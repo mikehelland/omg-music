@@ -256,6 +256,16 @@ OMusicPlayer.prototype.setupNextSection = function (fromStart) {
         p.loopSection = p.queueSection;
         p.queSection = undefined;
     }
+    else if (typeof p.queueSection === "string") {
+        for (var i = 0; i < this.song.sections.length; i++) {
+            if (this.song.sections[i].data.name === p.queueSection) {
+                p.loopSection = i;
+                p.queSection = undefined;
+                break;
+            }
+        }
+    }
+
 
     if (p.loopSection > -1) {
         p.sectionI = p.loopSection;

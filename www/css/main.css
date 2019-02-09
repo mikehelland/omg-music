@@ -52,6 +52,9 @@ body {
    text-decoration:none;
 }
 
+.main-page-link {
+    font-family: sans-serif;
+}
 .main-title-open {
    color:#FFFF88;
 }

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+   <link rel="stylesheet" href="/css/main.css" type="text/css" />
+   <link rel="stylesheet" href="/css/search.css" type="text/css" />
+   <style>
+       pre {font-size:1.5em;}
+   </style>
+</head>
+<body>
+
+   <div class="main-title-bar">
+         <div class="main-title-bar-content">
+         <a class="main-page-link" href="/index.htm">
+         <span class="main-title-open">Open</span><span class="main-title-media">Music</span><span class="main-title-gallery">.Gallery</span>
+         </a>
+
+         <div class="main-title-bar-right">
+            <div class="title-bar-user-controls"></div>
+         </div>
+      </div>
+
+   </div>
+
+   <div class="main-body">
+
+
+<h1>Game Dev</h1>
+<hr>
+
+<p>
+Adding music and sounds to your game is easy with OpenMusic.Gallery. Just add a few lines of code.
+</p>
+
+<h4>When the game is loading:</h4>
+
+<pre>
+     &lt;script src="https://openmusic.gallery/omg.js">&lt;/script>
+
+     game.music = new OMusicPlayer()
+     game.music.prepareSongFromURL("http://openmusic.gallery/data/1333")
+     game.laserSound = game.music.getSound("SFX", "laser")
+</pre>
+
+<h4>When the game starts:</h4>
+
+<pre>
+     game.music.play()
+</pre>
+
+<h4>Increase BPM and key when difficulty increases:</h4>
+
+<pre>
+     game.music.beatParams.bpm += 20
+
+     game.music.keyParams.rootNote++
+     game.music.rescaleSong()
+</pre>
+
+<h4>When the laser is fired:</h4>
+
+<pre>
+     game.laserSound.play()
+</pre>
+
+<h4>When the game ends:</h4>
+
+<pre>
+     game.music.stop()
+</pre>
+
+   </div>
+
+
+   <script src="/js/usercontrols.js"></script>
+   <script>
+   setupUserControls(document.getElementsByClassName("title-bar-user-controls")[0]);
+   </script>
+
+
+</body>
+</html>

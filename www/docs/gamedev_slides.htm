@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+   <link rel="stylesheet" href="/css/main.css" type="text/css" />
+   <link rel="stylesheet" href="/css/search.css" type="text/css" />
+   <style>
+       body {}
+       pre {font-size:2.2em; }
+       .slide {display:none; padding:20px;}
+       .string {color:red;}
+       .comment {color:blue;}
+       #main-canvas {width:80%; height:60%;}
+       h1 {font-family: sans-serif; font-size:4em; text-align: center;}
+   </style>
+</head>
+<body>
+
+   <div class="main-title-bar">
+         <div class="main-title-bar-content">
+         <a class="main-page-link" href="/index.htm">
+         <span class="main-title-open">Open</span><span class="main-title-media">Music</span><span class="main-title-gallery">.Gallery</span>
+         </a>
+
+      </div>
+
+   </div>
+
+   <div class="main-body">
+
+       <div class="slide">
+           <h1>You Have A Game!</h1>
+       </div>   
+       <div class="slide">
+           
+        <canvas id="main-canvas">
+        </canvas>
+
+        <script src="/omg.js"></script>
+        <script src="game.js"></script>
+           
+       </div>
+    
+        <div class="slide">
+           <h1>But You Have No Sound!</h1>
+       </div>   
+
+<div class="slide">
+    
+<h2>TODO: </h2>
+
+<pre>
+
+     <b>* Background Music 
+
+     * Laser Sound
+
+     * Boss Character Theme
+
+     * Intensify Music with Difficulty</b>
+</pre>
+
+</div>
+
+<div class="slide">
+
+<h2>Get music from OpenMusic.Gallery:</h2>
+
+<pre>
+     <a target="out" href="/">https://openmusic.gallery</a>
+</pre>
+
+</div>
+       
+<div class="slide">
+
+<h2>In your HTML:</h2>
+
+<pre>
+     &lt;script src=<span class="string">"https://openmusic.gallery/omg.js"</span>>&lt;/script>
+</pre>
+
+</div>
+
+<div class="slide">
+
+<h2>When the game is loading:</h2>
+
+<pre>
+     var music = new OMusicPlayer()
+     music.prepareSongFromURL(<span class="string">"https://openmusic.gallery/data/<span id="id">1333</span>"</span>)
+
+</pre>
+
+</div>
+       
+<div class="slide">
+
+<h2>When the game is loading:</h2>
+
+<pre>
+     var music = new OMusicPlayer()
+     music.prepareSongFromURL(<span class="string">"https://openmusic.gallery/data/<span id="id2">1333</span>"</span>)
+
+     var laserSound = music.getSound(<span class="string">"SFX"</span>, <span class="string">"laser"</span>)
+</pre>
+
+</div>
+       
+<div class="slide">
+
+<h2>When the game starts:</h2>
+
+<pre>
+     music.play()
+</pre>
+
+</div>
+
+<div class="slide">
+
+<h2>When the game starts:</h2>
+
+<pre>
+     music.play()
+
+     music.queueSection = <span class="string">"Main"</span>;
+</pre>
+
+</div>
+
+<div class="slide">
+
+<h2>When the laser is fired:</h2>
+
+<pre>
+     laserSound.play()
+</pre>
+
+</div>
+
+<div class="slide">
+
+<h2>When a boss character shows up:</h2>
+    
+<pre>
+    <span class="comment">// boss enters</span>
+    music.mutePart(<span class="string">"Boss"</span>, false);
+    
+    <span class="comment">// boss exits</span>
+    music.mutePart(<span class="string">"Boss"</span>, true);
+</pre>
+
+</div>
+       
+       
+<div class="slide">
+
+<h2>Increase BPM and key when difficulty increases:</h2>
+
+<pre>
+     music.beatParams.bpm += <span class="string">20</span>
+
+     music.keyParams.rootNote += <span class="string">1</span>
+     music.rescaleSong()
+</pre>
+
+</div>
+
+<div class="slide">
+
+<h2>When the game ends:</h2>
+
+<pre>
+     music.stop()
+</pre>
+
+</div>
+
+<div class="slide">
+
+<h2>That's it!</h2>
+    
+<pre>
+    <a id="gamelink" href="game.htm">Go to the game!</a>
+</pre>
+
+</div>
+
+   </div>
+
+
+   <script>
+   
+   var idDiv = document.getElementById("id");
+   var id2Div = document.getElementById("id2");
+   var id = "1333";
+   var startedTyping = false;
+   
+   var gamelink = document.getElementById("gamelink");
+   
+   var slides = document.getElementsByClassName("slide");
+   var slideI = 0;
+   slides[0].style.display = "block";
+   document.body.onkeypress = function (e) {
+       console.log(e)
+       if (e.key === "n") {
+        slides[slideI].style.display = "none";
+        slides[++slideI].style.display = "block";
+    }
+        if (e.charCode >= 48 && e.charCode <= 57) {
+            if (!startedTyping) {
+                startedTyping = true;
+                id = "";
+            }
+            id = id + e.key;
+            idDiv.innerHTML = id
+            id2Div.innerHTML = id
+            //gamelink.setAttr("href", "game.htm?" + id);
+            gamelink.href = "game.htm?" + id;
+        }
+   };
+   
+   </script>
+
+
+</body>
+</html>
