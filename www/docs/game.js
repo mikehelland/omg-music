@@ -248,7 +248,7 @@ document.body.onkeydown = function (eventData){    //onkeydown (means pushing th
         game.started = true;
         if (sound) {
             game.music.play();
-            game.music.queueSection = 1;
+            //game.music.queueSection = 1;
             game.laserSound = game.music.getSound("SFX", "toy5");
         }
     }
