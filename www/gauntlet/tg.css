@@ -508,8 +508,8 @@ button {
     width:100%;
 }
 .img-button {
-    padding:0px;
-    font-size:0.9em;
+    padding:6px;
+/*    font-size:0.9em;*/
     width:100%;
 }
 
@@ -621,6 +621,8 @@ input {
     padding:0.3em;
     margin:0.3em;
     font-size:0.8em;
+    /*background-color:black;
+    color:white;*/
 }
 
 .randomizer-title {
@@ -707,4 +709,28 @@ input {
     display:none;
     cursor:pointer;
     pointer-events:none;
+}
+
+
+button {
+  background: #222222;
+  background-image: linear-gradient(to bottom, #222222, #000000);
+  border-radius: 6px;
+  color: #ffffff;
+  font-size: 18px;
+  padding: 10px 20px 10px 20px;
+  margin: 5px 0px;
+  border: solid #888888 1px;
+  text-decoration: none;
+}
+
+button:hover {
+  background: #54636b;
+  background-image: linear-gradient(to bottom, #54636b, #000000);
+  text-decoration: none;
+}
+
+h2 {
+    margin:0px;
+    padding:1em 0;
 }
