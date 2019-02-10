@@ -559,5 +559,6 @@ OMGDrumMachine.prototype.getCaptionY = function (i, length) {
 OMGDrumMachine.prototype.hide = function () {
     this.canvas.style.display = "none";
     this.bgCanvas.style.display = "none";
+    this.beatMarker.style.display = "none";
     this.hidden = true;
 };
