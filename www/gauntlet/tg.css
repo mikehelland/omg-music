@@ -196,9 +196,6 @@ body {
     width:60%;
 }
 
-#mix-fragment {
-    flex-direction:column;    
-}
 .mixer-part {
     flex-grow:1;
     border:1px solid #000088;
@@ -313,10 +310,6 @@ body {
     font-size:0.6em !important;
 }
 
-#chords-fragment {
-    flex-direction: column;
-}
-
 .chord-select-button {
     flex-grow:1;
     text-align:center;
@@ -354,6 +347,10 @@ body {
 
 #song-options-button {
     margin-left:2px;
+    flex-grow:0 !important; 
+}
+
+#live-button {
     flex-grow:0 !important; 
 }
 
@@ -529,7 +526,7 @@ input {
     padding:0.1em !important;
 }
 
-#sequencer-fragment, #instrument-fragment {
+#sequencer-fragment, #instrument-fragment, #mix-fragment, #chords-fragment, #live-fragment {
     flex-direction:column;
 }
 
@@ -736,4 +733,17 @@ h2 {
 
 #add-part-search {
     width:50%;
+}
+
+#omglive-chat {
+    width: 95%;
+    color:white;
+    background-color:black;
+    flex-grow:1;
+    margin:auto;
+    border:0px;
+}
+
+#omglive-chat-input {
+    width: 95%;
 }

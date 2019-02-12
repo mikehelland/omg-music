@@ -7,6 +7,7 @@ tg.playButtonCaption = document.getElementById("play-button-caption");
 tg.mixButton = document.getElementById("mix-button");
 tg.saveButton = document.getElementById("save-button");
 tg.addPartButton = document.getElementById("add-part-button");
+tg.liveButton = document.getElementById("live-button");
 tg.detailFragment = document.getElementById("detail-fragment");
 tg.backButton = document.getElementById("back-button");
 
@@ -1529,6 +1530,7 @@ tg.showUserThings = function () {
 
 tg.onlogin = function (user) {
     tg.user = user;
+    tg.user.username = tg.user.username.trim();
     document.getElementById("tool-bar-user-button").innerHTML = user ? user.username : "Login";
     document.getElementById("user-login-signup").style.display = user ? "none" : "block";
     document.getElementById("user-info").style.display = user ? "block" : "none";
@@ -1544,15 +1546,10 @@ tg.songFragment = {
     div: document.getElementById("song-fragment"),
     nameInput: document.getElementById("song-info-name"),
     tagsInput: document.getElementById("song-info-tags"),
-    liveModeButton:  document.getElementById("song-omglive-mode"),
-    liveUrlInput:  document.getElementById("song-omglive-url"),
-    liveRoomInput:  document.getElementById("song-omglive-room"),
-    liveModeDetails:  document.getElementById("song-omglive-details"),
     randomizeButton: document.getElementById("create-random-song-button"),
     onshow: function () {
         tg.songFragment.nameInput.value = tg.song.data.name || "";
         tg.songFragment.tagsInput.value = tg.song.data.tags || "";    
-        tg.songFragment.setLiveModeUI();
     }
 };
 
@@ -1588,47 +1585,6 @@ tg.songFragment.setup = function () {
     };
     tg.songFragment.randomizeImg = tg.songFragment.randomizeButton.getElementsByTagName("img")[0];
     tg.songFragment.randomizeImg.src = "/img/monkey48.png";
-
-    var f = tg.songFragment;
-    f.liveModeButton.onclick = function () {
-        if (tg.omglive.socket) {
-            tg.omglive.socket.disconnect();
-            tg.omglive.socket = null;
-            f.setLiveModeUI();
-        }
-        else {
-            if (!tg.song.liveRoom) {
-                tg.song.liveRoom = tg.omglive.getRoomName(f.part);
-            }
-            tg.omglive.turnOn(function () {
-                f.setLiveModeUI();
-            });
-        }
-    };
-
-    f.setLiveModeUI =  function () {
-        if (tg.omglive.socket) {
-            f.liveModeButton.innerHTML = "OMG Live Mode is ON";
-            f.liveModeDetails.style.display = "block";
-            
-            f.liveRoomInput.value = tg.song.liveRoom;
-            f.liveUrlInput.value = window.origin + "/live/" + encodeURIComponent(tg.song.liveRoom);
-        }
-        else {
-            f.liveModeButton.innerHTML = "OMG Live Mode is OFF";
-            f.liveModeDetails.style.display = "none";            
-        }
-    };
-    
-    f.liveRoomInput.onkeypress = function (e) {
-        if (e.keyCode === 13) {
-            if (f.liveRoomInput.value !== tg.song.liveRoom) {
-                tg.omglive.switchRoom(f.liveRoomInput.value);
-                f.liveUrlInput.value = window.origin + "/live/" + encodeURIComponent(tg.song.liveRoom);
-            }
-        }
-    };
-
 
 };
 
@@ -2137,6 +2093,82 @@ tg.songOptionsFragment.setupMonkeyWaitTime = function (changeable) {
 };
 
 /*
+ * LIVE FRAGMENT!
+ * 
+*/
+
+
+tg.liveButton.onclick = function () {
+    tg.showFragment(tg.liveFragment, tg.liveButton);
+};
+tg.liveFragment = {
+    div: document.getElementById("live-fragment"),
+    liveModeButton:  document.getElementById("song-omglive-mode"),
+    liveUrlInput:  document.getElementById("song-omglive-url"),
+    liveRoomInput:  document.getElementById("song-omglive-room"),
+    liveModeDetails:  document.getElementById("song-omglive-details"),
+    chatArea:  document.getElementById("omglive-chat"),
+    chatInput:  document.getElementById("omglive-chat-input"),
+    display: "flex"
+};
+
+tg.liveFragment.setup = function () {
+    var f = tg.liveFragment;
+    f.liveModeButton.onclick = function () {
+        if (tg.omglive.socket) {
+            tg.omglive.socket.disconnect();
+            tg.omglive.socket = null;
+            f.setLiveModeUI();
+        }
+        else {
+            if (!tg.song.liveRoom) {
+                tg.song.liveRoom = tg.omglive.getRoomName(f.part);
+            }
+            tg.omglive.turnOn(function () {
+                f.setLiveModeUI();
+            });
+        }
+    };
+
+    f.setLiveModeUI =  function () {
+        if (tg.omglive.socket) {
+            f.liveModeButton.innerHTML = "OMG Live Mode is ON";
+            f.liveModeDetails.style.display = "block";
+            f.chatArea.style.display = "block";
+            f.chatInput.style.display = "block";
+            
+            f.liveRoomInput.value = tg.song.liveRoom;
+            f.liveUrlInput.value = window.origin + "/live/" + encodeURIComponent(tg.song.liveRoom);
+        }
+        else {
+            f.liveModeButton.innerHTML = "OMG Live Mode is OFF";
+            f.liveModeDetails.style.display = "none";            
+            f.chatArea.style.display = "none";
+            f.chatInput.style.display = "none";
+        }
+    };
+    
+    f.liveRoomInput.onkeypress = function (e) {
+        if (e.keyCode === 13) {
+            if (f.liveRoomInput.value !== tg.song.liveRoom) {
+                tg.omglive.switchRoom(f.liveRoomInput.value);
+                f.liveUrlInput.value = window.origin + "/live/" + encodeURIComponent(tg.song.liveRoom);
+            }
+        }
+    };
+    
+    f.chatInput.onkeypress = function (e) {
+        if (e.keyCode === 13) {
+            tg.omglive.chat(f.chatInput.value);
+            f.chatInput.value = "";
+        }        
+    };
+    
+    f.setLiveModeUI();
+};
+
+
+/*
  * OMG LIVE!
  * 
 */
@@ -2199,6 +2231,9 @@ tg.omglive = {
         tg.omglive.socket.emit("startSession", tg.song.liveRoom);
         tg.omglive.socket.on("data", function (data) {
             tg.omglive.ondata(data);
+        });
+        tg.omglive.socket.on("chat", function (data) {
+            tg.omglive.onchat(data);
         });
         callback();
     }
@@ -2290,6 +2325,11 @@ tg.omglive.ondata = function (data) {
     }
 };
 
+tg.omglive.onchat = function (data) {
+    tg.liveFragment.chatArea.append("\n" + data.user + ": " + data.text);
+    tg.liveFragment.chatArea.scrollTop = tg.liveFragment.chatArea.scrollHeight;
+};
+
 tg.omglive.partData = function (part, data) {
     
     var fret = Math.max(0, Math.min(part.mm.frets.length - 1,
@@ -2358,6 +2398,14 @@ tg.omglive.switchRoomPart = function (part, newRoom) {
     part.socket.emit("startSession", part.liveRoom);
 };
 
+tg.omglive.chat = function (text) {
+    if (!text) return;
+
+    tg.omglive.socket.emit("chat", {
+        user: tg.user.username, 
+        text: text,
+    });
+};
 
 /*
  * MIDI!

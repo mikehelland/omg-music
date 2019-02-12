@@ -46,6 +46,7 @@
             <div id="song-options-button">&#9776;</div>
             <div id="add-part-button">Add Part</div>
             <div id="mix-button">Mix</div>
+            <div id="live-button">Live</div>
         </div>
 </div>
     
@@ -254,17 +255,7 @@
             <br>
             <button class="img-button" id="create-random-song-button">
                 <img style="vertical-align:middle" height="32" width="32" src=""> New Random Song</button>
-            <br>
-            <hr>
-            <br>
-            <button id="song-omglive-mode">OMG Live</button>
-            <div id="song-omglive-details">
-                    <input id="song-omglive-room">
-                    <div>Others can connect at:</div>
-                    <input id="song-omglive-url" readonly>
-                </div>
             </div>
-            
         </div>
         <div id="section-fragment" class="fragment">
             <div class="detail-fragment-body">
@@ -302,6 +293,21 @@
                 <div id="song-options-changeable-list"></div>
             </div>
         </div>
+        <div id="live-fragment" class="fragment">
+            <div class="detail-fragment-body">
+            <button id="song-omglive-mode">OMG Live</button>
+            <div id="song-omglive-details">
+                    <input id="song-omglive-room">
+                    <div>Others can connect at:</div>
+                    <input id="song-omglive-url" readonly>
+                    
+            </div>
+            </div>
+            <textarea id="omglive-chat" readonly></textarea>
+            <input id="omglive-chat-input">
+        </div>
+            
+            
         </div>
         <div id="back-button">&lt; Back</div>
     </div>

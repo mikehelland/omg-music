@@ -100,6 +100,11 @@ omgSocket.on("connection", function (socket) {
     socket.on("data", function (data) {
         socket.to(room).emit("data", data);
     });
+    socket.on("chat", function (data) {
+        console.log(data, room)
+        omgSocket.in(room).emit("chat", data);
+        console.log("emitted")
+    });
 });
 
 
