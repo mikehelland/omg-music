@@ -152,6 +152,11 @@ tg.sequencer.setup = function () {
 
 tg.sequencer.show = function (part) {
     var s = tg.sequencer;
+    
+    if (!s.isSetup) {
+        s.setup();
+    }
+    
     s.beatStrength = 1;
     if (s.part && s.part.drumMachine) {
         s.beatStrength = s.part.drumMachine.beatStrength;
