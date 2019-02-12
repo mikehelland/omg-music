@@ -86,7 +86,9 @@ passport.use("signup", new LocalStrategy(
 
 var omgSocket = io.of("/omg-live");
 omgSocket.on("connection", function (socket) {
+    var room = "";
     socket.on("startSession", function (data) {
+        room = data;
         socket.join(data);
     });
     socket.on("leaveSession", function (data) {
@@ -94,6 +96,9 @@ omgSocket.on("connection", function (socket) {
     });
     socket.on("basic", function (data) {
         io.of("/omg-live").to(data.room).emit("basic", data);
+    });
+    socket.on("data", function (data) {
+        socket.to(room).emit("data", data);
     });
 });
 

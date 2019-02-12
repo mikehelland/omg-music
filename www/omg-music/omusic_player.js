@@ -356,6 +356,7 @@ OMusicPlayer.prototype.stop = function () {
 };
 
 OMusicPlayer.prototype.loadSection = function (section, soundsNeeded) {
+    var part;
     for (var ipart = 0; ipart < section.parts.length; ipart++) {
         part = section.parts[ipart];
         this.loadPart(part, soundsNeeded);

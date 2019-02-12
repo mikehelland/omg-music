@@ -71,26 +71,26 @@ function OMGSong(div, data, headerOnly) {
     this.onChordProgressionChangeListeners = [];
 };
 
-OMGSong.prototype.keyChanged = function () {
+OMGSong.prototype.keyChanged = function (source) {
     var song = this;
-    this.onKeyChangeListeners.forEach(listener => listener(song.data.keyParams));
+    this.onKeyChangeListeners.forEach(listener => listener(song.data.keyParams, source));
 };
 
-OMGSong.prototype.tempoChanged = function () {
+OMGSong.prototype.tempoChanged = function (source) {
     var song = this;
-    this.onBeatChangeListeners.forEach(listener => listener(song.data.beatParams));
+    this.onBeatChangeListeners.forEach(listener => listener(song.data.beatParams, source));
 };
 
-OMGSong.prototype.partMuteChanged = function (part) {
-    this.onPartAudioParamsChangeListeners.forEach(listener => listener(part));
+OMGSong.prototype.partMuteChanged = function (part, source) {
+    this.onPartAudioParamsChangeListeners.forEach(listener => listener(part, source));
 };
 
-OMGSong.prototype.chordProgressionChanged = function (section) {
-    this.onChordProgressionChangeListeners.forEach(listener => listener(section));
+OMGSong.prototype.chordProgressionChanged = function (source) {
+    this.onChordProgressionChangeListeners.forEach(listener => listener(source));
 };
 
-OMGSong.prototype.partAdded = function (part) {
-    this.onPartAddListeners.forEach(listener => listener(part));
+OMGSong.prototype.partAdded = function (part, source) {
+    this.onPartAddListeners.forEach(listener => listener(part, source));
 };
 
 

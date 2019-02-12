@@ -57,20 +57,23 @@ tg.showFragment = function (fragment, button, params) {
     }
     fragment.div.style.display = fragment.display || "block";
     tg.currentFragment = fragment;
+    
+    if (fragment.setup && !fragment.isSetup) {
+        fragment.setup();
+        fragment.isSetup = true;
+    }
+    
     if (fragment.onshow) {
         fragment.onshow(params);
     }
-}
+};
 
 tg.hideDetails = function (hideFragment) {
-    if (tg.beatsFragment) tg.beatsFragment.style.display = "none";
-    if (tg.keyFragment) tg.keyFragment.style.display = "none";
-    if (tg.chordsFragment) tg.chordsFragment.style.display = "none";
-    if (tg.surface) tg.surface.style.display = "none";
     if (tg.mixFragment) tg.mixFragment.style.display = "none";
     if (tg.userFragment) tg.userFragment.style.display = "none";
-    if (tg.songFragment) tg.songFragment.style.display = "none";
     if (tg.sectionFragment) tg.sectionFragment.div.style.display = "none";
+
+    if (tg.surface) tg.surface.style.display = "none";
     if (tg.sequencer) tg.sequencer.div.style.display = "none";
     if (tg.instrument) tg.instrument.div.style.display = "none";
     
@@ -146,7 +149,6 @@ tg.sequencer.setup = function () {
         s.part.drumMachine.updateBeatMarker(isubbeat);
     };
 };
-tg.sequencer.setup();
 
 tg.sequencer.show = function (part) {
     var s = tg.sequencer;
@@ -231,6 +233,7 @@ tg.instrument.setup = function () {
     tg.instrument.onBeatPlayedListener = function (subbeat, isection) {
         tg.instrument.mm.updateBeatMarker(subbeat);
     };
+    tg.instrument.isSetup = true;
 };
 tg.instrument.setup();
 
@@ -323,91 +326,80 @@ tg.playButtonCaption.innerHTML = "PLAY";
 */
 
 tg.beatsButton.onclick = function () {
-    tg.hideDetails();
-    tg.showBeatsFragment();
+    tg.showFragment(tg.beatsFragment, tg.beatsButton);
 };
 
+tg.beatsFragment = {
+    div: document.getElementById("beats-fragment"),
+    subbeatsLabel: document.getElementById("subbeats-label"),
+    beatsLabel: document.getElementById("beats-label"),
+    measuresLabel: document.getElementById("measures-label"),
+    bpmLabel: document.getElementById("bpm-label"),
+    shuffleLabel: document.getElementById("shuffle-label"),
 
-tg.showBeatsFragment = function () {
-    tg.hideDetails();
-    if (!tg.beatsFragment) {
-        tg.beatsFragment = document.getElementById("beats-fragment");
-        var bf= tg.beatsFragment;
-        bf.div = bf;
-        
-        bf.onhide = function () {
-            tg.song.onBeatChangeListeners.splice(
-                tg.song.onBeatChangeListeners.indexOf(bf.listener), 1);
-        };
-        
-        bf.subbeatsLabel = document.getElementById("subbeats-label");
-        bf.beatsLabel = document.getElementById("beats-label");
-        bf.measuresLabel = document.getElementById("measures-label");
-        bf.bpmLabel = document.getElementById("bpm-label");
-        bf.shuffleLabel = document.getElementById("shuffle-label");
-        
-        bf.subbeatsRange = document.getElementById("subbeats-range");
-        bf.beatsRange = document.getElementById("beats-range");
-        bf.measuresRange = document.getElementById("measures-range");
-        bf.bpmRange = document.getElementById("bpm-range");
-        bf.shuffleRange = document.getElementById("shuffle-range");
-        
-        var onSubeatsChange = function (e) {
-            bf.subbeatsLabel.innerHTML = bf.subbeatsRange.value;
-            tg.song.data.beatParams.subbeats = bf.subbeatsRange.value * 1;
-        };
-        bf.subbeatsRange.ontouchmove = onSubeatsChange;
-        bf.subbeatsRange.onmousemove = onSubeatsChange;
-        bf.subbeatsRange.onmousedown = onSubeatsChange;
-        bf.subbeatsRange.onchange = onSubeatsChange;
-        var onBeatsChange = function (e) {
-            bf.beatsLabel.innerHTML = bf.beatsRange.value;
-            tg.song.data.beatParams.beats = bf.beatsRange.value * 1;
-        };
-        bf.beatsRange.ontouchmove = onBeatsChange;
-        bf.beatsRange.onmousemove = onBeatsChange;
-        bf.beatsRange.onmousedown = onBeatsChange;
-        bf.beatsRange.onchange = onBeatsChange;
-        var onMeasuresChange = function (e) {
-            bf.measuresLabel.innerHTML = bf.measuresRange.value;
-            tg.song.data.beatParams.measures = bf.measuresRange.value * 1;
-        };
-        bf.measuresRange.ontouchmove = onMeasuresChange;
-        bf.measuresRange.onmousemove = onMeasuresChange;
-        bf.measuresRange.onmousedown = onMeasuresChange;
-        bf.measuresRange.onchange = onMeasuresChange;
-        var onBpmChange = function (e) {
-            bf.bpmLabel.innerHTML = bf.bpmRange.value;
-            tg.song.data.beatParams.bpm = bf.bpmRange.value * 1;
-            tg.player.newBPM = bf.bpmRange.value;
-            tg.setSongControlsUI();
-        };
-        bf.bpmRange.ontouchmove = onBpmChange;
-        bf.bpmRange.onmousemove = onBpmChange;
-        bf.bpmRange.onmousedown = onBpmChange;
-        bf.bpmRange.onchange = onBpmChange;
-        var onShuffleChange = function (e) {
-            tg.song.data.beatParams.shuffle = bf.shuffleRange.value / 100;
-            bf.shuffleLabel.innerHTML = bf.shuffleRange.value * 1;
-            
-        };
-        bf.shuffleRange.ontouchmove = onShuffleChange;
-        bf.shuffleRange.onmousemove = onShuffleChange;
-        bf.shuffleRange.onmousedown = onShuffleChange;
-        bf.shuffleRange.onchange = onShuffleChange;
+    subbeatsRange: document.getElementById("subbeats-range"),
+    beatsRange: document.getElementById("beats-range"),
+    measuresRange: document.getElementById("measures-range"),
+    bpmRange: document.getElementById("bpm-range"),
+    shuffleRange: document.getElementById("shuffle-range"),
+    onshow: function () {
+        tg.beatsFragment.refresh();    
+        tg.song.onBeatChangeListeners.push(tg.beatsFragment.refresh);
+    },
+    onhide: function () {
+        tg.song.onBeatChangeListeners.splice(
+            tg.song.onBeatChangeListeners.indexOf(tg.beatsFragment.refresh), 1);
     }
-    tg.refreshBeatsFragment();
-    tg.beatsFragment.style.display = "block";
-    tg.newChosenButton(tg.beatsButton);
-    
-    tg.beatsFragment.listener = function () {
-        tg.refreshBeatsFragment();
-    };
-    tg.song.onBeatChangeListeners.push(tg.beatsFragment.listener);
-    tg.currentFragment = tg.beatsFragment;
 };
 
-tg.refreshBeatsFragment = function () {
+tg.beatsFragment.setup = function () {
+    var bf= tg.beatsFragment;
+
+    var onSubeatsChange = function (e) {
+        tg.song.data.beatParams.subbeats = bf.subbeatsRange.value * 1;
+        tg.song.tempoChanged();
+    };
+    bf.subbeatsRange.ontouchmove = onSubeatsChange;
+    bf.subbeatsRange.onmousemove = onSubeatsChange;
+    bf.subbeatsRange.onmousedown = onSubeatsChange;
+    bf.subbeatsRange.onchange = onSubeatsChange;
+    var onBeatsChange = function (e) {
+        tg.song.data.beatParams.beats = bf.beatsRange.value * 1;
+        tg.song.tempoChanged();
+    };
+    bf.beatsRange.ontouchmove = onBeatsChange;
+    bf.beatsRange.onmousemove = onBeatsChange;
+    bf.beatsRange.onmousedown = onBeatsChange;
+    bf.beatsRange.onchange = onBeatsChange;
+    var onMeasuresChange = function (e) {
+        tg.song.data.beatParams.measures = bf.measuresRange.value * 1;
+        tg.song.tempoChanged();
+    };
+    bf.measuresRange.ontouchmove = onMeasuresChange;
+    bf.measuresRange.onmousemove = onMeasuresChange;
+    bf.measuresRange.onmousedown = onMeasuresChange;
+    bf.measuresRange.onchange = onMeasuresChange;
+    var onBpmChange = function (e) {
+        tg.song.data.beatParams.bpm = bf.bpmRange.value * 1;
+        tg.player.newBPM = bf.bpmRange.value;
+        tg.setSongControlsUI();
+        tg.song.tempoChanged();
+    };
+    bf.bpmRange.ontouchmove = onBpmChange;
+    bf.bpmRange.onmousemove = onBpmChange;
+    bf.bpmRange.onmousedown = onBpmChange;
+    bf.bpmRange.onchange = onBpmChange;
+    var onShuffleChange = function (e) {
+        tg.song.data.beatParams.shuffle = bf.shuffleRange.value / 100;
+        tg.song.tempoChanged();
+    };
+    bf.shuffleRange.ontouchmove = onShuffleChange;
+    bf.shuffleRange.onmousemove = onShuffleChange;
+    bf.shuffleRange.onmousedown = onShuffleChange;
+    bf.shuffleRange.onchange = onShuffleChange;
+};
+
+tg.beatsFragment.refresh = function () {
     tg.beatsFragment.subbeatsLabel.innerHTML = tg.song.data.beatParams.subbeats;
     tg.beatsFragment.beatsLabel.innerHTML = tg.song.data.beatParams.beats;
     tg.beatsFragment.measuresLabel.innerHTML = tg.song.data.beatParams.measures;
@@ -427,22 +419,51 @@ tg.refreshBeatsFragment = function () {
 */
 
 tg.keyButton.onclick = function () {
-    tg.hideDetails();
-    tg.showKeyFragment();
-}
+    tg.showFragment(tg.keyFragment, tg.keyButton);
+};
 
-tg.showKeyFragment = function () {
-    var kf;
-    if (!tg.keyFragment) {
-        tg.keyFragment = document.getElementById("key-fragment");
-        tg.keyFragment.keyList = document.getElementById("key-list");
-        tg.keyFragment.scaleList = document.getElementById("scale-list");
+tg.keyFragment = {
+    div: document.getElementById("key-fragment"),
+    keyList: document.getElementById("key-list"),
+    scaleList: document.getElementById("scale-list"),
+    display: "flex",
+    onshow: function () {
+        tg.song.onKeyChangeListeners.push(tg.keyFragment.listener);
+    },
+    onhide: function () {
+        var i = tg.song.onKeyChangeListeners.indexOf(tg.keyFragment.listener);
+        if (i > -1) {
+            tg.song.onKeyChangeListeners.splice(i, 1);
+        }
     }
+};
+
+tg.keyFragment.setup = function () {
+    var kf = tg.keyFragment;
     
     var lastKey;
     var lastScale;
-    
-    kf = tg.keyFragment;
+
+    kf.listener = function (keyParams, source) {
+        if (source === "keyFragment") return;
+        if (lastKey) {
+            lastKey.classList.remove("selected-list-item");
+        }
+        lastKey = kf.keyList.children[keyParams.rootNote];
+        lastKey.classList.add("selected-list-item");
+        
+        for (var i = 0; i < omg.ui.scales.length; i++) {
+            if (omg.ui.scales[i].value.join() === keyParams.scale.join()) {
+                if (lastScale) {
+                    lastScale.classList.remove("selected-list-item");
+                }
+                lastScale = kf.scaleList.children[i];
+                lastScale.classList.add("selected-list-item");
+                break;
+            }
+        }
+    };
+
     kf.keyList.innerHTML = "";
     kf.scaleList.innerHTML = "";
     var keyI = 0;
@@ -457,7 +478,7 @@ tg.showKeyFragment = function () {
         keyDiv.onclick = (function (i) {
             return function () {
                 tg.song.data.keyParams.rootNote = i;
-                tg.keyChanged();
+                tg.keyChanged("keyFragment");
 
                 if (lastKey) {
                     lastKey.classList.remove("selected-list-item");
@@ -481,7 +502,7 @@ tg.showKeyFragment = function () {
         scaleDiv.onclick = (function (newScale) {
             return function () {
                 tg.song.data.keyParams.scale = newScale;
-                tg.keyChanged();
+                tg.keyChanged("keyFragment");
                 
                 if (lastScale) {
                     lastScale.classList.remove("selected-list-item");
@@ -493,9 +514,6 @@ tg.showKeyFragment = function () {
 
         kf.scaleList.appendChild(scaleDiv);
     });
-
-    tg.keyFragment.style.display = "flex";
-    tg.newChosenButton(tg.keyButton);
 };
 
 tg.keyChanged = function () {
@@ -515,40 +533,42 @@ tg.keyChanged = function () {
 
 
 tg.chordsButton.onclick = function () {
-    tg.hideDetails();
-    tg.showChordsFragment();
+    tg.showFragment(tg.chordsFragment, tg.chordsButton);
 };
-tg.showChordsFragment = function () {
-    if (!tg.chordsFragment) {
-        tg.chordsFragment = document.getElementById("chords-fragment");
-        tg.chordsFragment.appendMode = false;
-        document.getElementById("chords-fragment-clear-button").onclick = function () {
-            tg.currentSection.data.chordProgression = [0];
-            tg.setSongControlsUI();
-        };
-        var appendButton = document.getElementById("chords-fragment-append-button");
-        appendButton.onclick = function () {
-            tg.chordsFragment.appendMode = !tg.chordsFragment.appendMode;
-            if (tg.chordsFragment.appendMode) {
-                appendButton.classList.add("selected-option");
-            }
-            else {
-                appendButton.classList.remove("selected-option");
-            }
-        };
 
-    }
-    var chordsList = document.getElementById("chords-fragment-list");
-    chordsList.innerHTML = "";
-    for (var i = tg.song.data.keyParams.scale.length - 1; i >= 0; i--) {
-        chordsList.appendChild(tg.makeChordButton(i));
-    }
-    for (var i = 1; i < tg.song.data.keyParams.scale.length; i++) {
-        chordsList.appendChild(tg.makeChordButton(i * -1));
-    }
+tg.chordsFragment = {
+    div: document.getElementById("chords-fragment"),
+    appendButton: document.getElementById("chords-fragment-append-button"),
+    clearButton: document.getElementById("chords-fragment-clear-button"),
+    chordsList: document.getElementById("chords-fragment-list"),
+    onshow: function () {
+        tg.chordsFragment.chordsList.innerHTML = "";
+        for (var i = tg.song.data.keyParams.scale.length - 1; i >= 0; i--) {
+            tg.chordsFragment.chordsList.appendChild(tg.makeChordButton(i));
+        }
+        for (var i = 1; i < tg.song.data.keyParams.scale.length; i++) {
+            tg.chordsFragment.chordsList.appendChild(tg.makeChordButton(i * -1));
+        }
+    },
+    display: "flex"
+};
 
-    tg.chordsFragment.style.display = "flex";
-    tg.newChosenButton(tg.chordsButton);
+tg.chordsFragment.setup = function () {
+    tg.chordsFragment.appendMode = false;
+    tg.chordsFragment.clearButton.onclick = function () {
+        tg.currentSection.data.chordProgression = [0];
+        tg.setSongControlsUI();
+    };
+
+    tg.chordsFragment.appendButton.onclick = function () {
+        tg.chordsFragment.appendMode = !tg.chordsFragment.appendMode;
+        if (tg.chordsFragment.appendMode) {
+            tg.chordsFragment.appendButton.classList.add("selected-option");
+        }
+        else {
+            tg.chordsFragment.appendButton.classList.remove("selected-option");
+        }
+    };
 };
 
 tg.makeChordButton = function (chordI) {
@@ -562,7 +582,7 @@ tg.makeChordButton = function (chordI) {
         else {
             tg.currentSection.data.chordProgression = [chordI];
         }
-        tg.setSongControlsUI();
+        tg.song.chordProgressionChanged();
     };
     return chordDiv;
 };
@@ -618,7 +638,7 @@ tg.addPartFragment.setup = function () {
     f.currentList = f.soundSetList;
   
     var addOscButtonClick = function (e) {
-        tg.addOsc(e.target.innerHTML);  
+        tg.addOsc(e.target.innerHTML, "addPartFragment");  
     };
     document.getElementById("add-sine-osc-button").onclick = addOscButtonClick;
     document.getElementById("add-saw-osc-button").onclick = addOscButtonClick;
@@ -636,7 +656,7 @@ tg.addPartFragment.setup = function () {
         newDiv.onclick = function () {
             var soundSet = tg.player.getSoundSetForSoundFont(newDiv.innerHTML, 
                 f.gallerySelect.value + name + "-mp3/");
-            tg.addPart(soundSet);
+            tg.addPart(soundSet, "addPartFragment");
         };
 
     });
@@ -657,10 +677,10 @@ tg.addPartFragment.loadList = function (list, url) {
             list.appendChild(newDiv);
             soundSet.url = location.origin + "/data/" + soundSet.id;
             newDiv.onclick = function () {
-                tg.addPart(soundSet);
+                tg.addPart(soundSet, "addPartFragment");
             };
         });
-    }).catch(e=>console.log(e));
+    }).catch(e=>console.error(e));
 };
 
 tg.addPartFragment.setupAddPartTabs = function () {
@@ -754,24 +774,22 @@ tg.addCustomSoundSet = function () {
         data: urls,
         defaultSurface: "PRESET_VERTICAL"
     };
-    tg.addPart(soundSet);
+    tg.addPart(soundSet, "addPartFragment");
 };
 
-tg.addPart = function (soundSet) {
+tg.addPart = function (soundSet, source) {
     var blankPart = {soundSet: soundSet};
     var part = new OMGPart(undefined,blankPart,tg.currentSection);
     tg.player.loadPart(part);
-    var div = tg.loadPart(part)
-    div.getElementsByClassName("part-button")[0].onclick();
+    tg.song.partAdded(part, source);
 };
 
-tg.addOsc = function (type) {
+tg.addOsc = function (type, source) {
   var soundSet = {"url":"PRESET_OSC_" + type.toUpperCase(),"name": type + " Oscillator",
       "type":"SOUNDSET","octave":5,"lowNote":0,"highNote":108,"chromatic":true};
-  tg.addPart(soundSet);
+  tg.addPart(soundSet, source);
 };
 
-tg.addPartFragment.setup();
 
 /*
  * MIX FRAGMENT
@@ -805,7 +823,8 @@ tg.showMixFragment = function () {
         child.sizeCanvas();
     });
     
-    tg.mixFragment.listener = (part) => {
+    tg.mixFragment.listener = (part, source) => {
+        if (source === "mixFragment") return;
         if (part.mixerDiv) {
             part.mixerDiv.refresh();
         }
@@ -836,6 +855,10 @@ tg.showSubmixFragment = function (part) {
 tg.makeMixerDiv = function (part, divs) {
     var newContainerDiv = document.createElement("div");
     newContainerDiv.className = "mixer-part";
+    
+    var onchange = function () {
+        tg.song.partMuteChanged(part, "mixFragment");
+    };
 
     var audioParams = part.audioParams || part.data.audioParams;
     
@@ -843,11 +866,11 @@ tg.makeMixerDiv = function (part, divs) {
             "color": audioParams.mute ?"#880000" : "#008800", transform: "square"};
     var warpProperty = {"property": "warp", "name": "Warp", "type": "slider", "min": 0, "max": 2, resetValue: 1, "color": "#880088"};
     var panProperty = {"property": "pan", "name": "Pan", "type": "slider", "min": -1, "max": 1, resetValue: 0, "color": "#000088"};
-    var mixerVolumeCanvas = new SliderCanvas(null, volumeProperty, part.gain, audioParams);
+    var mixerVolumeCanvas = new SliderCanvas(null, volumeProperty, part.gain, audioParams, onchange);
     mixerVolumeCanvas.div.className = "mixer-part-volume";
-    var mixerWarpCanvas = new SliderCanvas(null, warpProperty, null, audioParams);
+    var mixerWarpCanvas = new SliderCanvas(null, warpProperty, null, audioParams, onchange);
     mixerWarpCanvas.div.className = "mixer-part-warp";
-    var mixerPanCanvas = new SliderCanvas(null, panProperty, part.panner, audioParams);
+    var mixerPanCanvas = new SliderCanvas(null, panProperty, part.panner, audioParams, onchange);
     mixerPanCanvas.div.className = "mixer-part-pan";
 
     newContainerDiv.appendChild(mixerVolumeCanvas.div);
@@ -1032,14 +1055,16 @@ tg.partOptionsFragment.setup = function () {
         if (f.part.omglive) {
             f.part.socket.disconnect()
             f.part.omglive = null;
+            f.setLiveModeUI();
         }
         else {
             if (!f.part.liveRoom) {
-                f.part.liveRoom = tg.getOMGLiveRoomName(f.part);
+                f.part.liveRoom = tg.omglive.getRoomNamePart(f.part);
             }
-            tg.turnOnLiveMode(f.part);
+            tg.omglive.turnOnPart(f.part, function () {
+                f.setLiveModeUI();
+            });
         }
-        f.setLiveModeUI();
     };
     
     f.verticalButton.onclick = function () {
@@ -1099,7 +1124,6 @@ tg.partOptionsFragment.setup = function () {
     };
 
 };
-tg.partOptionsFragment.setup();
 
 
 tg.partOptionsFragment.onshow = function (part) {
@@ -1139,7 +1163,7 @@ tg.partOptionsFragment.onshow = function (part) {
     f.liveRoomInput.onkeypress = function (e) {
         if (e.keyCode === 13) {
             if (f.liveRoomInput.value !== part.liveRoom) {
-                tg.switchOMGLiveRoom(part, f.liveRoomInput.value);
+                tg.omglive.switchRoomPart(part, f.liveRoomInput.value);
                 f.liveUrlInput.value = window.origin + "/live/" + encodeURIComponent(part.liveRoom);
             }
         }
@@ -1269,7 +1293,7 @@ tg.setupFXControls = function (fx, part, fxDiv) {
 
 
 
-function SliderCanvas(canvas, controlInfo, audioNode, data) {
+function SliderCanvas(canvas, controlInfo, audioNode, data, onchange) {
     var m = this;
     if (!canvas) {
         canvas = document.createElement("canvas");
@@ -1297,6 +1321,7 @@ function SliderCanvas(canvas, controlInfo, audioNode, data) {
     this.data = data;
     this.audioNode = audioNode;
     this.controlInfo = controlInfo;
+    this.onchange = onchange;
     this.percent = 0;
     this.isAudioParam = audioNode && typeof audioNode[controlInfo.property] === "object";
     
@@ -1355,7 +1380,10 @@ SliderCanvas.prototype.onupdate = function (value) {
     if (this.data) {
         this.data[this.controlInfo.dataProperty || this.controlInfo.property] = value;
     }
-    this.drawCanvas(this.div);    
+    this.drawCanvas(this.div);
+    if (this.onchange) {
+        this.onchange(value);
+    }
 };
 SliderCanvas.prototype.onup = function (e) {
     this.isTouching = false;
@@ -1483,7 +1511,7 @@ tg.showUserThings = function () {
     listDiv.innerHTML = "";
     omg.util.getUserThings(tg.user, listDiv, function (thing) {
         if (thing.type && thing.type === "SOUNDSET") {
-            tg.addPart(thing);
+            tg.addPart(thing, "addPartFragment");
         }
         else {
             tg.loadSong(thing);
@@ -1507,47 +1535,96 @@ tg.onlogin = function (user) {
  * SONG FRAGMENT
  * 
 */
-
+tg.songFragment = {
+    div: document.getElementById("song-fragment"),
+    nameInput: document.getElementById("song-info-name"),
+    tagsInput: document.getElementById("song-info-tags"),
+    liveModeButton:  document.getElementById("song-omglive-mode"),
+    liveUrlInput:  document.getElementById("song-omglive-url"),
+    liveRoomInput:  document.getElementById("song-omglive-room"),
+    liveModeDetails:  document.getElementById("song-omglive-details"),
+    randomizeButton: document.getElementById("create-random-song-button"),
+    onshow: function () {
+        tg.songFragment.nameInput.value = tg.song.data.name || "";
+        tg.songFragment.tagsInput.value = tg.song.data.tags || "";    
+        tg.songFragment.setLiveModeUI();
+    }
+};
 
 tg.songButton = document.getElementById("main-fragment-song-button");
 tg.songButton.onclick = function () {
-    tg.hideDetails();
-    tg.showSongFragment();
-    tg.newChosenButton(tg.songButton);
+    tg.showFragment(tg.songFragment, tg.songButton);
 };
-tg.showSongFragment = function () {
-    if (!tg.songFragment) {
-        tg.songFragment = document.getElementById("song-fragment");
-        tg.songFragment.nameInput = document.getElementById("song-info-name");
-        tg.songFragment.tagsInput = document.getElementById("song-info-tags");
-        document.getElementById("song-info-update").onclick = function () {
+
+tg.songFragment.setup = function () {
+    tg.songFragment.nameInput.onkeypress = function (e) {
+        if (e.keyCode === 13) {
             tg.song.data.name = tg.songFragment.nameInput.value;
             document.getElementById("tool-bar-song-button").innerHTML = tg.songFragment.nameInput.value;
-            tg.song.data.tags = tg.songFragment.tagsInput.value;
-        };
-    }
-    tg.songFragment.nameInput.value = tg.song.data.name || "";
-    tg.songFragment.tagsInput.value = tg.song.data.tags || "";
+        }
+    };
+    tg.songFragment.tagsInput.onkeypress = function (e) {
+        if (e.keyCode === 13) {
+            tg.song.data.tags = tg.songFragment.tagsInput.value;    
+        }
+    };
     
     document.getElementById("create-new-song-button").onclick = function () {
         tg.loadSong(tg.newBlankSong());
     };
-    var randomizeButton = document.getElementById("create-random-song-button");
-    var randomizeImg = randomizeButton.getElementsByTagName("img")[0];
-    if (!randomizeImg.getAttribute("src")) {
-        randomizeImg.src = "/img/monkey48.png";
-    }
     
-    randomizeButton.onclick = function () {
+    tg.songFragment.randomizeButton.onclick = function () {
         var rs = OMGMonkey.prototype.newSong();
         console.log(rs);
         tg.loadSong(rs);
         
-        randomizeImg.className = "monkey-spin";
-        setTimeout(()=> randomizeImg.className = "monkey", 1100);
+        tg.songFragment.randomizeImg.className = "monkey-spin";
+        setTimeout(()=> tg.songFragment.randomizeImg.className = "monkey", 1100);
     };
-        
-    tg.songFragment.style.display = "block";
+    tg.songFragment.randomizeImg = tg.songFragment.randomizeButton.getElementsByTagName("img")[0];
+    tg.songFragment.randomizeImg.src = "/img/monkey48.png";
+
+    var f = tg.songFragment;
+    f.liveModeButton.onclick = function () {
+        if (tg.omglive.socket) {
+            tg.omglive.socket.disconnect();
+            tg.omglive.socket = null;
+            f.setLiveModeUI();
+        }
+        else {
+            if (!tg.song.liveRoom) {
+                tg.song.liveRoom = tg.omglive.getRoomName(f.part);
+            }
+            tg.omglive.turnOn(function () {
+                f.setLiveModeUI();
+            });
+        }
+    };
+
+    f.setLiveModeUI =  function () {
+        if (tg.omglive.socket) {
+            f.liveModeButton.innerHTML = "OMG Live Mode is ON";
+            f.liveModeDetails.style.display = "block";
+            
+            f.liveRoomInput.value = tg.song.liveRoom;
+            f.liveUrlInput.value = window.origin + "/live/" + encodeURIComponent(tg.song.liveRoom);
+        }
+        else {
+            f.liveModeButton.innerHTML = "OMG Live Mode is OFF";
+            f.liveModeDetails.style.display = "none";            
+        }
+    };
+    
+    f.liveRoomInput.onkeypress = function (e) {
+        if (e.keyCode === 13) {
+            if (f.liveRoomInput.value !== tg.song.liveRoom) {
+                tg.omglive.switchRoom(f.liveRoomInput.value);
+                f.liveUrlInput.value = window.origin + "/live/" + encodeURIComponent(tg.song.liveRoom);
+            }
+        }
+    };
+
+
 };
 
 tg.newBlankSong = function () {
@@ -1931,12 +2008,6 @@ tg.songOptionsFragment = {
         e.target.classList.add("selected-option");
     },
     onshow: function () {
-        
-        if (!tg.songOptionsFragment.isSetup) {
-            tg.songOptionsFragment.setup();
-            tg.songOptionsFragment.isSetup = true;
-        }
-        
         if (!tg.songOptionsFragment.isSetupForSong) {
             tg.songOptionsFragment.setupForSong();
             tg.songOptionsFragment.isSetupForSong = true;
@@ -2065,50 +2136,156 @@ tg.songOptionsFragment.setupMonkeyWaitTime = function (changeable) {
  * 
 */
 
-tg.turnOnLiveMode = function (part) {
-    part.omglive = {users: {}, notes: []};
-    part.omglive.notes.autobeat = 1;
+tg.omglive = {
+    setup: function (callback) {
+        
+        if (typeof io !== "undefined") {
+            callback();
+            return;
+        }
+        
+        var scriptTag = document.createElement("script");
+        scriptTag.src = "/js/socketio.js";
+        scriptTag.async = false;
+        scriptTag.onload = callback;
+        document.body.appendChild(scriptTag);    
+    },
+    turnOnPart: function (part, callback) {
 
-    var onready = function () {
+        if (typeof io === "undefined") {
+            tg.omglive.setup(function () {
+                tg.omglive.turnOnPart(part, callback);
+            });
+            return;
+        }
+
+        part.omglive = {users: {}, notes: []};
+        part.omglive.notes.autobeat = 1;
+
         part.socket = io("/omg-live");
         part.socket.emit("startSession", part.liveRoom);
         part.socket.on("basic", function (data) {
             if (data.x === -1) {
-                tg.omgLiveDataEnd(part, data);
+                tg.omglive.partDataEnd(part, data);
             }
             else {
-                tg.omgLiveData(part, data);
+                tg.omglive.partData(part, data);
             }
             if (!tg.player.playing && tg.currentFragment === tg.instrument) {
                 tg.instrument.mm.draw();
             }
         });
-    };
+        tg.requirePartMelodyMaker(part);
+        callback();
+    },
+    turnOn: function (callback) {
 
-    if (typeof io !== "undefined") {
-        onready();
-        return;
+        if (typeof io === "undefined") {
+            tg.omglive.setup(function () {
+                tg.omglive.turnOn(callback);
+            });
+            return;
+        }
+
+        tg.omglive.users = {};
+        tg.omglive.setupListeners();
+
+        tg.omglive.socket = io("/omg-live");
+        tg.omglive.socket.emit("startSession", tg.song.liveRoom);
+        tg.omglive.socket.on("data", function (data) {
+            tg.omglive.ondata(data);
+        });
+        callback();
     }
-    var scriptTag = document.createElement("script");
-    scriptTag.src = "/js/socketio.js";
-    scriptTag.async = false;
-    document.body.appendChild(scriptTag);    
-
-    var attempts = 20, attempt = 0;
-    var interval = setInterval(function () {
-        if (typeof io !== "undefined") {
-            onready();
-            clearInterval(interval);
-        }
-        if (attempt++ === attempts) {
-            clearInterval(interval);
-        }
-    }, 1000);
 };
 
-tg.omgLiveData = function (part, data) {
-    
-    tg.requirePartMelodyMaker(part);
+tg.omglive.setupListeners = function () {
+    tg.song.onBeatChangeListeners.push(tg.omglive.onBeatChangeListener);
+    tg.song.onKeyChangeListeners.push(tg.omglive.onKeyChangeListener);
+    tg.song.onChordProgressionChangeListeners.push(tg.omglive.onChordProgressionChangeListener);
+    tg.song.onPartAudioParamsChangeListeners.push(tg.omglive.onPartAudioParamsChangeListener);
+    tg.song.onPartAddListeners.push(tg.omglive.onPartAddListener);
+};
+
+tg.omglive.onBeatChangeListener = function (beatParams, source) {
+    if (source === "omglive") return;
+
+    tg.omglive.socket.emit("data", {
+        property: "beatParams", 
+        value: beatParams
+    });
+};
+
+tg.omglive.onKeyChangeListener = function (keyParams, source) {
+    if (source === "omglive") return;
+
+    tg.omglive.socket.emit("data", {
+        property: "keyParams", 
+        value: keyParams
+    });
+};
+
+tg.omglive.onChordProgressionChangeListener = function (source) {
+    if (source === "omglive") return;
+
+    tg.omglive.socket.emit("data", {
+        property: "chordProgression", 
+        value: tg.currentSection.data.chordProgression
+    });
+};
+
+tg.omglive.onPartAudioParamsChangeListener = function (part, source) {
+    if (source === "omglive") return;
+
+    tg.omglive.socket.emit("data", {
+        property: "audioParams", 
+        partI: tg.currentSection.parts.indexOf(part),
+        value: part.data.audioParams
+    });
+};
+
+tg.omglive.onPartAddListener = function (part, source) {
+    if (source === "omglive") return;
+
+    tg.omglive.socket.emit("data", {
+        action: "addPart", 
+        soundSet: part.data.soundSet,
+    });
+};
+
+tg.omglive.ondata = function (data) {
+    if (data.property === "beatParams") {
+        tg.song.data.beatParams.bpm = data.value.bpm;
+        tg.song.data.beatParams.shuffle = data.value.shuffle;
+        tg.song.data.beatParams.subbeats = data.value.subbeats;
+        tg.song.data.beatParams.beats = data.value.beats;
+        tg.song.data.beatParams.measures = data.value.measures;
+        tg.song.tempoChanged("omglive");
+    }
+    else if (data.property === "keyParams") {
+        tg.song.data.keyParams.rootNote = data.value.rootNote;
+        tg.song.data.keyParams.scale = data.value.scale;
+        tg.song.keyChanged("omglive");
+    }
+    else if (data.property === "chordProgression") {
+        tg.currentSection.data.chordProgression = data.value;
+        tg.song.chordProgressionChanged("omglive");
+    }
+    else if (data.property === "audioParams" && typeof data.partI === "number") {
+        let part = tg.currentSection.parts[data.partI];
+        if (!part) return;
+        part.data.audioParams.mute = data.value.mute;
+        part.data.audioParams.gain = data.value.gain;
+        part.data.audioParams.pan = data.value.pan;
+        part.data.audioParams.warp = data.value.warp;
+        tg.song.partMuteChanged(part, "omglive");
+    }
+    else if (data.action === "addPart") {
+        tg.addPart(data.soundSet, "omglive");
+    }
+};
+
+tg.omglive.partData = function (part, data) {
     
     var fret = Math.max(0, Math.min(part.mm.frets.length - 1,
         part.mm.skipFretsBottom + Math.round((1 - data.y) * 
@@ -2137,7 +2314,7 @@ tg.omgLiveData = function (part, data) {
     tg.player.playLiveNotes(part.omglive.notes, part, 0);    
 };
 
-tg.omgLiveDataEnd = function (part, data) {
+tg.omglive.partDataEnd = function (part, data) {
     var noteIndex = part.omglive.notes.indexOf(part.omglive.users[data.user].note);
     part.omglive.notes.splice(noteIndex, 1);
     delete part.omglive.users[data.user];
@@ -2150,19 +2327,27 @@ tg.omgLiveDataEnd = function (part, data) {
     }   
 };
 
-tg.getOMGLiveRoomName = function (part) {
+tg.omglive.getRoomName = function () {
     var roomName = "";
     if (tg.user && tg.user.username) {
         roomName += tg.user.username.trim() + "-";
     }
     if (tg.song.data.name) {
-        roomName += tg.song.data.name + "-";
+        roomName += tg.song.data.name;
+    }
+    return roomName;
+};
+
+tg.omglive.getRoomNamePart = function (part) {
+    var roomName = tg.omglive.getRoomName();
+    if (roomName) {
+        roomName += "-";
     }
     roomName += part.data.name.substr(0, part.data.name.indexOf(" "));
     return roomName;
 };
 
-tg.switchOMGLiveRoom = function (part, newRoom) {
+tg.omglive.switchRoomPart = function (part, newRoom) {
     part.socket.emit("leaveSession", part.liveRoom);
     part.liveRoom = newRoom;
     part.socket.emit("startSession", part.liveRoom);
@@ -2266,7 +2451,7 @@ tg.onmidimessage = function (control, value) {
 
 tg.requirePartMelodyMaker = function (part) {
     if (part.data.surface.url === "PRESET_VERTICAL" && !part.mm && typeof OMGMelodyMaker !== "undefined") {
-        part.mm = new OMGMelodyMaker(tg.instrument.canvas, part, tg.player, tg.instrument.backgroundCanvas);
+        part.mm = new OMGMelodyMaker(tg.instrument.surface, part, tg.player);
         part.mm.readOnly = false;
     }
 };

@@ -128,8 +128,11 @@ tg.loadSong = function (songData) {
             part.muteButton.refresh();
         }
     });
-    tg.song.onPartAddListeners.push(function (part) {
-        tg.loadPart(part);
+    tg.song.onPartAddListeners.push(function (part, source) {
+        var div = tg.loadPart(part);
+        if (source === "addPartFragment") {
+            div.getElementsByClassName("part-button")[0].onclick();
+        }
     });
     
     if (tg.player) {
