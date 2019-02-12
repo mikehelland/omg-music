@@ -66,7 +66,6 @@ tg.hideDetails = function (hideFragment) {
     if (tg.beatsFragment) tg.beatsFragment.style.display = "none";
     if (tg.keyFragment) tg.keyFragment.style.display = "none";
     if (tg.chordsFragment) tg.chordsFragment.style.display = "none";
-    if (tg.addPartFragment) tg.addPartFragment.style.display = "none";
     if (tg.surface) tg.surface.style.display = "none";
     if (tg.mixFragment) tg.mixFragment.style.display = "none";
     if (tg.userFragment) tg.userFragment.style.display = "none";
@@ -577,66 +576,94 @@ tg.makeChordButton = function (chordI) {
 
 
 tg.addPartButton.onclick = function() {
-    tg.hideDetails();
-    tg.showAddPartFragment();
+    tg.showFragment(tg.addPartFragment, tg.addPartButton)
 };
-tg.showAddPartFragment = function () {
-    if (!tg.addPartFragment) {
-        tg.addPartFragment = document.getElementById("add-part-fragment");
-        tg.soundSetList = document.getElementById("add-part-soundset-list");
-        tg.soundFontList = document.getElementById("add-part-soundfont-list");
-        tg.setupAddPartTabs();
-  
-        tg.gallerySelect = document.getElementById("add-part-gallery-select");
-        tg.gallerySelect.onchange = function (e) {
-            tg.soundSetList.style.display = tg.gallerySelect.value === "omg" ? "block" : "none";
-            tg.soundFontList.style.display = tg.gallerySelect.value !== "omg" ? "block" : "none";
-        };
-  
-        var addOscButtonClick = function (e) {
-          tg.addOsc(e.target.innerHTML);  
-        };
-        document.getElementById("add-sine-osc-button").onclick = addOscButtonClick;
-        document.getElementById("add-saw-osc-button").onclick = addOscButtonClick;
-        document.getElementById("add-square-osc-button").onclick = addOscButtonClick;
-        document.getElementById("add-triangle-osc-button").onclick = addOscButtonClick;
+tg.addPartFragment = {
+    div: document.getElementById("add-part-fragment"),
+    soundSetList: document.getElementById("add-part-soundset-list"),
+    soundFontList: document.getElementById("add-part-soundfont-list"),
+    gallerySelect: document.getElementById("add-part-gallery-select"),
+    searchInput: document.getElementById("add-part-search")    
+};
+tg.addPartFragment.setup = function () {
+    var f = tg.addPartFragment;
+    f.setupAddPartTabs();
+
+    var searchFilter = function (list) {
+        var divs = list.children;
+        for (var i = 0; i < divs.length; i++) {
+            divs[i].style.display = divs[i].innerHTML.toUpperCase()
+                    .indexOf(f.searchInput.value.toUpperCase()) > -1 ?
+                "block" : "none";
+        }
+    };
+    
+    f.gallerySelect.onchange = function (e) {
+        var newList;
+        if (f.gallerySelect.value === "omg") {
+            newList = f.soundSetList;
+        }
+        else if (f.gallerySelect.value === "favorites") {
+            newList = f.favoriteList;            
+        }
+        else {
+            newList = f.soundFontList;
+        }
         
-        fetch(location.origin + "/data/?type=SOUNDSET").then(function (e) {return e.json();}).then(function (json) {
-            tg.soundSetList.innerHTML = "";
-            json.forEach(function (soundSet) {
-                var newDiv = document.createElement("div");
-                newDiv.className = "soundset-list-item";
-                newDiv.innerHTML = soundSet.name;
-                tg.soundSetList.appendChild(newDiv);
-                soundSet.url = location.origin + "/data/" + soundSet.id;
-                newDiv.onclick = function () {
-                    tg.addPart(soundSet);
-                };
-            });
-        });
+        searchFilter(newList);
+        f.currentList.style.display = "none";
+        f.currentList = newList;
+        f.currentList.style.display = "block";
+    };
+    f.currentList = f.soundSetList;
+  
+    var addOscButtonClick = function (e) {
+        tg.addOsc(e.target.innerHTML);  
+    };
+    document.getElementById("add-sine-osc-button").onclick = addOscButtonClick;
+    document.getElementById("add-saw-osc-button").onclick = addOscButtonClick;
+    document.getElementById("add-square-osc-button").onclick = addOscButtonClick;
+    document.getElementById("add-triangle-osc-button").onclick = addOscButtonClick;
+
+
+    f.loadList(f.soundSetList, "/data/?type=SOUNDSET");
         
-        omg.ui.soundFontNames.forEach(function (name) {
+    omg.ui.soundFontNames.forEach(function (name) {
+        var newDiv = document.createElement("div");
+        newDiv.className = "soundset-list-item";
+        newDiv.innerHTML = name.split("_").join(" ");
+        f.soundFontList.appendChild(newDiv);
+        newDiv.onclick = function () {
+            var soundSet = tg.player.getSoundSetForSoundFont(newDiv.innerHTML, 
+                f.gallerySelect.value + name + "-mp3/");
+            tg.addPart(soundSet);
+        };
+
+    });
+        
+    
+    f.searchInput.onkeyup = function (e) {
+        searchFilter(f.currentList);
+    };
+};
+
+tg.addPartFragment.loadList = function (list, url) {
+    fetch(location.origin + url).then(function (e) {return e.json();}).then(function (json) {
+        list.innerHTML = "";
+        json.forEach(function (soundSet) {
             var newDiv = document.createElement("div");
             newDiv.className = "soundset-list-item";
-            newDiv.innerHTML = name.split("_").join(" ");
-            tg.soundFontList.appendChild(newDiv);
+            newDiv.innerHTML = soundSet.name;
+            list.appendChild(newDiv);
+            soundSet.url = location.origin + "/data/" + soundSet.id;
             newDiv.onclick = function () {
-                var soundSet = tg.player.getSoundSetForSoundFont(newDiv.innerHTML, 
-                    tg.gallerySelect.value + name + "-mp3/");
                 tg.addPart(soundSet);
             };
-
         });
-    }
-    tg.soundSetList.style.display = tg.gallerySelect.value === "omg" ? "block" : "none";
-    tg.soundFontList.style.display = tg.gallerySelect.value !== "omg" ? "block" : "none";
-
-    tg.addPartFragment.style.display = "block";
-    tg.newChosenButton(tg.addPartButton);
+    }).catch(e=>console.log(e));
 };
 
-
-tg.setupAddPartTabs = function () {
+tg.addPartFragment.setupAddPartTabs = function () {
     var f = tg.addPartFragment;
     var galleryTab = document.getElementById("add-part-gallery-button");
     var oscillatorTab = document.getElementById("add-part-oscillator-button");
@@ -744,6 +771,7 @@ tg.addOsc = function (type) {
   tg.addPart(soundSet);
 };
 
+tg.addPartFragment.setup();
 
 /*
  * MIX FRAGMENT
@@ -851,7 +879,7 @@ tg.makeMixerDiv = function (part, divs) {
 */
 
 tg.saveButton.onclick = function () {
-    tg.showFragment(tg.saveFragment);
+    tg.showFragment(tg.saveFragment, tg.saveButton);
 };
 tg.saveFragment = {
     div: document.getElementById("save-fragment"),

@@ -185,10 +185,12 @@ body {
     width:100%;
     display:none;
 }*/
-#beats-fragment, #save-fragment, #add-part-fragment {
+#beats-fragment, #save-fragment {
     text-align:center;
     font-size: 1.5em;
 }
+
+#add-part-fragment {}
 
 #beats-fragment input {
     width:60%;
@@ -278,7 +280,7 @@ body {
     width:90%;
 }
 
-#add-triangle-osc-button, #add-saw-osc-button, #add-sine-osc-button, #add-square-osc-button {
+/*#add-triangle-osc-button, #add-saw-osc-button, #add-sine-osc-button, #add-square-osc-button {
     padding:0.3em;
     font-size:0.8em;
     border:1px solid white;
@@ -290,7 +292,7 @@ body {
 #add-triangle-osc-button:hover, #add-saw-osc-button:hover, 
     #add-sine-osc-button:hover, #add-square-osc-button:hover {
         opacity:1;
-}
+}*/
 
 #osc-buttons {
     padding:0.3em;
@@ -375,7 +377,7 @@ body {
     border-top: 1px solid #888888;
     cursor:pointer;
     padding:0.5em;
-    font-size: 0.7em;
+    /*font-size: 0.7em;*/
     opacity:0.8;
     
 }
@@ -418,16 +420,12 @@ body {
     display:flex;
 }
 
-.detail-tab-row {
-    text-align:center;
-    font-size: 1.5em;
-}
-
 .detail-tab, #add-part-tabs > div {
+    text-align:center;
     flex-grow:1;
     border:1px solid #888888;
     cursor:pointer;
-    font-size:0.6em;
+    /*font-size:0.6em;*/
     padding:1.2em;
     opacity:0.8;
 }
@@ -436,7 +434,7 @@ body {
     background-color:#000022;
 }
 
-.detail-tab-page, #add-part-oscillator, #add-part-gallery, #add-part-custom {
+.detail-tab-page, #add-part-oscillator, #add-part-gallery, #add-part-custom, #add-part-soundfont-list {
     display:none;
 }
 
@@ -523,7 +521,7 @@ input {
     background-color:black;
 }
 #add-part-custom {
-    font-size: 0.7em !important;
+    /*font-size: 0.7em !important;*/
 }
 
 .soundset-url-input {
@@ -618,11 +616,11 @@ input {
 
 
 #add-part-gallery-select {
-    padding:0.3em;
+    font-size:1em;
+    padding:0.5em;
     margin:0.3em;
-    font-size:0.8em;
-    /*background-color:black;
-    color:white;*/
+    background-color:black;
+    color:white;
 }
 
 .randomizer-title {
@@ -722,6 +720,7 @@ button {
   margin: 5px 0px;
   border: solid #888888 1px;
   text-decoration: none;
+  cursor:pointer;
 }
 
 button:hover {
@@ -733,4 +732,8 @@ button:hover {
 h2 {
     margin:0px;
     padding:1em 0;
+}
+
+#add-part-search {
+    width:50%;
 }
