@@ -104,7 +104,10 @@ omgSocket.on("connection", function (socket) {
             userString += " " + u;
             users++;
         }
-        socket.emit("chat", {text: users + " users logged in: " + userString});
+        socket.emit("chat", {text: users + " users logged in"});
+        if (users) {
+            socket.emit("chat", {text: userString});
+        }
         rooms[room].users[user] = Date.now();
         omgSocket.in(room).emit("chat", {text: user + " has joined"});
     });

@@ -2120,6 +2120,7 @@ tg.liveFragment = {
 
 tg.liveFragment.setup = function () {
     var f = tg.liveFragment;
+    tg.song.liveRoom = tg.song.liveRoom || tg.omglive.getRoomName(f.part);
     f.liveModeButton.onclick = function () {
         if (tg.omglive.socket) {
             tg.omglive.socket.disconnect();
@@ -2127,9 +2128,6 @@ tg.liveFragment.setup = function () {
             f.setLiveModeUI();
         }
         else {
-            if (!tg.song.liveRoom) {
-                tg.song.liveRoom = tg.omglive.getRoomName(f.part);
-            }
             tg.omglive.turnOn(function () {
                 f.setLiveModeUI();
             });
@@ -2137,14 +2135,14 @@ tg.liveFragment.setup = function () {
     };
 
     f.setLiveModeUI =  function () {
+        f.liveRoomInput.value = tg.song.liveRoom;
         if (tg.omglive.socket) {
             f.liveModeButton.innerHTML = "OMG Live Mode is ON";
             f.liveModeDetails.style.display = "block";
             f.chatArea.style.display = "block";
             f.chatInput.style.display = "block";
             
-            f.liveRoomInput.value = tg.song.liveRoom;
-            f.liveUrlInput.value = window.origin + "/live/" + encodeURIComponent(tg.song.liveRoom);
+            f.liveUrlInput.value = window.origin + "/gauntlet/?live=" + encodeURIComponent(tg.song.liveRoom);
         }
         else {
             f.liveModeButton.innerHTML = "OMG Live Mode is OFF";
@@ -2235,7 +2233,12 @@ tg.omglive = {
         tg.omglive.users = {};
         tg.omglive.setupListeners();
 
-        tg.omglive.socket = io("/omg-live");
+        var localhost = window.location.hostname === "localhost" || 
+                window.location.host.startsWith("192");
+
+        //tg.omglive.socket = io("/omg-live");
+        var url = window.location.origin.replace("https:", "http:");
+        tg.omglive.socket = io(url + "/omg-live");
         tg.omglive.socket.emit("startSession", 
                 {room: tg.song.liveRoom, user: tg.omglive.username});
         tg.omglive.socket.on("data", function (data) {
@@ -2416,6 +2419,14 @@ tg.omglive.getRoomNamePart = function (part) {
     }
     roomName += part.data.name.substr(0, part.data.name.indexOf(" "));
     return roomName;
+};
+
+tg.omglive.switchRoom = function (newRoom) {
+    if (tg.omglive.socket) {
+        tg.omglive.socket.emit("leaveSession", {room: tg.song.liveRoom, user: tg.omglive.username});
+        tg.omglive.socket.emit("startSession", {room: newRoom, user: tg.omglive.username});
+    }
+    tg.song.liveRoom = newRoom;
 };
 
 tg.omglive.switchRoomPart = function (part, newRoom) {
