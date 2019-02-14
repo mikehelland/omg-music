@@ -356,7 +356,8 @@ try {
         key: fs.readFileSync('privkey.pem'),
         cert: fs.readFileSync('fullchain.pem')
     };
-    https.createServer(options, app).listen(8081, function () {
+    var httpsServer = https.createServer(options, app);
+    httpsServer.listen(8081, function () {
         console.log("https port 8081");
     });
 }
@@ -365,14 +366,8 @@ catch (excp) {
     console.log("did not create https server");
 }
 
-if (process.env.LOCAL) {
-    var io = require('socket.io')(http);
-    console.log("sockets to http");
-}
-else {
-    var io = require('socket.io')(https);
-    console.log("sockets to https");
-}
+var io = require('socket.io')(httpsServer);
+console.log("sockets to https");
 
 
 var rooms = {};

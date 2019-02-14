@@ -2233,16 +2233,9 @@ tg.omglive = {
         tg.omglive.users = {};
         tg.omglive.setupListeners();
 
-        var localhost = window.location.hostname === "localhost" || 
-                window.location.host.startsWith("192");
-        var url = "";
-        var params;
-        if (!localhost) {
-            //url = window.location.origin.replace("http:", "https:");
-            params = {secure:true};
-        }
+        var url = window.location.origin.replace("http:", "https:");
 
-        tg.omglive.socket = io(url + "/omg-live", params);
+        tg.omglive.socket = io(url + "/omg-live");
         tg.omglive.socket.emit("startSession", 
                 {room: tg.song.liveRoom, user: tg.omglive.username});
         tg.omglive.socket.on("data", function (data) {
