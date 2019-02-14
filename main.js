@@ -6,6 +6,9 @@ app.use(compression());
 var multer = require('multer');
 const upload = multer();
 
+var http = require('http').Server(app);
+var https = require('https');
+
 var bodyParser = require('body-parser');
 var massive = require("massive");
 var cookieParser = require('cookie-parser');
@@ -342,19 +345,6 @@ catch (excp) {
     3. Also make sure database omusic_db exists. Run: ./create_database.sh`);
 }
 
-var http = require('http').Server(app);
-if (process.env.LOCAL) {
-    var io = require('socket.io')(http);
-}
-else {
-    var https = require('https');
-    var options = {
-        key: fs.readFileSync('privkey.pem'),
-        cert: fs.readFileSync('fullchain.pem')
-    };
-    https.createServer(options, app);
-    var io = require('socket.io')(https);
-}
 
 var httpPort = process.env.OMG_PORT || 8080;
 http.listen(httpPort, function () {
@@ -362,7 +352,11 @@ http.listen(httpPort, function () {
 });
 
 try {
-    https.listen(8081, function () {
+    var options = {
+        key: fs.readFileSync('privkey.pem'),
+        cert: fs.readFileSync('fullchain.pem')
+    };
+    https.createServer(options, app).listen(8081, function () {
         console.log("https port 8081");
     });
 }
@@ -371,7 +365,14 @@ catch (excp) {
     console.log("did not create https server");
 }
 
-
+if (process.env.LOCAL) {
+    var io = require('socket.io')(http);
+    console.log("sockets to http");
+}
+else {
+    var io = require('socket.io')(https);
+    console.log("sockets to https");
+}
 
 
 var rooms = {};
