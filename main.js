@@ -9,7 +9,13 @@ const upload = multer();
 var bodyParser = require('body-parser');
 var http = require('http').Server(app);
 var https = require('https');
-var io = require('socket.io')(http);
+
+if (process.env.LOCAL) {
+    var io = require('socket.io')(http);
+}
+else {
+    var io = require('socket.io')(https);
+}
 var massive = require("massive");
 var cookieParser = require('cookie-parser');
 var passport = require("passport");
