@@ -7,19 +7,6 @@ var multer = require('multer');
 const upload = multer();
 
 var bodyParser = require('body-parser');
-var http = require('http').Server(app);
-if (process.env.LOCAL) {
-    var io = require('socket.io')(http);
-}
-else {
-    var https = require('https');
-    var options = {
-        key: fs.readFileSync('privkey.pem'),
-        cert: fs.readFileSync('fullchain.pem')
-    };
-    https.createServer(options, app);
-    var io = require('socket.io')(https);
-}
 var massive = require("massive");
 var cookieParser = require('cookie-parser');
 var passport = require("passport");
@@ -93,56 +80,6 @@ passport.use("signup", new LocalStrategy(
         });
     })
 );
-
-var rooms = {};
-var omgSocket = io.of("/omg-live");
-omgSocket.on("connection", function (socket) {
-    var room = "";
-    var user = "";
-    socket.on("startSession", function (data) {
-        room = data.room;
-        user = data.user;
-        socket.join(room);
-        
-        if (!rooms[room]) {
-            rooms[room] = {users:{}};
-        }
-        
-        var userString = "";
-        var users = 0;
-        for (var u in rooms[room].users) {
-            userString += " " + u;
-            users++;
-        }
-        socket.emit("chat", {text: users + " users logged in"});
-        if (users) {
-            socket.emit("chat", {text: userString});
-        }
-        rooms[room].users[user] = Date.now();
-        omgSocket.in(room).emit("chat", {text: user + " has joined"});
-    });
-    socket.on("leaveSession", function (data) {
-        socket.leave(data.room);
-        delete rooms[room].users[user];
-        omgSocket.in(room).emit("chat", {text: user + " has left"});
-        room = "";
-    });
-    socket.on("basic", function (data) {
-        io.of("/omg-live").to(data.room).emit("basic", data);
-    });
-    socket.on("data", function (data) {
-        socket.to(room).emit("data", data);
-    });
-    socket.on("chat", function (data) {
-        omgSocket.in(room).emit("chat", data);
-    });
-    socket.on("disconnect", function () {
-        if (rooms[room]) {
-            delete rooms[room].users[user];
-        }
-        omgSocket.in(room).emit("chat", {text: user + " has left"});
-    });
-});
 
 
 app.post("/login",
@@ -405,6 +342,19 @@ catch (excp) {
     3. Also make sure database omusic_db exists. Run: ./create_database.sh`);
 }
 
+var http = require('http').Server(app);
+if (process.env.LOCAL) {
+    var io = require('socket.io')(http);
+}
+else {
+    var https = require('https');
+    var options = {
+        key: fs.readFileSync('privkey.pem'),
+        cert: fs.readFileSync('fullchain.pem')
+    };
+    https.createServer(options, app);
+    var io = require('socket.io')(https);
+}
 
 var httpPort = process.env.OMG_PORT || 8080;
 http.listen(httpPort, function () {
@@ -420,3 +370,56 @@ catch (excp) {
     console.log(excp);
     console.log("did not create https server");
 }
+
+
+
+
+var rooms = {};
+var omgSocket = io.of("/omg-live");
+omgSocket.on("connection", function (socket) {
+    var room = "";
+    var user = "";
+    socket.on("startSession", function (data) {
+        room = data.room;
+        user = data.user;
+        socket.join(room);
+        
+        if (!rooms[room]) {
+            rooms[room] = {users:{}};
+        }
+        
+        var userString = "";
+        var users = 0;
+        for (var u in rooms[room].users) {
+            userString += " " + u;
+            users++;
+        }
+        socket.emit("chat", {text: users + " users logged in"});
+        if (users) {
+            socket.emit("chat", {text: userString});
+        }
+        rooms[room].users[user] = Date.now();
+        omgSocket.in(room).emit("chat", {text: user + " has joined"});
+    });
+    socket.on("leaveSession", function (data) {
+        socket.leave(data.room);
+        delete rooms[room].users[user];
+        omgSocket.in(room).emit("chat", {text: user + " has left"});
+        room = "";
+    });
+    socket.on("basic", function (data) {
+        io.of("/omg-live").to(data.room).emit("basic", data);
+    });
+    socket.on("data", function (data) {
+        socket.to(room).emit("data", data);
+    });
+    socket.on("chat", function (data) {
+        omgSocket.in(room).emit("chat", data);
+    });
+    socket.on("disconnect", function () {
+        if (rooms[room]) {
+            delete rooms[room].users[user];
+        }
+        omgSocket.in(room).emit("chat", {text: user + " has left"});
+    });
+});
