@@ -84,15 +84,35 @@ passport.use("signup", new LocalStrategy(
     })
 );
 
+var rooms = {};
 var omgSocket = io.of("/omg-live");
 omgSocket.on("connection", function (socket) {
     var room = "";
+    var user = "";
     socket.on("startSession", function (data) {
-        room = data;
-        socket.join(data);
+        room = data.room;
+        user = data.user;
+        socket.join(room);
+        
+        if (!rooms[room]) {
+            rooms[room] = {users:{}};
+        }
+        
+        var userString = "";
+        var users = 0;
+        for (var u in rooms[room].users) {
+            userString += " " + u;
+            users++;
+        }
+        socket.emit("chat", {text: users + " users logged in: " + userString});
+        rooms[room].users[user] = Date.now();
+        omgSocket.in(room).emit("chat", {text: user + " has joined"});
     });
     socket.on("leaveSession", function (data) {
-        socket.leave(data);
+        socket.leave(data.room);
+        delete rooms[room].users[user];
+        omgSocket.in(room).emit("chat", {text: user + " has left"});
+        room = "";
     });
     socket.on("basic", function (data) {
         io.of("/omg-live").to(data.room).emit("basic", data);
@@ -101,9 +121,13 @@ omgSocket.on("connection", function (socket) {
         socket.to(room).emit("data", data);
     });
     socket.on("chat", function (data) {
-        console.log(data, room)
         omgSocket.in(room).emit("chat", data);
-        console.log("emitted")
+    });
+    socket.on("disconnect", function () {
+        if (rooms[room]) {
+            delete rooms[room].users[user];
+        }
+        omgSocket.in(room).emit("chat", {text: user + " has left"});
     });
 });
 

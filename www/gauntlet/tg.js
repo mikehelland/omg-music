@@ -2187,6 +2187,8 @@ tg.omglive = {
             return;
         }
         
+        tg.omglive.username = tg.user ? tg.user.username : "guest" + (Math.round(Math.random() * 1000))
+        
         var scriptTag = document.createElement("script");
         scriptTag.src = "/js/socketio.js";
         scriptTag.async = false;
@@ -2206,7 +2208,7 @@ tg.omglive = {
         part.omglive.notes.autobeat = 1;
 
         part.socket = io("/omg-live");
-        part.socket.emit("startSession", part.liveRoom);
+        part.socket.emit("startSession", {room: part.liveRoom, user: tg.omglive.username});
         part.socket.on("basic", function (data) {
             if (data.x === -1) {
                 tg.omglive.partDataEnd(part, data);
@@ -2234,7 +2236,8 @@ tg.omglive = {
         tg.omglive.setupListeners();
 
         tg.omglive.socket = io("/omg-live");
-        tg.omglive.socket.emit("startSession", tg.song.liveRoom);
+        tg.omglive.socket.emit("startSession", 
+                {room: tg.song.liveRoom, user: tg.omglive.username});
         tg.omglive.socket.on("data", function (data) {
             tg.omglive.ondata(data);
         });
@@ -2349,7 +2352,7 @@ tg.omglive.ondata = function (data) {
 };
 
 tg.omglive.onchat = function (data) {
-    tg.liveFragment.chatArea.append("\n" + data.user + ": " + data.text);
+    tg.liveFragment.chatArea.append("\n" + (data.user ? data.user + ": " : "") + data.text);
     tg.liveFragment.chatArea.scrollTop = tg.liveFragment.chatArea.scrollHeight;
 };
 
@@ -2416,17 +2419,16 @@ tg.omglive.getRoomNamePart = function (part) {
 };
 
 tg.omglive.switchRoomPart = function (part, newRoom) {
-    part.socket.emit("leaveSession", part.liveRoom);
+    part.socket.emit("leaveSession", {room: part.liveRoom, user: tg.omglive.username});
     part.liveRoom = newRoom;
-    part.socket.emit("startSession", part.liveRoom);
+    part.socket.emit("startSession", {room: part.liveRoom, user: tg.omglive.username});
 };
 
 tg.omglive.chat = function (text) {
     if (!text) return;
-
     tg.omglive.socket.emit("chat", {
-        user: tg.user.username, 
-        text: text,
+        user: tg.omglive.username, 
+        text: text
     });
 };
 
