@@ -8,12 +8,16 @@ const upload = multer();
 
 var bodyParser = require('body-parser');
 var http = require('http').Server(app);
-var https = require('https');
-
 if (process.env.LOCAL) {
     var io = require('socket.io')(http);
 }
 else {
+    var https = require('https');
+    var options = {
+        key: fs.readFileSync('privkey.pem'),
+        cert: fs.readFileSync('fullchain.pem')
+    };
+    https.createServer(options, app);
     var io = require('socket.io')(https);
 }
 var massive = require("massive");
@@ -408,11 +412,7 @@ http.listen(httpPort, function () {
 });
 
 try {
-    var options = {
-        key: fs.readFileSync('privkey.pem'),
-        cert: fs.readFileSync('fullchain.pem')
-    };
-    https.createServer(options, app).listen(8081, function () {
+    https.listen(8081, function () {
         console.log("https port 8081");
     });
 }
