@@ -178,21 +178,24 @@ OMGDrumMachine.prototype.ondown = function (touch) {
         // figure out the subbeat this is
         var subbeat;
         var data;
+        var trackI;
         if (this.selectedTrack < 0) {
             subbeat = column;
-            data = this.part.data.tracks[row].data;
+            trackI = row;
         }
         else {
             subbeat = column + row * this.beatParams.subbeats;
-            data = this.part.data.tracks[this.selectedTrack].data;
+            trackI = this.selectedTrack;
         }
 
-        data[subbeat] = data[subbeat] ? 0 : this.beatStrength;
+        data = this.tracks[trackI].data;
+        data[subbeat] = (data[subbeat] === this.beatStrength) ? 
+                0 : this.beatStrength;
 
         touch.lastBox = [column, row];
 
         if (omgdrums.onchange)
-            omgdrums.onchange();
+            omgdrums.onchange(this.part, trackI, subbeat);
         
         this.touches.push(touch);
     }
@@ -217,20 +220,24 @@ OMGDrumMachine.prototype.onmove = function (touch) {
     } else if (touch.lastBox[0] !== column || touch.lastBox[1] !== row) {
         var subbeat;
         var data;
+        var trackI;
         if (this.selectedTrack < 0) {
             subbeat = column;
+            trackI = row;
             data = omgdrums.part.data.tracks[row].data;
         }
         else {
             subbeat = column + row * this.beatParams.subbeats;
-            data = omgdrums.part.data.tracks[this.selectedTrack].data;
+            trackI = this.selectedTrack;
+            
         }
-        data[subbeat] = data[subbeat] ? 0 : this.beatStrength;
+        data = this.tracks[trackI].data;
+        data[subbeat] = (data[subbeat] === this.beatStrength) ? 0 : this.beatStrength;
 
         touch.lastBox = [column, row];
 
         if (omgdrums.onchange)
-            omgdrums.onchange();
+            omgdrums.onchange(this.part, trackI, subbeat);
 
     }
 
@@ -246,8 +253,8 @@ OMGDrumMachine.prototype.onup = function (touch) {
 OMGDrumMachine.prototype.setPart = function (part) {
 
     this.part = part;
-    this.drumbeat = part.data;
     this.beatParams = part.section.song.data.beatParams;
+    this.tracks = part.data.tracks;
 
     this.totalBeats = this.beatParams.measures * this.beatParams.beats;
     this.totalSubbeats = this.totalBeats * this.beatParams.subbeats;
@@ -281,7 +288,7 @@ OMGDrumMachine.prototype.drawBackground = function (w, h) {
 
 OMGDrumMachine.prototype.draw = function (subbeat, w, h) {
 
-    if (!this.drumbeat || !this.drumbeat.tracks || !this.drumbeat.tracks.length)
+    if (!this.tracks)
         return;
 
     if (this.hidden) {
@@ -354,7 +361,7 @@ OMGDrumMachine.prototype.drawTrackView = function (subbeat) {
     for (var i = 0; i < this.totalBeats; i++) {
         for (var j = 0; j < this.beatParams.subbeats; j++) {
             subbeatIndex = j + i * this.beatParams.subbeats;
-            var value = this.drumbeat.tracks[this.selectedTrack].data[subbeatIndex];
+            var value = this.tracks[this.selectedTrack].data[subbeatIndex];
             if (!value) {
                 if (subbeatIndex === subbeat) {
                     this.ctx.globalAlpha = 0.5;
@@ -487,14 +494,14 @@ OMGDrumMachine.prototype.setInfo = function () {
 
     var words;
     var info;
-    for (var i = 0; i < this.drumbeat.tracks.length; i++) {
-        if (!this.drumbeat.tracks[i].sound) {
+    for (var i = 0; i < this.tracks.length; i++) {
+        if (!this.tracks[i].sound) {
             continue;
         }
         
         this.info.push({captionWords: [],
-            name: this.drumbeat.tracks[i].name, 
-            track: this.drumbeat.tracks[i],
+            name: this.tracks[i].name, 
+            track: this.tracks[i],
             i: i
         });
     }

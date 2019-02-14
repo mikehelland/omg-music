@@ -168,6 +168,9 @@ tg.sequencer.show = function (part) {
         part.drumMachine = new OMGDrumMachine(s.surface, part);
         part.drumMachine.captionWidth = window.innerWidth / 2 / 8;
         part.drumMachine.readOnly = false;
+        part.drumMachine.onchange = function (part, trackI, subbeat) {
+            s.onchange(part, trackI, subbeat);
+        };
     }
     part.drumMachine.backgroundDrawn = false;
 
@@ -187,6 +190,9 @@ tg.sequencer.onhide = function () {
     this.part.drumMachine.hide();
 };
 
+tg.sequencer.onchange = function () {
+    //empty, needs to be here
+};
 
 /*
  * INSTRUMENT / VERTICAL SURFACE
@@ -2245,6 +2251,7 @@ tg.omglive.setupListeners = function () {
     tg.song.onChordProgressionChangeListeners.push(tg.omglive.onChordProgressionChangeListener);
     tg.song.onPartAudioParamsChangeListeners.push(tg.omglive.onPartAudioParamsChangeListener);
     tg.song.onPartAddListeners.push(tg.omglive.onPartAddListener);
+    tg.sequencer.onchange = tg.omglive.onSequencerChangeListener;
 };
 
 tg.omglive.onBeatChangeListener = function (beatParams, source) {
@@ -2279,7 +2286,7 @@ tg.omglive.onPartAudioParamsChangeListener = function (part, source) {
 
     tg.omglive.socket.emit("data", {
         property: "audioParams", 
-        partI: tg.currentSection.parts.indexOf(part),
+        partName: part.data.name,
         value: part.data.audioParams
     });
 };
@@ -2288,8 +2295,19 @@ tg.omglive.onPartAddListener = function (part, source) {
     if (source === "omglive") return;
 
     tg.omglive.socket.emit("data", {
-        action: "addPart", 
+        action: "partAdd", 
         soundSet: part.data.soundSet,
+    });
+};
+
+tg.omglive.onSequencerChangeListener = function (part, trackI, subbeat) {
+    console.log(trackI)
+    tg.omglive.socket.emit("data", {
+        action: "sequencerChange", 
+        partName: part.data.name,
+        value: part.data.tracks[trackI].data[subbeat],
+        trackI: trackI,
+        subbeat: subbeat
     });
 };
 
@@ -2311,8 +2329,8 @@ tg.omglive.ondata = function (data) {
         tg.currentSection.data.chordProgression = data.value;
         tg.song.chordProgressionChanged("omglive");
     }
-    else if (data.property === "audioParams" && typeof data.partI === "number") {
-        let part = tg.currentSection.parts[data.partI];
+    else if (data.property === "audioParams" && data.partName) {
+        let part = tg.currentSection.getPart(data.partName);
         if (!part) return;
         part.data.audioParams.mute = data.value.mute;
         part.data.audioParams.gain = data.value.gain;
@@ -2320,8 +2338,13 @@ tg.omglive.ondata = function (data) {
         part.data.audioParams.warp = data.value.warp;
         tg.song.partMuteChanged(part, "omglive");
     }
-    else if (data.action === "addPart") {
+    else if (data.action === "partAdd") {
         tg.addPart(data.soundSet, "omglive");
+    }
+    else if (data.action === "sequencerChange") {
+        let part = tg.currentSection.getPart(data.partName);
+        part.data.tracks[data.trackI].data[data.subbeat] = data.value;
+        if (part.drumMachine && !part.drumMachine.hidden) part.drumMachine.draw();
     }
 };
 

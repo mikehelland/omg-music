@@ -129,6 +129,7 @@ function OMGSection(div, data, song) {
 
     this.div = div;
     this.parts = [];
+    this.partLookup = {};
 
     //if there is no song, but the section has key and beat parameters
     //make a song with those parameters
@@ -186,6 +187,19 @@ OMGSection.prototype.getData = function () {
         this.data.parts[ip] = this.parts[ip].data;
     }
     return this.data;
+};
+
+OMGSection.prototype.getPart = function (partName) {
+    if (this.partLookup[partName]) {
+        return this.partLookup[partName];
+    }
+    
+    for (var ip = 0; ip < this.parts.length; ip++) {
+        if (this.parts[ip].data.name === partName) {
+            this.partLookup[partName] = this.parts[ip];
+            return this.parts[ip];
+        }
+    }
 };
 
 function OMGPart(div, data, section) {
