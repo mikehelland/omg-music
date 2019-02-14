@@ -2238,7 +2238,7 @@ tg.omglive = {
         var url = "";
         var params;
         if (!localhost) {
-            url = window.location.origin.replace("http:", "https:");
+            //url = window.location.origin.replace("http:", "https:");
             params = {secure:true};
         }
 
