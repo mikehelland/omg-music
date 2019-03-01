@@ -71,7 +71,6 @@ tg.showFragment = function (fragment, button, params) {
 
 tg.hideDetails = function (hideFragment) {
     if (tg.mixFragment) tg.mixFragment.style.display = "none";
-    if (tg.userFragment) tg.userFragment.style.display = "none";
     if (tg.sectionFragment) tg.sectionFragment.div.style.display = "none";
 
     if (tg.surface) tg.surface.style.display = "none";
@@ -1469,53 +1468,65 @@ SliderCanvas.prototype.drawCanvas = function () {
 
 tg.userButton = document.getElementById("main-fragment-user-button");
 tg.userButton.onclick = function () {
-    tg.hideDetails();
-    tg.showUserFragment();
-    tg.newChosenButton(tg.userButton);
+    tg.showFragment(tg.userFragment, tg.userButton);
 };
-tg.showUserFragment = function () {
-    if (!tg.userFragment) {
-        tg.userFragment = document.getElementById("user-fragment");
-        document.getElementById("user-logout-button").onclick = function () {
-            omg.server.logout(() => {
-                tg.onlogin(undefined);
-            });
-        };
-        document.getElementById("user-login-button").onclick = function () {
-            omg.server.login(
-                document.getElementById("user-login-username").value, 
-                document.getElementById("user-login-password").value, function (results) {
-                    if (results) {
-                        document.getElementById("user-login-signup").style.display = "none";
-                        tg.onlogin(results);
-                        tg.showUserThings();
-                    }
-                    else {
-                        document.getElementById("user-login-invalid").style.display = "inline-block";
-                    }
-                });
-        };
-        document.getElementById("user-signup-button").onclick = function () {
-            omg.server.signup(
-                document.getElementById("user-signup-username").value, 
-                document.getElementById("user-signup-password").value, function (results) {
-                    if (results) {                        
-                        tg.onlogin(results);
-                        tg.showUserThings();
-                    }
-                    else {
-                        document.getElementById("user-login-invalid").style.display = "inline-block";
-                    }
-                });
-        };
+tg.userFragment = {
+    div: document.getElementById("user-fragment"),
+    loginUsername: document.getElementById("user-login-username"),
+    loginPassword: document.getElementById("user-login-password"),
+    signupUsername: document.getElementById("user-signup-username"),
+    signupPassword: document.getElementById("user-signup-password"),
+    loginArea: document.getElementById("user-login-signup"),
+    invalidMessage: document.getElementById("user-login-invalid"),
+    login: function (username, password) {
+        omg.server.login(username, password, tg.userFragment.onlogin);
+    },
+    signup: function (username, password) {
+        omg.server.signup(username, password, tg.userFragment.onlogin);
+    },
+    onlogin: function (results) {
+        if (results) {
+            tg.onlogin(results);
+            tg.showUserThings();
+        }
+        else {
+            tg.userFragment.invalidMessage.style.display = "inline-block";
+        }        
     }
-    
+};
+tg.userFragment.setup = function () {
+    document.getElementById("user-logout-button").onclick = function () {
+        omg.server.logout(() => {
+            tg.onlogin(undefined);
+        });
+    };
+    document.getElementById("user-login-button").onclick = function () {
+        tg.userFragment.login(tg.userFragment.loginUsername.value,
+                            tg.userFragment.loginPassword.value);
+    };
+    document.getElementById("user-signup-button").onclick = function () {
+        tg.userFragment.signup(tg.userFragment.signupUsername.value, 
+                            tg.userFragment.signupPassword.value);
+    };
+    tg.userFragment.loginPassword.onkeypress = function (e) {
+        if (e.keyCode === 13) {
+            tg.userFragment.login(tg.userFragment.loginUsername.value,
+                                tg.userFragment.loginPassword.value);            
+        }
+    };
+    tg.userFragment.signupPassword.onkeypress = function (e) {
+        if (e.keyCode === 13) {
+            tg.userFragment.signup(tg.userFragment.signupUsername.value,
+                                tg.userFragment.signupPassword.value);            
+        }
+    };
+};
+
+tg.userFragment.onshow = function () {
     if (tg.user) {
-        document.getElementById("user-login-signup").style.display = "none";
+        tg.userFragment.loginArea.style.display = "none";
         tg.showUserThings();
     }
-    
-    tg.userFragment.style.display = "block";
 };
 
 tg.showUserThings = function () {
@@ -1536,9 +1547,11 @@ tg.showUserThings = function () {
 
 tg.onlogin = function (user) {
     tg.user = user;
-    tg.user.username = tg.user.username.trim();
+    if (tg.user && tg.user.username) {
+        tg.user.username = tg.user.username.trim();
+    }
     document.getElementById("tool-bar-user-button").innerHTML = user ? user.username : "Login";
-    document.getElementById("user-login-signup").style.display = user ? "none" : "block";
+    tg.userFragment.loginArea.style.display = user ? "none" : "block";
     document.getElementById("user-info").style.display = user ? "block" : "none";
     document.getElementById("user-info-username").innerHTML = user ? user.username : "Login";
 };
@@ -2120,7 +2133,7 @@ tg.liveFragment = {
 
 tg.liveFragment.setup = function () {
     var f = tg.liveFragment;
-    tg.song.liveRoom = tg.song.liveRoom || tg.omglive.getRoomName(f.part);
+    tg.song.liveRoom = "default"; //g.song.liveRoom || tg.omglive.getRoomName(f.part);
     f.liveModeButton.onclick = function () {
         if (tg.omglive.socket) {
             tg.omglive.socket.disconnect();

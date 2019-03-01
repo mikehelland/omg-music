@@ -6,6 +6,8 @@
    <link rel="stylesheet" href="/css/search.css" type="text/css" />
    <style>
        pre {font-size:1.5em;}
+       .string {color:red;}
+       .comment {color:blue;}
    </style>
 </head>
 <body>
@@ -29,45 +31,63 @@
 <h1>Game Dev</h1>
 <hr>
 
+<iframe width="560" height="315" src="https://www.youtube.com/embed/TXpPFBkpXp0" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+		
 <p>
 Adding music and sounds to your game is easy with OpenMusic.Gallery. Just add a few lines of code.
 </p>
 
+<h4>In your HTML:</h4>
+
+<pre>
+     &lt;script src=<span class="string">"https://openmusic.gallery/omg.js"</span>>&lt;/script>
+</pre>
+
 <h4>When the game is loading:</h4>
 
 <pre>
-     &lt;script src="https://openmusic.gallery/omg.js">&lt;/script>
+     var music = new OMusicPlayer()
+     music.prepareSongFromURL(<span class="string">"http://openmusic.gallery/data/1333"</span>)
+     var laserSound = music.getSound(<span class="string">"SFX"</span>, <span class="string">"laser"</span>)
 
-     game.music = new OMusicPlayer()
-     game.music.prepareSongFromURL("http://openmusic.gallery/data/1333")
-     game.laserSound = game.music.getSound("SFX", "laser")
 </pre>
 
 <h4>When the game starts:</h4>
 
 <pre>
-     game.music.play()
-</pre>
-
-<h4>Increase BPM and key when difficulty increases:</h4>
-
-<pre>
-     game.music.beatParams.bpm += 20
-
-     game.music.keyParams.rootNote++
-     game.music.rescaleSong()
+     music.play()
 </pre>
 
 <h4>When the laser is fired:</h4>
 
 <pre>
-     game.laserSound.play()
+     laserSound.play()
 </pre>
+
+<h4>Increase BPM and key when difficulty increases:</h4>
+
+<pre>
+     music.beatParams.bpm += <span class="string">20</span>
+
+     music.keyParams.rootNote += <span class="string">1</span>
+     music.rescaleSong()
+</pre>
+
+<h4>When a boss character shows up:</h4>
+    
+<pre>
+    <span class="comment">// boss enters</span>
+    music.mutePart(<span class="string">"Boss"</span>, false);
+    
+    <span class="comment">// boss exits</span>
+    music.mutePart(<span class="string">"Boss"</span>, true);
+</pre>
+
 
 <h4>When the game ends:</h4>
 
 <pre>
-     game.music.stop()
+     music.stop()
 </pre>
 
    </div>

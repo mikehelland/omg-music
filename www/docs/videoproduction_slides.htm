@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+   <link rel="stylesheet" href="/css/main.css" type="text/css" />
+   <link rel="stylesheet" href="/css/search.css" type="text/css" />
+   <style>
+       body {}
+       pre {font-size:2.2em; }
+       .slide {display:none; padding:20px;}
+       .string {color:red;}
+       .comment {color:blue;}
+       #main-canvas {width:80%; height:60%;}
+       h1 {font-family: sans-serif; font-size:4em; text-align: center;}
+       h2 {font-size:2em;}
+       h4 {font-size:2em; text-align: center;}
+       li {font-size:2.2em; font-family: sans-serif; margin: 0 0 18px 0;}
+
+   </style>
+</head>
+<body>
+
+   <div class="main-title-bar">
+         <div class="main-title-bar-content">
+         <a class="main-page-link" href="/index.htm">
+         <span class="main-title-open">Open</span><span class="main-title-media">Music</span><span class="main-title-gallery">.Gallery</span>
+         </a>
+
+      </div>
+
+   </div>
+
+   <div class="main-body">
+
+       <div class="slide">
+           <h1>You made a video!</h1>
+       </div>   
+    
+        <div class="slide">
+           <h1>Now you need music.</h1>
+       </div>   
+
+
+<div class="slide">
+    
+	<h2>The Old Way</h2>
+	<h1>WAV, MP3, etc</h1>
+
+</div>
+
+<div class="slide">
+    
+	<h2>The Old Way</h2>
+	<h1>WAV, MP3, etc</h1>
+	<h4>Find online or Record Your Own</h4>	
+
+</div>
+
+<div class="slide">
+    
+	<h2>The Old Way</h2>
+
+	<img src="waveform.jpg">
+
+</div>
+
+
+
+<div class="slide">
+<h2>The New Way</h2>
+<h1>Open Music!</h1>
+</div>
+
+
+<div class="slide">
+
+<h2>The New Way</h2>
+
+<h1>Open Music!</h1>
+
+<h4>(It's like Open Source Software, but for Music)</h4>
+</div>
+
+<div class="slide">
+
+<h2>The New Way</h2>
+
+<img src="omg-preview.jpg">
+
+</div>
+
+<div class="slide">
+
+<h2>WAV/MP3</h2>
+<img src="waveform2.jpg">
+<h2>Open Music</h2>
+<a target="out" href="https://openmusic.gallery/gauntlet/?id=1333">
+<img src="omg-preview.jpg">
+</a>
+
+</div>
+
+<div class="slide">
+
+    <h2>Back to the Video Project</h2>
+
+    <ul>
+     <li>Video is made</li>
+     <li>Music has been selected</li>
+     <li>"Just a couple little changes" to fit the scene</li>
+
+
+</div>
+<div class="slide">
+
+    <h2>TODO:</h2>
+
+    <ul>
+     <li>Increase the Tempo</li>
+     <li>Lower the Key</li>
+     <li>Change the Chord Progression</li>
+     <li>Remove the 2nd Verse</li>
+     <li>Close the Hit Hat</li>
+     <li>Decrease the Reverb</li>
+     <li>Change the Drum Fill</li>
+    </ul>
+
+</div>
+
+<div class="slide">
+
+<h2>WAV/MP3</h2>
+<img src="waveform2.jpg">
+<h2>Open Music</h2>
+<a target="out" href="https://openmusic.gallery/gauntlet/?id=1333">
+<img src="omg-preview.jpg">
+</a>
+
+</div>
+
+<div class="slide">
+
+    <h2>TODO:</h2>
+
+    <ul style="fonttext-decoration: line-through;text-decoration: red line-through;">
+     <li>Increase the Tempo</li>
+     <li>Lower the Key</li>
+     <li>Change the Chord Progression</li>
+     <li>Remove the 2nd Verse</li>
+     <li>Close the Hit Hat</li>
+     <li>Decrease the Reverb</li>
+     <li>Change the Drum Fill</li>
+    </ul>
+
+</div>
+
+       
+<div class="slide">
+
+    <h2>Open Music</h2>
+
+    <ul>
+     <li>Highly Customizable!</li>
+     <li>No recording studio or expensive software</li>
+     <li>No Royalties</li>
+     <li>Open Source Licenses</li>
+    </ul>
+
+</div>
+
+<div class="slide">
+
+    <h2>OpenMusic.Gallery</h2>
+
+    <ul>
+     <li>Browse or search a gallery of open music</li>
+     <li>Create your own music easily</li>
+     <li>Customize, edit, and remix</li>
+     <li>Share and collaborate</li>
+    </ul>
+
+</div>
+
+<div class="slide">
+
+    <h2>Open Music can be added to:</h2>
+
+    <ul>
+       <li>Video Editors</li>
+       <li>Video Sites</li>
+       <li>Audio Sites</li>
+       <li>Social Media</li>
+    </ul>
+
+</div>
+
+<div class="slide">
+
+    <h2>Check it out!</h2>
+
+    <h1><a style="color:blue;" href="https://openmusic.gallery">https://openmusic.gallery</a></h1>
+
+</div>
+
+
+
+<div class="slide">
+
+</div>
+
+   </div>
+
+
+   <script>
+   
+   var idDiv = document.getElementById("id");
+   var id2Div = document.getElementById("id2");
+   var id = "1333";
+   var startedTyping = false;
+   
+   var gamelink = document.getElementById("gamelink");
+   
+   var slides = document.getElementsByClassName("slide");
+   var slideI = 0;
+   slides[0].style.display = "block";
+   document.body.onkeypress = function (e) {
+       console.log(e)
+       if (e.charCode === 32) {
+        slides[slideI].style.display = "none";
+        slides[++slideI].style.display = "block";
+    }
+   };
+   
+   </script>
+
+
+</body>
+</html>
