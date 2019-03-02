@@ -201,8 +201,10 @@ OMGEmbeddedViewer.prototype.setupControls = function (params) {
 
     var className = "omg-viewer-" + data.type.toLowerCase();
     this.div.classList.add(className);
-    this.song.loop = this.song.arrangement.length === 0;
-
+    
+    if (this.song) {
+        this.song.loop = this.song.arrangement.length === 0;
+    }
 };
 
 OMGEmbeddedViewer.prototype.drawCanvas = function (data) {
