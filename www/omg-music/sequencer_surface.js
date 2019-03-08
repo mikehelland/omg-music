@@ -537,6 +537,9 @@ OMGDrumMachine.prototype.setRowColumnSizes = function () {
     this.beatMarker.style.display = "none";
     this.beatMarkerShowing = false;
     
+    this.totalBeats = this.beatParams.measures * this.beatParams.beats;
+    this.totalSubbeats = this.totalBeats * this.beatParams.subbeats;
+    
     if (this.selectedTrack < 0) {
         this.columnWidth = (this.bgCanvas.width - this.captionWidth) / this.totalSubbeats;
         this.rowHeight = this.captionHeight;

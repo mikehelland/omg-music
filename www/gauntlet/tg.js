@@ -148,6 +148,8 @@ tg.sequencer.setup = function () {
     s.onBeatPlayedListener = function (isubbeat, isection) {
         s.part.drumMachine.updateBeatMarker(isubbeat);
     };
+    
+    s.uis = [];
 };
 
 tg.sequencer.show = function (part) {
@@ -170,6 +172,7 @@ tg.sequencer.show = function (part) {
         part.drumMachine.onchange = function (part, trackI, subbeat) {
             s.onchange(part, trackI, subbeat);
         };
+        s.uis.push(part.drumMachine);
     }
     part.drumMachine.backgroundDrawn = false;
 
