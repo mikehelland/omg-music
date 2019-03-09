@@ -2221,7 +2221,9 @@ tg.omglive = {
         part.omglive = {users: {}, notes: []};
         part.omglive.notes.autobeat = 1;
 
-        part.socket = io("/omg-live");
+        var url = window.location.origin.replace("http:", "https:");
+
+        part.socket = io(url + "/omg-live");
         part.socket.emit("startSession", {room: part.liveRoom, user: tg.omglive.username});
         part.socket.on("basic", function (data) {
             if (data.x === -1) {
@@ -2320,7 +2322,6 @@ tg.omglive.onPartAddListener = function (part, source) {
 };
 
 tg.omglive.onSequencerChangeListener = function (part, trackI, subbeat) {
-    console.log(trackI)
     tg.omglive.socket.emit("data", {
         action: "sequencerChange", 
         partName: part.data.name,
@@ -2328,6 +2329,24 @@ tg.omglive.onSequencerChangeListener = function (part, trackI, subbeat) {
         trackI: trackI,
         subbeat: subbeat
     });
+};
+
+tg.omglive.onVerticalChangeListener = function (part, frets, autobeat) {
+    if (tg.omglive.calculateNotesLocally) {
+        tg.omglive.socket.emit("data", {
+            action: "verticalChangeNotes", 
+            partName: part.data.name,
+            value: part.data.notes
+        });
+    }
+    else {
+        tg.omglive.socket.emit("data", {
+            action: "verticalChangeFrets", 
+            partName: part.data.name,
+            value: frets,
+            autobeat: autobeat
+        });        
+    }
 };
 
 tg.omglive.ondata = function (data) {
@@ -2364,6 +2383,9 @@ tg.omglive.ondata = function (data) {
         let part = tg.currentSection.getPart(data.partName);
         part.data.tracks[data.trackI].data[data.subbeat] = data.value;
         if (part.drumMachine && !part.drumMachine.hidden) part.drumMachine.draw();
+    }
+    else if (data.action === "verticalChangeFrets") {
+        tg.omglive.onVerticalChangeFrets(data);
     }
 };
 
