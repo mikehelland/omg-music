@@ -740,11 +740,14 @@ OMusicPlayer.prototype.makeOsc = function (part) {
 
     part.osc.connect(part.preFXGain);
 
+    part.baseFrequency = 0;
     part.osc.frequency.setValueAtTime(0, p.context.currentTime);
     part.osc.start(p.context.currentTime);
 
     part.osc.finishPart = function () {
         part.osc.frequency.setValueAtTime(0, p.nextBeatTime);
+        //todo keep freq same, reduce volume
+        part.baseFrequency = 0;
 
         //total hack, this is why things should be processed ala AudioContext, not our own thread
         /*setTimeout(function () {
@@ -1027,14 +1030,16 @@ OMusicPlayer.prototype.playNote = function (note, part) {
 
     if (!note || note.rest) {
         if (part.osc) {
+            //todo keep freq same, reduce volume
+            part.baseFrequency = 0;
             part.osc.frequency.setValueAtTime(0, p.nextBeatTime);
         }
         return;
     }
 
     if (part.osc) {
-        var freq = p.makeFrequency(note.scaledNote) * part.data.audioParams.warp;
-        part.osc.frequency.setValueAtTime(freq, p.nextBeatTime);
+        part.baseFrequency = p.makeFrequency(note.scaledNote);
+        part.osc.frequency.setValueAtTime(part.baseFrequency * part.data.audioParams.warp, p.nextBeatTime);
         part.playingI = part.currentI;
         var playingI = part.playingI;
         
@@ -1042,6 +1047,8 @@ OMusicPlayer.prototype.playNote = function (note, part) {
         //a different note has played
         setTimeout(function () {
             if (part.osc && part.playingI === playingI) {
+                //todo keep freq same, reduce volume
+                part.baseFrequency = 0;
                 part.osc.frequency.setValueAtTime(0,
                         //p.subbeats * note.beats * p.subbeatLength * 0.85)
                         p.nextBeatTime * 0.88);
@@ -1270,8 +1277,9 @@ OMusicPlayer.prototype.playLiveNotes = function (notes, part) {
     if (notes.autobeat === 0) {
         part.playingI = -1;
         if (part.osc) {
-            part.osc.frequency.setValueAtTime(this
-                    .makeFrequency(notes[0].scaledNote) * part.data.audioParams.warp, this.context.currentTime);
+            part.baseFrequency = this.makeFrequency(notes[0].scaledNote);
+            part.osc.frequency.setValueAtTime(
+                    part.baseFrequency * part.data.audioParams.warp, this.context.currentTime);
         }
         else {
             //var sound = this.getSound(part.data.soundSet, notes[0]);
@@ -1295,6 +1303,8 @@ OMusicPlayer.prototype.playLiveNotes = function (notes, part) {
 OMusicPlayer.prototype.endLiveNotes = function (part) {
   
     if (part.osc) {
+        //todo keep freq same, reduce volume
+        part.baseFrequency = 0;
         part.osc.frequency.setValueAtTime(0,
                 this.context.currentTime);
     }  

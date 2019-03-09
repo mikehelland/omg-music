@@ -371,7 +371,7 @@ tg.beatsFragment.setup = function () {
 
     var onSubeatsChange = function (e) {
         tg.song.data.beatParams.subbeats = bf.subbeatsRange.value * 1;
-        tg.song.tempoChanged();
+        tg.song.beatsChanged();
     };
     bf.subbeatsRange.ontouchmove = onSubeatsChange;
     bf.subbeatsRange.onmousemove = onSubeatsChange;
@@ -379,7 +379,7 @@ tg.beatsFragment.setup = function () {
     bf.subbeatsRange.onchange = onSubeatsChange;
     var onBeatsChange = function (e) {
         tg.song.data.beatParams.beats = bf.beatsRange.value * 1;
-        tg.song.tempoChanged();
+        tg.song.beatsChanged();
     };
     bf.beatsRange.ontouchmove = onBeatsChange;
     bf.beatsRange.onmousemove = onBeatsChange;
@@ -387,7 +387,7 @@ tg.beatsFragment.setup = function () {
     bf.beatsRange.onchange = onBeatsChange;
     var onMeasuresChange = function (e) {
         tg.song.data.beatParams.measures = bf.measuresRange.value * 1;
-        tg.song.tempoChanged();
+        tg.song.beatsChanged();
     };
     bf.measuresRange.ontouchmove = onMeasuresChange;
     bf.measuresRange.onmousemove = onMeasuresChange;
@@ -397,7 +397,7 @@ tg.beatsFragment.setup = function () {
         tg.song.data.beatParams.bpm = bf.bpmRange.value * 1;
         tg.player.newBPM = bf.bpmRange.value;
         tg.setSongControlsUI();
-        tg.song.tempoChanged();
+        tg.song.beatsChanged();
     };
     bf.bpmRange.ontouchmove = onBpmChange;
     bf.bpmRange.onmousemove = onBpmChange;
@@ -405,7 +405,7 @@ tg.beatsFragment.setup = function () {
     bf.bpmRange.onchange = onBpmChange;
     var onShuffleChange = function (e) {
         tg.song.data.beatParams.shuffle = bf.shuffleRange.value / 100;
-        tg.song.tempoChanged();
+        tg.song.beatsChanged();
     };
     bf.shuffleRange.ontouchmove = onShuffleChange;
     bf.shuffleRange.onmousemove = onShuffleChange;
@@ -1007,8 +1007,7 @@ tg.partOptionsFragment = {
     div: document.getElementById("part-options-fragment"),
     submixerButton:  document.getElementById("part-options-submixer-button"),
     liveModeButton:  document.getElementById("part-options-omglive-mode"),
-    midiButton:  document.getElementById("part-options-midi-button"),
-    midiBreak:  document.getElementById("part-options-midi-break"),
+    midiCanvas:  document.getElementById("part-options-midi-canvas"),
     liveUrlInput:  document.getElementById("part-options-omglive-url"),
     liveRoomInput:  document.getElementById("part-options-omglive-room"),
     liveModeDetails:  document.getElementById("part-options-omglive-details"),
@@ -1030,23 +1029,33 @@ tg.partOptionsFragment.setup = function () {
         }
     };
 
-    f.midiButton.onclick = function () {
-        if (!tg.midiParts) {
-            tg.turnOnMIDI();
-        }
-        var index = tg.midiParts.indexOf(f.part);
-        var on = false;
-        if (index === -1) {
-            f.part.activeMIDINotes = [];
-            f.part.activeMIDINotes.autobeat = 1;
-            tg.midiParts.push(f.part);
-            on = true;
-        }
-        else {
-            tg.midiParts.splice(index, 1);
-        }
-        f.midiButton.innerHTML = "MIDI Input is " + (on ? "ON" : "OFF");
-    };
+    if (navigator.requestMIDIAccess) {
+        var onchannelchange = function () {
+            if (!tg.midi) {
+                tg.turnOnMIDI();
+            }
+            var index = tg.midiParts.indexOf(f.part);
+            if (f.midiCanvas.value === "Off" && index > -1) {
+                tg.midiParts.splice(index, 1);
+            }
+            else if (f.midiCanvas.value !== "Off" && index === -1) {
+                f.part.activeMIDINotes = [];
+                f.part.activeMIDINotes.autobeat = 1;
+                tg.midiParts.push(f.part);
+            }
+        };
+
+        var midiProperty = {"property": "midiChannel", "name": "MIDI Channel", "type": "options",
+                //options: ["Off", "All", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16"],
+                options: ["Off", "All", 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16],
+                "color": "#008800", transform: "square"};
+        this.midiCanvas = new SliderCanvas(this.midiCanvas, midiProperty, undefined, f.part, onchannelchange);
+        this.midiCanvas.div.className = "fx-slider";
+    }
+    else {
+        this.midiCanvas.style.display = "none";
+    }
+
 
     f.randomizeImg = f.randomizeButton.getElementsByTagName("img")[0];
     f.randomizeButton.onclick = function () {
@@ -1150,13 +1159,9 @@ tg.partOptionsFragment.onshow = function (part) {
     
     f.nameInput.value = part.data.name;
 
-    f.midiButton.style.display = omg.midi.api && 
-            part.data.surface.url === "PRESET_VERTICAL" && 
-            part.data.soundSet.chromatic ? "block" : "none";
-    f.midiBreak.style.display = f.midiButton.style.display;
-    f.midiButton.innerHTML = "MIDI Input is " + 
-            (tg.midiParts && tg.midiParts.indexOf(part) > -1 ? 
-            "ON" : "OFF");
+    part.midiChannel = part.midiChannel || "Off";
+    this.midiCanvas.data = part;
+    this.midiCanvas.sizeCanvas();
     
     if (part.data.surface.url === "PRESET_VERTICAL") {
         f.verticalButton.style.display = "none";
@@ -2356,7 +2361,7 @@ tg.omglive.ondata = function (data) {
         tg.song.data.beatParams.subbeats = data.value.subbeats;
         tg.song.data.beatParams.beats = data.value.beats;
         tg.song.data.beatParams.measures = data.value.measures;
-        tg.song.tempoChanged("omglive");
+        tg.song.beatsChanged("omglive");
     }
     else if (data.property === "keyParams") {
         tg.song.data.keyParams.rootNote = data.value.rootNote;
@@ -2495,8 +2500,11 @@ tg.turnOnMIDI = function () {
     omg.midi.onstop = tg.onmidistop;
 }
 
-tg.onmidinoteoff = function (noteNumber) {
+tg.onmidinoteoff = function (noteNumber, channel) {
     tg.midiParts.forEach(part => {
+        if (!(part.midiChannel === channel || part.midiChannel === "All")) {
+            return;
+        }
         for (var i = 0; i< part.activeMIDINotes.length; i++) {
             if (part.activeMIDINotes[i].scaledNote === noteNumber) {
                 part.activeMIDINotes.splice(i, 1);
@@ -2513,8 +2521,11 @@ tg.onmidinoteoff = function (noteNumber) {
     });
 };
 
-tg.onmidinoteon = function (noteNumber) {
+tg.onmidinoteon = function (noteNumber, channel) {
     tg.midiParts.forEach(part => {
+        if (!(part.midiChannel === channel || part.midiChannel === "All")) {
+            return;
+        }
         var note = {beats: 0.25, scaledNote: noteNumber};
         part.activeMIDINotes.splice(0, 0, note);    
         tg.player.playLiveNotes(part.activeMIDINotes, part, 0); 
@@ -2543,15 +2554,23 @@ tg.onmidistop = function () {
     }
 };
 
-tg.onmidimessage = function (control, value) {
+tg.onmidimessage = function (control, value, channel) {
     if (control === 91) {
         value = Math.floor(value / 128 * 4);
         if (value === 1) value = 4;
         else if (value === 3) value = 1;
-        tg.midiParts.forEach(part => part.activeMIDINotes.autobeat = value);
+        tg.midiParts.forEach(part => {
+            if (!(part.midiChannel === channel || part.midiChannel === "All")) {
+                return;
+            }
+            part.activeMIDINotes.autobeat = value;
+        });
     }
     else if (control === 7) {
         tg.midiParts.forEach(part => {
+            if (!(part.midiChannel === channel || part.midiChannel === "All")) {
+                return;
+            }
             part.data.audioParams.gain = 1.5 * Math.pow(value / 127, 2);
             part.gain.gain.value = part.data.audioParams.gain;
             tg.song.partMuteChanged(part);
@@ -2559,10 +2578,36 @@ tg.onmidimessage = function (control, value) {
     }
     else if (control === 10) {
         tg.midiParts.forEach(part => {
+            if (!(part.midiChannel === channel || part.midiChannel === "All")) {
+                return;
+            }
             part.data.audioParams.pan = (value - 64) / 64;
             part.panner.pan.value = part.data.audioParams.pan;
             tg.song.partMuteChanged(part);
         });
+    }
+    else if (control === "pitchbend" || control === 5) {
+        tg.midiParts.forEach(part => {
+            if (!(part.midiChannel === channel || part.midiChannel === "All")) {
+                return;
+            }
+            part.data.audioParams.warp = (value + 1) / 64;
+            //part.panner.warp.value = part.data.audioParams.warp;
+            if (part.osc) {
+                part.osc.frequency.value = part.baseFrequency * (value + 1) / 64;
+                console.log(part.baseFrequency, part.osc.frequency.value)
+            }
+            tg.song.partMuteChanged(part);
+        });
+    }
+    else if (control === 71) {
+        tg.song.gain = value / 127 * 1.5;
+        tg.song.postFXGain.gain.value = tg.song.gain;
+    }
+    else if (control === 74) {
+        console.log(value)
+        tg.song.data.beatParams.bpm = Math.round(value / 127 * 200 + 20);
+        tg.song.beatsChanged();
     }
 };
 

@@ -597,16 +597,16 @@ omg.midi = {
     },
     onMessage: function (event) {
   
-        // Mask off the lower nibble (MIDI channel, which we don't care about)
+        var channel = (event.data[0] & 0x0f) + 1;
         switch (event.data[0] & 0xf0) {
             case 0x90:
                 if (event.data[2]!=0) {  // if velocity != 0, this is a note-on message
-                    omg.midi.onnoteon(event.data[1]);
+                    omg.midi.onnoteon(event.data[1], channel);
                     return;
                 }
                 // if velocity == 0, fall thru: it's a note-off.  MIDI's weird, y'all.
             case 0x80:
-                omg.midi.onnoteoff(event.data[1]);
+                omg.midi.onnoteoff(event.data[1], channel);
                 return;
             case 0xb0:
                 switch (event.data[1]) {
@@ -617,8 +617,11 @@ omg.midi = {
                         omg.midi.onstop();
                         return;
                     default:
-                        omg.midi.onmessage(event.data[1], event.data[2]);
+                        omg.midi.onmessage(event.data[1], event.data[2], channel);
                 }
+                return;
+            case 0xE0:
+                omg.midi.onmessage("pitchbend", event.data[2], channel);
                 return;
         }
     },

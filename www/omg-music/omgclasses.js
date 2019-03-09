@@ -76,7 +76,7 @@ OMGSong.prototype.keyChanged = function (source) {
     this.onKeyChangeListeners.forEach(listener => listener(song.data.keyParams, source));
 };
 
-OMGSong.prototype.tempoChanged = function (source) {
+OMGSong.prototype.beatsChanged = function (source) {
     var song = this;
     this.onBeatChangeListeners.forEach(listener => listener(song.data.beatParams, source));
 };
