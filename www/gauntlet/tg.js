@@ -1604,7 +1604,6 @@ tg.songFragment.setup = function () {
     
     tg.songFragment.randomizeButton.onclick = function () {
         var rs = OMGMonkey.prototype.newSong();
-        console.log(rs);
         tg.loadSong(rs);
         
         tg.songFragment.randomizeImg.className = "monkey-spin";
@@ -2492,12 +2491,14 @@ tg.turnOnMIDI = function () {
     if (navigator.requestMIDIAccess && !omg.midi.api) {
         navigator.requestMIDIAccess().then(omg.midi.onSuccess, omg.midi.onFailure );
     }
-    tg.midiParts = [];
-    omg.midi.onnoteoff = tg.onmidinoteoff;
-    omg.midi.onnoteon = tg.onmidinoteon;
-    omg.midi.onmessage = tg.onmidimessage;
-    omg.midi.onplay = tg.onmidiplay;
-    omg.midi.onstop = tg.onmidistop;
+    if (!tg.midiParts) {
+        tg.midiParts = [];
+        omg.midi.onnoteoff = tg.onmidinoteoff;
+        omg.midi.onnoteon = tg.onmidinoteon;
+        omg.midi.onmessage = tg.onmidimessage;
+        omg.midi.onplay = tg.onmidiplay;
+        omg.midi.onstop = tg.onmidistop;
+    }
 }
 
 tg.onmidinoteoff = function (noteNumber, channel) {
@@ -2587,15 +2588,23 @@ tg.onmidimessage = function (control, value, channel) {
         });
     }
     else if (control === "pitchbend" || control === 5) {
+        if (value === 64) {
+            value = 1;
+        }
+        else if (value < 64) {
+            value = value / 64 / 2 + 0.5;
+        }
+        else {
+            value = 1 + (value - 64) / 63;
+        }
         tg.midiParts.forEach(part => {
             if (!(part.midiChannel === channel || part.midiChannel === "All")) {
                 return;
             }
-            part.data.audioParams.warp = (value + 1) / 64;
+            part.data.audioParams.warp = value;
             //part.panner.warp.value = part.data.audioParams.warp;
             if (part.osc) {
-                part.osc.frequency.value = part.baseFrequency * (value + 1) / 64;
-                console.log(part.baseFrequency, part.osc.frequency.value)
+                part.osc.frequency.value = part.baseFrequency * value;
             }
             tg.song.partMuteChanged(part);
         });
@@ -2605,7 +2614,6 @@ tg.onmidimessage = function (control, value, channel) {
         tg.song.postFXGain.gain.value = tg.song.gain;
     }
     else if (control === 74) {
-        console.log(value)
         tg.song.data.beatParams.bpm = Math.round(value / 127 * 200 + 20);
         tg.song.beatsChanged();
     }
