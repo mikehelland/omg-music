@@ -2529,17 +2529,23 @@ tg.onmidinoteon = function (noteNumber, channel) {
         }
         var note = {beats: 0.25, scaledNote: noteNumber};
         part.activeMIDINotes.splice(0, 0, note);    
-        tg.player.playLiveNotes(part.activeMIDINotes, part, 0); 
-        for (var i = 0; i < part.mm.frets.length; i++) {
-            if (part.mm.frets[i].note === noteNumber) {
-                note.note = i - part.mm.frets.rootNote;
-                break;
-            }
-            if (part.mm.frets[i].note > noteNumber) {
-                note.note = i - part.mm.frets.rootNote - 0.5;
-                break;
+        if (!part.data.soundSet.chromatic) {
+            note.note = noteNumber % part.soundSet.data.length;
+        }
+        else {
+            for (var i = 0; i < part.mm.frets.length; i++) {
+                if (part.mm.frets[i].note === noteNumber) {
+                    note.note = i - part.mm.frets.rootNote;
+                    break;
+                }
+                if (part.mm.frets[i].note > noteNumber) {
+                    note.note = i - part.mm.frets.rootNote - 0.5;
+                    break;
+                }
             }
         }
+        tg.player.playLiveNotes(part.activeMIDINotes, part, 0); 
+
     });
 };
 
