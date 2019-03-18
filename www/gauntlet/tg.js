@@ -260,6 +260,9 @@ tg.instrument.show = function (part) {
     if (!part.mm) {
         part.mm = new OMGMelodyMaker(tg.instrument.surface, part, tg.player);
         part.mm.readOnly = false;
+        part.mm.onchange = function (part, frets) {
+            tg.instrument.onchange(part, frets);
+        };
     }
     tg.instrument.mm = part.mm;
     tg.instrument.mm.setCanvasEvents();
@@ -274,6 +277,9 @@ tg.instrument.onhide = function () {
 
 };
 
+tg.instrument.onchange = function (part, notes) {
+    //empty on purpose
+};
 
 /*
  * MAIN FRAGMENT
@@ -1161,7 +1167,9 @@ tg.partOptionsFragment.onshow = function (part) {
 
     part.midiChannel = part.midiChannel || "Off";
     this.midiCanvas.data = part;
-    this.midiCanvas.sizeCanvas();
+    if (this.midiCanvas.sizeCanvas) {
+        this.midiCanvas.sizeCanvas();
+    }
     
     if (part.data.surface.url === "PRESET_VERTICAL") {
         f.verticalButton.style.display = "none";
@@ -2277,6 +2285,7 @@ tg.omglive.setupListeners = function () {
     tg.song.onPartAudioParamsChangeListeners.push(tg.omglive.onPartAudioParamsChangeListener);
     tg.song.onPartAddListeners.push(tg.omglive.onPartAddListener);
     tg.sequencer.onchange = tg.omglive.onSequencerChangeListener;
+    tg.instrument.onchange = tg.omglive.onVerticalChangeListener;
 };
 
 tg.omglive.onBeatChangeListener = function (beatParams, source) {
@@ -2348,7 +2357,7 @@ tg.omglive.onVerticalChangeListener = function (part, frets, autobeat) {
             action: "verticalChangeFrets", 
             partName: part.data.name,
             value: frets,
-            autobeat: autobeat
+            autobeat: frets.autobeat
         });        
     }
 };
@@ -2396,6 +2405,18 @@ tg.omglive.ondata = function (data) {
 tg.omglive.onchat = function (data) {
     tg.liveFragment.chatArea.append("\n" + (data.user ? data.user + ": " : "") + data.text);
     tg.liveFragment.chatArea.scrollTop = tg.liveFragment.chatArea.scrollHeight;
+};
+
+tg.omglive.onVerticalChangeFrets = function (data) {
+    var part = tg.currentSection.getPart(data.partName);
+    if (data.value.length > 0) {
+        data.value.autobeat = data.autobeat;
+        tg.player.playLiveNotes(data.value, part, 0);
+    }
+    else {
+        tg.player.endLiveNotes(part);
+    }
+    if (part.mm && !part.mm.hidden) part.mm.draw();
 };
 
 tg.omglive.partData = function (part, data) {

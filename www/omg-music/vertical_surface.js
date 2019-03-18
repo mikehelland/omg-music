@@ -377,6 +377,9 @@ OMGMelodyMaker.prototype.setupFretBoard = function () {
 OMGMelodyMaker.prototype.doneTouching = function () {
     
     this.player.endLiveNotes(this.part);
+    if (this.onchange) {
+        this.onchange(this.part, this.notes);
+    }
 
     this.frets.touching = -1;
     this.buttonTouched = undefined;
@@ -650,6 +653,9 @@ OMGMelodyMaker.prototype.ondownInWriteMode = function (touch) {
     this.setTouchingXSection();
         
     this.player.playLiveNotes(this.notes, this.part, 0);
+    if (this.onchange) {
+        this.onchange(this.part, this.notes);
+    }
 
     this.draw();
     this.part.saved = false;
@@ -680,6 +686,9 @@ OMGMelodyMaker.prototype.onmoveInWriteMode = function (touch) {
         touch.note.beats = 0.25;
 
         this.player.playLiveNotes(this.notes, this.part);
+        if (this.onchange) {
+            this.onchange(this.part, this.notes);
+        }
         
         this.draw();
     }
