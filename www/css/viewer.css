@@ -167,3 +167,39 @@
         transform: rotate(360deg);
     }
 }
+
+.tip-jar {
+    position:absolute;
+    top:0px;
+    left:0px;
+    bottom:0px;
+    right:0px;
+    display: flex;
+    align-items: center;
+}
+
+.tip-jar-background {
+    position:absolute;
+    top:0px;
+    left:0px;
+    bottom:0px;
+    right:0px;
+    background-color: white;
+    opacity: 0.65;
+}
+
+.tip-jar-foreground {
+    height:160px;
+    z-index: 1;
+    margin: 0 auto;    
+    background-color: white;
+    border-radius:5px;
+    padding:10px;
+    border:1px solid #888888
+}
+
+.tip-jar-canvas {
+    width:100px;
+    margin: 20px auto;
+    height:100px;
+}

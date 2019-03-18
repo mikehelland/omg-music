@@ -50,7 +50,7 @@ OMGEmbeddedViewer.prototype.setupControls = function (params) {
     viewer.playButton.innerHTML = "&#9654";
     viewer.editButton.innerHTML = "Edit";
     viewer.shareButton.innerHTML = "Share";
-    viewer.tipButton.innerHTML = "Tip";
+    viewer.tipButton.innerHTML = "Tip Jar";
     viewer.voteButton.innerHTML = "&#x2B06";
     viewer.voteButton.title = "Upvote";
 
@@ -181,9 +181,61 @@ OMGEmbeddedViewer.prototype.setupControls = function (params) {
     viewer.userDiv.innerHTML = data.username || "(unknown)";
     viewer.datetimeDiv.innerHTML = omg.util.getTimeCaption(data.created_at);
 
-    viewer.tipButton.onclick = function () {
-        window.location = "bitcoin:1Jdam2fBZxfhWLB8yP69Zbw6fLzRpweRjc?amount=0.004";
+    var url = 'bitcoin:1Jdam2fBZxfhWLB8yP69Zbw6fLzRpweRjc';
+    var amount = "?amount=0.004";
+    var makeTipJar = function () {
+        viewer.tipJar = document.createElement("div");
+        viewer.tipJar.className = "tip-jar";
+        viewer.tipJarBackground = document.createElement("div");
+        viewer.tipJarBackground.className = "tip-jar-background";
+        viewer.tipJarForeground = document.createElement("div");
+        viewer.tipJarForeground.className = "tip-jar-foreground";
+        viewer.qrCanvas = document.createElement("canvas");
+        var canvasDiv = document.createElement("div");
+        canvasDiv.className = "tip-jar-canvas";
+        viewer.tipJar.appendChild(viewer.tipJarBackground);
+        viewer.tipJar.appendChild(viewer.tipJarForeground);
+        viewer.tipJarLink = document.createElement("div");
+        viewer.tipJarLink.innerHTML = "<a href='" + url + amount + "'>" + url + "</a>";
+
+        viewer.tipJarBackground.onclick = function () {
+            viewer.tipJar.style.display = "none";
+        };
+
+        viewer.qr = new QRious({
+            element: viewer.qrCanvas,
+            value: url + amount
+        });
+        
+        viewer.tipJarForeground.appendChild(canvasDiv);
+        canvasDiv.appendChild(viewer.qrCanvas);
+        viewer.tipJarForeground.appendChild(viewer.tipJarLink);
+        viewer.div.appendChild(viewer.tipJar);
+        viewer.qr.element.onclick = function () {
+            window.location = url;
+        };
     };
+
+    viewer.tipButton.onclick = function () {
+        
+        if (viewer.tipJar) {
+            viewer.tipJar.style.display = "flex";
+            return;
+        }
+        
+        if (typeof QRious === "undefined") {
+            var scriptTag = document.createElement("script");
+            scriptTag.onload = makeTipJar;
+            scriptTag.src = "https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js";
+            scriptTag.async = true;
+            document.body.appendChild(scriptTag);
+        }
+        else {
+            makeTipJar();
+        }
+        
+    };
+
     viewer.editButton.onclick = function () {
         window.location = "/gauntlet/?id=" + data.id;
     };
