@@ -369,6 +369,47 @@ catch (excp) {
 var io = require('socket.io')(httpsServer);
 console.log("sockets to https");
 
+var getLivePart = function (song, partName) {
+    for (var i = 0; i < song.sections[0].parts.length; i++) {
+        if (song.sections[0].parts[i].name === partName) {
+            return song.sections[0].parts[i];
+        }
+    }
+};
+var updateLiveSong = function (song, data) {
+    if (data.action === "partAdd") {
+        song.sections[0].parts.push(data.part);
+    }
+    else if (data.property === "beatParams") {
+        song.beatParams.bpm = data.value.bpm;
+        song.beatParams.shuffle = data.value.shuffle;
+        song.beatParams.subbeats = data.value.subbeats;
+        song.beatParams.beats = data.value.beats;
+        song.beatParams.measures = data.value.measures;
+    }
+    else if (data.property === "keyParams") {
+        song.keyParams.rootNote = data.value.rootNote;
+        song.keyParams.scale = data.value.scale;
+    }
+    else if (data.property === "chordProgression") {
+        song.sections[0].chordProgression = data.value;
+    }
+    else if (data.property === "audioParams" && data.partName) {
+        let part = getLivePart(song, data.partName);
+        if (!part) return;
+        part.audioParams.mute = data.value.mute;
+        part.audioParams.gain = data.value.gain;
+        part.audioParams.pan = data.value.pan;
+        part.audioParams.warp = data.value.warp;
+    }
+    else if (data.action === "sequencerChange") {
+        let part = getLivePart(song, data.partName);
+        part.tracks[data.trackI].data[data.subbeat] = data.value;
+    }
+    else if (data.action === "verticalChangeNotes") {
+        //tg.omglive.onVerticalChangeFrets(data);
+    }
+};
 
 var rooms = {};
 var omgSocket = io.of("/omg-live");
@@ -381,7 +422,11 @@ omgSocket.on("connection", function (socket) {
         socket.join(room);
         
         if (!rooms[room]) {
-            rooms[room] = {users:{}};
+            rooms[room] = {users:{}, song: data.song};
+            socket.emit("data", {property: "joined"});
+        }
+        else {
+            socket.emit("data", {property: "joined", song: rooms[room].song});
         }
         
         var userString = "";
@@ -407,6 +452,10 @@ omgSocket.on("connection", function (socket) {
         io.of("/omg-live").to(data.room).emit("basic", data);
     });
     socket.on("data", function (data) {
+        try {
+            updateLiveSong(rooms[room].song, data);
+        }
+        catch (e) {}
         socket.to(room).emit("data", data);
     });
     socket.on("chat", function (data) {

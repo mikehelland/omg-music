@@ -1117,7 +1117,7 @@ tg.partOptionsFragment.setup = function () {
             f.liveModeDetails.style.display = "block";
             
             f.liveRoomInput.value = f.part.liveRoom;
-            f.liveUrlInput.value = window.origin + "/live/" + encodeURIComponent(f.part.liveRoom);
+            f.liveUrlInput.value = window.location.origin + "/live/" + encodeURIComponent(f.part.liveRoom);
         }
         else {
             f.liveModeButton.innerHTML = "OMG Live Mode is OFF";
@@ -1191,7 +1191,7 @@ tg.partOptionsFragment.onshow = function (part) {
         if (e.keyCode === 13) {
             if (f.liveRoomInput.value !== part.liveRoom) {
                 tg.omglive.switchRoomPart(part, f.liveRoomInput.value);
-                f.liveUrlInput.value = window.origin + "/live/" + encodeURIComponent(part.liveRoom);
+                f.liveUrlInput.value = window.location.origin + "/live/" + encodeURIComponent(part.liveRoom);
             }
         }
     };
@@ -2170,7 +2170,7 @@ tg.liveFragment.setup = function () {
             f.chatArea.style.display = "block";
             f.chatInput.style.display = "block";
             
-            f.liveUrlInput.value = window.origin + "/gauntlet/?live=" + encodeURIComponent(tg.song.liveRoom);
+            f.liveUrlInput.value = window.location.origin + "/gauntlet/?live=" + encodeURIComponent(tg.song.liveRoom);
         }
         else {
             f.liveModeButton.innerHTML = "OMG Live Mode is OFF";
@@ -2184,7 +2184,7 @@ tg.liveFragment.setup = function () {
         if (e.keyCode === 13) {
             if (f.liveRoomInput.value !== tg.song.liveRoom) {
                 tg.omglive.switchRoom(f.liveRoomInput.value);
-                f.liveUrlInput.value = window.origin + "/live/" + encodeURIComponent(tg.song.liveRoom);
+                f.liveUrlInput.value = window.location.origin + "/live/" + encodeURIComponent(tg.song.liveRoom);
             }
         }
     };
@@ -2261,13 +2261,12 @@ tg.omglive = {
         }
 
         tg.omglive.users = {};
-        tg.omglive.setupListeners();
-
+        
         var url = window.location.origin.replace("http:", "https:");
 
         tg.omglive.socket = io(url + "/omg-live");
         tg.omglive.socket.emit("startSession", 
-                {room: tg.song.liveRoom, user: tg.omglive.username});
+                {room: tg.song.liveRoom, user: tg.omglive.username, song: tg.song.getData()});
         tg.omglive.socket.on("data", function (data) {
             tg.omglive.ondata(data);
         });
@@ -2330,7 +2329,7 @@ tg.omglive.onPartAddListener = function (part, source) {
 
     tg.omglive.socket.emit("data", {
         action: "partAdd", 
-        soundSet: part.data.soundSet,
+        part: part.data,
     });
 };
 
@@ -2363,7 +2362,13 @@ tg.omglive.onVerticalChangeListener = function (part, frets, autobeat) {
 };
 
 tg.omglive.ondata = function (data) {
-    if (data.property === "beatParams") {
+    if (data.property === "joined") {
+        if (data.song) {
+            tg.loadSong(data.song);
+        }
+        tg.omglive.setupListeners();
+    }
+    else if (data.property === "beatParams") {
         tg.song.data.beatParams.bpm = data.value.bpm;
         tg.song.data.beatParams.shuffle = data.value.shuffle;
         tg.song.data.beatParams.subbeats = data.value.subbeats;
@@ -2390,7 +2395,7 @@ tg.omglive.ondata = function (data) {
         tg.song.partMuteChanged(part, "omglive");
     }
     else if (data.action === "partAdd") {
-        tg.addPart(data.soundSet, "omglive");
+        tg.addPart(data.part.soundSet, "omglive");
     }
     else if (data.action === "sequencerChange") {
         let part = tg.currentSection.getPart(data.partName);
