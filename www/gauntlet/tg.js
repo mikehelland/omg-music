@@ -1536,6 +1536,21 @@ tg.userFragment.setup = function () {
                                 tg.userFragment.signupPassword.value);            
         }
     };
+    var fullScreen = false;
+    var noSleep;
+    document.getElementById("go-full-screen").onclick = function () {
+        document.body.requestFullscreen();
+        if (typeof NoSleep === "undefined") {
+            var script = document.createElement("script");
+            script.src = "/js/NoSleep.min.js";
+            script.async = true;
+            script.onload = function () {
+                var noSleep = new NoSleep();
+                noSleep.enable();
+            };
+            document.body.appendChild(script);
+        }            
+    };
 };
 
 tg.userFragment.onshow = function () {
