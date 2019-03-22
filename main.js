@@ -435,17 +435,17 @@ omgSocket.on("connection", function (socket) {
             userString += " " + u;
             users++;
         }
-        socket.emit("chat", {text: users + " users in room " + room});
+        socket.emit("chat", {text: "[" + room + "]: " + users + " users in room"});
         if (users) {
             socket.emit("chat", {text: userString});
         }
         rooms[room].users[user] = Date.now();
-        omgSocket.in(room).emit("chat", {text: user + " has joined " + room});
+        omgSocket.in(room).emit("chat", {text: "[" + room + "]: " + user + " has joined"});
     });
     socket.on("leaveSession", function (data) {
-        socket.leave(data.room);
         delete rooms[room].users[user];
-        omgSocket.in(room).emit("chat", {text: user + " has left" + room});
+        omgSocket.in(room).emit("chat", {text: "[" + room + "]: " + user + " has left"});
+        socket.leave(data.room);
         room = "";
     });
     socket.on("basic", function (data) {

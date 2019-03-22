@@ -541,7 +541,7 @@ OMusicPlayer.prototype.prepareSong = function (song, callback) {
         if (callback) callback();
     };
     
-    if (Object.keys(soundsNeeded).length === 0) {
+    if (Object.keys(soundsNeeded).length === 0 || p.disableAudio) {
         finish();
         return true;
     }
@@ -772,7 +772,7 @@ OMusicPlayer.prototype.makeFrequency = function (mapped) {
 OMusicPlayer.prototype.loadSound = function (sound, onload) {
     var p = this;
 
-    if (!sound || !p.context) {
+    if (!sound || !p.context || p.disableAudio) {
         return;
     }
     var key = sound;

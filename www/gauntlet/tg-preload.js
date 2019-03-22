@@ -79,6 +79,12 @@ tg.getSong = function (callback) {
             if (param.startsWith("blank")) {
                 blank = true;
             }
+            if (param.startsWith("disableAudio")) {
+                tg.disableAudio = true;
+            }
+            if (param.startsWith("live=")) {
+                tg.liveRoom = param.split("=")[1];
+            }
         });
     }
 
