@@ -1252,6 +1252,9 @@ tg.setupAddFXButtons = function (part, addButton, availableFXDiv, fxList) {
 tg.addFXToPart = function (fxName, part, fxList) {
     var fxNode = tg.player.addFXToPart(fxName, part);
     tg.setupFXDiv(fxNode, part, fxList);
+    if (tg.onfxchange) {
+        tg.onfxchange("ADD", fxNode.data, part);
+    }
 };
 
 tg.setupPartOptionsFX = function (part, fxListDiv) {
@@ -2504,7 +2507,7 @@ tg.omglive.getRoomNamePart = function (part) {
 tg.omglive.switchRoom = function (newRoom) {
     if (tg.omglive.socket) {
         tg.omglive.socket.emit("leaveSession", {room: tg.song.liveRoom, user: tg.omglive.username});
-        tg.omglive.socket.emit("startSession", {room: newRoom, user: tg.omglive.username});
+        tg.omglive.socket.emit("startSession", {room: newRoom, user: tg.omglive.username, song: tg.song.getData()});
     }
     tg.song.liveRoom = newRoom;
 };
