@@ -143,10 +143,13 @@ body {
     flex-grow:1.5 !important;
 }
 
-#part-list {
+#part-list, #presentation-mixer {
     flex-grow:1;
     display:flex;
     flex-direction:column;
+}
+#presentation-mixer {
+    display :none;
 }
 
 .part-button, .part-mute-button, .part-options-button {
@@ -746,4 +749,26 @@ h2 {
 
 #omglive-chat-input {
     width: 95%;
+}
+#presentation-mode-fragment {
+    flex-direction:column;
+}
+
+.presentation-mode-canvas-holder {
+    flex-grow:1;
+    position:relative;
+}
+.presentation-mode-canvas {
+    height:100%;
+    width:100%;
+    border:5px solid red;
+}
+
+.full-window-close {
+    position:absolute;
+    top:0;
+    left:0;
+    right:0;
+    bottom:0;
+    opacity:0.5;
 }

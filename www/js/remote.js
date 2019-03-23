@@ -1,4 +1,5 @@
-var socket = io("/omg-live");
+var url = window.location.origin.replace("http:", "https:");
+var socket = io(url + "/omg-live");
 var canvas = document.getElementById("main-canvas");
 var ctx = canvas.getContext("2d");
 

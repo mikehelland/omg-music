@@ -33,16 +33,19 @@ omg.ui.totalOffsets = function (element, parent) {
 
 function OMGDrumMachine(div, part, params) {
 
-    this.bgCanvas = document.createElement("canvas");
-    this.bgCanvas.className = "surface-canvas";
+    if (!params) params = {};
+
+    //if (!params.noBackground) {
+        this.bgCanvas = document.createElement("canvas");
+        this.bgCanvas.className = "surface-canvas";        
+        this.bgCtx = this.bgCanvas.getContext("2d");
+    //}
     div.appendChild(this.bgCanvas);
     this.canvas = document.createElement("canvas");
     this.canvas.className = "surface-canvas";
     div.appendChild(this.canvas);
     this.ctx = this.canvas.getContext("2d");
-    this.bgCtx = this.bgCanvas.getContext("2d");
 
-    if (!params) params = {};
     this.readOnly = params.readOnly || true;
     this.beatStrength = 1;
     
