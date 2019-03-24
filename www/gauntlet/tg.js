@@ -803,6 +803,8 @@ tg.addCustomSoundSet = function () {
 
 tg.addPart = function (soundSet, source) {
     var blankPart = {soundSet: soundSet};
+    var names = tg.currentSection.parts.map(section => section.data.name);
+    blankPart.name = omg.util.getUniqueName(soundSet.name, names);
     var part = new OMGPart(undefined,blankPart,tg.currentSection);
     tg.player.loadPart(part);
     tg.song.partAdded(part, source);
