@@ -32,7 +32,12 @@ tg.player.onStop = function () {
 };
 
 tg.player.onBeatPlayedListeners.push(function (isubbeat, section) {
-    tg.drawPlayButton(isubbeat);
+    if (tg.presentationMode) {
+        tg.presentationFragment.updateBeatMarker(isubbeat);
+    }
+    else {
+        tg.drawPlayButton(isubbeat);
+    }
     if (isubbeat === 0) {
         if (tg.currentSection !== section) {
             tg.loadSection(section);
@@ -1256,7 +1261,7 @@ tg.addFXToPart = function (fxName, part, fxList) {
     var fxNode = tg.player.addFXToPart(fxName, part);
     tg.setupFXDiv(fxNode, part, fxList);
     if (tg.onfxchange) {
-        tg.onfxchange("ADD", fxNode.data, part);
+        tg.onfxchange("ADD", part, fxNode.data);
     }
 };
 
@@ -2302,6 +2307,7 @@ tg.omglive = {
         tg.instrument.onchange = tg.omglive.onVerticalChangeListener;
     
         tg.onLoadSongListeners.push(tg.omglive.onLoadSongListener);
+        tg.onfxchange = tg.omglive.onFXChangeListener;
 
         callback();
     }
@@ -2336,6 +2342,16 @@ tg.omglive.onLoadSongListener = function (source) {
     tg.omglive.socket.emit("data", {
         action: "loadSong", 
         value: tg.song.getData()
+    });
+};
+
+tg.omglive.onFXChangeListener = function (action, part, fx, source) {
+    if (source === "omglive") return;
+
+    tg.omglive.socket.emit("data", {
+        action: "fxAdd", 
+        partName: part.data.name,
+        fxName: fx.name
     });
 };
 
@@ -2464,6 +2480,12 @@ tg.omglive.ondata = function (data) {
         tg.omglive.onVerticalChangeFrets(data);
         if (tg.presentationMode) part.presentationUI.draw();
     }
+    else if (data.action === "fxAdd" && data.partName) {
+        let part = tg.currentSection.getPart(data.partName);
+        if (!part) return;
+        tg.player.addFXToPart(data.fxName, part);
+        //todo listener to update ui?
+    }
 };
 
 tg.omglive.onchat = function (data) {
@@ -2578,10 +2600,13 @@ tg.turnOnPresentationMode = function () {
 tg.presentationFragment = {
     div: document.getElementById("presentation-mode-fragment"),
     display: "flex",
-    presentationMixer: document.getElementById("presentation-mixer")
-
+    presentationMixer: document.getElementById("presentation-mixer"),
+    beatMarker: document.getElementById("presentation-beat-marker"),
+    partList: document.getElementById("presentation-part-list")
 };
 tg.presentationFragment.onshow = function () {
+    tg.presentationFragment.beatMarker.style.height = "100%";
+
     tg.presentationMode = true;
     tg.playButton.style.display = "none";
     tg.playButtonCaption.style.display = "none";
@@ -2591,7 +2616,8 @@ tg.presentationFragment.onshow = function () {
     
     var f = tg.presentationFragment;
     f.presentationMixer.style.display = "flex";
-    f.div.innerHTML = "";
+    f.partList.innerHTML = "";
+    f.beatMarker.style.display = "block";
     var divs = [];
     tg.currentSection.parts.forEach(function (part) {
         var div = document.createElement("div");
@@ -2599,7 +2625,7 @@ tg.presentationFragment.onshow = function () {
         
         var uiClass = part.data.surface.url === "PRESET_SEQUENCER" ? OMGDrumMachine : OMGMelodyMaker;            
         part.presentationUI = new uiClass(div, part, {noBackground: true, readOnly: false, captionWidth:0});
-        f.div.appendChild(div);        
+        f.partList.appendChild(div);        
         
         tg.makeMixerDiv(part, divs, f.presentationMixer);
 
@@ -2650,8 +2676,16 @@ tg.presentationFragment.addPart = function (part) {
 
     var uiClass = part.data.surface.url === "PRESET_SEQUENCER" ? OMGDrumMachine : OMGMelodyMaker;            
     part.presentationUI = new uiClass(div, part, {noBackground: true, readOnly: false, captionWidth:0});
-    f.div.appendChild(div);
+    f.partList.div.appendChild(div);
     part.presentationUI.draw();
+};
+tg.presentationFragment.updateBeatMarker = function (isubbeat) {
+    tg.presentationFragment.beatWidth = tg.presentationFragment.div.clientWidth / (
+            tg.song.data.beatParams.subbeats *
+            tg.song.data.beatParams.beats *
+            tg.song.data.beatParams.measures);
+    tg.presentationFragment.beatMarker.style.width = tg.presentationFragment.beatWidth + "px";
+    tg.presentationFragment.beatMarker.style.left = tg.presentationFragment.beatWidth * isubbeat + "px";
 };
 
 

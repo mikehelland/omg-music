@@ -750,7 +750,9 @@ h2 {
 #omglive-chat-input {
     width: 95%;
 }
-#presentation-mode-fragment {
+#presentation-part-list {
+    width:100%;
+    display:flex;
     flex-direction:column;
 }
 
