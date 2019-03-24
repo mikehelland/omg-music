@@ -4,8 +4,8 @@ var tg = {
     keyButton: document.getElementById("key-button"),
     chordsButton: document.getElementById("chords-button"),
     chordsEditorView: document.getElementById("chords-fragment-chords-view"),
-    sectionCaptionDiv: document.getElementById("tool-bar-section-button")
-
+    sectionCaptionDiv: document.getElementById("tool-bar-section-button"),
+    onLoadSongListeners: []
 };
 
 tg.setSongControlsUI = function () {
@@ -106,7 +106,7 @@ tg.getSong = function (callback) {
     }
 };
 
-tg.loadSong = function (songData) {
+tg.loadSong = function (songData, source) {
     var className = songData.constructor.name;
     if (className === "OMGSong") {
         tg.song = songData;
@@ -115,7 +115,7 @@ tg.loadSong = function (songData) {
         tg.song = new OMGSong(null, songData);
     }
     
-    tg.loadSection(tg.song.sections[0])
+    tg.loadSection(tg.song.sections[0]);
         
     document.getElementById("tool-bar-song-button").innerHTML = tg.song.data.name || "(Untitled)";
     
@@ -146,6 +146,9 @@ tg.loadSong = function (songData) {
         tg.songOptionsFragment.isSetupForSong = false;
     }
 
+    for (var i = 0; i < tg.onLoadSongListeners.length; i++) {
+        tg.onLoadSongListeners[i](source);
+    }
 };
 
 tg.loadSection = function (section) {
@@ -168,7 +171,7 @@ tg.loadPart = function (part) {
             tg.instrument.onchange(part, frets);
         };
     }
-
+    part.midiChannel = tg.currentSection.parts.indexOf(part) + 1;
     return div;
 };
 

@@ -452,11 +452,16 @@ omgSocket.on("connection", function (socket) {
         io.of("/omg-live").to(data.room).emit("basic", data);
     });
     socket.on("data", function (data) {
-        try {
-            updateLiveSong(rooms[room].song, data);
-        }
-        catch (e) {}
         socket.to(room).emit("data", data);
+        if (data.action === "loadSong") {
+            rooms[room].song = data.value;
+        }
+        else {
+            try {
+                updateLiveSong(rooms[room].song, data);
+            }
+            catch (e) {}
+        }
     });
     socket.on("chat", function (data) {
         omgSocket.in(room).emit("chat", data);

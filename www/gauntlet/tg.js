@@ -806,6 +806,7 @@ tg.addPart = function (soundSet, source) {
     var part = new OMGPart(undefined,blankPart,tg.currentSection);
     tg.player.loadPart(part);
     tg.song.partAdded(part, source);
+    if (tg.presentationMode) tg.presentationFragment.addPart(part);
 };
 
 tg.addOsc = function (type, source) {
@@ -2294,6 +2295,12 @@ tg.omglive = {
         tg.omglive.socket.on("chat", function (data) {
             tg.omglive.onchat(data);
         });
+        
+        tg.sequencer.onchange = tg.omglive.onSequencerChangeListener;
+        tg.instrument.onchange = tg.omglive.onVerticalChangeListener;
+    
+        tg.onLoadSongListeners.push(tg.omglive.onLoadSongListener);
+
         callback();
     }
 };
@@ -2304,8 +2311,30 @@ tg.omglive.setupListeners = function () {
     tg.song.onChordProgressionChangeListeners.push(tg.omglive.onChordProgressionChangeListener);
     tg.song.onPartAudioParamsChangeListeners.push(tg.omglive.onPartAudioParamsChangeListener);
     tg.song.onPartAddListeners.push(tg.omglive.onPartAddListener);
-    tg.sequencer.onchange = tg.omglive.onSequencerChangeListener;
-    tg.instrument.onchange = tg.omglive.onVerticalChangeListener;
+};
+
+tg.omglive.removeListeners = function () {
+    tg.omglive.removeListener(tg.song.onBeatChangeListeners, tg.omglive.onBeatChangeListener);
+    tg.omglive.removeListener(tg.song.onKeyChangeListeners, tg.omglive.onKeyChangeListener);
+    tg.omglive.removeListener(tg.song.onChordProgressionChangeListeners, tg.omglive.onChordProgressionChangeListener);
+    tg.omglive.removeListener(tg.song.onPartAudioParamsChangeListeners, tg.omglive.onPartAudioParamsChangeListener);
+    tg.omglive.removeListener(tg.song.onPartAddListeners, tg.omglive.onPartAddListener);
+
+};
+
+tg.omglive.removeListener = function (listeners, listener) {
+    listeners.splice(listeners.indexOf(listener), 1);
+};
+
+tg.omglive.onLoadSongListener = function (source) {
+    if (source === "omglive") return;
+
+    tg.omglive.setupListeners();
+
+    tg.omglive.socket.emit("data", {
+        action: "loadSong", 
+        value: tg.song.getData()
+    });
 };
 
 tg.omglive.onBeatChangeListener = function (beatParams, source) {
@@ -2385,8 +2414,13 @@ tg.omglive.onVerticalChangeListener = function (part, frets, autobeat) {
 tg.omglive.ondata = function (data) {
     if (data.property === "joined") {
         if (data.song) {
-            tg.loadSong(data.song);
+            tg.loadSong(data.song, "omglive");
         }
+        tg.omglive.setupListeners();
+    }
+    else if (data.action === "loadSong") {
+        tg.omglive.removeListeners();
+        tg.loadSong(data.value, "omglive");
         tg.omglive.setupListeners();
     }
     else if (data.property === "beatParams") {
@@ -2541,7 +2575,9 @@ tg.turnOnPresentationMode = function () {
 };
 tg.presentationFragment = {
     div: document.getElementById("presentation-mode-fragment"),
-    display: "flex"
+    display: "flex",
+    presentationMixer: document.getElementById("presentation-mixer")
+
 };
 tg.presentationFragment.onshow = function () {
     tg.presentationMode = true;
@@ -2551,9 +2587,8 @@ tg.presentationFragment.onshow = function () {
     tg.mainToolbar.style.display = "none";
     tg.mainBottomToolbar.style.display = "none";
     
-    var presentationMixer = document.getElementById("presentation-mixer");
-    presentationMixer.style.display = "flex";
     var f = tg.presentationFragment;
+    f.presentationMixer.style.display = "flex";
     f.div.innerHTML = "";
     var divs = [];
     tg.currentSection.parts.forEach(function (part) {
@@ -2562,10 +2597,9 @@ tg.presentationFragment.onshow = function () {
         
         var uiClass = part.data.surface.url === "PRESET_SEQUENCER" ? OMGDrumMachine : OMGMelodyMaker;            
         part.presentationUI = new uiClass(div, part, {noBackground: true, readOnly: false, captionWidth:0});
-        //part.presentationUI.canvas.className = "presentation-mode-canvas";
         f.div.appendChild(div);        
         
-        tg.makeMixerDiv(part, divs, presentationMixer);
+        tg.makeMixerDiv(part, divs, f.presentationMixer);
 
     });
     tg.currentSection.parts.forEach(function (part) {
@@ -2574,6 +2608,14 @@ tg.presentationFragment.onshow = function () {
     divs.forEach(function (div) {
         div.sizeCanvas();
     });
+
+    var listener = (part, source) => {
+        if (source === "mixFragment") return;
+        if (part.mixerDiv) {
+            part.mixerDiv.refresh();
+        }
+    };
+    tg.song.onPartAudioParamsChangeListeners.push(listener);
 
     var closeDiv = document.createElement("div");
     closeDiv.className = "full-window-close";
@@ -2585,12 +2627,29 @@ tg.presentationFragment.onshow = function () {
         tg.mainBottomToolbar.style.display = "flex";        
         document.body.removeChild(closeDiv);
         
-        presentationMixer.style.display = "none";
-        presentationMixer.innerHTML = "";
+        f.presentationMixer.style.display = "none";
+        f.presentationMixer.innerHTML = "";
         tg.presentationMode = false;
-        
+
+        tg.song.onPartAudioParamsChangeListeners.splice(
+            tg.song.onPartAudioParamsChangeListeners.indexOf(listener), 1);
+
     };
     document.body.appendChild(closeDiv);
+};
+tg.presentationFragment.addPart = function (part) {
+    var f = tg.presentationFragment;
+    var divs = [];
+    tg.makeMixerDiv(part, divs, f.presentationMixer);
+    var div = document.createElement("div");
+    div.className = "presentation-mode-canvas-holder";
+    divs[0].sizeCanvas();
+    divs[0].refresh();
+
+    var uiClass = part.data.surface.url === "PRESET_SEQUENCER" ? OMGDrumMachine : OMGMelodyMaker;            
+    part.presentationUI = new uiClass(div, part, {noBackground: true, readOnly: false, captionWidth:0});
+    f.div.appendChild(div);
+    part.presentationUI.draw();
 };
 
 
