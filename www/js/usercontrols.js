@@ -14,7 +14,7 @@ function setupUserControls(div, successCallback) {
       if (!div.omg.notLoggedIn) {
          //div.omg.notLoggedIn = document.createElement("span");
          //div.omg.notLoggedIn.className = "omg-user-controls-not-logged-in";
-         var httpsURL = "";
+         var httpsURL = "/";
          if (window.location.protocol !== "https:") {
              httpsURL = "https://" + window.location.host + "/";
          }
