@@ -1,3 +1,5 @@
+**April 2019: [Check out the Kickstarter!](https://www.kickstarter.com/projects/782747219/openmusicgallery)**
+
 # OpenMusic.Gallery
 
 is...
