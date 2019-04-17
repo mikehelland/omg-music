@@ -423,10 +423,10 @@ omgSocket.on("connection", function (socket) {
         
         if (!rooms[room]) {
             rooms[room] = {users:{}, song: data.song};
-            socket.emit("data", {property: "joined"});
+            socket.emit("join", {});
         }
         else {
-            socket.emit("data", {property: "joined", song: rooms[room].song});
+            socket.emit("join", rooms[room]);
         }
         
         var userString = "";
@@ -466,8 +466,24 @@ omgSocket.on("connection", function (socket) {
     socket.on("chat", function (data) {
         omgSocket.in(room).emit("chat", data);
     });
+    socket.on("rtc", function (data) {
+        if (data.message && data.message.type === "offer") {
+            rooms[room].offer = data;
+            rooms[room].serverUser = user;
+        }
+        else if (data.message && data.message.type === "answer") {
+            //send it to whoever made the offer!
+            socket.to(room).emit("rtc", data);
+        }
+        else if (data.message && data.message.candidate) {
+            socket.to(room).emit("rtc", data);
+        }
+    });
     socket.on("disconnect", function () {
         if (rooms[room]) {
+            if (rooms[room].serverUser === user) {
+                rooms[room].offer = undefined;
+            }
             delete rooms[room].users[user];
         }
         omgSocket.in(room).emit("chat", {text: user + " has left"});
