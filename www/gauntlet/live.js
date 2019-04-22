@@ -110,6 +110,7 @@ tg.omglive.setupClient = function (message) {
             console.log('RTCDataChannel peer ' + peerId + ' says: ' + event.data);    
         }
         tg.omglive.peerDataChannel.onerror = onerror;
+        tg.omglive.onchat({text: "WebRTC enabled as client"});
     };
 
     var offer = new RTCSessionDescription(message.message);
@@ -198,6 +199,7 @@ tg.omglive.onerror = function(e) {
     throw new Error(e);
 };
 tg.omglive.onreadyrtc = function(rtcdatachannel) {
+    tg.omglive.onchat({text: "WebRTC enabled as server"});
     rtcdatachannel.onmessage = function(event) {
         var data = JSON.parse(event.data);
         if (data.action === "verticalChangeFrets") {

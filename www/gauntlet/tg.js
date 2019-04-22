@@ -2490,3 +2490,8 @@ tg.requirePartMelodyMaker = function (part) {
     }
 };
 
+window.onkeypress = function (e) {
+    if (e.key === " " && e.target.tagName === "BODY") {
+        tg.playButtonCaption.onclick();
+    }
+};
