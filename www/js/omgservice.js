@@ -569,7 +569,8 @@ omg.ui.getBackgroundColor = function (type) {
 
 omg.ui.useUnicodeNotes = navigator.userAgent.indexOf("Android") === -1 
     && navigator.userAgent.indexOf("iPhone") === -1 
-    && navigator.userAgent.indexOf("iPad") === -1 ;
+    && navigator.userAgent.indexOf("iPad") === -1 
+    && navigator.userAgent.indexOf("Mac OS X") === -1 ;
 if (!omg.ui.useUnicodeNotes) {
     omg.ui.setupNoteImages();
 }
