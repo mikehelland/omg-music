@@ -165,11 +165,12 @@ tg.loadPart = function (part) {
     var div = tg.setupPartButton(part);
 
     if (part.data.surface.url === "PRESET_VERTICAL" && !part.mm && typeof OMGMelodyMaker !== "undefined") {
-        part.mm = new OMGMelodyMaker(tg.instrument.surface, part, tg.player, tg.instrument.backgroundCanvas);
+        /* Is there a reason I needed this? Hmmm. Maybe for MIDI or Live?
+         * part.mm = new OMGMelodyMaker(tg.instrument.surface, part, tg.player, tg.instrument.backgroundCanvas);
         part.mm.readOnly = false;
         part.mm.onchange = function (part, frets) {
             tg.instrument.onchange(part, frets);
-        };
+        };*/
     }
     part.midiChannel = tg.currentSection.parts.indexOf(part) + 1;
     return div;
