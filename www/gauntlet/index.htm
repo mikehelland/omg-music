@@ -159,8 +159,19 @@
             <canvas width="1200" height="630" id="save-fragment-canvas"></canvas>
         </div>
         <div id="part-options-fragment" class="fragment">
-            <div class="detail-fragment-body">
-                <h2>Part Options</h2>
+            <div id="part-options-tabs" class="detail-tab-row">
+                <div id="part-options-tab" class="detail-tab">Options</div>
+                <div id="part-options-fx-tab" class="detail-tab">FX</div>
+            </div>
+            <div id="part-options-fx" class="detail-fragment-body">
+                <button id="part-options-add-fx-button">Add FX</button>
+                <div id="part-options-available-fx">
+                </div>
+                <hr>
+                <div id="part-options-fx-list">
+                </div>
+            </div>
+            <div id="part-options-detail" class="detail-fragment-body">
                 <input id="part-options-name">
                 <canvas id="part-options-midi-canvas"></canvas>
                 <div id="part-options-surface-area">
@@ -170,20 +181,6 @@
                 </div>
                 
                 <button id="part-options-submixer-button">Tracks Sub Mixer</button>
-                <hr>
-                <button id="part-options-add-fx-button">Add FX</button>
-                <div id="part-options-available-fx">
-                </div>
-                <div id="part-options-fx-list">
-                    <!--    Delay Time:
-                        <br>
-                        <canvas id="part-options-delay-time"></canvas>
-                        <br>
-                        Delay Level:
-                        <br>
-                        <canvas id="part-options-delay-level"></canvas>
-                    -->
-                </div>
                 <hr>
                 <button id="part-options-omglive-mode">OMG LIVE Mode</button>
                 <div id="part-options-omglive-details">

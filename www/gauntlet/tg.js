@@ -1019,6 +1019,10 @@ tg.saveFragment.drawAndPostCanvas = function (data) {
 
 tg.partOptionsFragment = {
     div: document.getElementById("part-options-fragment"),
+    fxTab: document.getElementById("part-options-fx-tab"),
+    generalTab: document.getElementById("part-options-tab"),
+    fx: document.getElementById("part-options-fx"),
+    general: document.getElementById("part-options-detail"),
     submixerButton:  document.getElementById("part-options-submixer-button"),
     liveModeButton:  document.getElementById("part-options-omglive-mode"),
     midiCanvas:  document.getElementById("part-options-midi-canvas"),
@@ -1031,11 +1035,30 @@ tg.partOptionsFragment = {
     randomizeButton:  document.getElementById("part-options-randomize"),
     removeButton: document.getElementById("part-options-remove-button"),
     clearButton: document.getElementById("part-options-clear-button"),
-    nameInput: document.getElementById("part-options-name")
+    nameInput: document.getElementById("part-options-name"),
+    updateTabs: function (e) {
+        if (tg.partOptionsFragment.lastTab) {
+            tg.partOptionsFragment.lastTab.classList.remove("selected-option");
+        }
+        tg.partOptionsFragment.lastTab = e.target;
+        e.target.classList.add("selected-option");
+    }
 };
 tg.partOptionsFragment.setup = function () {
     var f = this;
 
+    f.fxTab.onclick = function (e) {
+        f.fx.style.display = "block";
+        f.general.style.display = "none";
+        f.updateTabs(e);
+    };
+    f.generalTab.onclick = function (e) {
+        f.fx.style.display = "none";
+        f.general.style.display = "block";
+        f.updateTabs(e);
+    };
+
+    f.generalTab.onclick({target: f.generalTab});
     f.nameInput.onkeypress = function (e) {
         if (e.keyCode === 13) {
             f.part.data.name = e.target.value;      
@@ -1339,18 +1362,20 @@ function SliderCanvas(canvas, controlInfo, audioNode, data, onchange) {
     var offsets = omg.ui.totalOffsets(canvas);
     canvas.onmousedown = function (e) {
         offsets = omg.ui.totalOffsets(canvas);
-        m.ondown(e.clientX - offsets.left);
+        m.ondown(e.clientX - offsets.left, e.clientY - offsets.top);
     };
     canvas.onmousemove = function (e) {
-        m.onmove(e.clientX - offsets.left);};
+        m.onmove(e.clientX - offsets.left, e.clientY - offsets.top);};
     canvas.onmouseup = function (e) {m.onup();};
     canvas.onmouseout = function (e) {m.onup();};
     canvas.ontouchstart = function (e) {
+        e.preventDefault();
+
         offsets = omg.ui.totalOffsets(canvas);
-        m.ondown(e.targetTouches[0].pageX - offsets.left);
+        m.ondown(e.targetTouches[0].pageX - offsets.left, e.targetTouches[0].pageY - offsets.top);
     };
     canvas.ontouchmove = function (e) {
-        m.onmove(e.targetTouches[0].pageX - offsets.left);
+        m.onmove(e.targetTouches[0].pageX - offsets.left, e.targetTouches[0].pageY - offsets.top);
     };
     canvas.ontouchend = function (e) {m.onup();};
 
@@ -1361,7 +1386,7 @@ function SliderCanvas(canvas, controlInfo, audioNode, data, onchange) {
     this.controlInfo = controlInfo;
     this.onchange = onchange;
     this.percent = 0;
-    this.isAudioParam = audioNode && typeof audioNode[controlInfo.property] === "object";
+    this.isAudioParam = audioNode && typeof audioNode[controlInfo.property] === "object" && controlInfo.property !== "xy";
     
     this.frequencyTransformScale = Math.log(controlInfo.max) - Math.log(controlInfo.min);
     
@@ -1373,18 +1398,23 @@ function SliderCanvas(canvas, controlInfo, audioNode, data, onchange) {
     }
 }
 
-SliderCanvas.prototype.ondown = function (x) {
+SliderCanvas.prototype.ondown = function (x, y) {
     this.isTouching = true;
-    this.onnewX(x);
+    this.onnewX(x, y);
 };
-SliderCanvas.prototype.onmove = function (x) {
+SliderCanvas.prototype.onmove = function (x, y) {
     if (this.isTouching) {
-        this.onnewX(x);
+        this.onnewX(x, y);
     }
 };
-SliderCanvas.prototype.onnewX = function (x) {
+SliderCanvas.prototype.onnewX = function (x, y) {
     this.percent = x / this.div.clientWidth;
-    
+
+    if (this.controlInfo.type === "xy") {
+        this.onupdate([this.percent, y / this.div.clientHeight]);
+        return;
+    }
+
     if (this.controlInfo.type === "options") {
         var i = Math.floor(this.percent * this.controlInfo.options.length);
         this.onupdate(this.controlInfo.options[Math.min(this.controlInfo.options.length - 1, i)]);
@@ -1425,9 +1455,16 @@ SliderCanvas.prototype.onupdate = function (value) {
 };
 SliderCanvas.prototype.onup = function (e) {
     this.isTouching = false;
+    if (this.controlInfo.type === "xy") {
+        this.onupdate([-1, -1]);
+        return;
+    }
 };
 SliderCanvas.prototype.sizeCanvas = function () {
     this.div.width = this.div.clientWidth;
+    if (this.controlInfo.type === "xy") {
+        this.div.style.height = Math.min(200, this.div.width) + "px";
+    }
     this.div.height = this.div.clientHeight;
     this.drawCanvas();
 };

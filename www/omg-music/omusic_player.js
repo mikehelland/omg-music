@@ -20,14 +20,6 @@ function OMusicPlayer() {
 
     this.auditioningParts = [];
 
-    /*p.compressor = p.context.createDynamicsCompressor();
-    p.compressor.threshold.value = -50;
-    p.compressor.knee.value = 40;
-    p.compressor.ratio.value = 2;
-    p.compressor.attack.value = 0;
-    p.compressor.release.value = 0.25;
-    p.compressor.connect(p.context.destination);*/
-
     p.onBeatPlayedListeners = [];
 
     p.iSubBeat = 0;
@@ -118,7 +110,7 @@ OMusicPlayer.prototype._play = function () {
         try {
             p.onBeatPlayedListeners[il].call(null, p.iSubBeat, p.section);
         } catch (ex) {
-            console.log(ex);
+            console.error(ex);
         }
     }
 
@@ -340,7 +332,7 @@ OMusicPlayer.prototype.stop = function () {
     for (var il = 0; il < p.onBeatPlayedListeners.length; il++) {
         try {
             p.onBeatPlayedListeners[il].call(null, -1, p.section);
-        } catch (ex) {console.log(ex);}
+        } catch (ex) {console.error(ex);}
     }
 
 
@@ -485,7 +477,7 @@ OMusicPlayer.prototype.playWhenReady = function (sections) {
         for (var j = 0; j < sections[i].parts.length; j++) {
             if (!sections[i].parts[j].loaded) {
                 allReady = false;
-                console.log("section " + i + " part " + j + " is not ready");
+                console.info("section " + i + " part " + j + " is not ready");
             }
         }
     }
@@ -507,7 +499,7 @@ OMusicPlayer.prototype.prepareSongFromURL = function (url, callback) {
                 p.prepareSong(song, callback);
             }
             catch (e) {
-                console.log(e);
+                console.error(e);
             }
         });
     });
@@ -714,7 +706,7 @@ OMusicPlayer.prototype.makeOsc = function (part) {
     }
 
     if (part.osc) {
-        console.log("makeOsc, already exists");
+        console.info("makeOsc, already exists");
         try {
             part.osc.stop(p.context.currentTime);
             part.osc.disconnect(part.gain);
@@ -1439,338 +1431,189 @@ OMusicPlayer.prototype.setupFX = function () {
         
     p.fx = {};
     p.fx["EQ"] = {"make" : function (data) {
-            var input = p.context.createGain();
-            p.makeEQ(input);
-            input.connect = function (to) {
-                console.log("input.connect!")
-                input.output.connect(to);
-            };
-            input.disconnect = function (from) {
-                console.log("input.disconnect!")
-                input.output.disconnect(from);
-            };
-            Object.defineProperty(input, 'highGain', {
-                set: function(value) {
-                    data.highGain = value;
-                    if (!data.bypass) {
-                        console.log("setting hgain", data);
-                        input.eqHGain.gain.value = value;
-                    }
-                }
-            });
-            Object.defineProperty(input, 'midGain', {
-                set: function(value) {
-                    data.midGain = value;
-                    if (!data.bypass)
-                        input.eqMGain.gain.value = value;
-                }
-            });
-            Object.defineProperty(input, 'lowGain', {
-                set: function(value) {
-                    data.lowGain = value;
-                    if (!data.bypass)
-                        input.eqLGain.gain.value = value;
-                }
-            });
-            Object.defineProperty(input, 'bypass', {
+            var eq = p.makeEQ(data);
+            return eq;
+        },
+        "controls": [
+            {"property": "highGain", default: 1, "name": "EQ High", "type": "slider", "min": 0, "max": 1.5, transform: "square"},
+            {"property": "midGain", default: 1, "name": "EQ Mid", "type": "slider", "min": 0, "max": 1.5, transform: "square"},
+            {"property": "lowGain", default: 1, "name": "EQ Low", "type": "slider", "min": 0, "max": 1.5, transform: "square"}
+        ]
+    };
+    p.fx["CompressorW"] = {"make" : function (data) {
+            var compressor = p.context.createDynamicsCompressor();
+            compressor.threshold.value = -50;
+            compressor.knee.value = 40;
+            compressor.ratio.value = 2;
+            compressor.attack.value = 0;
+            compressor.release.value = 0.25;
+            
+            Object.defineProperty(compressor, 'bypass', {
                 get: function() {
                     return data.bypass;
                 },
                 set: function(value) {
-                    console.log("bypass", value)
-                    input.eqHGain.gain.value = value ? 1 : data.highGain;
-                    input.eqMGain.gain.value = value ? 1 : data.midGain;
-                    input.eqLGain.gain.value = value ? 1 : data.lowGain;
                     data.bypass = value;
-                    console.log("bypass", data)
                 }
             });
-            input.highGain = data.highGain;
-            input.midGain = data.midGain;
-            input.lowGain = data.lowGain;
-            input.bypass = data.bypass;
-            return input;
-        },
-        "makeData": function (init) {
-            return {
-                name: "EQ",
-                highGain: 1,
-                midGain: 1, 
-                lowGain: 1,
-                bypass: 0
-            };                        
+            return compressor;
         },
         "controls": [
-            {"property": "highGain", "name": "EQ High", "type": "slider", "min": 0, "max": 1.5, transform: "square"},
-            {"property": "midGain", "name": "EQ Mid", "type": "slider", "min": 0, "max": 1.5, transform: "square"},
-            {"property": "lowGain", "name": "EQ Low", "type": "slider", "min": 0, "max": 1.5, transform: "square"}
+            {"property": "threshold", default: -50, "name": "Threshold", "type": "slider", "min": -100, "max": 0},
+            {"property": "knee", default: 40, "name": "Knee", "type": "slider", "min": 0, "max": 40},
+            {"property": "ratio", default: 2, "name": "Ratio", "type": "slider", "min": 1, "max": 20},
+            //{"property": "reduction", "name": "Reduction", "type": "slider", "min": -20, "max": 0},
+            {"property": "attack", default: 0, "name": "Attack", "type": "slider", "min": 0, "max": 1},
+            {"property": "release", default: 0.25, "name": "Release", "type": "slider", "min": 0, "max": 1}
         ]
     };
-    p.fx["Delay"] = {"audioClass" : p.tuna.Delay,
-        "makeData": function (init) {
-            return {
-                name: "Delay",
-                feedback: 0.45,    //0 to 1+
-                delayTime: 150,    //1 to 10000 milliseconds
-                wetLevel: 0.25,    //0 to 1+
-                dryLevel: 1,       //0 to 1+
-                cutoff: 2000,      //cutoff frequency of the built in lowpass-filter. 20 to 22050
-                bypass: 0
-            };                        
+    p.fx["DelayW"] = {"make" : function (data) {
+            return p.makeDelay(data);
         },
         "controls": [
-            {"property": "feedback", "name": "Feedback", "type": "slider", "min": 0, "max": 1},
-            {"property": "delayTime", "name": "Delay Time", "type": "slider", "min": 1, "max": 1000},
-            {"property": "wetLevel", "name": "Wet Level", "type": "slider", "min": 0, "max": 1},
-            {"property": "dryLevel", "name": "Dry Level", "type": "slider", "min": 0, "max": 1},
-            {"property": "cutoff", "name": "Cutoff", "type": "slider", "min": 20, "max": 22050}
+            {"property": "time", "name": "Delay Time", default: 0.25, "type": "slider", "min": 0, "max": 5, axis:"revx"},
+            {"property": "feedback", "name": "Feedback", default: 0.25, "type": "slider", "min": 0, "max": 1.0, axis:"revy"},
+        ]
+    };    
+    p.fx["Delay"] = {"audioClass" : p.tuna.Delay,
+        "controls": [
+            {"property": "feedback", default: 0.45, "name": "Feedback", "type": "slider", "min": 0, "max": 1},
+            {"property": "delayTime", default: 150, "name": "Delay Time", "type": "slider", "min": 1, "max": 1000},
+            {"property": "wetLevel", default: 0.25, "name": "Wet Level", "type": "slider", "min": 0, "max": 1},
+            {"property": "dryLevel", default: 1, "name": "Dry Level", "type": "slider", "min": 0, "max": 1},
+            {"property": "cutoff", default: 2000, "name": "Cutoff", "type": "slider", "min": 20, "max": 22050}
         ]
     };
     p.fx["Chorus"] = {"audioClass": p.tuna.Chorus,
-        "makeData": function (init) {
-            return {
-                name: "Chorus",
-                rate: 1.5,         //0.01 to 8+
-                feedback: 0.2,     //0 to 1+
-                delay: 0.0045,     //0 to 1
-                depth: 0.7,     //0 to 1
-                bypass: 0          //the value 1 starts the effect as bypassed, 0 or 1
-            };
-        },            
         "controls": [
-            {"property": "rate", "name": "Rate", "type": "slider", "min": 0.01, "max": 8},
-            {"property": "feedback", "name": "Feedback", "type": "slider", "min": 0, "max": 1},
-            {"property": "depth", "name": "Depth", "type": "slider", "min": 0, "max": 1},
-            {"property": "delay", "name": "Delay", "type": "slider", "min": 0, "max": 1}
+            {"property": "rate", default: 1.5, "name": "Rate", "type": "slider", "min": 0.01, "max": 8, axis:"x"},
+            {"property": "feedback", default: 0.2, "name": "Feedback", "type": "slider", "min": 0, "max": 1},
+            {"property": "depth", default: 0.7, "name": "Depth", "type": "slider", "min": 0, "max": 1, axis:"y"},
+            {"property": "delay", default: 0.0045, "name": "Delay", "type": "slider", "min": 0, "max": 1}
         ]
     };
     
     p.fx["Phaser"] = {"audioClass": p.tuna.Phaser,
-        "makeData": function (init) {
-            return {
-                name: "Phaser",
-                rate: 1.2,                     //0.01 to 8 is a decent range, but higher values are possible
-                depth: 0.3,                    //0 to 1
-                feedback: 0.2,                 //0 to 1+
-                stereoPhase: 30,               //0 to 180
-                baseModulationFrequency: 700,  //500 to 1500
-                bypass: 0
-            };
-        },
+
         "controls": [
-            {"property": "rate", "name": "Rate", "type": "slider", "min": 0.01, "max": 12},
-            {"property": "depth", "name": "Depth", "type": "slider", "min": 0, "max": 1},
-            {"property": "feedback", "name": "Feedback", "type": "slider", "min": 0, "max": 1},
-            {"property": "stereoPhase", "name": "Stereo Phase", "type": "slider", "min": 0, "max": 180},
-            {"property": "baseModulationFrequeny", "name": "Base Modulation Freq", "type": "slider", "min": 500, "max": 1500}
+            {"property": "rate", default: 1.2, "name": "Rate", "type": "slider", "min": 0.01, "max": 12, axis:"x"},
+            {"property": "depth", default: 0.3, "name": "Depth", "type": "slider", "min": 0, "max": 1},
+            {"property": "feedback", default: 0.2, "name": "Feedback", "type": "slider", "min": 0, "max": 1, axis:"y"},
+            {"property": "stereoPhase", default: 30, "name": "Stereo Phase", "type": "slider", "min": 0, "max": 180},
+            {"property": "baseModulationFrequeny", default: 700, "name": "Base Modulation Freq", "type": "slider", "min": 500, "max": 1500}
         ]
     };        
     p.fx["Overdrive"] = {"audioClass": p.tuna.Overdrive,
-        "makeData": function (init) {
-            return {
-                name: "Overdrive",
-                outputGain: 0.2,         //0 to 1+
-                drive: 0.7,              //0 to 1
-                curveAmount: 0.8,          //0 to 1
-                algorithmIndex: 0,       //0 to 5, selects one of our drive algorithms
-                bypass: 0
-            };
-        },
         "controls" : [
-            {"property": "outputGain", "name": "Output Gain", "type": "slider", "min": 0, "max": 1.5},
-            {"property": "drive", "name": "Drive", "type": "slider", "min": 0, "max": 1},
-            {"property": "curveAmount", "name": "Curve Amount", "type": "slider", "min": 0, "max": 1},
-            {"property": "algorithmIndex", "name": "Type", "type": "options", "options": [0,1,2,3,4,5]}
+            {"property": "outputGain", default: 0.15, "name": "Output Gain", "type": "slider", "min": 0, "max": 1.5},
+            {"property": "drive", default: 0.7, "name": "Drive", "type": "slider", "min": 0, "max": 1, axis:"x"},
+            {"property": "curveAmount", default: 0.8, "name": "Curve Amount", "type": "slider", "min": 0, "max": 1, axis:"y"},
+            {"property": "algorithmIndex", default: 0, "name": "Type", "type": "options", "options": [0,1,2,3,4,5]}
         ]
     };
     p.fx["Compressor"] = {"audioClass": p.tuna.Compressor,
-        "makeData": function (init) {
-            return {
-                name: "Compressor",
-                threshold: -1,    //-100 to 0
-                makeupGain: 1,     //0 and up (in decibels)
-                attack: 1,         //0 to 1000
-                release: 0,        //0 to 3000
-                ratio: 4,          //1 to 20
-                knee: 5,           //0 to 40
-                automakeup: true,  //true/false
-                bypass: 0
-            };
-        },
         "controls" : [
-            {"property": "threshold", "name": "Threshold", "type": "slider", "min": -100, "max": 0},
-            {"property": "makeupGain", "name": "Makeup Gain", "type": "slider", "min": 0, "max": 10},
-            {"property": "attack", "name": "Attack", "type": "slider", "min": 0, "max": 1000},
-            {"property": "release", "name": "Release", "type": "slider", "min": 0, "max": 3000},
-            {"property": "ratio", "name": "Ratio", "type": "slider", "min": 0, "max": 20},
-            {"property": "knee", "name": "Knee", "type": "slider", "min": 0, "max": 40},
-            {"property": "automakeup", "name": "Auto Makeup", "type": "options", "options": [false, true]}
+            {"property": "threshold", default: -1, "name": "Threshold", "type": "slider", "min": -100, "max": 0},
+            {"property": "makeupGain", default: 1, "name": "Makeup Gain", "type": "slider", "min": 0, "max": 10},
+            {"property": "attack", default: 1, "name": "Attack", "type": "slider", "min": 0, "max": 1000},
+            {"property": "release", default: 0, "name": "Release", "type": "slider", "min": 0, "max": 3000},
+            {"property": "ratio", default: 4, "name": "Ratio", "type": "slider", "min": 0, "max": 20},
+            {"property": "knee", default: 5, "name": "Knee", "type": "slider", "min": 0, "max": 40},
+            {"property": "automakeup", default: true, "name": "Auto Makeup", "type": "options", "options": [false, true]}
         ]
     };
     p.fx["Reverb"] = {"audioClass": p.tuna.Convolver,
-        "makeData": function (init) {
-            return {
-                name: "Reverb",
-                highCut: 22050,                         //20 to 22050
-                lowCut: 20,                             //20 to 22050
-                dryLevel: 1,                            //0 to 1+
-                wetLevel: 1,                            //0 to 1+
-                level: 1,                               //0 to 1+, adjusts total output of both wet and dry
-                impulse: "/omg-music/impulses/ir_rev_short.wav"
-            };
-        },
         "controls": [
-            {"property": "highCut", "name": "High Cut", "type": "slider", "min": 20, "max": 22050},
-            {"property": "lowCut", "name": "Low Cut", "type": "slider", "min": 20, "max": 22050},
-            {"property": "dryLevel", "name": "Dry Level", "type": "slider", "min": 0, "max": 1},
-            {"property": "wetLevel", "name": "Wet Level", "type": "slider", "min": 0, "max": 1},
-            {"property": "level", "name": "Level", "type": "slider", "min": 0, "max": 1},
+            {"property": "highCut", default: 22050, "name": "High Cut", "type": "slider", "min": 20, "max": 22050, axis:"revy"},
+            {"property": "lowCut", default: 20, "name": "Low Cut", "type": "slider", "min": 20, "max": 22050},
+            {"property": "dryLevel", default: 1, "name": "Dry Level", "type": "slider", "min": 0, "max": 1},
+            {"property": "wetLevel", default: 1, "name": "Wet Level", "type": "slider", "min": 0, "max": 1, axis:"x"},
+            {"property": "level", default: 1, "name": "Level", "type": "slider", "min": 0, "max": 1},
+            {"property": "impulse", default: "/omg-music/impulses/ir_rev_short.wav", "name": "Impulse", "type": "hidden"},
         ]
     };
     p.fx["Filter"] = {"audioClass": p.tuna.Filter,
-        "makeData": function (init) {
-            return {
-                name: "Filter",
-                frequency: 440, //20 to 22050
-                Q: 1, //0.001 to 100
-                gain: 0, //-40 to 40 (in decibels)
-                filterType: "lowpass", //lowpass, highpass, bandpass, lowshelf, highshelf, peaking, notch, allpass
-                bypass: 0
-            };
-        },
         "controls": [
-            {"property": "frequency", "name": "Frequency", "type": "slider", "min": 20, "max": 22050},
-            {"property": "Q", "name": "Q", "type": "slider", "min": 0.001, "max": 100},
-            {"property": "gain", "name": "Gain", "type": "slider", "min": -40, "max": 40},
-            {"property": "filterType", "name": "Filter Type", "type": "options", 
+            {"property": "frequency", default: 440, "name": "Frequency", "type": "slider", "min": 20, "max": 22050, axis:"x"},
+            {"property": "Q", default: 1, "name": "Q", "type": "slider", "min": 0.001, "max": 100},
+            {"property": "gain", default: 0, "name": "Gain", "type": "slider", "min": -40, "max": 40, axis: "y"},
+            {"property": "filterType", default: "lowpass", "name": "Filter Type", "type": "options", 
                 "options": ["lowpass", "highpass", "bandpass", "lowshelf", "highshelf", "peaking", "notch", "allpass"]},
         ]
     };
     p.fx["Cabinet"] = {"audioClass": p.tuna.Cabinet,
-        "makeData": function (init) {
-            return {
-                name: "Cabinet",
-                makeupGain: 1,                                 //0 to 20
-                impulsePath: "/omg-music/impulses/impulse_guitar.wav",    //path to your speaker impulse
-                bypass: 0
-            };
-        },
         "controls": [
-            {"property": "makeupGain", "name": "Makeup Gain", "type": "slider", "min": 0, "max": 20}
+            {"property": "makeupGain", default: 1, "name": "Makeup Gain", "type": "slider", "min": 0, "max": 20},
+            {"property": "impulse", default: "/omg-music/impulses/impulse_guitar.wav", "name": "Impulse", "type": "hidden"}
         ]
     };
     p.fx["Tremolo"] = {"audioClass": p.tuna.Tremolo,
-        "makeData": function (init) {
-            return {
-                name: "Tremolo",
-                intensity: 0.3,    //0 to 1
-                rate: 4,         //0.001 to 8
-                stereoPhase: 0,    //0 to 180
-                bypass: 0
-            };
-        },
         "controls": [
-            {"property": "intensity", "name": "Intensity", "type": "slider", "min": 0, "max": 1},
-            {"property": "rate", "name": "Rate", "type": "slider", "min": 0.001, "max": 8},
-            {"property": "stereoPhase", "name": "Stereo Phase", "type": "slider", "min": 0, "max": 180}
+            {"property": "intensity", default: 0.3, "name": "Intensity", "type": "slider", "min": 0, "max": 1, axis:"revy"},
+            {"property": "rate", default: 4, "name": "Rate", "type": "slider", "min": 0.001, "max": 8, axis:"x"},
+            {"property": "stereoPhase", default: 0, "name": "Stereo Phase", "type": "slider", "min": 0, "max": 180}
         ]
     };
     p.fx["Wah Wah"] = {"audioClass": p.tuna.WahWah,
-        "makeData": function (init) {
-            return {
-                name: "Wah Wah",
-                automode: true,                //true/false
-                baseFrequency: 0.5,            //0 to 1
-                excursionOctaves: 2,           //1 to 6
-                sweep: 0.2,                    //0 to 1
-                resonance: 10,                 //1 to 100
-                sensitivity: 0.5,              //-1 to 1
-                bypass: 0
-            };
-        },
         "controls": [
-            {"property": "automode", "name": "Auto Mode", "type": "options", "options": [false, true]},
-            {"property": "baseFrequency", "name": "Base Frequency", "type": "slider", "min": 0, "max": 1},
-            {"property": "excursionOctaves", "name": "Excursion Octaves", "type": "slider", "min": 1, "max": 6},
-            {"property": "sweep", "name": "Sweep", "type": "slider", "min": 0, "max": 1},
-            {"property": "resonance", "name": "Resonance", "type": "slider", "min": 1, "max": 10},
-            {"property": "sensitivity", "name": "Sensitivity", "type": "slider", "min": -1, "max": 1}
+            {"property": "automode", default: true, "name": "Auto Mode", "type": "options", "options": [false, true]},
+            {"property": "baseFrequency", default: 0.5, "name": "Base Frequency", "type": "slider", "min": 0, "max": 1, axis:"x"},
+            {"property": "excursionOctaves", default: 2, "name": "Excursion Octaves", "type": "slider", "min": 1, "max": 6},
+            {"property": "sweep", default: 0.2, "name": "Sweep", "type": "slider", "min": 0, "max": 1, axis:"y"},
+            {"property": "resonance", default: 10, "name": "Resonance", "type": "slider", "min": 1, "max": 10},
+            {"property": "sensitivity", default: 0.5, "name": "Sensitivity", "type": "slider", "min": -1, "max": 1}
         ]
     };
     p.fx["Bitcrusher"] = {"audioClass": p.tuna.Bitcrusher,
-        "makeData": function (init) {
-            return {
-                name: "Bitcrusher",
-                bits: 4,          //1 to 16
-                normfreq: 0.1,    //0 to 1
-                bufferSize: 4096  //256 to 16384
-            };
-        },
         "controls": [
-            {"property": "bits", "name": "Bits", "type": "options", "options": [1,2,4,8,16]},
-            {"property": "normfreq", "name": "Normal Frequency", "type": "slider", "min": 0, "max": 1, "transform": "square"},
-            {"property": "bufferSize", "name": "Buffer Size", "type": "options", "options": [256,512,1024,2048,4096,8192,16384]}
+            {"property": "bits", default: 4, "name": "Bits", "type": "options", "options": [1,2,4,8,16]},
+            {"property": "normfreq", default: 0.1, "name": "Normal Frequency", "type": "slider", "min": 0, "max": 1, "transform": "square", axis:"x"},
+            {"property": "bufferSize", default: 4096, "name": "Buffer Size", "type": "options", "options": [256,512,1024,2048,4096,8192,16384]}
         ]
     };
     p.fx["Moog"] = {"audioClass": p.tuna.MoogFilter,
-        "makeData": function (init) {
-            return {
-                name: "Moog",
-                cutoff: 0.065,    //0 to 1
-                resonance: 3.5,   //0 to 4
-                bufferSize: 4096  //256 to 16384
-            };
-        },
         "controls": [
-            {"property": "cutoff", "name": "Cutoff", "type": "slider", "min": 0, "max": 1},
-            {"property": "resonance", "name": "Resonance", "type": "slider", "min": 0, "max": 4},
-            {"property": "bufferSize", "name": "Buffer Size", "type": "options", "options": [256,512,1024,2048,4096,8192,16384]}
+            {"property": "cutoff", default: 0.065, "name": "Cutoff", "type": "slider", "min": 0, "max": 1},
+            {"property": "resonance", default: 3.5, "name": "Resonance", "type": "slider", "min": 0, "max": 4},
+            {"property": "bufferSize", default: 4096, "name": "Buffer Size", "type": "options", "options": [256,512,1024,2048,4096,8192,16384]}
         ]
     };
     p.fx["Ping Pong"] = {"audioClass": p.tuna.PingPongDelay,
-        "makeData": function (init) {
-            return {
-                name: "Ping Pong",
-                wetLevel: 0.5, //0 to 1
-                feedback: 0.3, //0 to 1
-                delayTimeLeft: 150, //1 to 10000 (milliseconds)
-                delayTimeRight: 200 //1 to 10000 (milliseconds)
-            };
+        "controls": [
+            {"property": "wetLevel", default: 0.5, "name": "Wet Level", "type": "slider", "min": 0, "max": 1},
+            {"property": "feedback", default: 0.3, "name": "Feedback", "type": "slider", "min": 0, "max": 1},
+            {"property": "delayTimeLeft", default: 150, "name": "Delay Time Left", "type": "slider", "min": 1, "max": 10000, axis:"x"},
+            {"property": "delayTimeRight", default: 200, "name": "Delay Time Right", "type": "slider", "min": 1, "max": 10000, axis:"revy"}
+        ]
+    };
+    p.fx["Rad Pad"] = {"make" : function (data) {
+            return p.makeRadPad(data);
         },
         "controls": [
-            {"property": "wetLevel", "name": "Wet Level", "type": "slider", "min": 0, "max": 1},
-            {"property": "feedback", "name": "Feedback", "type": "slider", "min": 0, "max": 1},
-            {"property": "delayTimeLeft", "name": "Delay Time Left", "type": "slider", "min": 1, "max": 10000},
-            {"property": "delayTimeRight", "name": "Delay Time Right", "type": "slider", "min": 1, "max": 10000}
+            {"property": "fx1", default: "None", "name": "FX1", "type": "options", 
+                "options": ["None", "DelayW", "Reverb", "Ping Pong"]},
+            {"property": "fx2", default: "None", "name": "FX2", "type": "options", 
+                "options": ["None", "LPF", "HPF", "BPF"]},
+            {"property": "fx3", default: "None", "name": "FX3", "type": "options", 
+                "options": ["None", "Tremolo", "Phaser", "Chorus"]},
+            {"property": "fx4", default: "None", "name": "FX4", "type": "options", 
+                "options": ["None", "Bitcrusher", "Overdrive"]},
+            {"property": "xy", default: 0.3, "name": "", "type": "xy", "min": 0, "max": 1}
         ]
     };
 };
 
 OMusicPlayer.prototype.makeFXNodeForPart = function (fx, part) {
     var fxNode, fxData;
-    var makeData = true;
     var fxName = fx;
     if (typeof fx === "object") {
-        makeData = false;
         fxName = fx.name;
         fxData = fx;
     }
-    var fxInfo = this.fx[fxName];
-    if (fxInfo) {
-        if (makeData) {
-            fxData = fxInfo.makeData();
-        }
-        if (fxInfo.audioClass) {
-            fxNode = new fxInfo.audioClass(fxData);
-        }
-        else {
-            fxNode = fxInfo.make(fxData);
-        }
-    }
+    
+    var fxNode = this.makeFXNode(fxName, fxData)
 
     if (fxNode) {
-        fxNode.data = fxData;
-
         var connectingNode = part.fx[part.fx.length - 1] || part.preFXGain;
         connectingNode.disconnect(part.postFXGain);
         connectingNode.connect(fxNode);
@@ -1781,13 +1624,37 @@ OMusicPlayer.prototype.makeFXNodeForPart = function (fx, part) {
     return fxNode;
 };
 
+OMusicPlayer.prototype.makeFXNode = function (fxName, fxData) {
+    var fxNode;
+    var fxInfo = this.fx[fxName];
+    if (fxInfo) {
+        if (!fxData) {
+            fxData = {"name": fxName};
+            fxInfo.controls.forEach(control => {
+                fxData[control.property] = control.default;
+            });
+        }
+        if (fxInfo.audioClass) {
+            fxNode = new fxInfo.audioClass(fxData);
+        }
+        else {
+            fxNode = fxInfo.make(fxData);
+        }
+        if (fxNode)
+            fxNode.data = fxData;
+    }
+    return fxNode;
+};
+
 OMusicPlayer.prototype.getSoundSetForSoundFont = function (name, url) {
   return {"name": name,  "prefix": url, "url": url,
             "type": "SOUNDSET", "soundFont": true, "lowNote": 21, "postfix": "", "chromatic": true, "defaultSurface": "PRESET_VERTICAL", "data": [ { "url": "A0.mp3", "name": "A0" }, { "url": "Bb0.mp3", "name": "Bb0" }, { "url": "B0.mp3", "name": "B0" }, { "url": "C1.mp3", "name": "C1" }, { "url": "Db1.mp3", "name": "Db1" }, { "url": "D1.mp3", "name": "D1" }, { "url": "Eb1.mp3", "name": "Eb1" }, { "url": "E1.mp3", "name": "E1" }, { "url": "F1.mp3", "name": "F1" }, { "url": "Gb1.mp3", "name": "Gb1" }, { "url": "G1.mp3", "name": "G1" }, { "url": "Ab1.mp3", "name": "Ab1" }, { "url": "A1.mp3", "name": "A1" }, { "url": "Bb1.mp3", "name": "Bb1" }, { "url": "B1.mp3", "name": "B1" }, { "url": "C2.mp3", "name": "C2" }, { "url": "Db2.mp3", "name": "Db2" }, { "url": "D2.mp3", "name": "D2" }, { "url": "Eb2.mp3", "name": "Eb2" }, { "url": "E2.mp3", "name": "E2" }, { "url": "F2.mp3", "name": "F2" }, { "url": "Gb2.mp3", "name": "Gb2" }, { "url": "G2.mp3", "name": "G2" }, { "url": "Ab2.mp3", "name": "Ab2" }, { "url": "A2.mp3", "name": "A2" }, { "url": "Bb2.mp3", "name": "Bb2" }, { "url": "B2.mp3", "name": "B2" }, { "url": "C3.mp3", "name": "C3" }, { "url": "Db3.mp3", "name": "Db3" }, { "url": "D3.mp3", "name": "D3" }, { "url": "Eb3.mp3", "name": "Eb3" }, { "url": "E3.mp3", "name": "E3" }, { "url": "F3.mp3", "name": "F3" }, { "url": "Gb3.mp3", "name": "Gb3" }, { "url": "G3.mp3", "name": "G3" }, { "url": "Ab3.mp3", "name": "Ab3" }, { "url": "A3.mp3", "name": "A3" }, { "url": "Bb3.mp3", "name": "Bb3" }, { "url": "B3.mp3", "name": "B3" }, { "url": "C4.mp3", "name": "C4" }, { "url": "Db4.mp3", "name": "Db4" }, { "url": "D4.mp3", "name": "D4" }, { "url": "Eb4.mp3", "name": "Eb4" }, { "url": "E4.mp3", "name": "E4" }, { "url": "F4.mp3", "name": "F4" }, { "url": "Gb4.mp3", "name": "Gb4" }, { "url": "G4.mp3", "name": "G4" }, { "url": "Ab4.mp3", "name": "Ab4" }, { "url": "A4.mp3", "name": "A4" }, { "url": "Bb4.mp3", "name": "Bb4" }, { "url": "B4.mp3", "name": "B4" }, { "url": "C5.mp3", "name": "C5" }, { "url": "Db5.mp3", "name": "Db5" }, { "url": "D5.mp3", "name": "D5" }, { "url": "Eb5.mp3", "name": "Eb5" }, { "url": "E5.mp3", "name": "E5" }, { "url": "F5.mp3", "name": "F5" }, { "url": "Gb5.mp3", "name": "Gb5" }, { "url": "G5.mp3", "name": "G5" }, { "url": "Ab5.mp3", "name": "Ab5" }, { "url": "A5.mp3", "name": "A5" }, { "url": "Bb5.mp3", "name": "Bb5" }, { "url": "B5.mp3", "name": "B5" }, { "url": "C6.mp3", "name": "C6" }, { "url": "Db6.mp3", "name": "Db6" }, { "url": "D6.mp3", "name": "D6" }, { "url": "Eb6.mp3", "name": "Eb6" }, { "url": "E6.mp3", "name": "E6" }, { "url": "F6.mp3", "name": "F6" }, { "url": "Gb6.mp3", "name": "Gb6" }, { "url": "G6.mp3", "name": "G6" }, { "url": "Ab6.mp3", "name": "Ab6" }, { "url": "A6.mp3", "name": "A6" }, { "url": "Bb6.mp3", "name": "Bb6" }, { "url": "B6.mp3", "name": "B6" }, { "url": "C7.mp3", "name": "C7" }, { "url": "Db7.mp3", "name": "Db7" }, { "url": "D7.mp3", "name": "D7" }, { "url": "Eb7.mp3", "name": "Eb7" }, { "url": "E7.mp3", "name": "E7" }, { "url": "F7.mp3", "name": "F7" }, { "url": "Gb7.mp3", "name": "Gb7" }, { "url": "G7.mp3", "name": "G7" }, { "url": "Ab7.mp3", "name": "Ab7" }, { "url": "A7.mp3", "name": "A7" }, { "url": "Bb7.mp3", "name": "Bb7" }, { "url": "B7.mp3", "name": "B7" }, { "url": "C8.mp3", "name": "C8" } ] }  
 };
 
-OMusicPlayer.prototype.makeEQ = function (part) {
-    
+
+OMusicPlayer.prototype.makeEQ = function (data) {
+    var p = this;
+    var input = p.context.createGain();
 
     // https://codepen.io/andremichelle/pen/RNwamZ/
     // How to hack an equalizer with two biquad filters
@@ -1806,58 +1673,150 @@ OMusicPlayer.prototype.makeEQ = function (part) {
     var gainDb = -40.0;
     var bandSplit = [360,3600];
 
-    part.eqH = context.createBiquadFilter();
-    part.eqH.type = "lowshelf";
-    part.eqH.frequency.value = bandSplit[0];
-    part.eqH.gain.value = gainDb;
+    input.eqH = context.createBiquadFilter();
+    input.eqH.type = "lowshelf";
+    input.eqH.frequency.value = bandSplit[0];
+    input.eqH.gain.value = gainDb;
 
-    part.eqHInvert = context.createGain();
-    part.eqHInvert.gain.value = -1.0;
+    input.eqHInvert = context.createGain();
+    input.eqHInvert.gain.value = -1.0;
 
-    part.eqM = context.createGain();
+    input.eqM = context.createGain();
 
-    part.eqL = context.createBiquadFilter();
-    part.eqL.type = "highshelf";
-    part.eqL.frequency.value = bandSplit[1];
-    part.eqL.gain.value = gainDb;
+    input.eqL = context.createBiquadFilter();
+    input.eqL.type = "highshelf";
+    input.eqL.frequency.value = bandSplit[1];
+    input.eqL.gain.value = gainDb;
 
-    part.eqLInvert = context.createGain();
-    part.eqLInvert.gain.value = -1.0;
+    input.eqLInvert = context.createGain();
+    input.eqLInvert.gain.value = -1.0;
 
-    part.connect(part.eqL);
-    part.connect(part.eqM);
-    part.connect(part.eqH);
+    input.connect(input.eqL);
+    input.connect(input.eqM);
+    input.connect(input.eqH);
 
-    part.eqH.connect(part.eqHInvert);
-    part.eqL.connect(part.eqLInvert);
+    input.eqH.connect(input.eqHInvert);
+    input.eqL.connect(input.eqLInvert);
 
-    part.eqHInvert.connect(part.eqM);
-    part.eqLInvert.connect(part.eqM);
+    input.eqHInvert.connect(input.eqM);
+    input.eqLInvert.connect(input.eqM);
 
-    part.eqLGain = context.createGain();
-    part.eqMGain = context.createGain();
-    part.eqHGain = context.createGain();
+    input.eqLGain = context.createGain();
+    input.eqMGain = context.createGain();
+    input.eqHGain = context.createGain();
 
-    if (typeof part.highGain !== "number")
-        part.highGain = 1;
-    if (typeof part.midGain !== "number")
-        part.midGain = 1;
-    if (typeof part.lowGain !== "number")
-        part.lowGain = 1;
-    part.eqHGain.gain.value = part.highGain;
-    part.eqMGain.gain.value = part.midGain;
-    part.eqLGain.gain.value = part.lowGain;
+    if (typeof input.highGain !== "number")
+        input.highGain = 1;
+    if (typeof input.midGain !== "number")
+        input.midGain = 1;
+    if (typeof input.lowGain !== "number")
+        input.lowGain = 1;
+    input.eqHGain.gain.value = input.highGain;
+    input.eqMGain.gain.value = input.midGain;
+    input.eqLGain.gain.value = input.lowGain;
 
-    part.eqL.connect(part.eqLGain);
-    part.eqM.connect(part.eqMGain);
-    part.eqH.connect(part.eqHGain);
+    input.eqL.connect(input.eqLGain);
+    input.eqM.connect(input.eqMGain);
+    input.eqH.connect(input.eqHGain);
 
-    part.output = context.createGain();
-    part.eqLGain.connect(part.output);
-    part.eqMGain.connect(part.output);
-    part.eqHGain.connect(part.output);
+    input.output = context.createGain();
+    input.eqLGain.connect(input.output);
+    input.eqMGain.connect(input.output);
+    input.eqHGain.connect(input.output);
+    
+    input.connect = function (to) {
+        input.output.connect(to);
+    };
+    input.disconnect = function (from) {
+        input.output.disconnect(from);
+    };
+    Object.defineProperty(input, 'highGain', {
+        set: function(value) {
+            data.highGain = value;
+            if (!data.bypass) {
+                input.eqHGain.gain.value = value;
+            }
+        }
+    });
+    Object.defineProperty(input, 'midGain', {
+        set: function(value) {
+            data.midGain = value;
+            if (!data.bypass)
+                input.eqMGain.gain.value = value;
+        }
+    });
+    Object.defineProperty(input, 'lowGain', {
+        set: function(value) {
+            data.lowGain = value;
+            if (!data.bypass)
+                input.eqLGain.gain.value = value;
+        }
+    });
+    Object.defineProperty(input, 'bypass', {
+        get: function() {
+            return data.bypass;
+        },
+        set: function(value) {
+            input.eqHGain.gain.value = value ? 1 : data.highGain;
+            input.eqMGain.gain.value = value ? 1 : data.midGain;
+            input.eqLGain.gain.value = value ? 1 : data.lowGain;
+            data.bypass = value;
+        }
+    });
+    input.highGain = data.highGain;
+    input.midGain = data.midGain;
+    input.lowGain = data.lowGain;
+    input.bypass = data.bypass;
+    return input;
 };
 
+OMusicPlayer.prototype.makeDelay = function (data) {
+    var p = this;
+    var input = p.context.createGain();
+    var output = p.context.createGain();
+    var delay  = p.context.createDelay();
+    var feedback = p.context.createGain();
+    
+    feedback.gain.value = data.feedback;
+    delay.delayTime.value = data.time;
+    
+    input.connect(delay);
+    input.connect(output);
+    delay.connect(feedback);
+    feedback.connect(delay);
+    feedback.connect(output);
+    
+    input.connect = function (to) {
+        output.connect(to);
+    };
+    input.disconnect = function (to) {
+        output.disconnect(to);
+    };
+    
+    Object.defineProperty(input, 'time', {
+        set: function(value) {
+            data.time = value;
+            //delay.delayTime.setValueAtTime(value, p.context.currentTime);
+            delay.delayTime.exponentialRampToValueAtTime(value, p.context.currentTime + p.latency/1000);
+        }
+    });
+    Object.defineProperty(input, 'feedback', {
+        set: function(value) {
+            data.feedback = value;
+            feedback.gain.exponentialRampToValueAtTime(data.bypass ? 0 : value, p.context.currentTime + p.latency/1000);
+        }
+    });
+    Object.defineProperty(input, 'bypass', {
+        get: function() {
+            return data.bypass;
+        },
+        set: function(value) {
+            data.bypass = value;
+            feedback.gain.setValueAtTime(value ? 0 : data.feedback, p.context.currentTime);
+        }
+    });
+    return input;
+};
 
 OMusicPlayer.prototype.mutePart = function (partName, mute) {
     var part = this.getPart(partName);
@@ -1893,4 +1852,169 @@ OMusicPlayer.prototype.getPart = function (partName) {
             return this.section.parts[i];
         }
     }
+};
+
+
+OMusicPlayer.prototype.makeRadPad = function (data) {
+    var p = this;
+    var input = p.context.createGain();
+    var output = p.context.createGain();
+    input.connect(output);
+
+    var fxs = [undefined, undefined, undefined, undefined];
+    var isTouching = false;
+
+    input.connectWA = input.connect;
+    input.disconnectWA = input.disconnect;
+    input.connect = function (to) {
+        output.connect(to);
+    };
+    input.disconnect = function (to) {
+        output.disconnect(to);
+    };
+
+    var getNextNode = function (fxI) {
+        for (var i = fxI + 1; i < fxs.length; i++) {
+            if (fxs[i]) {
+                return fxs[i];
+            }
+        }
+        return output;
+    };
+    var getPrevNode = function (fxI) {
+        for (var i = fxI - 1; i >= 0; i--) {
+            if (fxs[i]) {
+                return fxs[i];
+            }
+        }
+        return input;
+    };
+    var setFX = function (value, i) {
+        if (data["fx" + (1 + i)] === value) {
+            return;
+        }
+        data["fx" + (1 + i)] = value;
+        
+        var prevNode = getPrevNode(i);
+        var nextNode = getNextNode(i);
+        
+        if (fxs[i]) {
+            if (prevNode === input) {
+                try {input.disconnectWA(fxs[i]);}
+                catch (e) {input.disconnectWA();}
+            }
+            else {
+                try {prevNode.disconnect(fxs[i]);} 
+                catch (e) {prevNode.disconnect();}
+            }
+            
+            try {fxs[i].disconnect(nextNode);} 
+            catch (e) {fxs[i].disconnect();}
+        }
+        else {
+            if (prevNode === input) {
+                try {input.disconnectWA(nextNode);}
+                catch (e) {input.disconnectWA(nextNode);}
+            }
+            else {
+                try {prevNode.disconnect(nextNode);} 
+                catch (e) {prevNode.disconnect();}
+            }
+        }
+        fxs[i] = undefined;
+        
+        if (value !== "None") {
+            fxs[i] = makeFX(value);
+            if (prevNode === input) {
+                input.connectWA(fxs[i]);
+            }
+            else {
+                prevNode.connect(fxs[i]);
+            }
+            fxs[i].connect(nextNode);
+        }
+        else {
+            if (prevNode === input) {
+                input.connectWA(nextNode);
+            }
+            else {
+                prevNode.connect(nextNode);
+            }
+        }
+    };
+    
+    var makeFX = function (value) {
+        if (p.fx[value]) {
+            var node = p.makeFXNode(value);
+            node.padAxes = {};
+            p.fx[value].controls.forEach(function (control) {
+                if (control.axis) {
+                    node.padAxes[control.axis] = control;
+                }
+            });
+        }
+        node.bypass = true;
+        return node;
+    };
+    
+    Object.defineProperty(input, 'fx1', {
+        set: function (value) {
+            setFX(value, 0);
+        }
+    });
+    Object.defineProperty(input, 'fx2', {
+        set: function (value) {
+            setFX(value, 1);
+        }
+    });
+    Object.defineProperty(input, 'fx3', {
+        set: function (value) {
+            setFX(value, 2);
+        }
+    });
+    Object.defineProperty(input, 'fx4', {
+        set: function (value) {
+            setFX(value, 3);
+        }
+    });
+
+    Object.defineProperty(input, 'xy', {
+        set: function (xy) {
+            fxs.forEach(function (fx) {
+                if (!fx) return;
+                if (xy[0] === -1) {
+                    fx.bypass = true;
+                    return;
+                }
+                if (fx.bypass) {
+                    fx.bypass = false;
+                }
+                if (fx && fx.padAxes.x) {
+                    fx[fx.padAxes.x.property] = xy[0] * fx.padAxes.x.max;
+                }
+                if (fx && fx.padAxes.y) {
+                    fx[fx.padAxes.y.property] = xy[1] * fx.padAxes.y.max;
+                }                
+                if (fx && fx.padAxes.revx) {
+                    fx[fx.padAxes.revx.property] = (1 - xy[0]) * fx.padAxes.revx.max;
+                }
+                if (fx && fx.padAxes.revy) {
+                    fx[fx.padAxes.revy.property] = (1 - xy[1]) * fx.padAxes.revy.max;
+                }                
+            });
+        }
+    });
+    
+    Object.defineProperty(input, 'bypass', {
+        get: function() {
+            return data.bypass;
+        },
+        set: function(value) {
+            data.bypass = value;
+        }
+    });
+    
+    //setFX("DelayW", 0);
+    
+    return input;
 };
