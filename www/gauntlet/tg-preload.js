@@ -234,8 +234,10 @@ tg.getSong(function (song) {
     catch (e) {console.log(e)}
 
     var scriptTag;
-    ["/js/omgservice.js","/omg-music/tuna-min.js","/omg-music/omusic_player.js",
-    "tg.js",
+    ["/js/omgservice.js","/omg-music/tuna-min.js",
+        "/omg-music/omusic_player.js",
+        "/omg-music/fx.js",
+        "tg.js",
     ].forEach(js => {
         scriptTag = document.createElement("script");
         scriptTag.src = js;

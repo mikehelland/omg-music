@@ -79,6 +79,7 @@ return `<!DOCTYPE html>
    <script src="/omg-music/omgclasses.js"></script>
    <script src="/omg-music/tuna-min.js"></script>
    <script src="/omg-music/omusic_player.js"></script>
+   <script src="/omg-music/fx.js"></script>
    <script src="/js/omgservice.js"></script>
    <script src="/js/embedded_viewer.js"></script>
 

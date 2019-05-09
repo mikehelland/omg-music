@@ -149,11 +149,11 @@ OMGMonkey.prototype.getTempoFunctions = function () {
 
 OMGMonkey.prototype.changeTempo = function (bpmChange) {
     this.song.data.beatParams.bpm = Math.min(Math.max(this.song.data.beatParams.bpm + bpmChange, 40), 200);
-    this.song.tempoChanged();
+    this.song.beatsChanged();
 };
 OMGMonkey.prototype.changeShuffle = function (change) {
     this.song.data.beatParams.shuffle = Math.min(Math.max(this.song.data.beatParams.shuffle + change / 100, 0), 0.50);
-    this.song.tempoChanged();
+    this.song.beatsChanged();
 };
 
 OMGMonkey.prototype.getVolumePanFunctions = function () {
