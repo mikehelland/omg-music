@@ -1632,6 +1632,12 @@ tg.onlogin = function (user) {
     if (tg.user && tg.user.username) {
         tg.user.username = tg.user.username.trim();
     }
+    if (tg.user && tg.user.btc_address) {
+        tg.user.btc_address = tg.user.btc_address.trim();
+        if (!tg.song.data.btc_address) {
+            tg.song.data.btc_address = tg.user.btc_address;
+        }
+    }
     document.getElementById("tool-bar-user-button").innerHTML = user ? user.username : "Login";
     tg.userFragment.loginArea.style.display = user ? "none" : "block";
     document.getElementById("user-info").style.display = user ? "block" : "none";
@@ -1647,10 +1653,12 @@ tg.songFragment = {
     div: document.getElementById("song-fragment"),
     nameInput: document.getElementById("song-info-name"),
     tagsInput: document.getElementById("song-info-tags"),
+    btcInput: document.getElementById("song-btc-address"),
     randomizeButton: document.getElementById("create-random-song-button"),
     onshow: function () {
         tg.songFragment.nameInput.value = tg.song.data.name || "";
-        tg.songFragment.tagsInput.value = tg.song.data.tags || "";    
+        tg.songFragment.tagsInput.value = tg.song.data.tags || "";
+        tg.songFragment.btcInput.value = tg.song.data.btc_address || "";
     }
 };
 
@@ -1660,42 +1668,49 @@ tg.songButton.onclick = function () {
 };
 
 tg.songFragment.setup = function () {
-    tg.songFragment.nameInput.onkeypress = function (e) {
+    var f = this;
+    this.nameInput.onkeypress = function (e) {
         if (e.keyCode === 13) {
-            tg.song.data.name = tg.songFragment.nameInput.value;
-            document.getElementById("tool-bar-song-button").innerHTML = tg.songFragment.nameInput.value;
+            tg.song.data.name = f.nameInput.value;
+            document.getElementById("tool-bar-song-button").innerHTML = f.nameInput.value;
         }
     };
-    tg.songFragment.tagsInput.onkeypress = function (e) {
+    this.tagsInput.onkeypress = function (e) {
         if (e.keyCode === 13) {
-            tg.song.data.tags = tg.songFragment.tagsInput.value;    
+            tg.song.data.tags = f.tagsInput.value;    
         }
     };
+    omg.ui.setupInputEvents(this.btcInput, tg.song.data, "btc_address")
     
     document.getElementById("create-new-song-button").onclick = function () {
         tg.loadSong(tg.newBlankSong());
+        tg.addPartButton.onclick();
     };
-    
-    tg.songFragment.randomizeButton.onclick = function () {
+
+    this.randomizeButton.onclick = function () {
         var rs = OMGMonkey.prototype.newSong();
         tg.loadSong(rs);
         
-        tg.songFragment.randomizeImg.className = "monkey-spin";
-        setTimeout(()=> tg.songFragment.randomizeImg.className = "monkey", 1100);
+        f.randomizeImg.className = "monkey-spin";
+        setTimeout(()=> f.randomizeImg.className = "monkey", 1100);
     };
-    tg.songFragment.randomizeImg = tg.songFragment.randomizeButton.getElementsByTagName("img")[0];
-    tg.songFragment.randomizeImg.src = "/img/monkey48.png";
+    this.randomizeImg = this.randomizeButton.getElementsByTagName("img")[0];
+    this.randomizeImg.src = "/img/monkey48.png";
 
 };
 
 tg.newBlankSong = function () {
-    return {
+    var song = {
         "name":"","type":"SONG","sections":[
             {"name": "Intro", "type":"SECTION","parts":[],"chordProgression":[0]}
         ],
         "keyParams":{"scale":[0,2,4,5,7,9,11],"rootNote":0},
         "beatParams":{"bpm":120,"beats":4,"shuffle":0,"measures":1,"subbeats":4}
     };
+    if (tg.user && tg.user.btc_address) {
+        song.btc_address = tg.user.btc_address;
+    }
+    return song;
 };
 
 /*

@@ -181,7 +181,7 @@ OMGEmbeddedViewer.prototype.setupControls = function (params) {
     viewer.userDiv.innerHTML = data.username || "(unknown)";
     viewer.datetimeDiv.innerHTML = omg.util.getTimeCaption(data.created_at);
 
-    var url = 'bitcoin:1Jdam2fBZxfhWLB8yP69Zbw6fLzRpweRjc';
+    var url = 'bitcoin:' + (data.btc_address || '1Jdam2fBZxfhWLB8yP69Zbw6fLzRpweRjc');
     var amount = "?amount=0.004";
     var makeTipJar = function () {
         viewer.tipJar = document.createElement("div");

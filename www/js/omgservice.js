@@ -637,3 +637,22 @@ omg.midi = {
     onstop: function () {}
 };
 
+omg.ui.setupInputEvents = function (input, bindObject, bindProperty, onenter) {
+    var text = document.createElement("div");
+    text.innerHTML = "Press Enter to save changes";
+    text.style.display = "none";
+    input.parentElement.insertBefore(text, input.nextSibling)
+    input.value = bindObject[bindProperty] || "";
+    input.onkeyup = function (e) {
+        text.style.display = input.value !== bindObject[bindProperty] ? "inline-block" : "none";
+        if (e.keyCode === 13) {
+            text.style.display = "none";
+            bindObject[bindProperty] = input.value;
+            if (onenter) {
+                onenter();
+            }
+            
+            
+        }
+    };
+};

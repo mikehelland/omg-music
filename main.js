@@ -19,6 +19,8 @@ var fs = require("fs");
 var viewer = require("./viewer.js");
 var remote = require("./remote.js");
 
+const bcrypt = require('bcrypt');
+    
 app.use(cors());
 
 app.use(bodyParser.json());
@@ -49,14 +51,17 @@ passport.use("login", new LocalStrategy(
     function (username, password, done) {
         var db = app.get("db");
         db.users.findOne({username: username}, function (err, user) {
-            if (err) return done(err);
+            if (err || !user.bpassword) return done(err);
 
-            if (user && user.password.trim() === password) {
-                delete user.password;
-                return done(null, user);
-            }
-
-            return done(null, false);
+            bcrypt.compare(password, user.bpassword.trim(), function(err, res) {
+                if(res) {
+                    delete user.bpassword;
+                    delete user.password;
+                    return done(null, user);
+                } else {
+                    return done(null, false);
+                } 
+            });
         });
     }
 ));
@@ -72,13 +77,16 @@ passport.use("signup", new LocalStrategy(
                 return done(null, false);
             }
 
-            var newUser = {username: username, password: password, 
-                admin:false};
-            db.users.save(newUser, function (err, saveResult) {
-                if (err) {
-                    return done(err);
-                } 
-                return done(null, saveResult);
+            bcrypt.hash(password, 10, function(err, hash) {
+                var newUser = {username: username, bpassword: hash, 
+                    password: "",
+                    admin:false};
+                db.users.save(newUser, function (err, saveResult) {
+                    if (err) {
+                        return done(err);
+                    } 
+                    return done(null, saveResult);
+                });
             });
         });
     })
@@ -129,6 +137,24 @@ app.get('/user', function (req, res) {
     if (req.user) {
         delete req.user.password;
         res.send(req.user);
+    } else {
+        res.send(false);
+    }
+});
+
+app.post('/user', function (req, res) {
+    var db = app.get('db');
+    if (req.user && req.body) {
+        db.users.save(req.body, function (err, saveResult) {
+            if (err) {
+                res.send(false);
+            } 
+            else {
+                delete saveResult.password;
+                res.send(saveResult);
+            }
+        });
+
     } else {
         res.send(false);
     }

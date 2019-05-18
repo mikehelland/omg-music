@@ -9,6 +9,7 @@
   "author": "mike helland",
   "license": "ISC",
   "dependencies": {
+    "bcrypt": "^3.0.6",
     "body-parser": "^1.15.0",
     "compression": "^1.7.3",
     "cookie-parser": "^1.4.1",

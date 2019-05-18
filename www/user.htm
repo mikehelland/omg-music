@@ -24,8 +24,13 @@
    <div class="main-body">
 
       <h1 class="user-username"></h1>
+      <div><a href="/logout">Log Out</a></div>
       <div class="user-info">
-         Account created <span class="user-created-at"></span>
+         Account created: <span class="user-created-at"></span>
+      </div>
+      <div class="user-info">
+          Tip Jar Bitcoin address:
+          <input id="btc-address">
       </div>
 
       <div class="main-separator"></div>
@@ -41,11 +46,20 @@
 
    <script src="js/omgservice.js"></script>
    <script src="js/usercontrols.js"></script>
-   <script src="js/user.js"></script>
+   <!--<script src="js/user.js"></script>-->
    <script>
-   setupUserControls(document.getElementsByClassName("title-bar-user-controls")[0], function (user) {
-      omg.util.getUserThings(user, document.getElementsByClassName("search-things")[0]);
-   });
+    setupUserControls(document.getElementsByClassName("title-bar-user-controls")[0], function (user) {
+        omg.util.getUserThings(user, document.getElementsByClassName("search-things")[0]);
+        if (user.btc_address) {
+            user.btc_address = user.btc_address.trim();
+        }
+        var div = document.getElementById("btc-address");
+        omg.ui.setupInputEvents(div, user, "btc_address", function () {
+            omg.server.postHTTP("/user", user, function (e) {
+                console.log(e)
+            });
+        });
+    });
    </script>
 
 </body>
