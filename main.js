@@ -51,7 +51,7 @@ passport.use("login", new LocalStrategy(
     function (username, password, done) {
         var db = app.get("db");
         db.users.findOne({username: username}, function (err, user) {
-            if (err || !user.bpassword) return done(err);
+            if (err || !user || !user.bpassword) return done(err);
 
             bcrypt.compare(password, user.bpassword.trim(), function(err, res) {
                 if(res) {
