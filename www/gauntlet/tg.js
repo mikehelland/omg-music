@@ -89,7 +89,7 @@ tg.loadPart = function (part) {
     part.midiChannel = tg.currentSection.parts.indexOf(part) + 1;
     
     if (tg.showMeters === "All" || tg.showMeters === "Parts") {
-        tg.visibleMeters.push(new PeakMeter(part.analyser, part.muteButton, tg.player.context));
+        tg.visibleMeters.push(new PeakMeter(part.postFXGain, part.muteButton, tg.player.context));
     }
     return div;
 };
