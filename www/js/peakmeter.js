@@ -16,7 +16,7 @@ var PeakMeter = function (audioNode, div, context) {
     
     this.vertical = true; //this.width < this.height;
     this.createRainbow(this.meterElement, this.width, this.height, 0, 0);
-    this.channelCount = this.analyser.channelCount;
+    this.channelCount = 1; //this.analyser.channelCount;
     this.channelWidth = this.width / this.channelCount;
     if (!this.vertical) {
       this.channelWidth = this.height / this.channelCount;
