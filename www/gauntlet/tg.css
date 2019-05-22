@@ -78,7 +78,7 @@ body {
 #play-button-canvas {
     height:42px;
 }
-#play-button-caption {
+#play-button-caption, #play-button-meter {
     font-size:30px;
     text-align:center;
     height:42px;
@@ -86,6 +86,9 @@ body {
     position:absolute;
     width:100%;
     font-weight:bold;
+}
+#play-button-meter {
+    opacity:0.5;
 }
 #tool-bar {
     display:flex;
@@ -152,7 +155,7 @@ body {
     display :none;
 }
 
-.part-button, .part-mute-button, .part-options-button {
+.part-button, .part-mute-button, .part-options-button, .part-peak-meter {
     padding-left: 20px;
     padding-right: 20px;
     display: flex;
@@ -170,8 +173,9 @@ body {
 }
 
 .part-mute-button {
+    position:relative;
     background-color:green;
-        opacity:1 !important;
+    opacity:1 !important;
 }
 .part-mute-button:hover {
     opacity:0.65 !important;
@@ -179,7 +183,7 @@ body {
 #main-fragment-bottom-row div, #song-controls div, .part div {
     opacity:0.65;
 }
-#main-fragment-bottom-row div:hover, #song-controls div:hover, .part div:hover {
+#main-fragment-bottom-row div:hover, #song-controls div:hover, .part > div:hover {
     opacity:1;
 }
 
@@ -426,8 +430,12 @@ body {
     border:1px solid #888888;
     cursor:pointer;
     /*font-size:0.6em;*/
-    padding:1.2em;
+    padding:10px 10px 11px;
     opacity:0.8;
+}
+
+.detail-tab-caption {
+    display: none;
 }
 .detail-tab:hover, #add-part-tabs > div:hover {
     opacity:1;
@@ -773,4 +781,9 @@ h2 {
     right:0;
     bottom:0;
     opacity:0.5;
+}
+
+#user-fragment-help li {
+    margin:0.5em 0;
+    font-size: 1.2em;
 }

@@ -11,6 +11,7 @@
 <div id="main-fragment">
 
     <canvas id="play-button-canvas"></canvas>
+    <div id="play-button-meter"></div>
     <div id="play-button-caption"></div>
     <div id="tool-bar">
             <div id="main-fragment-user-button">
@@ -198,41 +199,91 @@
             </div>
         </div>
         <div id="user-fragment" class="fragment">
-            <div class="detail-fragment-body">
-            <h2>User</h2>
-            <a href="/">OMG Home</a> - <a href="#" id="go-full-screen">Go Fullscreen</a>
-            - <a href="#" id="go-presentation-mode">Presentation Mode</a>
-            <div id="user-login-signup">
-                <h3>You are not logged in. <span id="user-login-invalid">Invalid login</span>
-                </h3>
-                Login:
-                <br>
-                <input placeholder="username" id="user-login-username">
-                <br>
-                <input type="password" placeholder="password" id="user-login-password">
-                <br>
-                <button id="user-login-button">Login</button>
-                <hr>
-                -or- Create an account:
-                <br>
-                <input placeholder="username" id="user-signup-username">
-                <br>
-                <input type="password" placeholder="password" id="user-signup-password">
-                <br>
-                <button id="user-signup-button">Create an Account</button>
+            
+            <div id="user-fragment-details" class="detail-tab-page detail-fragment-body">
+                <div class="detail-tab-caption">
+                    User
+                </div>
+            
+                <div id="user-login-signup">
+                    <h3>You are not logged in. <span id="user-login-invalid">Invalid login</span>
+                    </h3>
+                    Login:
+                    <br>
+                    <input placeholder="username" id="user-login-username">
+                    <br>
+                    <input type="password" placeholder="password" id="user-login-password">
+                    <br>
+                    <button id="user-login-button">Login</button>
+                    <hr>
+                    -or- Create an account:
+                    <br>
+                    <input placeholder="username" id="user-signup-username">
+                    <br>
+                    <input type="password" placeholder="password" id="user-signup-password">
+                    <br>
+                    <button id="user-signup-button">Create an Account</button>
+                </div>
+                <div id="user-info">
+                    <span class="tool-bar-caption">Username:</span> <span id="user-info-username"></span>
+                    <br>
+                    <span class="tool-bar-caption">Account created:</span> <span class="user-created-at"></span>
+
+                    <div class="main-separator"></div>
+                    <span class="tool-bar-caption">User's posts:</span>
+                    <div class="search-things">
+                       <div id="user-fragment-detail-list"></div>
+                   </div>
+                    <button id="user-logout-button">Log Out</button>
+                </div>
             </div>
-            <div id="user-info">
-                <span class="tool-bar-caption">Username:</span> <span id="user-info-username"></span>
-                <br>
-                <span class="tool-bar-caption">Account created:</span> <span class="user-created-at"></span>
-                
-                <div class="main-separator"></div>
-                <span class="tool-bar-caption">User's posts:</span>
-                <div class="search-things">
-                   <div id="user-fragment-detail-list"></div>
-               </div>
-                <button id="user-logout-button">Log Out</button>
+            <div id="user-fragment-settings" class="detail-tab-page detail-fragment-body">
+                <div class="detail-tab-caption">
+                    Settings
+                </div>
+
             </div>
+            <div id="user-fragment-help" class="detail-tab-page detail-fragment-body">
+                <div class="detail-tab-caption">
+                    ?
+                </div>
+
+                <p>Make music with sounds from anywhere on the Internet!</p>
+                <h4>Video Tutorials</h4>
+                <ul>
+                    <li><a href="https://www.youtube.com/watch?v=g8QuIWtXTzs&t=5s" target="_blank">
+                        Overview
+                        </a>
+                    </li>
+                    <li><a href=https://www.youtube.com/watch?v=VfveFUJXNfo" target="_blank">
+                        101: The Vertical Surface
+                        </a>
+                    </li>
+                    <li><a href="https://www.youtube.com/watch?v=ftY8k-d8-e4" target="_blank">
+                        102: The Sequencer Surface</a>
+                    </li>
+                    <li>
+                        <a href="https://www.youtube.com/watch?v=TXpPFBkpXp0" target="_blank">
+                            Game Development
+                        </a>
+                    </li>
+                    <li><a href="https://www.youtube.com/watch?v=4CQcGW6Rwo4" target="_blank">
+                        Video Production
+                    </a></li>
+                    <li><a href="https://www.youtube.com/watch?v=2N1Zh2J1nSY" target="_blank">
+                        Practicing Guitar/Drums/etc
+                    </a></li>
+                </ul>
+
+                <h4>Resources</h4>
+                <ul>
+                    <li><a href="/" target="_blank">OpenMusic.Gallery Home</a></li>
+                    <li><a href="https://reddit.com/r/openmusic" target="_blank">OMG Forum</a></li>
+                    <li><a href="/docs/what_is_open_music.htm" target="_blank">About OMG</a></li>
+                    <li><a href="https://github.com/mikehelland/openmusic.gallery" target="_blank">Source Code</a></li>
+                    <li>Contact: <a href="mailto:mike@mikehelland.com">mike@mikehelland.com</a></li>    
+                </ul>
+
             </div>
         </div>
         <div id="song-fragment" class="fragment">

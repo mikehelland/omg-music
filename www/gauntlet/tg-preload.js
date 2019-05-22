@@ -106,75 +106,19 @@ tg.getSong = function (callback) {
     }
 };
 
-tg.loadSong = function (songData, source) {
-    var className = songData.constructor.name;
-    if (className === "OMGSong") {
-        tg.song = songData;
-    }
-    else {
-        tg.song = new OMGSong(null, songData);
-    }
-    
-    tg.loadSection(tg.song.sections[0]);
-        
+tg.preloadSong = function (songData) {
+    tg.song = new OMGSong(null, songData);    
     document.getElementById("tool-bar-song-button").innerHTML = tg.song.data.name || "(Untitled)";
     
-    tg.song.onKeyChangeListeners.push(function () {
-        tg.player.rescaleSection(tg.currentSection);
-        tg.setSongControlsUI();
-    });
-    tg.song.onBeatChangeListeners.push(function () {
-        tg.setSongControlsUI();
-    });
-    tg.song.onChordProgressionChangeListeners.push(function () {
-        tg.setSongControlsUI();
-    });
-    tg.song.onPartAudioParamsChangeListeners.push(function (part) {
-        if (part.muteButton) {
-            part.muteButton.refresh();
-        }
-    });
-    tg.song.onPartAddListeners.push(function (part, source) {
-        var div = tg.loadPart(part);
-        if (source === "addPartFragment") {
-            div.getElementsByClassName("part-button")[0].onclick();
-        }
-    });
-    
-    if (tg.player) {
-        tg.player.prepareSong(tg.song);
-        tg.songOptionsFragment.isSetupForSong = false;
-    }
-
-    for (var i = 0; i < tg.onLoadSongListeners.length; i++) {
-        tg.onLoadSongListeners[i](source);
-    }
-};
-
-tg.loadSection = function (section) {
+    var section = tg.song.sections[0];
     tg.currentSection = section;
     tg.partList.innerHTML = "";
     for (var j = 0; j < section.parts.length; j++) {
-        tg.loadPart(section.parts[j]);        
+        tg.setupPartButton(section.parts[j]);
     }
-    //if (tg.player.loopSection)
     tg.setSongControlsUI();
 };
 
-tg.loadPart = function (part) {
-    var div = tg.setupPartButton(part);
-
-    if (part.data.surface.url === "PRESET_VERTICAL" && !part.mm && typeof OMGMelodyMaker !== "undefined") {
-        /* Is there a reason I needed this? Hmmm. Maybe for MIDI or Live?
-         * part.mm = new OMGMelodyMaker(tg.instrument.surface, part, tg.player, tg.instrument.backgroundCanvas);
-        part.mm.readOnly = false;
-        part.mm.onchange = function (part, frets) {
-            tg.instrument.onchange(part, frets);
-        };*/
-    }
-    part.midiChannel = tg.currentSection.parts.indexOf(part) + 1;
-    return div;
-};
 
 tg.makeChordsCaption = function (chordI) {
     var chordsCaption = "";
@@ -229,7 +173,7 @@ tg.keyHelper = {keys: ["C", "C#", "D", "Eb", "E", "F", "F#", "G", "G#", "A", "Bb
 
 tg.getSong(function (song) {
     try {
-    tg.loadSong(song);
+    tg.preloadSong(song);
     }
     catch (e) {console.log(e)}
 

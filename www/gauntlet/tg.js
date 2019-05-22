@@ -4,6 +4,7 @@ if (typeof omg !== "object") var omg = {};
 
 tg.playButton = document.getElementById("play-button-canvas");
 tg.playButtonCaption = document.getElementById("play-button-caption");
+tg.playButtonMeter = document.getElementById("play-button-meter");
 tg.mixButton = document.getElementById("mix-button");
 tg.saveButton = document.getElementById("save-button");
 tg.addPartButton = document.getElementById("add-part-button");
@@ -12,6 +13,86 @@ tg.detailFragment = document.getElementById("detail-fragment");
 tg.backButton = document.getElementById("back-button");
 tg.mainToolbar = document.getElementById("tool-bar");
 tg.mainBottomToolbar = document.getElementById("main-fragment-bottom-row");
+
+tg.loadSong = function (songData, source) {
+    var className = songData.constructor.name;
+    if (className === "OMGSong") {
+        tg.song = songData;
+    }
+    else {
+        tg.song = new OMGSong(null, songData);
+    }
+    
+    tg.loadSection(tg.song.sections[0]);
+        
+    document.getElementById("tool-bar-song-button").innerHTML = tg.song.data.name || "(Untitled)";
+    
+    tg.setupSongListeners(source);
+};
+
+tg.setupSongListeners = function (source) {
+    
+    tg.song.onKeyChangeListeners.push(function () {
+        tg.player.rescaleSection(tg.currentSection);
+        tg.setSongControlsUI();
+    });
+    tg.song.onBeatChangeListeners.push(function () {
+        tg.setSongControlsUI();
+    });
+    tg.song.onChordProgressionChangeListeners.push(function () {
+        tg.setSongControlsUI();
+    });
+    tg.song.onPartAudioParamsChangeListeners.push(function (part) {
+        if (part.muteButton) {
+            part.muteButton.refresh();
+        }
+    });
+    tg.song.onPartAddListeners.push(function (part, source) {
+        var div = tg.loadPart(part);
+        if (source === "addPartFragment") {
+            div.getElementsByClassName("part-button")[0].onclick();
+        }
+    });
+    
+    if (tg.player) {
+        tg.player.prepareSong(tg.song);
+        tg.songOptionsFragment.isSetupForSong = false;
+    }
+
+    for (var i = 0; i < tg.onLoadSongListeners.length; i++) {
+        tg.onLoadSongListeners[i](source);
+    }
+};
+tg.setupSongListeners();
+
+tg.loadSection = function (section) {
+    tg.currentSection = section;
+    tg.partList.innerHTML = "";
+    for (var j = 0; j < section.parts.length; j++) {
+        tg.loadPart(section.parts[j]);        
+    }
+    //if (tg.player.loopSection)
+    tg.setSongControlsUI();
+};
+
+tg.loadPart = function (part) {
+    var div = tg.setupPartButton(part);
+
+    if (part.data.surface.url === "PRESET_VERTICAL" && !part.mm && typeof OMGMelodyMaker !== "undefined") {
+        /* Is there a reason I needed this? Hmmm. Maybe for MIDI or Live?
+         * part.mm = new OMGMelodyMaker(tg.instrument.surface, part, tg.player, tg.instrument.backgroundCanvas);
+        part.mm.readOnly = false;
+        part.mm.onchange = function (part, frets) {
+            tg.instrument.onchange(part, frets);
+        };*/
+    }
+    part.midiChannel = tg.currentSection.parts.indexOf(part) + 1;
+    
+    if (tg.showMeters === "All" || tg.showMeters === "Parts") {
+        tg.visibleMeters.push(new PeakMeter(part.analyser, part.muteButton, tg.player.context));
+    }
+    return div;
+};
 
 tg.player = new OMusicPlayer();
 tg.player.loadFullSoundSets = true;
@@ -54,10 +135,75 @@ omg.server.getHTTP("/user/", function (res) {
 
 
 /*
- * A couple quick navigation methods
+ * The Fragment system (kinda like android)
  * 
 */
 
+tg.setupFragment = function (f) {
+    if (f.button) {
+        f.button.onclick = function () {
+            tg.showFragment(f, f.button);
+        };        
+    }
+    
+    if (f.tabs) {
+        tg.setupTabbedFragment(f);
+    }
+};
+
+
+tg.setupTabbedFragment = function (f) {
+    var tabRow = document.createElement("div");
+    tabRow.className = "detail-tab-row";
+
+    var first = true;
+    for (var tabKey in f.tabs) {
+        let tab = f.tabs[tabKey];
+        
+        if (tab.setup) {
+            tab.setup();
+        }
+        
+        var header = tab.div.getElementsByClassName("detail-tab-caption")[0];
+        if (header) {
+            let tabDiv = tg.setupTabHeader(tab, header, f);
+            tabRow.appendChild(tabDiv);
+            tab.header = tabDiv;
+
+            if (first) {
+                tabDiv.onclick();
+                first = false;
+            }
+        }
+    }
+    f.div.insertBefore(tabRow, f.div.children[0]);
+};
+
+tg.setupTabHeader = function (tab, header, f) {
+    let tabDiv = document.createElement("div");
+    tabDiv.className = "detail-tab";            
+    tabDiv.innerHTML = header.innerHTML;
+            
+    tabDiv.onclick = function (e) {
+        if (f.lastTabPage) {
+            f.lastTabPage.style.display = "none";
+        }
+        if (f.lastTab) {
+            f.lastTab.classList.remove("selected-option");
+        }
+        f.lastTab = tabDiv;
+        f.lastTabPage = tab.div;
+
+        tab.div.style.display = "block";
+        tabDiv.classList.add("selected-option");
+
+        if (tab.onshow) {
+           tab.onshow();
+        }
+
+    };
+    return tabDiv;
+};
 
 tg.showFragment = function (fragment, button, params) {
     tg.hideDetails();
@@ -1384,12 +1530,17 @@ function SliderCanvas(canvas, controlInfo, audioNode, data, onchange) {
     this.data = data;
     this.audioNode = audioNode;
     this.controlInfo = controlInfo;
-    this.onchange = onchange;
+    this.onchange = onchange || controlInfo.onchange;
     this.percent = 0;
     this.isAudioParam = audioNode && typeof audioNode[controlInfo.property] === "object" && controlInfo.property !== "xy";
     
     this.frequencyTransformScale = Math.log(controlInfo.max) - Math.log(controlInfo.min);
-    
+
+    if (data && typeof data[controlInfo.property] === "undefined" && 
+            typeof controlInfo.default !== "undefined") {
+        data[controlInfo.property] = controlInfo.default;
+    }
+
     if (typeof this.controlInfo.resetValue === "number") {
         var slider = this;
         this.div.ondblclick = function () {
@@ -1529,86 +1680,139 @@ SliderCanvas.prototype.drawCanvas = function () {
  * 
 */
 
-
-tg.userButton = document.getElementById("main-fragment-user-button");
-tg.userButton.onclick = function () {
-    tg.showFragment(tg.userFragment, tg.userButton);
-};
 tg.userFragment = {
     div: document.getElementById("user-fragment"),
-    loginUsername: document.getElementById("user-login-username"),
-    loginPassword: document.getElementById("user-login-password"),
-    signupUsername: document.getElementById("user-signup-username"),
-    signupPassword: document.getElementById("user-signup-password"),
-    loginArea: document.getElementById("user-login-signup"),
-    invalidMessage: document.getElementById("user-login-invalid"),
-    login: function (username, password) {
-        omg.server.login(username, password, tg.userFragment.onlogin);
-    },
-    signup: function (username, password) {
-        omg.server.signup(username, password, tg.userFragment.onlogin);
-    },
-    onlogin: function (results) {
+    button: document.getElementById("main-fragment-user-button"),
+    tabs: {
+        user: {
+            div: document.getElementById("user-fragment-details"),
+            loginUsername: document.getElementById("user-login-username"),
+            loginPassword: document.getElementById("user-login-password"),
+            signupUsername: document.getElementById("user-signup-username"),
+            signupPassword: document.getElementById("user-signup-password"),
+            loginArea: document.getElementById("user-login-signup"),
+            invalidMessage: document.getElementById("user-login-invalid"),
+            loginButton: document.getElementById("user-login-button"),
+            signupButton: document.getElementById("user-signup-button"),
+            logoutButton: document.getElementById("user-logout-button")
+        }, 
+        settings: {
+            div: document.getElementById("user-fragment-settings"),
+        },
+        help: {
+            div: document.getElementById("user-fragment-help"),
+        }
+    }
+};
+    
+ 
+tg.userFragment.tabs.user.setup = function () {
+    var t = this;
+    
+    this.logoutButton.onclick = function () {
+        omg.server.logout(() => {
+            tg.onlogin(undefined);
+        });
+    };
+    
+    var login = () => {
+        omg.server.login(this.loginUsername.value, this.loginPassword.value, onlogin);
+    };
+    var signup = () => {
+        omg.server.signup(this.signupUsername.value, this.signupPassword.value, onlogin);
+    };
+    var onlogin =  (results) => {
         if (results) {
             tg.onlogin(results);
             tg.showUserThings();
         }
         else {
-            tg.userFragment.invalidMessage.style.display = "inline-block";
+            this.invalidMessage.style.display = "inline-block";
         }        
-    }
-};
-tg.userFragment.setup = function () {
-    document.getElementById("user-logout-button").onclick = function () {
-        omg.server.logout(() => {
-            tg.onlogin(undefined);
-        });
     };
-    document.getElementById("user-login-button").onclick = function () {
-        tg.userFragment.login(tg.userFragment.loginUsername.value,
-                            tg.userFragment.loginPassword.value);
-    };
-    document.getElementById("user-signup-button").onclick = function () {
-        tg.userFragment.signup(tg.userFragment.signupUsername.value, 
-                            tg.userFragment.signupPassword.value);
-    };
-    tg.userFragment.loginPassword.onkeypress = function (e) {
+
+    this.loginButton.onclick = login;
+    this.signupButton.onclick = signup;
+    this.loginPassword.onkeypress = function (e) {
         if (e.keyCode === 13) {
-            tg.userFragment.login(tg.userFragment.loginUsername.value,
-                                tg.userFragment.loginPassword.value);            
+            login();
         }
     };
-    tg.userFragment.signupPassword.onkeypress = function (e) {
+    this.signupPassword.onkeypress = function (e) {
         if (e.keyCode === 13) {
-            tg.userFragment.signup(tg.userFragment.signupUsername.value,
-                                tg.userFragment.signupPassword.value);            
+            signup();
         }
-    };
-    var fullScreen = false;
-    var noSleep;
-    document.getElementById("go-full-screen").onclick = function () {
-        document.body.requestFullscreen();
-        if (typeof NoSleep === "undefined") {
-            var script = document.createElement("script");
-            script.src = "/js/NoSleep.min.js";
-            script.async = true;
-            script.onload = function () {
-                var noSleep = new NoSleep();
-                noSleep.enable();
-            };
-            document.body.appendChild(script);
-        }            
-    };
-    document.getElementById("go-presentation-mode").onclick = function () {
-        tg.turnOnPresentationMode();
     };
 };
 
-tg.userFragment.onshow = function () {
+tg.userFragment.tabs.user.onshow = function () {
     if (tg.user) {
-        tg.userFragment.loginArea.style.display = "none";
+        this.loginArea.style.display = "none";
         tg.showUserThings();
     }
+};
+
+tg.userFragment.tabs.settings.onshow = function () {
+    this.controls.forEach(control => {
+        control.sizeCanvas();
+    });
+};
+
+tg.userFragment.tabs.settings.setup = function () {
+
+    var noSleep;
+    var toggleNoSleep = (value) => {
+        if (value) {
+            if (noSleep) {
+                noSleep.enable();
+            }
+            else {
+                var script = document.createElement("script");
+                script.src = "/js/NoSleep.min.js";
+                script.async = true;
+                script.onload = function () {
+                    noSleep = new NoSleep();
+                    noSleep.enable();
+                };
+                document.body.appendChild(script);
+            }
+        }
+        else if (noSleep) {
+            noSleep.disable();
+        }
+    };
+
+    this.settingsList = [
+        {property: "showMeters", default: "Off", 
+            name: "Show Peak Meters", type: "options", options: ["Off", "Master", "Parts", "All"], 
+            onchange: (value) => tg.togglePeakMeters(value)
+        },
+        {property: "presentationMode", default: false, 
+            name: "Presentation Mode", type: "options", options: [false, true], onchange: (value) => {
+                if (value) tg.turnOnPresentationMode();
+            }
+        },
+        {property: "fullscreen", default: false, 
+            name: "Fullscreen", type: "options", options: [false, true], onchange: (value) => {
+                if (value) document.body.requestFullscreen();
+                else document.exitFullscreen();
+            }
+        },
+        {property: "nosleep", default: false, 
+            name: "Keep Screen On", type: "options", options: [false, true], onchange: toggleNoSleep
+        }
+    ];
+    
+    this.controls = [];
+    
+    this.settingsList.forEach(setting => {
+        var control = new SliderCanvas(null, setting, null, tg);
+        control.div.className = "fx-slider";
+        this.div.appendChild(control.div);
+        
+        this.controls.push(control);
+    });
+    
 };
 
 tg.showUserThings = function () {
@@ -1639,10 +1843,12 @@ tg.onlogin = function (user) {
         }
     }
     document.getElementById("tool-bar-user-button").innerHTML = user ? user.username : "Login";
-    tg.userFragment.loginArea.style.display = user ? "none" : "block";
+    tg.userFragment.tabs.user.loginArea.style.display = user ? "none" : "block";
     document.getElementById("user-info").style.display = user ? "block" : "none";
     document.getElementById("user-info-username").innerHTML = user ? user.username : "Login";
 };
+
+tg.setupFragment(tg.userFragment);
 
 
 /*
@@ -2525,13 +2731,17 @@ tg.onmidimessage = function (control, value, channel) {
     }
 };
 
-["/omg-music/sequencer_surface.js", 
-    "/omg-music/vertical_surface.js",
-    "/omg-music/monkey.js",
-    "live.js"].forEach(js => {
+[{url: "/omg-music/sequencer_surface.js"},
+    {url: "/omg-music/vertical_surface.js"},
+    {url: "/omg-music/monkey.js"},
+    {url: "live.js"},
+    //{url: "/js/peakmeter.js", onload: ()=>tg.togglePeakMeters("All")}
+    {url: "/js/peakmeter.js"}
+].forEach(script => {
     scriptTag = document.createElement("script");
-    scriptTag.src = js;
+    scriptTag.src = script.url;
     scriptTag.async = true;
+    scriptTag.onload = script.onload;
     document.body.appendChild(scriptTag);
 });
 
@@ -2547,3 +2757,49 @@ window.onkeypress = function (e) {
         tg.playButtonCaption.onclick();
     }
 };
+
+
+tg.togglePeakMeters = function (value) {
+
+    if (tg.visibleMeters) {
+        for (var j = 0; j < tg.visibleMeters.length; j++) {
+            var meter = tg.visibleMeters[j];
+            meter.remove();
+        }        
+    }
+    tg.visibleMeters = [];
+    
+    if (value === "All" || value === "Master") {
+        var meter = new PeakMeter(tg.song.postFXGain, tg.playButtonMeter, tg.player.context);
+        tg.visibleMeters.push(meter);
+    }
+
+    if (value === "All" || value === "Parts") {
+        var part;
+        for (var i = 0; i < tg.currentSection.parts.length; i++) {
+            part = tg.currentSection.parts[i];
+            var meter = new PeakMeter(part.postFXGain, part.muteButton, tg.player.context);
+            tg.visibleMeters.push(meter);
+        }
+    }
+    
+    if (value !== "Off") {
+        tg.paintMeters();
+    }
+};
+    
+tg.paintMeters = function() {
+    for (var j = 0; j < tg.visibleMeters.length; j++) {
+        var meter = tg.visibleMeters[j];
+        meter.updateMeter();
+    }
+    
+    if (tg.showMeters !== "Off") {
+        window.requestAnimationFrame(tg.paintMeters);
+    }
+};
+
+if (window.innerWidth > window.innerHeight) {
+    tg.userFragment.tabs.help.header.onclick();
+    tg.userFragment.button.onclick();
+}
