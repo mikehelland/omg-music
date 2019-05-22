@@ -1,3 +1,4 @@
+
 //these should already be preloaded
 if (typeof tg !== "object") var tg = {}; 
 if (typeof omg !== "object") var omg = {}; 
@@ -15,6 +16,9 @@ tg.mainToolbar = document.getElementById("tool-bar");
 tg.mainBottomToolbar = document.getElementById("main-fragment-bottom-row");
 
 tg.loadSong = function (songData, source) {
+    var showMeters = tg.peakMeters.show;
+    tg.peakMeters.toggle("Off");
+    
     var className = songData.constructor.name;
     if (className === "OMGSong") {
         tg.song = songData;
@@ -23,11 +27,17 @@ tg.loadSong = function (songData, source) {
         tg.song = new OMGSong(null, songData);
     }
     
+    if (tg.player) {
+        tg.player.prepareSong(tg.song);
+        tg.songOptionsFragment.isSetupForSong = false;
+    }
+    
     tg.loadSection(tg.song.sections[0]);
         
     document.getElementById("tool-bar-song-button").innerHTML = tg.song.data.name || "(Untitled)";
     
     tg.setupSongListeners(source);
+    tg.peakMeters.toggle(showMeters);
 };
 
 tg.setupSongListeners = function (source) {
@@ -53,11 +63,6 @@ tg.setupSongListeners = function (source) {
             div.getElementsByClassName("part-button")[0].onclick();
         }
     });
-    
-    if (tg.player) {
-        tg.player.prepareSong(tg.song);
-        tg.songOptionsFragment.isSetupForSong = false;
-    }
 
     for (var i = 0; i < tg.onLoadSongListeners.length; i++) {
         tg.onLoadSongListeners[i](source);
@@ -88,8 +93,8 @@ tg.loadPart = function (part) {
     }
     part.midiChannel = tg.currentSection.parts.indexOf(part) + 1;
     
-    if (tg.showMeters === "All" || tg.showMeters === "Parts") {
-        tg.visibleMeters.push(new PeakMeter(part.postFXGain, part.muteButton, tg.player.context));
+    if (tg.peakMeters.show === "All" || tg.peakMeters.show === "Parts") {
+        tg.peakMeters.visibleMeters.push(new PeakMeter(part.postFXGain, part.muteButton, tg.player.context));
     }
     return div;
 };
@@ -135,7 +140,12 @@ omg.server.getHTTP("/user/", function (res) {
 
 
 /*
- * The Fragment system (kinda like android)
+ * Fragment System
+ * 
+ * The UI is broken into Fragments, primarily so on a desktop (landscape)
+ * the main fragment can be shown on the right, and a detail fragment on the left
+ * while in mobile (portrait) a single fragment is shown at a time and a back button
+ * to return to the main fragment
  * 
 */
 
@@ -144,10 +154,6 @@ tg.setupFragment = function (f) {
         f.button.onclick = function () {
             tg.showFragment(f, f.button);
         };        
-    }
-    
-    if (f.tabs) {
-        tg.setupTabbedFragment(f);
     }
 };
 
@@ -171,7 +177,7 @@ tg.setupTabbedFragment = function (f) {
             tab.header = tabDiv;
 
             if (first) {
-                tabDiv.onclick();
+                f.firstTab = tabDiv;
                 first = false;
             }
         }
@@ -212,15 +218,25 @@ tg.showFragment = function (fragment, button, params) {
     }
     fragment.div.style.display = fragment.display || "block";
     tg.currentFragment = fragment;
-    
+        
     if (fragment.setup && !fragment.isSetup) {
         fragment.setup();
         fragment.isSetup = true;
     }
     
+    if (fragment.tabs && !fragment.tabs.isSetup) {
+        tg.setupTabbedFragment(fragment);
+        fragment.tabs.isSetup = true;
+    }
+    
     if (fragment.onshow) {
         fragment.onshow(params);
     }
+
+    if (fragment.tabs && !fragment.lastTab) {
+        fragment.firstTab.onclick();
+    }
+
 };
 
 tg.hideDetails = function (hideFragment) {
@@ -1783,9 +1799,10 @@ tg.userFragment.tabs.settings.setup = function () {
     };
 
     this.settingsList = [
-        {property: "showMeters", default: "Off", 
+        {property: "show", default: "Parts", 
             name: "Show Peak Meters", type: "options", options: ["Off", "Master", "Parts", "All"], 
-            onchange: (value) => tg.togglePeakMeters(value)
+            dataObject: tg.peakMeters,
+            onchange: (value) => tg.peakMeters.toggle(value)
         },
         {property: "presentationMode", default: false, 
             name: "Presentation Mode", type: "options", options: [false, true], onchange: (value) => {
@@ -1806,7 +1823,7 @@ tg.userFragment.tabs.settings.setup = function () {
     this.controls = [];
     
     this.settingsList.forEach(setting => {
-        var control = new SliderCanvas(null, setting, null, tg);
+        var control = new SliderCanvas(null, setting, null, setting.dataObject || tg);
         control.div.className = "fx-slider";
         this.div.appendChild(control.div);
         
@@ -2735,8 +2752,8 @@ tg.onmidimessage = function (control, value, channel) {
     {url: "/omg-music/vertical_surface.js"},
     {url: "/omg-music/monkey.js"},
     {url: "live.js"},
-    //{url: "/js/peakmeter.js", onload: ()=>tg.togglePeakMeters("All")}
-    {url: "/js/peakmeter.js"}
+    {url: "/js/peakmeter.js", onload: ()=>tg.peakMeters.toggle("All")}
+    //{url: "/js/peakmeter.js"}
 ].forEach(script => {
     scriptTag = document.createElement("script");
     scriptTag.src = script.url;
@@ -2758,20 +2775,23 @@ window.onkeypress = function (e) {
     }
 };
 
+tg.peakMeters = {
+    show: "All",
+    visibleMeters: []
+};
 
-tg.togglePeakMeters = function (value) {
+tg.peakMeters.toggle = function (value) {
+    this.show = value;
 
-    if (tg.visibleMeters) {
-        for (var j = 0; j < tg.visibleMeters.length; j++) {
-            var meter = tg.visibleMeters[j];
-            meter.remove();
-        }        
+    for (var j = 0; j < this.visibleMeters.length; j++) {
+        var meter = this.visibleMeters[j];
+        meter.remove();
     }
-    tg.visibleMeters = [];
+    this.visibleMeters = [];
     
     if (value === "All" || value === "Master") {
         var meter = new PeakMeter(tg.song.postFXGain, tg.playButtonMeter, tg.player.context);
-        tg.visibleMeters.push(meter);
+        this.visibleMeters.push(meter);
     }
 
     if (value === "All" || value === "Parts") {
@@ -2779,27 +2799,31 @@ tg.togglePeakMeters = function (value) {
         for (var i = 0; i < tg.currentSection.parts.length; i++) {
             part = tg.currentSection.parts[i];
             var meter = new PeakMeter(part.postFXGain, part.muteButton, tg.player.context);
-            tg.visibleMeters.push(meter);
+            this.visibleMeters.push(meter);
         }
     }
     
-    if (value !== "Off") {
-        tg.paintMeters();
+    if (value !== "Off" && !this.animating) {
+        this.update();
     }
 };
     
-tg.paintMeters = function() {
-    for (var j = 0; j < tg.visibleMeters.length; j++) {
-        var meter = tg.visibleMeters[j];
-        meter.updateMeter();
+tg.peakMeters.update = function() {
+    if (tg.peakMeters.show !== "Off") {
+        tg.peakMeters.animating = true;
+        for (var j = 0; j < tg.peakMeters.visibleMeters.length; j++) {
+            tg.peakMeters.visibleMeters[j].updateMeter();
+        }
+
+        window.requestAnimationFrame(tg.peakMeters.update);
     }
-    
-    if (tg.showMeters !== "Off") {
-        window.requestAnimationFrame(tg.paintMeters);
+    else {
+        tg.peakMeters.animating = false;
     }
 };
 
 if (window.innerWidth > window.innerHeight) {
-    tg.userFragment.tabs.help.header.onclick();
     tg.userFragment.button.onclick();
+    tg.userFragment.tabs.help.header.onclick();
 }
+
