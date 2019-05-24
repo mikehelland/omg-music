@@ -1,5 +1,3 @@
-**April 2019: [Check out the Kickstarter!](https://www.kickstarter.com/projects/782747219/openmusicgallery)**
-
 # OpenMusic.Gallery
 
 is...
@@ -17,7 +15,17 @@ all in one web app, for **open music**.
 
 That means that with a few taps of your finger, you can remix the music in OpenMusic.Gallery, and use it royalty free.
 
-You can see it in action here: https://openmusic.gallery.
+You can see it in action here: 
+
+https://openmusic.gallery
+
+And the editor is here:
+
+https://openmusic.gallery/gauntlet
+
+Video Overview:
+
+https://www.youtube.com/watch?v=g8QuIWtXTzs&t=5s
 
 ----
 
@@ -37,11 +45,11 @@ You can see it in action here: https://openmusic.gallery.
 
 ----
 
-#Using the Client: Game Dev Example
+# Using the Client: Game Dev Example
 
-##How to: https://www.youtube.com/watch?v=TXpPFBkpXp0
+## How to: https://www.youtube.com/watch?v=TXpPFBkpXp0
 
-##When the game is loading:
+## When the game is loading:
 
      <script src="https://openmusic.gallery/omg.js"></script>
 
@@ -49,22 +57,22 @@ You can see it in action here: https://openmusic.gallery.
      game.music.prepareSongFromURL("http://openmusic.gallery/data/1333")
      game.laserSound = game.music.getSound("SFX", "laser")
 
-##When the game starts:
+## When the game starts:
 
      game.music.play()
 
-##Increase BPM and key when difficulty increases:
+## Increase BPM and key when difficulty increases:
 
      game.music.beatParams.bpm += 20
 
      game.music.keyParams.rootNote++
      game.music.rescaleSong()
 
-##When the laser is fired:
+## When the laser is fired:
 
      game.laserSound.play()
 
-##When the game ends:
+## When the game ends:
 
      game.music.stop()
 

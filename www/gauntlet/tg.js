@@ -792,7 +792,6 @@ tg.addPartButton.onclick = function() {
 tg.addPartFragment = {
     div: document.getElementById("add-part-fragment"),
     soundSetList: document.getElementById("add-part-soundset-list"),
-    soundFontList: document.getElementById("add-part-soundfont-list"),
     gallerySelect: document.getElementById("add-part-gallery-select"),
     searchInput: document.getElementById("add-part-search")    
 };
@@ -808,25 +807,31 @@ tg.addPartFragment.setup = function () {
                 "block" : "none";
         }
     };
-    
+
+    var sources;
+    fetch("https://mikehelland.github.io/omg-sounds/sources.json")
+            .then(function (e) {return e.json();}).then(function (json) {
+         
+         sources = json;
+         var i = 0;
+         json.forEach((function (source) {
+             var option = document.createElement("option");
+             option.innerHTML = source.name;
+             option.value = i++;
+             f.gallerySelect.appendChild(option);
+         }));     
+         
+        f.loadList(sources[0]);
+
+    }).catch(e=>console.error(e));
+
     f.gallerySelect.onchange = function (e) {
-        var newList;
-        if (f.gallerySelect.value === "omg") {
-            newList = f.soundSetList;
-        }
-        else if (f.gallerySelect.value === "favorites") {
-            newList = f.favoriteList;            
-        }
-        else {
-            newList = f.soundFontList;
-        }
+                
+        var source = sources[f.gallerySelect.value];
+        f.loadList(source);
         
-        searchFilter(newList);
-        f.currentList.style.display = "none";
-        f.currentList = newList;
-        f.currentList.style.display = "block";
+        searchFilter(f.soundSetList);
     };
-    f.currentList = f.soundSetList;
   
     var addOscButtonClick = function (e) {
         tg.addOsc(e.target.innerHTML, "addPartFragment");  
@@ -836,41 +841,35 @@ tg.addPartFragment.setup = function () {
     document.getElementById("add-square-osc-button").onclick = addOscButtonClick;
     document.getElementById("add-triangle-osc-button").onclick = addOscButtonClick;
 
-
-    f.loadList(f.soundSetList, "/data/?type=SOUNDSET");
-        
-    omg.ui.soundFontNames.forEach(function (name) {
-        var newDiv = document.createElement("div");
-        newDiv.className = "soundset-list-item";
-        newDiv.innerHTML = name.split("_").join(" ");
-        f.soundFontList.appendChild(newDiv);
-        newDiv.onclick = function () {
-            var soundSet = tg.player.getSoundSetForSoundFont(newDiv.innerHTML, 
-                f.gallerySelect.value + name + "-mp3/");
-            tg.addPart(soundSet, "addPartFragment");
-        };
-
-    });
-        
-    
     f.searchInput.onkeyup = function (e) {
         searchFilter(f.currentList);
     };
 };
 
-tg.addPartFragment.loadList = function (list, url) {
-    fetch(location.origin + url).then(function (e) {return e.json();}).then(function (json) {
-        list.innerHTML = "";
-        json.forEach(function (soundSet) {
+tg.addPartFragment.loadList = function (source) {
+    var listDiv = this.soundSetList;
+    listDiv.innerHTML = "";
+    var loadList = function (list) {
+        list.forEach(function (soundSet) {
             var newDiv = document.createElement("div");
             newDiv.className = "soundset-list-item";
             newDiv.innerHTML = soundSet.name;
-            list.appendChild(newDiv);
+            listDiv.appendChild(newDiv);
             soundSet.url = location.origin + "/data/" + soundSet.id;
             newDiv.onclick = function () {
                 tg.addPart(soundSet, "addPartFragment");
             };
         });
+    };
+    
+    if (source.list) {
+        loadList(source.list);
+        return;
+    }
+    
+    fetch(source.url).then(function (e) {return e.json();}).then(function (json) {
+        source.list = json;
+        loadList(json);
     }).catch(e=>console.error(e));
 };
 
