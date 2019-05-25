@@ -802,9 +802,10 @@ OMusicPlayer.prototype.loadSound = function (sound, onload) {
     });
 };
 
-OMusicPlayer.prototype.downloadSound = function (url, key, onload) {
+OMusicPlayer.prototype.downloadSound = function (url, key, onload, secondTry) {
     var p = this;
     var request = new XMLHttpRequest();
+
     request.open('GET', url, true);
     request.responseType = 'arraybuffer';
 
@@ -820,6 +821,14 @@ OMusicPlayer.prototype.downloadSound = function (url, key, onload) {
             console.warn("error loading sound url: " + url);
             onload(key);
         });
+    }
+    request.onerror = function (e) {
+        if (secondTry) {
+            return;
+        }
+        
+        url = "https://cors-anywhere.herokuapp.com/" + url;
+        p.downloadSound(url, key, onload, true);
     }
     request.send();
 };

@@ -2747,11 +2747,11 @@ tg.onmidimessage = function (control, value, channel) {
     }
 };
 
-[{url: "/omg-music/sequencer_surface.js"},
-    {url: "/omg-music/vertical_surface.js"},
-    {url: "/omg-music/monkey.js"},
+[{url: "../omg-music/sequencer_surface.js"},
+    {url: "../omg-music/vertical_surface.js"},
+    {url: "../omg-music/monkey.js"},
     {url: "live.js"},
-    {url: "/js/peakmeter.js", onload: ()=>tg.peakMeters.toggle("All")}
+    {url: "../js/peakmeter.js", onload: ()=>tg.peakMeters.toggle("All")}
     //{url: "/js/peakmeter.js"}
 ].forEach(script => {
     scriptTag = document.createElement("script");
