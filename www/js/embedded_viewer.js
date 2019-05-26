@@ -181,8 +181,7 @@ OMGEmbeddedViewer.prototype.setupControls = function (params) {
     viewer.userDiv.innerHTML = data.username || "(unknown)";
     viewer.datetimeDiv.innerHTML = omg.util.getTimeCaption(data.created_at);
 
-    var url = 'bitcoin:' + (data.btc_address || '1Jdam2fBZxfhWLB8yP69Zbw6fLzRpweRjc');
-    var amount = "?amount=0.004";
+    var url = 'bitcoin:' + (data.btc_address || '37WEyjvqgY6mEZDMiSTN11YWy5BYP8rP6e') + '?amount=0.00100000&label=OMG%20Tip%20Jar';
     var makeTipJar = function () {
         viewer.tipJar = document.createElement("div");
         viewer.tipJar.className = "tip-jar";
@@ -196,7 +195,7 @@ OMGEmbeddedViewer.prototype.setupControls = function (params) {
         viewer.tipJar.appendChild(viewer.tipJarBackground);
         viewer.tipJar.appendChild(viewer.tipJarForeground);
         viewer.tipJarLink = document.createElement("div");
-        viewer.tipJarLink.innerHTML = "<a href='" + url + amount + "'>" + url + "</a>";
+        viewer.tipJarLink.innerHTML = "<a href='" + url + "'>" + url + "</a>";
 
         viewer.tipJarBackground.onclick = function () {
             viewer.tipJar.style.display = "none";
@@ -204,7 +203,7 @@ OMGEmbeddedViewer.prototype.setupControls = function (params) {
 
         viewer.qr = new QRious({
             element: viewer.qrCanvas,
-            value: url + amount
+            value: url
         });
         
         viewer.tipJarForeground.appendChild(canvasDiv);
