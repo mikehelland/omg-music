@@ -826,7 +826,7 @@ OMusicPlayer.prototype.downloadSound = function (url, key, onload, secondTry) {
         if (secondTry) {
             return;
         }
-        
+
         url = "https://cors-anywhere.herokuapp.com/" + url;
         p.downloadSound(url, key, onload, true);
     }
@@ -1030,14 +1030,14 @@ OMusicPlayer.prototype.playNote = function (note, part) {
 
     if (!note || note.rest) {
         if (part.osc) {
-            part.gain.gain.setTargetAtTime(0, p.context.currentTime, 0.003);
+            part.preFXGain.gain.setTargetAtTime(0, p.context.currentTime, 0.003);
         }
         return;
     }
 
     if (part.osc) {
         part.baseFrequency = p.makeFrequency(note.scaledNote);
-        part.gain.gain.setTargetAtTime(part.data.audioParams.gain, p.nextBeatTime - 0.003, 0.003);
+        part.preFXGain.gain.setTargetAtTime(part.data.audioParams.gain, p.nextBeatTime - 0.003, 0.003);
         part.osc.frequency.setValueAtTime(part.baseFrequency * part.data.audioParams.warp, p.nextBeatTime);
         part.playingI = part.currentI;
         var playingI = part.playingI;
@@ -1046,7 +1046,7 @@ OMusicPlayer.prototype.playNote = function (note, part) {
         //a different note has played
         setTimeout(function () {
             if (part.osc && part.playingI === playingI) {
-                part.gain.gain.setTargetAtTime(0, p.context.currentTime, 0.003);
+                part.preFXGain.gain.setTargetAtTime(0, p.context.currentTime, 0.003);
             }
         }, p.song.data.beatParams.subbeats * note.beats * p.subbeatLength * 0.85);
     }
@@ -1275,7 +1275,7 @@ OMusicPlayer.prototype.playLiveNotes = function (notes, part) {
             part.baseFrequency = this.makeFrequency(notes[0].scaledNote);
             part.osc.frequency.setValueAtTime(
                     part.baseFrequency * part.data.audioParams.warp, this.context.currentTime);
-            part.gain.gain.setTargetAtTime(part.data.audioParams.gain, this.context.currentTime, 0.003);
+            part.preFXGain.gain.setTargetAtTime(part.data.audioParams.gain, this.context.currentTime, 0.003);
         }
         else {
             //var sound = this.getSound(part.data.soundSet, notes[0]);
@@ -1299,7 +1299,7 @@ OMusicPlayer.prototype.playLiveNotes = function (notes, part) {
 OMusicPlayer.prototype.endLiveNotes = function (part) {
   
     if (part.osc) {
-        part.gain.gain.setTargetAtTime(0,
+        part.preFXGain.gain.setTargetAtTime(0,
                 this.context.currentTime, 0.003);
     }  
     else {
