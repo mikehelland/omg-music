@@ -74,8 +74,8 @@ PeakMeter.prototype.createContainerDiv = function(parent) {
 PeakMeter.prototype.createRainbow = function(parent, width, height, top, left) {
     var rainbow = document.createElement('div');
     parent.appendChild(rainbow);
-    rainbow.style.width = width + 'px';
-    rainbow.style.height = height + 'px';
+    rainbow.style.width = '100%';
+    rainbow.style.height = '100%';
     rainbow.style.position = 'absolute';
     rainbow.style.top = top + 'px';
     if (this.vertical) {
@@ -96,7 +96,7 @@ PeakMeter.prototype.createChannelMask = function(parent, width, top, left, trans
     parent.appendChild(channelMask);
     channelMask.style.position = 'absolute';
     if (this.vertical) {
-      channelMask.style.width = width + 'px';
+      channelMask.style.width = '100%';
       channelMask.style.height = this.height + 'px';
       channelMask.style.top = top + 'px';
       channelMask.style.left = left + 'px';
