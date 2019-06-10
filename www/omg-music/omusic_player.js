@@ -128,8 +128,16 @@ OMusicPlayer.prototype._play = function () {
                                     beatParams.measures) {
         p.afterSection();
 
-        if (p.negativeLatencyCounter > 0 && p.latency < 500) {
-            p.latency += 20;
+        //this is autolatenecy
+        //if we're late, increase the latency (until 250ms)
+        //if we're not late, decrease it 1ms (until 20ms)
+        if (p.negativeLatencyCounter > 0) {
+            if (p.latency < 250) {
+                p.latency += 5;
+            }
+        }
+        else if (p.latency > 20) {
+            p.latency--;
         }
         p.negativeLatencyCounter = 0;
     }

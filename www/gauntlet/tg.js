@@ -16,8 +16,6 @@ tg.mainToolbar = document.getElementById("tool-bar");
 tg.mainBottomToolbar = document.getElementById("main-fragment-bottom-row");
 
 tg.loadSong = function (songData, source) {
-    var showMeters = tg.peakMeters.show;
-    tg.peakMeters.toggle("Off");
     
     var className = songData.constructor.name;
     if (className === "OMGSong") {
@@ -37,7 +35,6 @@ tg.loadSong = function (songData, source) {
     document.getElementById("tool-bar-song-button").innerHTML = tg.song.data.name || "(Untitled)";
     
     tg.setupSongListeners(source);
-    tg.peakMeters.toggle(showMeters);
 };
 
 tg.setupSongListeners = function (source) {
@@ -71,6 +68,9 @@ tg.setupSongListeners = function (source) {
 tg.setupSongListeners();
 
 tg.loadSection = function (section) {
+    var showMeters = tg.peakMeters.show;
+    tg.peakMeters.toggle("Off");
+
     tg.currentSection = section;
     tg.partList.innerHTML = "";
     for (var j = 0; j < section.parts.length; j++) {
@@ -78,6 +78,7 @@ tg.loadSection = function (section) {
     }
     //if (tg.player.loopSection)
     tg.setSongControlsUI();
+    tg.peakMeters.toggle(showMeters);
 };
 
 tg.loadPart = function (part) {
@@ -2269,9 +2270,9 @@ tg.copySection = function (name) {
     var names = tg.song.sections.map(section => section.data.name);
     newSectionData.name = omg.util.getUniqueName(newSectionData.name, names);
     var newSection = new OMGSection(null, newSectionData, tg.song);
-    tg.loadSection(newSection);
     tg.player.loadSection(newSection);
     tg.player.loopSection = tg.song.sections.indexOf(newSection);
+    tg.loadSection(newSection);
     return newSection;
 };
 

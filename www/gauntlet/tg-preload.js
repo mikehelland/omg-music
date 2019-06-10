@@ -51,8 +51,15 @@ tg.setupPartButton = function (omgpart) {
     button.className = "part-mute-button";
     button.innerHTML = "M";
     button.onclick = function () {
+        //this should all be in the player!
+
         omgpart.data.audioParams.mute = !omgpart.data.audioParams.mute;
         tg.song.partMuteChanged(omgpart);
+
+        if (omgpart.osc && omgpart.data.audioParams.mute) {
+            omgpart.preFXGain.gain.cancelScheduledValues(tg.player.context.currentTime)
+            omgpart.preFXGain.gain.setValueAtTime(0, tg.player.context.currentTime)
+        }
     }
     button.refresh = function () {
         button.style.backgroundColor = omgpart.data.audioParams.mute ?
