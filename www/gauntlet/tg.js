@@ -416,7 +416,14 @@ tg.instrument.setup = function () {
         ti.setMode(ti.mm.mode !== "ZOOM" ? "ZOOM" : "LIVE");
     };
     
-    tg.instrument.onBeatPlayedListener = function (subbeat, isection) {
+    tg.instrument.onBeatPlayedListener = function (subbeat, section) {
+        if (section !== tg.instrument.part.section) {
+            var newPart = section.getPart(tg.instrument.part.data.name);
+            if (newPart) {
+                newPart.mainFragmentButton.onclick();
+            }
+        }
+
         tg.instrument.mm.updateBeatMarker(subbeat);
     };
     tg.instrument.isSetup = true;
@@ -436,6 +443,7 @@ tg.instrument.show = function (part) {
             tg.instrument.onchange(part, frets);
         };
     }
+    tg.instrument.part = part;
     tg.instrument.mm = part.mm;
     tg.instrument.mm.setCanvasEvents();
     tg.instrument.mm.backgroundDrawn = false;
@@ -2177,6 +2185,7 @@ tg.sectionFragment.addArrangementListItem = (arrangementItem) => {
         }
         else {
             tg.player.arrangementI = tg.song.arrangement.indexOf(arrangementItem);
+            //todo what the heck is this doing here
             tg.player.section = tg.song.arrangement[tg.player.arrangementI].section;
         }
         tg.sectionFragment.updateSelectedSection(sectionDiv, section);
