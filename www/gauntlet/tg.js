@@ -317,7 +317,14 @@ tg.sequencer.setup = function () {
         s.part.drumMachine.beatStrength = 0.25;
     };
     
-    s.onBeatPlayedListener = function (isubbeat, isection) {
+    s.onBeatPlayedListener = function (isubbeat, section) {
+        if (section !== tg.sequencer.part.section) {
+            var newPart = section.getPart(tg.sequencer.part.data.name);
+            if (newPart) {
+                newPart.mainFragmentButton.onclick();
+            }
+        }
+
         s.part.drumMachine.updateBeatMarker(isubbeat);
     };
     
@@ -436,6 +443,7 @@ tg.instrument.show = function (part) {
     tg.player.onBeatPlayedListeners.push(tg.instrument.onBeatPlayedListener);
 
     tg.currentFragment = tg.instrument;
+
     if (!part.mm) {
         part.mm = new OMGMelodyMaker(tg.instrument.surface, part, tg.player);
         part.mm.readOnly = false;
@@ -443,6 +451,7 @@ tg.instrument.show = function (part) {
             tg.instrument.onchange(part, frets);
         };
     }
+
     tg.instrument.part = part;
     tg.instrument.mm = part.mm;
     tg.instrument.mm.setCanvasEvents();

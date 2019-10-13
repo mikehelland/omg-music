@@ -384,7 +384,10 @@ OMGMelodyMaker.prototype.doneTouching = function () {
     this.frets.touching = -1;
     this.buttonTouched = undefined;
     this.touchingXSection = -1;
-    this.draw();
+
+    if (!this.hidden) {
+        this.draw();
+    }
 };
 
 OMGMelodyMaker.prototype.updateOffsets = function () {
@@ -614,7 +617,9 @@ OMGMelodyMaker.prototype.onmove = function (touch) {
     else {
         this.onmoveInWriteMode(touch)
     }
-    this.draw();
+    if (!this.hidden) {
+        this.draw();
+    }
 };
 
 OMGMelodyMaker.prototype.onup = function (touch) {
@@ -630,7 +635,10 @@ OMGMelodyMaker.prototype.onup = function (touch) {
 
     var touchIndex = this.touches.indexOf(touch);
     this.touches.splice(touchIndex, 1);
-    this.draw();
+
+    if (!this.hidden) {
+        this.draw();
+    }
 };    
 
 OMGMelodyMaker.prototype.ondownInWriteMode = function (touch) {
