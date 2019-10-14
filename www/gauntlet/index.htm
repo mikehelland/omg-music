@@ -152,13 +152,24 @@
         </div>
         <div id="mix-fragment" class="fragment"></div>
         <div id="save-fragment" class="fragment">
-            <h2>Saved to OpenMusic.Gallery</h2>
-            <p>Your song can be accessed at this URL:</p>
-            <input id="saved-url">
-            <br>
-            <a id="saved-url-link">Go to URL</a>
-            <br>
-            <canvas width="1200" height="630" id="save-fragment-canvas"></canvas>
+            <div class="detail-fragment-body">
+                <h2 id="save-fragment-saving">Saving...</h2>
+                <div id="save-fragment-saved">
+                    <h2>Saved to OpenMusic.Gallery</h2>
+                    <p>Your song can be accessed at this URL:</p>
+                    <input id="saved-url">
+                    <br>
+                    <a id="saved-url-link">Go to URL</a>
+                </div>
+                <div id="save-fragment-overwrite">
+                    <h2>Overwrite existing song?</h2>
+                    <button id="save-fragment-overwrite-button">Overwrite existing song</button>
+                    <h2>Make a copy?</h2>
+                    <button id="save-fragment-copy-button">Make a copy</button>
+                </div>
+                <br>
+                <canvas width="1200" height="630" id="save-fragment-canvas"></canvas>
+            </div>
         </div>
         <div id="part-options-fragment" class="fragment">
             <div id="part-options-tabs" class="detail-tab-row">

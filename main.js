@@ -222,6 +222,42 @@ app.get('/data/:id', function (req, res) {
     });
 });
 app.post('/data/', function (req, res) {
+
+    if (typeof req.body.omgVersion !== "number" || req.body.omgVersion < 1) {
+        res.send({});
+        return;
+    }
+
+    if (req.body.id && !req.user) {
+        res.send({});
+        return;
+    }
+
+    var db = app.get('db');
+
+    if (req.body.id) {
+        db.things.findDoc({id: req.body.id}, function (err, docs) {
+            if (err) {
+               res.send(err);
+            } 
+            else {
+                if (docs.user_id === req.user.id) {
+                    postData(req, res, db)
+                }
+                else {
+                    res.send({});
+                    console.log(docs.user_id, req.user.id)
+                    console.log("tried to overwrite someone elses file")
+                }
+            }
+        });
+    }
+    else {
+        postData(req, res, db)
+    }
+});
+
+var postData = function (req, res, db) {
     if (req.user) {
         req.body.user_id = req.user.id;
         req.body.username = req.user.username;
@@ -230,17 +266,11 @@ app.post('/data/', function (req, res) {
         delete req.body.approved;
     }
 
-    if (typeof req.body.omgVersion !== "number" || req.body.omgVersion < 1) {
-        res.send({});
-        return;
-    }
-
     if (!req.body.created_at) {
         req.body.created_at = Date.now();
     }
     req.body.last_modified = Date.now();
 
-    var db = app.get('db');
     db.saveDoc("things", req.body, function (err, result) {
         if (!err) {
             res.send(result);
@@ -250,7 +280,8 @@ app.post('/data/', function (req, res) {
             console.log(err);
         }
     }); 
-});
+};
+
 app.delete('/data/:id', function (req, res) {
     if (req.user && req.user.admin) {
         req.body.user_id = req.user.id;

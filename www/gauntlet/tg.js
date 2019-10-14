@@ -1115,16 +1115,52 @@ tg.saveFragment = {
     div: document.getElementById("save-fragment"),
     canvas: document.getElementById("save-fragment-canvas"),
     urlInput: document.getElementById("saved-url"),
-    urlLink: document.getElementById("saved-url-link")
-            
+    urlLink: document.getElementById("saved-url-link"),
+    savingCaption: document.getElementById("save-fragment-saving"),
+    savedArea: document.getElementById("save-fragment-saved"),
+    overwriteArea: document.getElementById("save-fragment-overwrite"),
+    overwriteButton: document.getElementById("save-fragment-overwrite-button"),
+    copyButton: document.getElementById("save-fragment-copy-button")
 };
-tg.saveFragment.onshow = function () {
-
-    if (tg.song.data.id) {
-        // todo THIS SAVE STUFF!
-        // what if nothing's changed?
+tg.saveFragment.setup = function () {
+    tg.saveFragment.overwriteButton.onclick = function () {
+        tg.saveFragment.save();
+    };
+    tg.saveFragment.copyButton.onclick = function () {
         delete tg.song.data.id;
+        tg.saveFragment.save()
+    };
+};
+
+tg.saveFragment.onshow = function () {
+    var f = tg.saveFragment;
+    if (!tg.song.data.id) {
+        f.savingCaption.style.display = "block";
+        f.savedArea.style.display = "none";
+        f.overwriteArea.style.display = "none";
+        f.save();
     }
+    else {
+        if (tg.user && tg.song.data.user_id === tg.user.id) {
+            f.savingCaption.style.display = "none";
+            f.savedArea.style.display = "none";
+            f.overwriteArea.style.display = "block";    
+        }
+        else {
+            delete tg.song.data.id;
+            f.savingCaption.style.display = "block";
+            f.savedArea.style.display = "none";
+            f.overwriteArea.style.display = "none";
+            f.save();    
+        }
+    }
+}
+
+tg.saveFragment.save = function () {
+    tg.saveFragment.savingCaption.style.display = "block";
+    tg.saveFragment.overwriteArea.style.display = "none";
+    tg.saveFragment.savedArea.style.display = "none";
+
     var json = tg.song.getData();
     var ok = false;
     try {
@@ -1140,9 +1176,6 @@ tg.saveFragment.onshow = function () {
     
     omg.server.post(json, function (response) {
         if (response.id) {
-            var savedUrl = location.origin + "/play/" + response.id;
-            tg.saveFragment.urlInput.value = savedUrl;
-            tg.saveFragment.urlLink.href = savedUrl;        
             tg.saveFragment.onSave(response);
         }
         else {
@@ -1153,6 +1186,17 @@ tg.saveFragment.onshow = function () {
 };
 
 tg.saveFragment.onSave = function (data) {
+    tg.song.data.id = data.id;
+    tg.song.data.user_id = data.user_id;
+
+    var savedUrl = location.origin + "/play/" + data.id;
+    tg.saveFragment.urlInput.value = savedUrl;
+    tg.saveFragment.urlLink.href = savedUrl;
+
+    tg.saveFragment.savingCaption.style.display = "none";
+    tg.saveFragment.savedArea.style.display = "block";
+    tg.saveFragment.overwriteArea.style.display = "none";
+
     var onloadScript = function () {
         tg.saveFragment.drawAndPostCanvas(data);
     };

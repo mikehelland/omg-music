@@ -196,7 +196,7 @@ body {
     width:100%;
     display:none;
 }*/
-#beats-fragment, #save-fragment {
+#beats-fragment {
     text-align:center;
     font-size: 1.5em;
 }
