@@ -227,9 +227,11 @@ omg.util.getUserThings = function (user, resultList, onclick) {
         div.innerHTML = omg.util.getTimeCaption(user.created_at);
     }
 
+    var params = {user: user, resultList: resultList, onclick: onclick, page: 1};
     omg.server.getHTTP("/data/?user_id=" + user.id, function (results) {
         if (results) {
-            omg.util.loadSearchResults(results, resultList, onclick);
+            params.results = results;
+            omg.util.loadSearchResults(params);
         }
         else {
             resultList.innerHTML = "Error parsing search results.";
@@ -237,7 +239,13 @@ omg.util.getUserThings = function (user, resultList, onclick) {
     });
 };
 
-omg.util.loadSearchResults = function (results, resultList, onclick) {
+omg.util.loadSearchResults = function (params) {
+
+    omg.util.makePrevButton(params)
+
+    var results = params.results;
+    var resultList = params.resultList;
+    var onclick = params.onclick;
    results.forEach(function (result) {
       var resultDiv = document.createElement("div");
       resultDiv.className = "search-thing";
@@ -274,7 +282,7 @@ omg.util.loadSearchResults = function (results, resultList, onclick) {
 
       resultData = document.createElement("div");
       resultData.className = "search-thing-created-at";
-      resultData.innerHTML = omg.util.getTimeCaption(parseInt(result.created_at));
+      resultData.innerHTML = omg.util.getTimeCaption(parseInt(result.last_modified));
       rightData.appendChild(resultData);
 
       resultDiv.onclick = function () {
@@ -287,8 +295,55 @@ omg.util.loadSearchResults = function (results, resultList, onclick) {
       };
       resultList.appendChild(resultDiv);
    });
+
+   omg.util.makeNextButton(params)
 };
 
+omg.util.makePrevButton = function (params) {
+    if (params.page <= 1) {
+        return;
+    }
+
+    var button = document.createElement("button");
+    button.innerHTML = "< Previous";
+    button.onclick = function () {
+        params.resultList.innerHTML = "";
+
+        params.page -= 1;
+        omg.server.getHTTP("/data/?page=" + params.page + "&user_id=" + params.user.id, function (results) {
+            if (results) {
+                params.results = results;
+                omg.util.loadSearchResults(params);
+            }
+            else {
+                params.resultList.innerHTML = "Error parsing search results.";
+            }
+        });
+    
+    };
+    params.resultList.appendChild(button);
+};
+
+omg.util.makeNextButton = function (params) {
+    var nextButton = document.createElement("button");
+    nextButton.innerHTML = "Next >";
+    nextButton.onclick = function () {
+        params.resultList.innerHTML = "";
+
+        params.page += 1;
+        omg.server.getHTTP("/data/?page=" + params.page + "&user_id=" + params.user.id, function (results) {
+            if (results) {
+                params.results = results;
+                omg.util.loadSearchResults(params);
+            }
+            else {
+                params.resultList.innerHTML = "Error parsing search results.";
+            }
+        });
+    
+    };
+    params.resultList.appendChild(nextButton);
+};
 
 /*
  * UI stuff

@@ -1770,11 +1770,12 @@ tg.userFragment = {
             loginArea: document.getElementById("user-login-signup"),
             invalidMessage: document.getElementById("user-login-invalid"),
             loginButton: document.getElementById("user-login-button"),
-            signupButton: document.getElementById("user-signup-button"),
-            logoutButton: document.getElementById("user-logout-button")
+            signupButton: document.getElementById("user-signup-button")
         }, 
         settings: {
             div: document.getElementById("user-fragment-settings"),
+            listDiv: document.getElementById("user-fragment-settings-list"),
+            logoutButton: document.getElementById("user-logout-button")
         },
         help: {
             div: document.getElementById("user-fragment-help"),
@@ -1785,13 +1786,7 @@ tg.userFragment = {
  
 tg.userFragment.tabs.user.setup = function () {
     var t = this;
-    
-    this.logoutButton.onclick = function () {
-        omg.server.logout(() => {
-            tg.onlogin(undefined);
-        });
-    };
-    
+        
     var login = () => {
         omg.server.login(this.loginUsername.value, this.loginPassword.value, onlogin);
     };
@@ -1830,12 +1825,20 @@ tg.userFragment.tabs.user.onshow = function () {
 };
 
 tg.userFragment.tabs.settings.onshow = function () {
+    this.logoutButton.style.display = tg.user ? "block" : "none";
     this.controls.forEach(control => {
         control.sizeCanvas();
     });
 };
 
 tg.userFragment.tabs.settings.setup = function () {
+
+    this.logoutButton.onclick = function () {
+        omg.server.logout(() => {
+            tg.onlogin(undefined);
+            tg.userFragment.tabs.user.header.onclick()
+        });
+    };
 
     var noSleep;
     var toggleNoSleep = (value) => {
@@ -1886,7 +1889,7 @@ tg.userFragment.tabs.settings.setup = function () {
     this.settingsList.forEach(setting => {
         var control = new SliderCanvas(null, setting, null, setting.dataObject || tg);
         control.div.className = "fx-slider";
-        this.div.appendChild(control.div);
+        this.listDiv.appendChild(control.div);
         
         this.controls.push(control);
     });

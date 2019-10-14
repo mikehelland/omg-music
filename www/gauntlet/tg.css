@@ -691,7 +691,7 @@ input {
     float: right;
 }
 
-.search-thing-votes, .search-thing-user, .search-thing-type {
+.search-thing-votes, .search-thing-user, .search-thing-type, .search-thing-created-at {
     font-size:80%;
 }
 
