@@ -49,7 +49,10 @@
    <!--<script src="js/user.js"></script>-->
    <script>
     setupUserControls(document.getElementsByClassName("title-bar-user-controls")[0], function (user) {
-        omg.util.getUserThings(user, document.getElementsByClassName("search-things")[0]);
+        omg.util.getUserThings({user, 
+            resultList: document.getElementsByClassName("search-things")[0],
+            showMenu: true
+         });
         if (user.btc_address) {
             user.btc_address = user.btc_address.trim();
         }

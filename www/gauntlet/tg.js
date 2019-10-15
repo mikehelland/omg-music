@@ -1899,17 +1899,22 @@ tg.userFragment.tabs.settings.setup = function () {
 tg.showUserThings = function () {
     var listDiv = document.getElementById("user-fragment-detail-list");
     listDiv.innerHTML = "";
-    omg.util.getUserThings(tg.user, listDiv, function (thing) {
-        if (thing.type && thing.type === "SOUNDSET") {
-            tg.addPart(thing, "addPartFragment");
-        }
-        else {
-            tg.loadSong(thing);
-            if (window.innerWidth < window.innerHeight) {
-                tg.hideDetails(true);
+    var params = {
+        user: tg.user,
+        resultList: listDiv,
+        onclick: function (thing) {
+            if (thing.type && thing.type === "SOUNDSET") {
+                tg.addPart(thing, "addPartFragment");
+            }
+            else {
+                tg.loadSong(thing);
+                if (window.innerWidth < window.innerHeight) {
+                    tg.hideDetails(true);
+                }
             }
         }
-    });
+    }
+    omg.util.getUserThings(params);
 };
 
 tg.onlogin = function (user) {

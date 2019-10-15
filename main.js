@@ -1,3 +1,5 @@
+var omg = {}
+
 var compression = require('compression');
 var express = require('express');
 var app = express();
@@ -167,7 +169,6 @@ app.get('/data/', function (req, res) {
     var options = {limit : perPage, order : "created_at desc"};
     var find = {};
     if (req.query.user_id) {
-        //find = {user_id: parseInt(req.query.user_id)};
         find.user_id = req.query.user_id;
     }
     if (req.query.type) {
@@ -242,7 +243,7 @@ app.post('/data/', function (req, res) {
             } 
             else {
                 if (docs.user_id === req.user.id) {
-                    postData(req, res, db)
+                    omg.postData(req, res, db)
                 }
                 else {
                     res.send({});
@@ -253,11 +254,11 @@ app.post('/data/', function (req, res) {
         });
     }
     else {
-        postData(req, res, db)
+        omg.postData(req, res, db)
     }
 });
 
-var postData = function (req, res, db) {
+omg.postData = function (req, res, db) {
     if (req.user) {
         req.body.user_id = req.user.id;
         req.body.username = req.user.username;
@@ -283,25 +284,33 @@ var postData = function (req, res, db) {
 };
 
 app.delete('/data/:id', function (req, res) {
-    if (req.user && req.user.admin) {
-        req.body.user_id = req.user.id;
-        req.body.username = req.user.username;
-    }
-    else {
+
+    if (!req.params.id || !req.user) {
         res.send({"error": "access denied"});
         return;
     }
 
     var db = app.get('db');
-    db.things.destroy({id: req.params.id}, function (err, result) {
-        if (!err) {
-            res.send(result);
-        }
-        else {
+    db.things.findDoc({id: req.params.id}, function (err, docs) {
+        if (err) {
             res.send(err);
-            console.log(err);
+        } 
+        else {
+            if (docs.user_id === req.user.id || req.user.admin) {
+                db.things.destroy({id: req.params.id}, function (err, result) {
+                    if (!err) {
+                        res.send(result);
+                    }
+                    else {
+                        res.send(err);
+                    }
+                }); 
+            }
+            else {
+                res.send({"error": "access denied"});
+            }
         }
-    }); 
+    });
 });
 
 app.get('/play/:id', function (req, res) {

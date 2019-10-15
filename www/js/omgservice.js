@@ -215,26 +215,25 @@ omg.util.saveSound = function (sound, data) {
     } catch (e) {console.log(e);}
 };
 
-omg.util.getUserThings = function (user, resultList, onclick) {
-
+omg.util.getUserThings = function (params) {
     var div = document.getElementsByClassName("user-username")[0];
     if (div) {
-        div.innerHTML = user.username;
+        div.innerHTML = params.user.username;
     }
 
     div = document.getElementsByClassName("user-created-at")[0];
     if (div) {
-        div.innerHTML = omg.util.getTimeCaption(user.created_at);
+        div.innerHTML = omg.util.getTimeCaption(params.user.created_at);
     }
 
-    var params = {user: user, resultList: resultList, onclick: onclick, page: 1};
-    omg.server.getHTTP("/data/?user_id=" + user.id, function (results) {
+    params.page = 1
+    omg.server.getHTTP("/data/?user_id=" + params.user.id, function (results) {
         if (results) {
             params.results = results;
             omg.util.loadSearchResults(params);
         }
         else {
-            resultList.innerHTML = "Error parsing search results.";
+            params.resultList.innerHTML = "Error parsing search results.";
         }
     });
 };
@@ -246,54 +245,99 @@ omg.util.loadSearchResults = function (params) {
     var results = params.results;
     var resultList = params.resultList;
     var onclick = params.onclick;
-   results.forEach(function (result) {
-      var resultDiv = document.createElement("div");
-      resultDiv.className = "search-thing";
+    results.forEach(function (result) {
+        var resultDiv = document.createElement("div");
+        resultDiv.className = "search-thing";
 
-      var resultData = document.createElement("div");
-      resultData.className = "search-thing-image";
-      resultData.innerHTML = "&nbsp;"
-      resultData.style.backgroundColor = omg.ui.getBackgroundColor(result.type);
-      resultDiv.appendChild(resultData);
+        var resultDetail = document.createElement("div");
+        resultDetail.className = "search-thing-detail";
 
-      resultData = document.createElement("div");
-      resultData.className = "search-thing-type";
-      resultData.innerHTML = result.type;
-      resultDiv.appendChild(resultData);
+        var resultData = document.createElement("div");
+        resultData.className = "search-thing-image";
+        resultData.innerHTML = "&nbsp;"
+        resultData.style.backgroundColor = omg.ui.getBackgroundColor(result.type);
+        resultDetail.appendChild(resultData);
 
-      resultData = document.createElement("div");
-      resultData.className = "search-thing-title";
-      resultData.innerHTML = result.name || (result.tags ? ("(" + result.tags + ")") : "");
-      resultDiv.appendChild(resultData);
+        resultData = document.createElement("div");
+        resultData.className = "search-thing-type";
+        resultData.innerHTML = result.type;
+        resultDetail.appendChild(resultData);
 
-      resultData = document.createElement("div");
-      resultData.className = "search-thing-user";
-      resultData.innerHTML = result.username ? "by " + result.username : "";
-      resultDiv.appendChild(resultData);
+        resultData = document.createElement("div");
+        resultData.className = "search-thing-title";
+        resultData.innerHTML = result.name || (result.tags ? ("(" + result.tags + ")") : "");
+        resultDetail.appendChild(resultData);
 
-      var rightData = document.createElement("div");
-      rightData.className = "search-thing-right-data";
-      resultDiv.appendChild(rightData);
+        resultData = document.createElement("div");
+        resultData.className = "search-thing-user";
+        resultData.innerHTML = result.username ? "by " + result.username : "";
+        resultDetail.appendChild(resultData);
 
-      resultData = document.createElement("div");
-      resultData.className = "search-thing-votes";
-      resultData.innerHTML = (result.votes || "0") + " votes";
-      rightData.appendChild(resultData);
+        var rightData = document.createElement("div");
+        rightData.className = "search-thing-right-data";
+        resultDetail.appendChild(rightData);
 
-      resultData = document.createElement("div");
-      resultData.className = "search-thing-created-at";
-      resultData.innerHTML = omg.util.getTimeCaption(parseInt(result.last_modified));
-      rightData.appendChild(resultData);
+        resultData = document.createElement("div");
+        resultData.className = "search-thing-votes";
+        resultData.innerHTML = (result.votes || "0") + " votes";
+        rightData.appendChild(resultData);
 
-      resultDiv.onclick = function () {
-          if (onclick) {
-              onclick(result);
-          }
-          else {
-            window.location = "viewer.htm?id=" + result.id;
-          }
-      };
-      resultList.appendChild(resultDiv);
+        resultData = document.createElement("div");
+        resultData.className = "search-thing-created-at";
+        resultData.innerHTML = omg.util.getTimeCaption(parseInt(result.last_modified));
+        rightData.appendChild(resultData);
+        resultDiv.appendChild(resultDetail)
+        
+        var showingMenu = false
+        if (params.showMenu) {
+            var menuDiv = document.createElement("div");
+            menuDiv.className = "search-thing-menu";
+            menuDiv.innerHTML = "&nbsp;&#9776;&nbsp;";
+            rightData.appendChild(menuDiv);
+
+            var optionsDiv = document.createElement("div");
+            optionsDiv.className = "search-thing-options";
+            optionsDiv.style.display = "none"
+            resultDiv.appendChild(optionsDiv);
+            var optionsRight = document.createElement("div")
+            optionsRight.className = "search-thing-options-right"
+            optionsDiv.appendChild(optionsRight)
+
+            var deleteButton = document.createElement("span");
+            deleteButton.innerHTML = "Delete"
+            deleteButton.className = "search-thing-option"
+            optionsRight.appendChild(deleteButton)
+            deleteButton.onclick = function () {
+                omg.server.deleteId(result.id, function () {
+                    resultList.removeChild(resultDiv)
+                });
+            }
+
+            var editButton = document.createElement("span");
+            editButton.innerHTML = "Edit"
+            editButton.className = "search-thing-option"
+            optionsDiv.appendChild(editButton)
+            editButton.onclick = function () {
+                window.location = "/gauntlet/?id=" + result.id
+            }
+
+            menuDiv.onclick = function (e) {
+                console.log(optionsDiv.parentElement.innerHTML)
+                showingMenu = !showingMenu
+                optionsDiv.style.display = showingMenu ? "block" : "none"
+                e.stopPropagation() 
+            };
+        }
+
+        resultDetail.onclick = function () {
+            if (onclick) {
+                onclick(result);
+            }
+            else {
+                window.location = "play/" + result.id;
+            }
+        };
+        resultList.appendChild(resultDiv);
    });
 
    omg.util.makeNextButton(params)
