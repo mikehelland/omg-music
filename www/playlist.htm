@@ -5,13 +5,6 @@
         <link rel="stylesheet" href="css/main.css" type="text/css" />
         <link rel="stylesheet" href="css/search.css" type="text/css" />
 
-        <style>
-            .url-input {width: 300px;}
-            audio {position:relative; top: 8px;}
-            .sound {padding: 8px;}
-            #edit-button, #delete-button {visibility: hidden};
-        </style>
-
     </head>
     <body>
 
@@ -36,11 +29,6 @@
             <div id="list" class="search-info">
             </div>
 
-            <button id="edit-button">
-                Edit</button>
-            <button id="delete-button">
-                Delete</button>
-
         </div>
 
         <script src="js/usercontrols.js"></script>
@@ -56,57 +44,91 @@ if (!params.id) {
     nameDiv.innerText = "(Invalid ID)";
 } else {
 
-    var setupAdminButtons = function (response) {
-        
-        var deleteButton = document.getElementById("delete-button");
-        deleteButton.onclick = function () {
-            omg.server.deleteId(params.id, function () {
-                window.history.back();
-            });
-        };
-        deleteButton.style.visibility = "visible";
-        var editButton = document.getElementById("edit-button");
-        editButton.onclick = function () {
-            window.location = "soundset-editor.htm?id=" + params.id;
-        };
-        editButton.style.visibility = "visible";
-        if (!response.approved) {
-            var approveButton = document.getElementById("approve-button");
-            approveButton.onclick = function () {
-                response.approved = true;
-                omg.server.post(response, function () {
-                    window.location = window.location;
-                })
-            };
-            approveButton.style.visibility = "visible";
+    var playlist
+    var moveUp = function (item) {
+        var i = playlist.data.indexOf(item) 
+        if (i < 1) {
+            return
         }
-        else {
-            var disapproveButton = document.getElementById("disapprove-button");
-            disapproveButton.onclick = function () {
-                response.approved = false;
-                omg.server.post(response, function () {
-                    window.location = window.location;
-                })
-            };
-            disapproveButton.style.visibility = "visible";
+
+        playlist.data.splice(i, 1)
+        playlist.data.splice(i - 1, 0, item)
+        console.log(playlist.data)
+
+        omg.server.post(playlist)
+        loadData(playlist)
+    }
+
+    var moveDown = function (item) {
+        var i = playlist.data.indexOf(item) 
+        if (i > -1 && i > playlist.data.length - 1) {
+            return
         }
-    };
-    
-    omg.server.getId(params.id, function (response) {
-        nameDiv.innerText = response.name;
+
+        playlist.data.splice(i, 1)
+        playlist.data.splice(i + 1, 0, item)
+
+        omg.server.post(playlist)
+        loadData(playlist)
+    }
+
+    var remove = function (item) {
+        var i = playlist.data.indexOf(item) 
+        if (i == -1) {
+            return
+        }
+
+        playlist.data.splice(i, 1)
+
+        omg.server.post(playlist)
+        loadData(playlist)
+    }
+
+    var loadData = function (response) {
+        listDiv.innerHTML = ""
         omg.util.loadSearchResults({
             resultList: listDiv,
             results: response.data,
-            noNavigation: true
-        })
+            noNavigation: true,
+            onmakediv: (params) => {
+                var el = document.createElement("div")
+                el.innerHTML = "&uarr;"
+                el.className = "search-thing-menu"
+                params.rightDiv.appendChild(el)
+                el.onclick = (e) => {
+                    e.stopPropagation()
+                    moveUp(params.thing)
+                }
 
-        setupUserControls(
-            document.getElementsByClassName("title-bar-user-controls")[0],
-            function () {
-                if (typeof omg !== "undefined" && omg.user && omg.user.admin) {
-                    setupAdminButtons(response);
+                el = document.createElement("div")
+                el.innerHTML = "&darr;"
+                el.className = "search-thing-menu"
+                params.rightDiv.appendChild(el)
+                el.onclick = (e) => {
+                    e.stopPropagation()
+                    moveDown(params.thing)
+                }
+
+                el = document.createElement("div")
+                el.innerHTML = "&times;"
+                el.className = "search-thing-menu"
+                params.rightDiv.appendChild(el)
+                el.onclick = (e) => {
+                    e.stopPropagation()
+                    remove(params.thing)
                 }
             }
+        })
+
+
+    }
+
+    omg.server.getId(params.id, function (response) {
+        playlist = response
+        nameDiv.innerText = response.name;
+        loadData(response)
+        setupUserControls(
+            document.getElementsByClassName("title-bar-user-controls")[0]
         );
     });
 }

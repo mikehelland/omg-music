@@ -52,7 +52,7 @@
     setupUserControls(document.getElementsByClassName("title-bar-user-controls")[0], function (user) {
         omg.util.getUserThings({user: user, 
             resultList: document.getElementsByClassName("search-things")[0],
-            showMenu: true
+            showMenu: true               
          });
         if (user.btc_address) {
             user.btc_address = user.btc_address.trim();

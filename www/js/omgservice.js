@@ -359,6 +359,15 @@ omg.util.loadSearchResults = function (params) {
             }
         };
         resultList.appendChild(resultDiv);
+
+        if (params.onmakediv) {
+            params.onmakediv({
+                div: resultDiv,
+                detail: resultDetail,
+                rightDiv: rightData,
+                thing: result
+            })
+        }
    });
 
    omg.util.makeNextButton(params)
