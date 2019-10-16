@@ -260,7 +260,7 @@ OMGEmbeddedViewer.prototype.setupControls = function (params) {
 
 OMGEmbeddedViewer.prototype.drawCanvas = function (data) {
     
-    if (data.type === "SOUNDSET") {
+    if (data.type === "SOUNDSET" || data.type === "PLAYLIST") {
         //todo this.loadSoundSet(data);
         return;
     }

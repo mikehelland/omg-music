@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+    <head>
+
+        <link rel="stylesheet" href="css/main.css" type="text/css" />
+        <link rel="stylesheet" href="css/search.css" type="text/css" />
+
+        <style>
+            .url-input {width: 300px;}
+            audio {position:relative; top: 8px;}
+            .sound {padding: 8px;}
+            #edit-button, #delete-button {visibility: hidden};
+        </style>
+
+    </head>
+    <body>
+
+        <div class="main-title-bar">
+            <div class="main-title-bar-content">
+                <a class="main-page-link" href="index.htm">
+                    <span class="main-title-open">Open</span><span class="main-title-media">Music</span><span class="main-title-gallery">.Gallery</span>
+                </a>
+
+                <div class="main-title-bar-right">
+                    <div class="title-bar-user-controls"></div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="main-body">
+
+            <h1>Playlist: <span id="name"></span></h1>
+
+
+            <div id="list" class="search-info">
+            </div>
+
+            <button id="edit-button">
+                Edit</button>
+            <button id="delete-button">
+                Delete</button>
+
+        </div>
+
+        <script src="js/usercontrols.js"></script>
+        <script src="js/omgservice.js"></script>
+        <script>
+
+
+var nameDiv = document.getElementById("name");
+var listDiv = document.getElementById("list");
+
+var params = omg.util.getPageParams();
+if (!params.id) {
+    nameDiv.innerText = "(Invalid ID)";
+} else {
+
+    var setupAdminButtons = function (response) {
+        
+        var deleteButton = document.getElementById("delete-button");
+        deleteButton.onclick = function () {
+            omg.server.deleteId(params.id, function () {
+                window.history.back();
+            });
+        };
+        deleteButton.style.visibility = "visible";
+        var editButton = document.getElementById("edit-button");
+        editButton.onclick = function () {
+            window.location = "soundset-editor.htm?id=" + params.id;
+        };
+        editButton.style.visibility = "visible";
+        if (!response.approved) {
+            var approveButton = document.getElementById("approve-button");
+            approveButton.onclick = function () {
+                response.approved = true;
+                omg.server.post(response, function () {
+                    window.location = window.location;
+                })
+            };
+            approveButton.style.visibility = "visible";
+        }
+        else {
+            var disapproveButton = document.getElementById("disapprove-button");
+            disapproveButton.onclick = function () {
+                response.approved = false;
+                omg.server.post(response, function () {
+                    window.location = window.location;
+                })
+            };
+            disapproveButton.style.visibility = "visible";
+        }
+    };
+    
+    omg.server.getId(params.id, function (response) {
+        nameDiv.innerText = response.name;
+        omg.util.loadSearchResults({
+            resultList: listDiv,
+            results: response.data,
+            noNavigation: true
+        })
+
+        setupUserControls(
+            document.getElementsByClassName("title-bar-user-controls")[0],
+            function () {
+                if (typeof omg !== "undefined" && omg.user && omg.user.admin) {
+                    setupAdminButtons(response);
+                }
+            }
+        );
+    });
+}
+        </script>
+
+    </body>
+</html>

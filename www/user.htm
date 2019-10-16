@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+   <title>User - OpenMusic.Gallery</title>
 
    <link rel="stylesheet" href="css/main.css" type="text/css" />
    <link rel="stylesheet" href="css/search.css" type="text/css" />
@@ -49,7 +50,7 @@
    <!--<script src="js/user.js"></script>-->
    <script>
     setupUserControls(document.getElementsByClassName("title-bar-user-controls")[0], function (user) {
-        omg.util.getUserThings({user, 
+        omg.util.getUserThings({user: user, 
             resultList: document.getElementsByClassName("search-things")[0],
             showMenu: true
          });

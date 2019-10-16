@@ -83,11 +83,13 @@ passport.use("signup", new LocalStrategy(
                 var newUser = {username: username, bpassword: hash, 
                     password: "",
                     admin:false};
-                db.users.save(newUser, function (err, saveResult) {
+                db.users.save(newUser, function (err, user) {
                     if (err) {
                         return done(err);
                     } 
-                    return done(null, saveResult);
+                    delete user.password;
+                    delete user.bpassword;
+                    return done(null, user);
                 });
             });
         });
@@ -138,6 +140,7 @@ app.post('/api-signup',
 app.get('/user', function (req, res) {
     if (req.user) {
         delete req.user.password;
+        delete req.user.bpassword;
         res.send(req.user);
     } else {
         res.send(false);

@@ -313,16 +313,29 @@ omg.util.loadSearchResults = function (params) {
                 });
             }
 
-            var editButton = document.createElement("span");
-            editButton.innerHTML = "Edit"
-            editButton.className = "search-thing-option"
-            optionsDiv.appendChild(editButton)
-            editButton.onclick = function () {
+            var button = document.createElement("span");
+            button.innerHTML = "Edit"
+            button.className = "search-thing-option"
+            optionsDiv.appendChild(button)
+            button.onclick = function () {
                 window.location = "/gauntlet/?id=" + result.id
             }
 
+            if (result.type === "SONG" || result.type === "SECTION" || result.type === "PART") {
+                button = document.createElement("span");
+                button.innerHTML = "&nbsp;&minus;&nbsp;";
+                optionsDiv.appendChild(button)
+    
+                button = document.createElement("span");
+                button.innerHTML = "Add to PlayList"
+                button.className = "search-thing-option"
+                optionsDiv.appendChild(button)
+                button.onclick = function () {
+                    omg.util.addToPlaylist(result)
+                }    
+            }
+
             menuDiv.onclick = function (e) {
-                console.log(optionsDiv.parentElement.innerHTML)
                 showingMenu = !showingMenu
                 optionsDiv.style.display = showingMenu ? "block" : "none"
                 e.stopPropagation() 
@@ -334,7 +347,15 @@ omg.util.loadSearchResults = function (params) {
                 onclick(result);
             }
             else {
-                window.location = "play/" + result.id;
+                if (result.type === "SOUNDSET") {
+                    window.location = "soundset.htm?id=" + result.id;
+                }
+                else if (result.type === "PLAYLIST") {
+                    window.location = "playlist.htm?id=" + result.id;
+                }
+                else {
+                    window.location = "play/" + result.id;
+                }
             }
         };
         resultList.appendChild(resultDiv);
@@ -344,7 +365,7 @@ omg.util.loadSearchResults = function (params) {
 };
 
 omg.util.makePrevButton = function (params) {
-    if (params.page <= 1) {
+    if (params.page <= 1 || params.noNavigation) {
         return;
     }
 
@@ -369,6 +390,10 @@ omg.util.makePrevButton = function (params) {
 };
 
 omg.util.makeNextButton = function (params) {
+    if (params.noNavigation) {
+        return
+    }
+
     var nextButton = document.createElement("button");
     nextButton.innerHTML = "Next >";
     nextButton.onclick = function () {
@@ -388,6 +413,69 @@ omg.util.makeNextButton = function (params) {
     };
     params.resultList.appendChild(nextButton);
 };
+
+
+omg.util.addToPlaylist = function (result) {
+    if (!omg.user) {
+        alert("Login to make playlists")
+        return
+    }
+
+    var thing = {name: result.name, id: result.id, 
+        username: result.username, type: result.type,
+        created_at: result.created_at,
+        last_modified: result.last_modified
+    }
+    omg.server.getHTTP("/data/?type=PLAYLIST&user_id=" + omg.user.id, function (results) {
+        if (results) {
+
+            var dialog = document.createElement("div")
+            dialog.innerHTML = "<div class='dialog-header'>Save to...</div><hr>" +
+                (results.length === 0 ? "<br>(make a playlist!)<br>" : "")
+
+            results.forEach(function (playlist) {
+                var playlistDiv = document.createElement("div")
+                playlistDiv.innerHTML = playlist.name
+                playlistDiv.className = "add-to-playlist-item"
+                dialog.appendChild(playlistDiv)
+
+                playlistDiv.onclick = function () {
+                    playlist.data.push(thing)
+                    omg.server.post(playlist)
+                    clearDialog()
+                }
+            });
+
+            var element = document.createElement("hr")
+            dialog.appendChild(element)
+            element = document.createElement("input")
+            element.placeholder = "New playlist"
+            dialog.appendChild(element)
+            element.onkeypress = function (e) {
+                if (e.keyCode === 13) {
+                    var newPlaylist = {
+                        omgVersion: 1,
+                        type: "PLAYLIST",
+                        name: element.value,
+                        data: [thing]
+                    }
+
+                    omg.server.post(newPlaylist)
+                    clearDialog()
+                }
+            }
+
+            var clearDialog = omg.ui.showDialog(dialog)
+        }
+        else {
+            dialog.innerHTML = "Error parsing search results.";
+        }
+    });
+
+
+}
+
+
 
 /*
  * UI stuff
@@ -661,6 +749,10 @@ omg.ui.getBackgroundColor = function (type) {
        return "#FF9999";
    }
 
+   if (type === "PLAYLIST") {
+    return "#d08fc9";
+}
+
    return "#808080";
 };
 
@@ -674,9 +766,53 @@ if (!omg.ui.useUnicodeNotes) {
     omg.ui.setupNoteImages();
 }
 
-if (!document.body.requestFullscreen && document.body.webkitRequestFullscreen) {
-    document.body.requestFullscreen = document.body.webkitRequestFullscreen;
+
+omg.ui.setupInputEvents = function (input, bindObject, bindProperty, onenter) {
+    var text = document.createElement("div");
+    text.innerHTML = "Press Enter to save changes";
+    text.style.display = "none";
+    input.parentElement.insertBefore(text, input.nextSibling)
+    input.value = bindObject[bindProperty] || "";
+    input.onkeyup = function (e) {
+        text.style.display = input.value !== bindObject[bindProperty] ? "inline-block" : "none";
+        if (e.keyCode === 13) {
+            text.style.display = "none";
+            bindObject[bindProperty] = input.value;
+            if (onenter) {
+                onenter();
+            }          
+        }
+    };
+};
+
+omg.ui.showDialog = function (dialog) {
+    var background = document.createElement("div")
+    background.style.position = "fixed"
+    background.style.left = "0px"
+    background.style.top = "0px"
+    background.style.width = "100%"
+    background.style.height = "100%"
+    background.style.backgroundColor = "#808080"
+    background.style.opacity = 0.5
+
+    dialog.className = "dialog"
+
+    document.body.appendChild(background)
+    document.body.appendChild(dialog)
+
+    dialog.style.position = "fixed"
+    dialog.style.left = window.innerWidth / 2 - dialog.clientWidth / 2 + "px"
+    dialog.style.top = window.innerHeight / 2 - dialog.clientHeight / 2 + "px"
+
+    var clearDialog = () => {
+        document.body.removeChild(background)
+        document.body.removeChild(dialog)
+    }
+
+    background.onclick = clearDialog
+    return clearDialog
 }
+
 
 omg.midi = {
     onSuccess: function (midiAccess) {
@@ -736,22 +872,9 @@ omg.midi = {
     onstop: function () {}
 };
 
-omg.ui.setupInputEvents = function (input, bindObject, bindProperty, onenter) {
-    var text = document.createElement("div");
-    text.innerHTML = "Press Enter to save changes";
-    text.style.display = "none";
-    input.parentElement.insertBefore(text, input.nextSibling)
-    input.value = bindObject[bindProperty] || "";
-    input.onkeyup = function (e) {
-        text.style.display = input.value !== bindObject[bindProperty] ? "inline-block" : "none";
-        if (e.keyCode === 13) {
-            text.style.display = "none";
-            bindObject[bindProperty] = input.value;
-            if (onenter) {
-                onenter();
-            }
-            
-            
-        }
-    };
-};
+
+
+//shim, may only be needed for tachno gauntlet
+if (!document.body.requestFullscreen && document.body.webkitRequestFullscreen) {
+    document.body.requestFullscreen = document.body.webkitRequestFullscreen;
+}

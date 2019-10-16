@@ -316,6 +316,11 @@ h3 {
     border-radius:8px; padding:4px;
     border:1px solid #808080;
 }
+.omg-viewer-playlist {
+   background-color:#d08fc9; 
+   border-radius:8px; padding:4px;
+   border:1px solid #808080;
+}
 
 
 .omg-soundset {border-spacing:10px; 
@@ -464,4 +469,22 @@ h3 {
 	border-radius:100%;
 	font-style:bold;
 	cursor:pointer;
+}
+
+
+.dialog {
+   background-color:white;
+   padding: 20px;
+
+}
+
+.add-to-playlist-item {
+   cursor: pointer;
+   padding: 6px;
+   margin: 2px;
+}
+
+.add-to-playlist-item:hover {
+   padding: 5px;
+   border: 1px solid #808080;
 }
