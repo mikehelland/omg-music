@@ -664,11 +664,13 @@ input {
 .search-thing {
    margin:16px;
    padding:16px;
-   /*background-color:#F8F8F8;*/
-   cursor:pointer;
    position:relative;
    border:1px solid #F8F8F8;
    opacity:0.8;
+}
+
+.search-thing-detail {
+    cursor:pointer;
 }
 
 .search-thing:hover {

@@ -1903,7 +1903,22 @@ tg.showUserThings = function () {
         user: tg.user,
         resultList: listDiv,
         onclick: function (thing) {
-            if (thing.type && thing.type === "SOUNDSET") {
+            if (thing.type && thing.type === "PLAYLIST") {
+                listDiv.innerHTML = ""
+                omg.util.loadSearchResults({resultList: listDiv, 
+                    results: thing.data,
+                    noNavigation: true,
+                    onclick: (song) => {
+                        omg.server.getId(song.id, (result) => {
+                            tg.loadSong(result);
+                            if (window.innerWidth < window.innerHeight) {
+                                tg.hideDetails(true);
+                            }    
+                        })
+                    }
+                })
+            }
+            else if (thing.type && thing.type === "SOUNDSET") {
                 tg.addPart(thing, "addPartFragment");
             }
             else {
