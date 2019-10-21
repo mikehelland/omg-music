@@ -149,13 +149,23 @@ app.get('/user', function (req, res) {
 
 app.post('/user', function (req, res) {
     var db = app.get('db');
-    if (req.user && req.body) {
+    if (req.user && req.body && req.user.id === req.body.id) {
+        
+        if (req.body.admin && !req.user.admin) {
+            req.body.admin = false
+        }
+
+        //this is so postgres accepts it as json, needs to be a string
+        if (req.body.sources) {
+            req.body.sources = JSON.stringify(req.body.sources)
+        }
         db.users.save(req.body, function (err, saveResult) {
             if (err) {
-                res.send(false);
+                res.send(err);
             } 
             else {
                 delete saveResult.password;
+                delete saveResult.bpassword;
                 res.send(saveResult);
             }
         });

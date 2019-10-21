@@ -826,18 +826,21 @@ tg.addPartFragment.setup = function () {
         }
     };
 
-    var sources;
+    var sources = (tg.user && tg.user.sources) || [];
     fetch("https://mikehelland.github.io/omg-sounds/sources.json")
             .then(function (e) {return e.json();}).then(function (json) {
-         
-         sources = json;
-         var i = 0;
-         json.forEach((function (source) {
-             var option = document.createElement("option");
-             option.innerHTML = source.name;
-             option.value = i++;
-             f.gallerySelect.appendChild(option);
-         }));     
+
+        
+        json.forEach(function (source) {
+            sources.push(source)
+        })
+        var i = 0;
+        sources.forEach((function (source) {
+            var option = document.createElement("option");
+            option.innerHTML = source.name;
+            option.value = i++;
+            f.gallerySelect.appendChild(option);
+        }));     
          
         f.loadList(sources[0]);
 
