@@ -6,12 +6,22 @@
  */
 
 omg.search = function (params, callback) {
-    var url = "data/?q=" + (params.q || "");
+    var url = "data/?"
+    if (params.q) {
+        url = url + "&q=" + params.q;
+        params.metaData = false //meta data doesn't come with text search
+    }
+    if (params.metaData) {
+        url = url + "&metaData=true"
+    }
     if (params.type) {
         url = url + "&type=" + params.type;
     }
     if (params.page) {
         url = url + "&page=" + params.page;
+    }
+    if (params.user) {
+        url = url + "&user_id=" + params.user.id;
     }
 
     omg.server.getHTTP(url, function (results) {
@@ -21,7 +31,6 @@ omg.search = function (params, callback) {
 };
 
 omg.loadSearchResults = function (params, results) {
-	
     results.forEach(function (result) {
         var resultDiv = document.createElement("div");
 
@@ -29,12 +38,19 @@ omg.loadSearchResults = function (params, results) {
         resultDiv.innerHTML = '<div class="beat-marker"></div>';
         params.resultList.appendChild(resultDiv);
 
-        new OMGEmbeddedViewer({div: resultDiv, 
-                                data: result,
-                                height: 80, 
-                                onPlay: params.onPlay,
-                                onStop: params.onStop
-                            });
+        var viewerParams = params.viewerParams || {}
+        viewerParams.div = resultDiv
+        viewerParams.height = 80
+        viewerParams.onPlay = params.onPlay
+        viewerParams.onStop = params.onStop
+
+        if (params.metaData) {
+            viewerParams.result = result;
+        }
+        else {
+            viewerParams.data = result;
+        }
+        new OMGEmbeddedViewer(viewerParams);
 
         params.resultList.appendChild(document.createElement("br"));
 

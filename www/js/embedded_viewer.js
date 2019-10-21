@@ -7,6 +7,11 @@ if (typeof omg === "undefined") {
 
 function OMGEmbeddedViewer(params) {
 
+    if (params.result) {
+        params.data = params.result.body
+        params.data.id = params.result.id
+    }
+
     this.player = new OMusicPlayer();
     this.song = this.player.makeOMGSong(params.data);
     this.predraw = params.predraw;
@@ -50,23 +55,17 @@ OMGEmbeddedViewer.prototype.setupControls = function (params) {
     viewer.playButton.innerHTML = "&#9654";
     viewer.editButton.innerHTML = "Edit";
     viewer.shareButton.innerHTML = "Share";
-    viewer.tipButton.innerHTML = "Tip Jar";
+    viewer.tipButton.innerHTML = "Tip";
     viewer.voteButton.innerHTML = "&#x2B06";
     viewer.voteButton.title = "Upvote";
 
     viewer.playButton.className = "omg-music-controls-play-button";
-    viewer.editButton.className = "omg-music-controls-edit-button";
+    viewer.editButton.className = "omg-music-controls-button";
     viewer.shareButton.className = "omg-music-controls-button";
-    viewer.tipButton.className = "omg-music-controls-edit-button";
+    viewer.tipButton.className = "omg-music-controls-button";
     viewer.voteButton.className = "omg-music-controls-button";
 
     viewer.div.appendChild(viewer.playButton);
-    if (data.id) {
-        viewer.div.appendChild(viewer.editButton);
-    }
-    viewer.div.appendChild(viewer.tipButton);
-
-    //viewer.div.appendChild(viewer.shareButton);
 
     var result = data;
     var resultDiv = viewer.div;
@@ -97,14 +96,6 @@ OMGEmbeddedViewer.prototype.setupControls = function (params) {
     resultData.className = "omg-thing-votes";
     resultData.innerHTML = (result.votes || "0") + " votes";
     //rightData.appendChild(resultData);
-
-    if (params.playcount) {
-        resultData = document.createElement("span");
-        resultData.className = "omg-thing-playcount";
-        resultData.innerHTML = params.playcount + " plays";
-        rightData.appendChild(resultData);        
-        rightData.appendChild(document.createElement("br"));
-    }
     
     resultData = document.createElement("span");
     resultData.className = "omg-thing-created-at";
@@ -256,6 +247,45 @@ OMGEmbeddedViewer.prototype.setupControls = function (params) {
     if (this.song) {
         this.song.loop = this.song.arrangement.length === 0;
     }
+
+    var bottomRow = document.createElement("div")
+    if (data.id) {
+        bottomRow.appendChild(viewer.editButton);
+    }
+    bottomRow.appendChild(viewer.tipButton);
+    bottomRow.appendChild(viewer.shareButton);
+
+    if (data.type === "SONG" || data.type === "PART" || data.type === "SECTION") {
+        resultData = document.createElement("span");
+        resultData.className = "omg-music-controls-button";
+        resultData.innerHTML = "Add To Playlist";
+        resultData.onclick = function () {
+            omg.util.addToPlaylist(result)
+        }    
+        bottomRow.appendChild(resultData);    
+    }
+
+    if (params.deleteButton) {
+        resultData = document.createElement("span");
+        resultData.className = "omg-music-controls-button";
+        resultData.innerHTML = "Delete &times;";
+        resultData.onclick = () => {
+            omg.server.deleteId(result.id, function () {
+                viewer.div.parentElement.removeChild(viewer.div)
+            });
+        }
+        resultData.style.float = "right"
+        bottomRow.appendChild(resultData);
+    }
+
+    if (params.result && params.result.playcount) {
+        resultData = document.createElement("span");
+        resultData.className = "omg-thing-playcount";
+        resultData.innerHTML = params.result.playcount + " &#9658;";
+        bottomRow.appendChild(resultData);        
+    }
+
+    viewer.div.appendChild(bottomRow)
 };
 
 OMGEmbeddedViewer.prototype.drawCanvas = function (data) {

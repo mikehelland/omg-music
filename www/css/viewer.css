@@ -28,8 +28,8 @@
    /*top:0.8em;*/
    position:absolute;
 }
-.omg-music-controls-edit-button, .omg-music-controls-button {
-   
+
+.omg-music-controls-button {
    cursor:pointer;
    display:inline-block;
    padding:0.4em;
@@ -38,11 +38,21 @@
    border:1px solid transparent;
    text-decoration:underline;
    margin:0 5px;
-
 }
+
+.omg-thing-playcount {
+   display:inline-block;
+   padding:0.4em;
+   font-family: Helvetica;
+   font-size: 0.8em;
+   border:1px solid transparent;
+   margin:0 5px;
+   float:right;
+}
+
 .omg-music-controls-edit-button:hover, .omg-music-controls-button:hover {
    border:1px solid #808080;
-   border-radius:100%;
+   
     
 }
 
@@ -101,10 +111,9 @@
 }
 
 .omg-thing-title {
-   display:inline-block;
-   margin:0 5px;
-   top:-6px;
-   position:relative;
+   top:7px;
+   left:55px;
+   position:absolute;
 }
 
 .omg-thing-votes {
@@ -112,12 +121,11 @@
 }
 
 .omg-thing-user {
-   display:inline-block;
-   font-size:0.8em;
+   font-size:0.7em;
    font-style:italic;
-   margin:0 5px;
-   top:-6px;
-   position:relative;
+   top:27px;
+   left:55px;
+   position:absolute;
 }
 
 .omg-thing-right-data {
@@ -133,6 +141,7 @@
    width:90px;
    font-family: Helvetica;
    font-style:italic;
+   opacity:0.7;
 }
 
 .omg-music-controls-edit-button {

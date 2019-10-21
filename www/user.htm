@@ -5,6 +5,7 @@
 
    <link rel="stylesheet" href="css/main.css" type="text/css" />
    <link rel="stylesheet" href="css/search.css" type="text/css" />
+   <link rel="stylesheet" href="css/viewer.css" type="text/css" />
 
 </head>
 <body>
@@ -45,26 +46,48 @@
 
    </div>
 
+   
    <script src="js/omgservice.js"></script>
    <script src="js/usercontrols.js"></script>
-   <!--<script src="js/user.js"></script>-->
+   <script src="js/search.js"></script>
+
+
+   <script src="omg-music/tuna-min.js"></script>
+   <script src="omg-music/omgclasses.js"></script>
+   <script src="omg-music/omusic_player.js"></script>
+   <script src="omg-music/fx.js"></script>
+   <script src="js/omgservice.js"></script>
+   <script src="js/embedded_viewer.js"></script>
+   
    <script>
-    setupUserControls(document.getElementsByClassName("title-bar-user-controls")[0], function (user) {
-        omg.util.getUserThings({user: user, 
+      setupUserControls(document.getElementsByClassName("title-bar-user-controls")[0], function (user) {
+         /*omg.util.getUserThings({user: user, 
             resultList: document.getElementsByClassName("search-things")[0],
             showMenu: true               
-         });
-        if (user.btc_address) {
-            user.btc_address = user.btc_address.trim();
-        }
-        var div = document.getElementById("btc-address");
-        omg.ui.setupInputEvents(div, user, "btc_address", function () {
-            omg.server.postHTTP("/user", user, function (e) {
-                console.log(e)
-            });
-        });
+         });*/
 
-    });
+         document.getElementsByClassName("user-username")[0].innerHTML = user.username;
+
+         document.getElementsByClassName("user-created-at")[0].innerHTML = omg.util.getTimeCaption(user.created_at);
+
+         omg.search({
+            user:  user,
+            resultList: document.getElementsByClassName("search-things")[0],
+            metaData: true,
+            viewerParams: {deleteButton: true}
+         })
+
+         if (user.btc_address) {
+            user.btc_address = user.btc_address.trim();
+         }
+         var div = document.getElementById("btc-address");
+         omg.ui.setupInputEvents(div, user, "btc_address", function () {
+            omg.server.postHTTP("/user", user, function (e) {
+               console.log(e)
+            });
+         });
+
+      });
    </script>
 
 </body>

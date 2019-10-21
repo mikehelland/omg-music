@@ -179,14 +179,12 @@ fpa.showMostPlaysArea = function () {
         fpa.loadedMostPlaysArea = true;
         var list = document.getElementById("most-plays-list");
         omg.server.getHTTP("/most-plays/", results => {
-            results.forEach(song => {
+            results.forEach(result => {
                 var div = document.createElement("div");
                 div.className = "omgviewer";
 
-                song.body.id = song.id;
-                var params = {id: song.id, height: 180,
-                    data: song.body,
-                    playcount: song.playcount,
+                var params = {result: result, 
+                    height: 180,
                     div: div, 
                     onPlay: fpa.onPlay, onStop: fpa.onStop};
 
@@ -265,6 +263,7 @@ fpa.search = function () {
     parameters.resultList = document.getElementsByClassName("search-things")[0];
     parameters.onPlay = fpa.onPlay;
     parameters.onStop = fpa.onStop;
+    parameters.metaData = true
 
     var filterType = document.getElementById("filter-type");
     var type = parameters.type || "";

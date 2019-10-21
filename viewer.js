@@ -1,9 +1,9 @@
 var viewer = function (result) {
 
     var resultCaption = "OpenMusic.Gallery";
-    if (result) {
+    if (result && result.body) {
 
-        resultCaption = result.name || result.tags || "";
+        resultCaption = result.body.name || result.body.tags || "";
         if (resultCaption.length === 0) {
             resultCaption = "a song";
         }
@@ -11,8 +11,8 @@ var viewer = function (result) {
             resultCaption = '&quot;' + resultCaption + '&quot;';
         }
 
-        if (result.username) {
-            resultCaption += " by " + result.username.trim();
+        if (result.body.username) {
+            resultCaption += " by " + result.body.username.trim();
         }
         else {
             resultCaption += " on OMG";
@@ -92,7 +92,7 @@ return `<!DOCTYPE html>
         omg.setupShareWindow();
         
         viewer = new OMGEmbeddedViewer({div: document.getElementById("omgviewer"),
-            data: data,
+            result: data,
             height: window.innerHeight - 44 - 250});
     }
    </script>

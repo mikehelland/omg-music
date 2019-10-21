@@ -67,8 +67,12 @@ omg.server.getHTTP = function (url, callback) {
     omg.server.http({url: url, callback: callback});
 };
 
-omg.server.getId = function (id, callback) {
-    omg.server.getHTTP(this.url + "/data/" + id, callback);
+omg.server.getId = function (id, callback, metaData) {
+    var url = this.url + "/data/" + id
+    if (metaData) {
+        url = url + "?metaData=true"
+    }
+    omg.server.getHTTP(url, callback);
     return; 
 };
 

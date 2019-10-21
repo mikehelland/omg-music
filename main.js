@@ -177,17 +177,72 @@ app.post('/user', function (req, res) {
 
 
 app.get('/data/', function (req, res) {
-    var db = app.get('db');
     var perPage = req.query.perPage || 20;
     var options = {limit : perPage, order : "created_at desc"};
     var find = {};
+    if (req.query.page) {
+        options.offset = (parseInt(req.query.page) - 1) * perPage;
+    }
+    var callback = function (err, docs) {
+        if (err) {
+            res.send(err);
+        }
+        else {
+            res.send(docs);
+        }
+    };
+
+    // can only get full records (include playcount, votes etc) without text search
+    if (req.query.metaData && !req.query.q) {
+        omg.getRecords(req, res, options, callback)
+    }
+    else {
+        omg.getDocs(req, res, options, callback)
+    }
+})
+
+omg.getRecords = function (req, res, options, callback) {
+    var db = app.get('db');
+    var find = {}
+    if (req.query.user_id) {
+        find["body ->> 'user_id'"] = req.query.user_id;
+    }
+    if (req.query.type) {
+        if (req.query.type === "MELODY" || req.query.type === "BASSLINE" || req.query.type === "DRUMBEAT") {
+            find["body ->> 'partType'"] = req.query.type;
+        }
+        else {
+            find["body ->> 'type'"] = req.query.type;
+        }
+        
+        if (req.query.type === "SOUNDSET") {
+            if (!req.user || !req.user.admin) {
+                find["body ->> 'approved'"]  = true;                
+            }
+            options.limit = 100;
+        }
+    }
+
+
+    if (req.query.q) {
+        find = {keys:["body ->> 'tags'", "body ->> 'name'"], term: req.query.q};
+            options.columns = ["playcount", "id", "body"]
+            db.things.find(find, options, callback)    
+    }
+    else {
+        options.columns = ["playcount", "id", "body"]
+        db.things.find(find, options, callback)    
+    }
+};
+
+omg.getDocs = function (req, res, options, callback) {
+    var db = app.get('db');
+    var find = {}
     if (req.query.user_id) {
         find.user_id = req.query.user_id;
     }
     if (req.query.type) {
-        if (req.query.type === "MELODY" || 
-                        req.query.type === "BASSLINE" ||
-                        req.query.type === "DRUMBEAT") {
+        if (req.query.type === "MELODY" || req.query.type === "BASSLINE" || req.query.type === "DRUMBEAT") {
             find.partType = req.query.type;
         }
         else {
@@ -202,38 +257,34 @@ app.get('/data/', function (req, res) {
         }
     }
 
-    if (req.query.page) {
-        options.offset = (parseInt(req.query.page) - 1) * perPage;
-    }
-
-    var callback = function (err, docs) {
-        if (err) {
-            res.send(err);
-        }
-        else {
-            res.send(docs);
-        }
-    };
-    if (JSON.stringify(find) == "{}") {
-        find = "*";
-    }
     if (req.query.q) {
         find = {keys:["tags", "name"], term: req.query.q};
         db.things.searchDoc(find, options, callback);
     }
     else {
-        db.things.findDoc(find, options, callback);        
+        if (JSON.stringify(find) == "{}") {
+            find = "*";
+        }        
+        db.things.findDoc(find, options, callback);
     }
-});
+};
+
+
 app.get('/data/:id', function (req, res) {
     var db = app.get('db');
-    db.things.findDoc({id: req.params.id}, function (err, docs) {
+    var callback = function (err, docs) {
         if (err) {
            res.send(err);
         } else {
            res.send(docs);
         }
-    });
+    }
+    if (req.query.metaData) {
+        db.things.find({id: req.params.id}, callback);
+    }
+    else {
+        db.things.findDoc({id: req.params.id}, callback);
+    }
 });
 app.post('/data/', function (req, res) {
 
@@ -328,11 +379,11 @@ app.delete('/data/:id', function (req, res) {
 
 app.get('/play/:id', function (req, res) {
     var db = app.get('db');
-    db.things.findDoc({id: req.params.id}, function (err, docs) {
+    db.things.find({id: req.params.id}, function (err, docs) {
         if (err) {
            res.send(err);
         } else {
-           res.send(viewer(docs));
+           res.send(viewer(docs[0]));
         }
     });
 });
