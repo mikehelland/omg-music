@@ -31,6 +31,23 @@ omg.search = function (params, callback) {
 };
 
 omg.loadSearchResults = function (params, results) {
+
+    params.resultList.innerHTML = ""
+
+    if (params.page && params.page > 1) {
+        var prevButton = document.createElement("button")
+        prevButton.innerHTML = "< Previous"
+        params.resultList.appendChild(prevButton)
+        prevButton.onclick = () => {
+            params.page -= 1
+            omg.search(params)
+        }
+    }
+
+    if (results.length === 0) {
+        return
+    }
+
     results.forEach(function (result) {
         var resultDiv = document.createElement("div");
 
@@ -62,6 +79,15 @@ omg.loadSearchResults = function (params, results) {
             }
         };
    });
+
+    var nextButton = document.createElement("button")
+    nextButton.innerHTML = "Next >"
+    params.resultList.appendChild(nextButton)
+    nextButton.onclick = () => {
+        params.page = (params.page || 1) + 1
+        omg.search(params)
+    }
+
 };
 
 
