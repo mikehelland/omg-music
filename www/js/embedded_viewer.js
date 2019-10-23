@@ -44,8 +44,8 @@ OMGEmbeddedViewer.prototype.setupControls = function (params) {
     viewer.padding = 8;
 
     viewer.playButton = document.createElement("div");
-    viewer.editButton = document.createElement("div");
-    viewer.shareButton = document.createElement("div");
+    viewer.editButton = document.createElement("a");
+    viewer.shareButton = document.createElement("a");
     viewer.tipButton = document.createElement("div");
     viewer.voteButton = document.createElement("div");
     viewer.titleDiv = document.createElement("div");
@@ -54,7 +54,7 @@ OMGEmbeddedViewer.prototype.setupControls = function (params) {
 
     viewer.playButton.innerHTML = "&#9654";
     viewer.editButton.innerHTML = "Edit";
-    viewer.shareButton.innerHTML = "Share";
+    viewer.shareButton.innerHTML = "Link";
     viewer.tipButton.innerHTML = "Tip";
     viewer.voteButton.innerHTML = "&#x2B06";
     viewer.voteButton.title = "Upvote";
@@ -102,10 +102,6 @@ OMGEmbeddedViewer.prototype.setupControls = function (params) {
     //resultData.innerHTML = getTimeCaption(parseInt(result.created_at));
     resultData.innerHTML = omg.util.getTimeCaption(parseInt(result.last_modified));
     rightData.appendChild(resultData);    
-
-    viewer.shareButton.onclick = function () {
-        omg.shareWindow.show();
-    };
 
     viewer.partMargin = 20;
     viewer.sectionMargin = 0;
@@ -176,40 +172,33 @@ OMGEmbeddedViewer.prototype.setupControls = function (params) {
     var makeTipJar = function () {
         viewer.tipJar = document.createElement("div");
         viewer.tipJar.className = "tip-jar";
-        viewer.tipJarBackground = document.createElement("div");
-        viewer.tipJarBackground.className = "tip-jar-background";
-        viewer.tipJarForeground = document.createElement("div");
-        viewer.tipJarForeground.className = "tip-jar-foreground";
+
         viewer.qrCanvas = document.createElement("canvas");
         var canvasDiv = document.createElement("div");
         canvasDiv.className = "tip-jar-canvas";
-        viewer.tipJar.appendChild(viewer.tipJarBackground);
-        viewer.tipJar.appendChild(viewer.tipJarForeground);
+
         viewer.tipJarLink = document.createElement("div");
         viewer.tipJarLink.innerHTML = "<a href='" + url + "'>" + url + "</a>";
-
-        viewer.tipJarBackground.onclick = function () {
-            viewer.tipJar.style.display = "none";
-        };
 
         viewer.qr = new QRious({
             element: viewer.qrCanvas,
             value: url
         });
         
-        viewer.tipJarForeground.appendChild(canvasDiv);
         canvasDiv.appendChild(viewer.qrCanvas);
-        viewer.tipJarForeground.appendChild(viewer.tipJarLink);
-        viewer.div.appendChild(viewer.tipJar);
+        viewer.tipJar.appendChild(canvasDiv)
+        viewer.tipJar.appendChild(viewer.tipJarLink)
+
         viewer.qr.element.onclick = function () {
             window.location = url;
         };
+        omg.ui.showDialog(viewer.tipJar)
     };
 
     viewer.tipButton.onclick = function () {
         
         if (viewer.tipJar) {
-            viewer.tipJar.style.display = "flex";
+            omg.ui.showDialog(viewer.tipJar)
             return;
         }
         
@@ -226,9 +215,8 @@ OMGEmbeddedViewer.prototype.setupControls = function (params) {
         
     };
 
-    viewer.editButton.onclick = function () {
-        window.location = "/gauntlet/?id=" + data.id;
-    };
+    viewer.editButton.href = "/gauntlet/?id=" + data.id;
+    viewer.shareButton.href = "/play/" + data.id;
 
     var br = document.createElement("br");
     viewer.div.appendChild(br);
