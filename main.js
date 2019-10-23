@@ -327,6 +327,10 @@ omg.postData = function (req, res, db) {
         req.body.user_id = req.user.id;
         req.body.username = req.user.username;
     }
+    else {
+        delete req.body.user_id
+        delete req.body.username
+    }
     if (req.body.approved && (!req.user || !req.user.admin)) {
         delete req.body.approved;
     }
