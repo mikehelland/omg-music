@@ -2683,14 +2683,25 @@ tg.presentationFragment.addPart = function (part) {
     f.partList.div.appendChild(div);
     part.presentationUI.draw();
 };
+tg.presentationFragment.beatMarkerVisible = false
 tg.presentationFragment.updateBeatMarker = function (isubbeat) {
-    tg.presentationFragment.beatWidth = tg.presentationFragment.div.clientWidth / (
+    if (isubbeat == -1) {
+        tg.presentationFragment.beatMarkerVisible = false
+        tg.presentationFragment.beatMarker.style.display = "none"
+        return
+    }
+    if (!tg.presentationFragment.beatMarkerVisible) {
+        tg.presentationFragment.beatMarkerVisible = true
+        tg.presentationFragment.beatMarker.style.display = "block"
+        tg.presentationFragment.beatWidth = tg.presentationFragment.div.clientWidth / (
             tg.song.data.beatParams.subbeats *
             tg.song.data.beatParams.beats *
             tg.song.data.beatParams.measures);
-    tg.presentationFragment.beatMarker.style.width = tg.presentationFragment.beatWidth + "px";
+        tg.presentationFragment.beatMarker.style.width = tg.presentationFragment.beatWidth + "px";
+    }
     tg.presentationFragment.beatMarker.style.left = tg.presentationFragment.beatWidth * isubbeat + "px";
 };
+    
 
 
 /*
