@@ -21,6 +21,7 @@ function OMusicPlayer() {
     this.auditioningParts = [];
 
     p.onBeatPlayedListeners = [];
+    p.onPlayListeners = [];
 
     p.iSubBeat = 0;
     p.loopStarted = 0;
@@ -86,8 +87,17 @@ OMusicPlayer.prototype.play = function (song) {
     this._play();
 
     if (typeof (p.onPlay) == "function") {
+        // should use the listeners array, but still here because its used
         p.onPlay(p);
     }
+    for (var il = 0; il < p.onPlayListeners.length; il++) {
+        try {
+            p.onPlayListeners[il].call(null, true);
+        } catch (ex) {
+            console.error(ex);
+        }
+    }
+
 };
 
 OMusicPlayer.prototype._play = function () {
@@ -334,7 +344,15 @@ OMusicPlayer.prototype.stop = function () {
     p.playing = false;
 
     if (typeof (p.onStop) == "function") {
+        // should use the listeners array, but still here because its used
         p.onStop(p);
+    }
+    for (var il = 0; il < p.onPlayListeners.length; il++) {
+        try {
+            p.onPlayListeners[il].call(null, false);
+        } catch (ex) {
+            console.error(ex);
+        }
     }
     
     for (var il = 0; il < p.onBeatPlayedListeners.length; il++) {

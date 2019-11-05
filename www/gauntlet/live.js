@@ -80,7 +80,6 @@ tg.omglive = {
         tg.instrument.onchange = tg.omglive.onVerticalChangeListener;
     
         tg.onLoadSongListeners.push(tg.omglive.onLoadSongListener);
-        tg.onfxchange = tg.omglive.onFXChangeListener;
 
         callback();
     }
@@ -216,19 +215,23 @@ var peerId = "";
 
 
 tg.omglive.setupListeners = function () {
+    tg.player.onPlayListeners.push(tg.omglive.onPlayListener);
     tg.song.onBeatChangeListeners.push(tg.omglive.onBeatChangeListener);
     tg.song.onKeyChangeListeners.push(tg.omglive.onKeyChangeListener);
     tg.song.onChordProgressionChangeListeners.push(tg.omglive.onChordProgressionChangeListener);
     tg.song.onPartAudioParamsChangeListeners.push(tg.omglive.onPartAudioParamsChangeListener);
     tg.song.onPartAddListeners.push(tg.omglive.onPartAddListener);
+    tg.song.onFXChangeListeners.push(tg.omglive.onFXChangeListener)
 };
 
 tg.omglive.removeListeners = function () {
+    tg.omglive.removeListener(tg.player.onPlayListeners, tg.omglive.onPlayListener);
     tg.omglive.removeListener(tg.song.onBeatChangeListeners, tg.omglive.onBeatChangeListener);
     tg.omglive.removeListener(tg.song.onKeyChangeListeners, tg.omglive.onKeyChangeListener);
     tg.omglive.removeListener(tg.song.onChordProgressionChangeListeners, tg.omglive.onChordProgressionChangeListener);
     tg.omglive.removeListener(tg.song.onPartAudioParamsChangeListeners, tg.omglive.onPartAudioParamsChangeListener);
     tg.omglive.removeListener(tg.song.onPartAddListeners, tg.omglive.onPartAddListener);
+    tg.omglive.removeListener(tg.song.onFXChangeListeners, tg.omglive.onFXChangeListener);
 
 };
 
@@ -251,9 +254,11 @@ tg.omglive.onFXChangeListener = function (action, part, fx, source) {
     if (source === "omglive") return;
 
     tg.omglive.socket.emit("data", {
-        action: "fxAdd", 
-        partName: part.data.name,
-        fxName: fx.name
+        action: "fxChange",
+        fxAction: action, 
+        partName: part === tg.song ? undefined : part.data.name,
+        fxName: fx.data.name,
+        fxData: action === "add" ? fx.data : undefined
     });
 };
 
@@ -342,6 +347,16 @@ tg.omglive.onVerticalChangeListener = function (part, frets, autobeat) {
     }
 };
 
+tg.omglive.onPlayListener = function (play) {
+    if (tg.remoteTo) {
+        return
+    }
+    var data = {
+        action: play ? "play" : "stop"
+    };
+    tg.omglive.socket.emit("data", data);
+};
+
 tg.omglive.onjoin = function (data) {
     if (data.song) {
         tg.loadSong(data.song, "omglive");
@@ -397,11 +412,18 @@ tg.omglive.ondata = function (data) {
         tg.omglive.onVerticalChangeFrets(data);
         if (tg.presentationMode) part.presentationUI.draw();
     }
-    else if (data.action === "fxAdd" && data.partName) {
-        let part = tg.currentSection.getPart(data.partName);
-        if (!part) return;
-        tg.player.addFXToPart(data.fxName, part);
-        //todo listener to update ui?
+    else if (data.action === "fxChange") {
+        tg.omglive.onFXChange(data);
+    }
+    else if (data.action === "play") {
+        if (tg.remoteTo && !tg.player.playing) {
+            tg.player.play()
+        }
+    }
+    else if (data.action === "stop") {
+        if (tg.remoteTo && tg.player.playing) {
+            tg.player.stop()
+        }
     }
 };
 
@@ -421,6 +443,25 @@ tg.omglive.onVerticalChangeFrets = function (data) {
     }
     if (part.mm && !part.mm.hidden) part.mm.draw();
 };
+
+tg.omglive.onFXChange = function (data) {
+    let part = data.partName ? tg.currentSection.getPart(data.partName) : tg.song;
+    if (!part) return;
+
+    if (data.fxAction === "add") {
+        tg.player.addFXToPart(data.fxName, part, "omglive");
+    }
+    else if (data.fxAction === "remove") {
+        var fx = part.getFX(data.fxName)
+        tg.player.removeFXFromPart(fx, part, "omglive");
+    }
+    else if (data.fxAction) {
+        var fx = part.getFX(data.fxName)
+        for (var property in data.fxAction) {
+            tg.player.adjustFX(fx, part, property, data.fxAction[property], "omglive");
+        }
+    }
+}
 
 tg.omglive.partData = function (part, data) {
     

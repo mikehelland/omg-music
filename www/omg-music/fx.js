@@ -1,12 +1,14 @@
-OMusicPlayer.prototype.addFXToPart = function (fx, part) {
-    var node = this.makeFXNodeForPart(fx, part)
-    if (node) {
-        part.data.fx.push(node.data);
+OMusicPlayer.prototype.addFXToPart = function (fxName, part, source) {
+    var fx = this.makeFXNodeForPart(fxName, part)
+    if (fx) {
+        part.data.fx.push(fx.data);
+
+        this.song.fxChanged("add", part, fx, source);
     }
-    return node;
+    return fx;
 };
 
-OMusicPlayer.prototype.removeFXFromPart = function (fx, part) {
+OMusicPlayer.prototype.removeFXFromPart = function (fx, part, source) {
     var index = part.fx.indexOf(fx);
     
     var connectingNode = part.fx[index - 1] || part.preFXGain;
@@ -19,7 +21,24 @@ OMusicPlayer.prototype.removeFXFromPart = function (fx, part) {
     index = part.data.fx.indexOf(fx.data);
     part.data.fx.splice(index, 1);
 
+    this.song.fxChanged("remove", part, fx, source);
 };
+
+OMusicPlayer.prototype.adjustFX = function (fx, part, property, value, source) {
+    //todo isAudioParam should be set in this file
+    if (fx.isAudioParam) {
+        fx[property].setValueAtTime(value, tg.player.context.currentTime);
+    }
+    else {
+        fx[property] = value;
+    }
+    
+    fx.data[property] = value;
+    var changes = {}
+    changes[property] =  value
+    this.song.fxChanged(changes, part, fx, source);
+}
+
 
 OMusicPlayer.prototype.setupFX = function () {
     var p = this;

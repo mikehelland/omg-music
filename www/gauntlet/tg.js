@@ -102,7 +102,9 @@ tg.loadPart = function (part) {
 
 tg.player = new OMusicPlayer();
 tg.player.loadFullSoundSets = true;
-tg.player.disableAudio = tg.disableAudio;
+if (tg.remoteTo) {
+    tg.player.disableAudio = true;
+}
 tg.player.prepareSong(tg.song);
 
 
@@ -1509,9 +1511,6 @@ tg.setupAddFXButtons = function (part, addButton, availableFXDiv, fxList) {
 tg.addFXToPart = function (fxName, part, fxList) {
     var fxNode = tg.player.addFXToPart(fxName, part);
     tg.setupFXDiv(fxNode, part, fxList);
-    if (tg.onfxchange) {
-        tg.onfxchange("ADD", part, fxNode.data);
-    }
 };
 
 tg.setupPartOptionsFX = function (part, fxListDiv) {
@@ -1556,13 +1555,18 @@ tg.setupFXDiv = function (fx, part, fxListDiv) {
 };
 
 tg.setupFXControls = function (fx, part, fxDiv) {
+
     var controls = tg.player.fx[fx.data.name].controls;
     var divs = [];
     controls.forEach(function (control) {        
         var canvas = document.createElement("canvas");
         canvas.className = "fx-slider";
         fxDiv.appendChild(canvas);
-        var div = new SliderCanvas(canvas, control, fx, fx.data);
+        var div = new SliderCanvas(canvas, control, fx, fx.data, (value) => {
+            var changes = {}
+            changes[control.property] = value
+            tg.song.fxChanged(changes, part, fx)
+        });
         divs.push(div);
     });
     fx.controlDivs = divs;

@@ -69,6 +69,7 @@ function OMGSong(div, data, headerOnly) {
     this.onPartAudioParamsChangeListeners = [];
     this.onPartAddListeners = [];
     this.onChordProgressionChangeListeners = [];
+    this.onFXChangeListeners = [];
 };
 
 OMGSong.prototype.keyChanged = function (source) {
@@ -91,6 +92,10 @@ OMGSong.prototype.chordProgressionChanged = function (source) {
 
 OMGSong.prototype.partAdded = function (part, source) {
     this.onPartAddListeners.forEach(listener => listener(part, source));
+};
+
+OMGSong.prototype.fxChanged = function (action, part, fx, source) {
+    this.onFXChangeListeners.forEach(listener => listener(action, part, fx, source));
 };
 
 
@@ -335,5 +340,20 @@ OMGPart.prototype.makeTracks = function () {
                     sound.url + (that.data.soundSet.postfix || "");
             that.data.tracks.push(track);
         });
+    }
+};
+
+OMGSong.prototype.getFX = function (name) {
+    for (var ip = 0; ip < this.fx.length; ip++) {
+        if (this.fx[ip].data.name === name) {
+            return this.fx[ip];
+        }
+    }
+};
+OMGPart.prototype.getFX = function (name) {
+    for (var ip = 0; ip < this.fx.length; ip++) {
+        if (this.fx[ip].data.name === name) {
+            return this.fx[ip];
+        }
     }
 };
