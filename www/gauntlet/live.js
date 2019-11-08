@@ -43,7 +43,8 @@ tg.omglive = {
             else {
                 tg.omglive.partData(part, data);
             }
-            if (!tg.player.playing && tg.currentFragment === tg.instrument) {
+            //if (!tg.player.playing && tg.currentFragment === tg.instrument) {
+            if (tg.currentFragment === tg.instrument) {
                 tg.instrument.mm.draw();
             }
         });
