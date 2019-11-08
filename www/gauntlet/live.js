@@ -359,7 +359,7 @@ tg.omglive.onPlayListener = function (play) {
 };
 
 tg.omglive.onjoin = function (data) {
-    if (data.song) {
+    if (data.song && tg.remoteTo) {
         tg.loadSong(data.song, "omglive");
     }
     if (data.offer) {
