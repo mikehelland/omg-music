@@ -523,7 +523,7 @@ tg.omglive.getRoomNamePart = function (part) {
         roomName += "-";
     }
     roomName += part.data.name.substr(0, part.data.name.indexOf(" "));
-    return roomName;
+    return "gauntlet" //todo put this back to roomName;
 };
 
 tg.omglive.switchRoom = function (newRoom) {

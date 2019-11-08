@@ -138,6 +138,7 @@ OMGMelodyMaker.prototype.draw = function (isubbeat, w, h) {
 
 OMGMelodyMaker.prototype.drawFrets = function () {
 
+    this.bgContext.globalAlpha = this.part.omglive ? 0.6 : 1
     this.bgContext.font = "12px sans-serif";
     this.bgContext.lineWidth = "2px";
     this.bgContext.strokeStyle = this.highContrast ? this.backgroundColor : this.color;
@@ -168,7 +169,8 @@ OMGMelodyMaker.prototype.drawFrets = function () {
         this.bgContext.lineTo(Math.round(i * this.bgCanvas.width / 4), this.bgCanvas.height - this.bottomFretBottom);
     }
     this.bgContext.stroke();
-    this.bgContext.closePath();    
+    this.bgContext.closePath();
+    this.bgContext.globalAlpha = 1    
 };
 
 
@@ -973,6 +975,8 @@ OMGMelodyMaker.prototype.setPart = function (part, welcomeStyle) {
 
 
 OMGMelodyMaker.prototype.drawOMGLiveUsers = function () {
+
+    this.context.fillText("Connect at http://gauntlet.live", 25, 50)
     var user;
     for (var user in this.part.omglive.users) {
         user = this.part.omglive.users[user];
