@@ -455,7 +455,7 @@ app.post('/preview', upload.any(), (req, res) => {
 });
 
 app.post('/upload', upload.any(), (req, res) => {
-    if (!req.user) {
+    if (!req.user || !req.user.admin) {
         res.status(500).send({"error": "access denied"});
         return;
     }
@@ -489,7 +489,70 @@ app.get('/live/:room', function (req, res) {
     res.send(remote(req.params.room));
 });
 
+
+app.use('/admin', function(req,res,next){
+
+    if (!req.user) {
+        res.redirect("/login.htm");
+    }
+
+    if (req.user && req.user.admin) {
+        next();
+    }
+    else {
+        res.status(404).send("Not found");
+    }
+});
+
+
+app.get('/admin/users', function (req, res) {
+    var options = {}
+    var find = {}
+
+    var callback = function (err, docs) {
+        if (err) {
+            res.send(err);
+        }
+        else {
+            res.send(docs);
+        }
+    };
+
+    var db = app.get("db");
+    options.columns = ["username", "id", "admin", "btc_address", "created_at"]
+    db.users.find(find, options, callback)
+})
+
+app.get('/admin/rooms', function (req, res) {
+
+    res.send(rooms);
+
+})
+
+app.get('/admin/gallery-stats', function (req, res) {
+
+    var callback = function (err, docs) {
+        if (err) {
+            res.send(err);
+        }
+        else {
+            res.send(docs);
+        }
+    };
+
+    var db = app.get("db");
+    db.run("select body ->> 'type' as type, count(id) from things group by body ->> 'type'", callback)
+})
+
+
+app.use("/admin", express.static('admin', {index: "index.htm"}));
 app.use(express.static('www', {index: "index.htm"}));
+
+
+
+
+
+/// DATA BASE TIME!
 
 try {
     console.log("Connecting to database...");
@@ -508,6 +571,9 @@ catch (excp) {
 
     3. Also make sure database omusic_db exists. Run: ./create_database.sh`);
 }
+
+
+//// THE ACTUAL SERVERS
 
 
 var httpPort = process.env.OMG_PORT || 8080;

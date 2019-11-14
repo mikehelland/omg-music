@@ -6,7 +6,7 @@
  */
 
 omg.search = function (params, callback) {
-    var url = "data/?"
+    var url = "/data/?"
     if (params.q) {
         url = url + "&q=" + params.q;
         params.metaData = false //meta data doesn't come with text search

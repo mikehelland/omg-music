@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>omg admin users</title>
+        <style>
+            #list-fragment {
+                border:1px solid black;
+                position:fixed;
+                left:0px;
+                top:0px;
+                height:99%;
+                width:30%;
+            }
+
+            #detail-fragment {
+                position:absolute;
+                left:30%;
+                top:0px;
+                margin:20px;
+            }
+
+            table {
+                border-collapse: collapse;
+                width:100%;
+            }
+            thead {
+                background-color:#AAAAAA;
+                font-size:0.7em;
+                text-align: center;
+            }
+            td {
+                border:1px solid #444444;
+                padding:14px;
+                font-size:0.85em;
+                font-family: 'helvetica neue', helvetica, arial, sans-serif;
+
+            }
+            tbody tr:nth-child(even) {
+                background-color: #EEEEFF;
+            }
+            tbody tr:hover {
+                background-color:#cccccc;
+                cursor:pointer;
+            }
+        </style>
+
+        <link rel="stylesheet" href="/css/main.css" type="text/css" />
+        <link rel="stylesheet" href="/css/search.css" type="text/css" />
+        <link rel="stylesheet" href="/css/viewer.css" type="text/css" />
+
+    </head>
+    <body>
+        <div id="list-fragment">
+                <a href="/admin">Admin</a> > Users
+            <table>
+                    <colgroup>
+                        <col width="60%" />
+                        <col width="40%" />
+                    </colgroup>
+                <thead>
+                <tr>
+                    <td>
+                        Username
+                    </td>
+                    <td>
+                        Last Login
+                    </td>
+                </tr>
+                </thead>
+                <tbody id="table"></tbody>
+            </table>
+        </div>
+        <div id="detail-fragment">
+            <div id="detail-username"></div>
+            <br>
+            created: <span id="detail-created_at"></span>
+            <br>
+            last login: <span id="detail-last_login"></span>
+            <br>
+            btc: <span id="detail-btc_address"></span>
+
+            <div class="search-things"></div>
+        </div>
+        
+        <script src="/js/omgservice.js"></script>
+        <script src="/js/search.js"></script>
+        <script src="/js/embedded_viewer.js"></script>
+        <script src="/omg-music/tuna-min.js"></script>
+        <script src="/omg-music/omgclasses.js"></script>
+        <script src="/omg-music/omusic_player.js"></script>
+        <script src="/omg-music/fx.js"></script>
+     
+        <script>
+
+var detailInputs = {
+    username: document.getElementById("detail-username"),
+    created_at: document.getElementById("detail-created_at"),
+    last_login: document.getElementById("detail-last_login"),
+    btc_address: document.getElementById("detail-btc_address"),
+}
+var table = document.getElementById("table")
+omg.server.getHTTP("/admin/users", (response) => {
+    response.forEach(user => {
+
+        var tr = document.createElement("tr")
+        var td = document.createElement("td")
+        td.innerHTML = user.username + (user.admin ? " (Admin)" : "")
+        tr.appendChild(td)
+        td = document.createElement("td")
+        td.innerHTML = omg.util.getTimeCaption(user.created_at)
+        tr.appendChild(td)
+        table.appendChild(tr)
+
+        tr.onclick = () => {
+            loadDetail(user)
+        }
+    })
+})
+
+var loadDetail = (user) => {
+    detailInputs.username.innerHTML = user.username
+    detailInputs.created_at.innerHTML = omg.util.getTimeCaption(user.created_at)
+    detailInputs.last_login.innerHTML = omg.util.getTimeCaption(user.last_login)
+    detailInputs.btc_address.innerHTML = user.btc_address
+    omg.search({
+        user:  user,
+        resultList: document.getElementsByClassName("search-things")[0],
+        metaData: true,
+        viewerParams: {deleteButton: true}
+    })
+}
+        
+        
+        
+        </script>
+    </body>
