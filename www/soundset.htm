@@ -112,11 +112,10 @@ if (!params.id) {
             newDiv = document.createElement("div");
             newDiv.className = "sound";
             var data = response.data[i];
-            newDiv.innerHTML = data.name +
+            newDiv.innerHTML = "<audio controls src='" + prefix + data.url + postfix +
+                    "'></audio>" + " - " + data.name +
                     " - <a href='" + prefix + data.url + postfix +
-                    "'>" + data.url + "</a> - " +
-                    "<audio controls src='" + prefix + data.url + postfix +
-                    "'></audio>";
+                    "'>" + data.url + "</a>";
             soundList.appendChild(newDiv);
         }
 

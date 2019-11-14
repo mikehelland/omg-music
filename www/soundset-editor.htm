@@ -9,6 +9,31 @@
             .url-input {width: 300px;}
             /*button {width: 100%; height: 40px; background-color: blue;}*/
             textarea {width: 400px; height: 100px;}
+
+            #drop-zone {
+                border:2px dashed #808080;
+                padding: 30px;
+                margin: 20px;
+                text-align: center;
+            }
+            .drop-zone-hover {
+                background-color:#DDDDFF;
+                border:2px dotted #808080 !important;
+            }
+
+            .search-thing-menu {
+                cursor: pointer;
+                margin:4px;
+                display:inline-block;
+                float:right;
+            }
+
+            .search-thing-menu:hover {
+                border-radius: 2px;
+                border: 1px solid #808080;
+                margin:3px;
+            }
+
         </style>
 
     </head>
@@ -30,6 +55,12 @@
         <div class="main-body">
 
             <h1>Add/Edit a Sound Set</h1>
+
+            <div id="drop-zone">
+                    Drop Files Here To Upload
+            </div>    
+
+
             Sound Set Name: 
             <br>
             <input id="soundset-name">
@@ -71,221 +102,274 @@
             URL Prefix <input id="url-prefix">
             URL Postfix <input id="url-postfix">
 
+
+            <hr>
             <div id="inputs">
-            <div class="search-info">
-                Sound 1 Name:
-
-                <input id="sound-1-name">
-
-                URL:
-
-                <input id="sound-1-url" class="url-input">
             </div>
 
-            <div class="search-info">
-                Sound 2 Name:
-
-                <input id="sound-2-name">
-
-                URL:
-
-                <input id="sound-2-url" class="url-input">
-            </div>
-
-            <div class="search-info">
-                Sound 3 Name:
-
-                <input id="sound-3-name">
-
-                URL:
-
-                <input id="sound-3-url" class="url-input">
-            </div>
-
-            <div class="search-info">
-                Sound 4 Name:
-
-                <input id="sound-4-name">
-
-                URL:
-
-                <input id="sound-4-url" class="url-input">
-            </div>
-
-            <div class="search-info">
-                Sound 5 Name:
-
-                <input id="sound-5-name">
-
-                URL:
-
-                <input id="sound-5-url" class="url-input">
-            </div>
-
-            <div class="search-info">
-                Sound 6 Name:
-
-                <input id="sound-6-name">
-
-                URL:
-
-                <input id="sound-6-url" class="url-input">
-            </div>
-
-            <div class="search-info">
-                Sound 7 Name:
-
-                <input id="sound-7-name">
-
-                URL:
-
-                <input id="sound-7-url" class="url-input">
-            </div>
-
-            <div class="search-info">
-                Sound 8 Name:
-
-                <input id="sound-8-name">
-
-                URL:
-
-                <input id="sound-8-url" class="url-input">
-            </div>
-            </div>
+            <a href="#" id="add-sound">Add Sound</a>
+            <hr>
 
             <button class="main-create-something" id="submit-button">Submit Sound Set</button>
-
-            <div>Or Batch Input:</div>
-            <textarea id="batch-input"></textarea>
-            <br>
-            <button class="main-create-something" id="submit-button2">Load Batch</button>
 
         </div>
 
         <script src="js/usercontrols.js"></script>
-        <script>
-            setupUserControls(document.getElementsByClassName("title-bar-user-controls")[0]);
-        </script>
 
         <script src="js/omgservice.js"></script>
         <script>
-            var lineCount = 8;
-            for (var i = 1; i <= lineCount; i++) {
-                urlElement = document.getElementById("sound-" + i + "-url");
-                urlElement.addEventListener("paste", function (e) {
-                    console.log(e.clipboardData.getData("Text"));
+var inputsDiv = document.getElementById("inputs")
+var inputs = {name: document.getElementById("soundset-name"),
+    data: [],
+    chromatic: document.getElementById("chromatic-checkbox"),
+    lowNote: document.getElementById("bottom-note-select"),
+    defaultSurface: document.getElementById("default-surface"),
+    prefix: document.getElementById("url-prefix"),
+    postfix: document.getElementById("url-postfix")
+};
+var soundset = {data: []}
+soundset.type= "SOUNDSET"
+soundset.omgVersion = 1
+var autoPrefix
+var params = omg.util.getPageParams();
 
-                    var nameInput = document.getElementById(e.target.id.replace("url", "name"));
-                    if (nameInput.value.length == 0) {
+var setupPage = () => {
+    if (params.id) {
+        autoPrefix = "/uploads/" + omg.user.id + "/" + params.id + "/"
+        omg.server.getId(params.id, function (response) {
 
-                        var filename;
-                        filename = e.clipboardData.getData("Text");
+            setInputs(response)
 
-                        nameInput.value = filename.split("/").pop().split(".")[0]
-                    }
-                }, false);
+            var newDiv;
+            soundset = response
+        });
+    }
+}
+
+var setInputs = (data) => {
+    inputs.name.value = data.name
+    inputs.chromatic.checked = data.chromatic
+    inputs.lowNote.selectedIndex = data.lowNote - 9
+    inputs.defaultSurface.value = data.defaultSurface
+    inputs.prefix.value = data.prefix
+    inputs.postfix.value = data.postfix
+
+    setList(data)
+}
+
+var setList = (data) => {
+    inputsDiv.innerHTML = ""
+    inputs.data = []
+    for (var i = 0; i < data.data.length; i++) {
+        makeListItem(data.data[i])
+    }
+
+}
+
+var getInputs = () => {
+    soundset.name = document.getElementById("soundset-name").value
+    soundset.chromatic = document.getElementById("chromatic-checkbox").checked
+    soundset.lowNote = document.getElementById("bottom-note-select").selectedIndex + 9
+    soundset.defaultSurface = document.getElementById("default-surface").value
+    soundset.prefix = document.getElementById("url-prefix").value
+    soundset.postfix = document.getElementById("url-postfix").value
+
+    //for (var i = 0; i < inputs.data.length; i++) {
+    //    soundset.data.push({url: inputs.data[i].urlInput.value, 
+    //        name: inputs.data[i].nameInput.value})
+    //}
+}
+
+var makeListItem = (data) => {
+    var div = document.createElement("div")
+    div.innerHTML = "Sound " + (inputs.data.length + 1) + " Name: "
+    var nameInput = document.createElement("input")
+    nameInput.value = data.name
+    div.appendChild(nameInput)
+    var caption = document.createElement("span")
+    caption.innerHTML = "URL: "
+    div.appendChild(caption)
+    var urlInput = document.createElement("input")
+    urlInput.value = data.url
+    div.appendChild(urlInput)
+    inputsDiv.appendChild(div)
+
+    urlInput.addEventListener("paste", function (e) {
+        if (nameInput.value.length == 0) {
+
+            var filename;
+            filename = e.clipboardData.getData("Text");
+
+             nameInput.value = makeSoundName(filename)
+             data.name = nameInput.value
+        }
+    }, false);
+    urlInput.onchange = ()=>data.url = urlInput.value
+    nameInput.onchange = ()=>data.name = nameInput.value
+
+    var el = document.createElement("div")
+    el.innerHTML = "&times;"
+    el.className = "search-thing-menu"
+    div.appendChild(el)
+    el.onclick = (e) => {
+        e.stopPropagation()
+        remove(data)
+    }
+
+    el = document.createElement("div")
+    el.innerHTML = "&darr;"
+    el.className = "search-thing-menu"
+    div.appendChild(el)
+    el.onclick = (e) => {
+        e.stopPropagation()
+        moveDown(data)
+    }
+
+    el = document.createElement("div")
+    el.innerHTML = "&uarr;"
+    el.className = "search-thing-menu"
+    div.appendChild(el)
+    el.onclick = (e) => {
+        e.stopPropagation()
+        moveUp(data)
+    }
+
+    inputs.data.push({nameInput: nameInput, urlInput, urlInput})
+}
+
+document.getElementById("add-sound").onclick = ()=>{
+    var newData = {url:"",name:""}
+    makeListItem(newData)
+    soundset.data.push(newData)
+}
+
+var makeSoundName = (filename) => {
+    return filename.split("/").pop().split(".")[0].replace("_", " ").replace("-", " ")
+}
+
+var dropZone = document.getElementById("drop-zone")
+dropZone.ondragover = (e) => {
+    e.preventDefault()
+    dropZone.className = "drop-zone-hover"
+}
+dropZone.ondragleave = (e) => {
+    e.preventDefault()
+    dropZone.className = ""
+}
+dropZone.ondrop = (e) => {
+    e.preventDefault()
+    var handleDroppedItems = (items) => {
+        for (var i = 0; i < e.dataTransfer.items.length; i++) {
+            if (e.dataTransfer.items[i].kind === "file" && 
+                    e.dataTransfer.items[i].type.startsWith("audio/")) {
+                handleDroppedItem(e.dataTransfer.items[i])
             }
+        }
+    }
+    dropZone.className = ""
 
-            document.getElementById("submit-button").onclick = function () {
-                var newSoundSet = {type: "SOUNDSET",
-                    omgVersion: 1,
-                    name: document.getElementById("soundset-name").value,
-                    data: [],
-                    chromatic: document.getElementById("chromatic-checkbox").checked,
-                    lowNote: document.getElementById("bottom-note-select").selectedIndex + 9,
-                    defaultSurface: document.getElementById("default-surface").value,
-                    prefix: document.getElementById("url-prefix").value,
-                    postfix: document.getElementById("url-postfix").value
-                };
+    var handleDroppedItem = (item) => {
+        var file = item.getAsFile()
+        var sound = {url: file.name, name: makeSoundName(file.name)}
+        if (inputs.prefix.value !== autoPrefix) {
+            sound.url = autoPrefix + sound.url
+        }
+        makeListItem(sound)
+        soundset.data.push(sound)
 
-                if (params.id)
-                    newSoundSet.id = params.id;
+        var fd = new FormData();
+        fd.append('soundsetId', soundset.id);
+        fd.append('file', file);
+        fd.append('filename', file.name);
+        omg.server.postHTTP("/upload", fd, (res)=>console.log(res));
+    }
 
-                var cap, url
-                for (var i = 1; i <= lineCount; i++) {
-                    url = document.getElementById("sound-" + i + "-url").value;
-                    cap = document.getElementById("sound-" + i + "-name").value;
-                    if (url.length > 0 && cap.length > 0) {
-                        newSoundSet.data.push({url: url, name: cap});
-                    }
+    if (e.dataTransfer.items) {
+        if (soundset.id) {
+            handleDroppedItems(e.dataTransfer.items)
+        }
+        else {
+            submit((res) => {
+                autoPrefix = "/uploads/" + omg.user.id + "/" + soundset.id + "/"
+                if (!inputs.prefix.value) {
+                    inputs.prefix.value = autoPrefix
+                    soundset.prefix = autoPrefix
                 }
+                handleDroppedItems(e.dataTransfer.items)
+            })
+        }
+    }
+}
 
-                console.log(JSON.stringify(newSoundSet));
+document.getElementById("submit-button").onclick = function () {
+    console.log("1", soundset.id)
+    if (!inputs.name.value || soundset.data.length == 0) {
+        alert("SoundSet needs a name, and a sound with a caption and url.")
+        return
+    }
 
-                if (newSoundSet.name.length > 0 && newSoundSet.data.length > 0) {
-                    omg.server.post(newSoundSet, function (response) {
-                        console.log(response);
+    submit((res)=>{
+        console.log("2", soundset.id)
+        if (res.id > 0) {
+            window.location = "soundset.htm?id=" + res.id;
+        }
+    })
+}
 
-                        //var responseO = JSON.parse(response);
-                        if (response.id > 0) {
-                            window.location = "soundset.htm?id=" + response.id;
-                        }
-                    });
-                } else {
-                    alert("SoundSet needs a name, and a sound with a caption and url.")
-                }
-            };
+var submit = (cb) => {
+    getInputs()
+    
+    omg.server.post(soundset, function (response) {
+        if (response.id) {
+            soundset.id = response.id
+        }
+        if (cb) {
+            cb(response)
+        }
+    });
+};
 
+var moveUp = function (item) {
 
-            document.getElementById("submit-button2").onclick = function () {
-                var newSoundSet = {type: "SOUNDSET",
-                    name: document.getElementById("soundset-name").value,
-                    data: [],
-                };
+    var i = soundset.data.indexOf(item) 
+    if (i < 1) {
+        return
+    }
 
-                var input = document.getElementById("batch-input").value;
-                
-                if (input.startsWith("{")) {
-                    console.log(input)
-                    var ooo = JSON.parse(input);
-                    console.log(ooo)
-                    omg.server.post(ooo, function (response) {
-                        console.log(response);
-                        if (response.id > 0) {
-                            window.location = "soundset.htm?id=" + response.id;
-                        }
-                    });
-                    return;
-                }
-                
-                var lines = input.split("\n");
-                lineCount = lines.length;
-                var inputs = document.getElementById("inputs");
-                
-                var cap, url;
-                for (var i = 1; i <= lines.length; i++) {
-                    if (i > 8) {
-                        var newDiv = document.createElement("div");
-                        newDiv.className = "search-info";
-                        newDiv.innerHTML = 'Sound ' +  i + 
-                                ' Name: <input id="sound-' + i + 
-                                '-name">URL:<input id="sound-' + i + 
-                                '-url" class="url-input">';
-                        inputs.appendChild(newDiv);
-                    }
-                    document.getElementById("sound-" + i + "-url").value = lines[i - 1];
-                    document.getElementById("sound-" + i + "-name").value = lines[i - 1].split("/").pop().split(".")[0];
-                }
+    soundset.data.splice(i, 1)
+    soundset.data.splice(i - 1, 0, item)
 
-            };
+    setList(soundset)
+}
 
-            var params = omg.util.getPageParams();
-            if (params.id) {
+var moveDown = function (item) {
 
-                omg.server.getId(params.id, function (response) {
-                    document.getElementById("soundset-name").value = response.name;
-                    var newDiv;
-                    for (var i = 0; i < response.data.length; i++) {
-                        document.getElementById("sound-" + (i + 1) + "-url").value =
-                                response.data[i].url;
-                        document.getElementById("sound-" + (i + 1) + "-name").value =
-                                response.data[i].name;
-                    }
-                });
+    var i = soundset.data.indexOf(item) 
+    if (i > -1 && i > soundset.data.length - 1) {
+        return
+    }
 
-            }
+    soundset.data.splice(i, 1)
+    soundset.data.splice(i + 1, 0, item)
 
+    setList(soundset)
+}
+
+var remove = function (item) {
+
+    var i = soundset.data.indexOf(item) 
+    if (i == -1) {
+        return
+    }
+
+    soundset.data.splice(i, 1)
+
+    setList(soundset)
+}
         </script>
-
+        <script>
+            setupUserControls(document.getElementsByClassName("title-bar-user-controls")[0], setupPage);
+        </script>
+    
     </body>
 </html>

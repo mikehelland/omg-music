@@ -454,6 +454,36 @@ app.post('/preview', upload.any(), (req, res) => {
     });
 });
 
+app.post('/upload', upload.any(), (req, res) => {
+    if (!req.user) {
+        res.status(500).send({"error": "access denied"});
+        return;
+    }
+    if (!req.user.id || !req.body.soundsetId || ! req.body.filename) {
+        res.status(500).send({"error": "wrong parameters"});
+        return;
+    }
+
+    var filename = "www/uploads/" + req.user.id
+    if (!fs.existsSync(filename)){
+        fs.mkdirSync(filename);
+    }
+
+    filename = filename + "/" + req.body.soundsetId 
+    if (!fs.existsSync(filename)){
+        fs.mkdirSync(filename);
+    }
+
+    filename = filename + "/" + req.body.filename
+    fs.writeFile(filename, req.files[0].buffer, (err) => {
+        if (err) {
+            console.log('Error: ', err);
+            res.status(500).send({"error": err.message});
+        } else {
+            res.status(200).send({});
+        }
+    });
+});
 
 app.get('/live/:room', function (req, res) {
     res.send(remote(req.params.room));

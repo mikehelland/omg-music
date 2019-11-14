@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html>
+    <head>
+
+        <link rel="stylesheet" href="css/main.css" type="text/css" />
+        <link rel="stylesheet" href="css/search.css" type="text/css" />
+
+        <style>
+            .url-input {width: 300px;}
+            /*button {width: 100%; height: 40px; background-color: blue;}*/
+            textarea {width: 400px; height: 100px;}
+        </style>
+
+    </head>
+    <body>
+
+        <div class="main-title-bar">
+            <div class="main-title-bar-content">
+                <a class="main-page-link" href="index.htm">
+                    <span class="main-title-open">Open</span><span class="main-title-media">Music</span><span class="main-title-gallery">.Gallery</span>
+                </a>
+
+                <div class="main-title-bar-right">
+                    <div class="title-bar-user-controls"></div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="main-body">
+
+            <h1>Add/Edit a Sound Set</h1>
+            Sound Set Name: 
+            <br>
+            <input id="soundset-name">
+
+            <br>
+            Default Surface: <select id="default-surface">
+                <option value="PRESET_VERTICAL">Vertical</option>
+                <option value="PRESET_FRETBOARD">Fretboard</option>
+                <option value="PRESET_SEQUENCER">Sequencer</option>
+            </select>
+            Chromatic <input type="checkbox" id="chromatic-checkbox"> 
+            Bottom Note:             
+            <select id="bottom-note-select">
+		<option>A0</option>	<option>Bb0</option>	<option>B0</option>	<option>C1</option>
+		<option>C#1</option>	<option>D1</option>	<option>Eb1</option>	<option>E1</option>
+		<option>F1</option>	<option>F#1</option>	<option>G1</option>	<option>G#1</option>
+		<option>A1</option>	<option>Bb1</option>	<option>B1</option>	<option>C2</option>
+		<option>C#2</option>	<option>D2</option>	<option>Eb2</option>	<option>E2</option>
+		<option>F2</option>	<option>F#2</option>	<option>G2</option>	<option>G#2</option>
+		<option>A2</option>	<option>Bb2</option>	<option>B2</option>	<option>C3</option>
+		<option>C#3</option>	<option>D3</option>	<option>Eb3</option>	<option>E3</option>
+		<option>F3</option>	<option>F#3</option>	<option>G3</option>	<option>G#3</option>
+		<option>A3</option>	<option>Bb3</option>	<option>B3</option>	<option>C4</option>
+		<option>C#4</option>	<option>D4</option>	<option>Eb4</option>	<option>E4</option>
+		<option>F4</option>	<option>F#4</option>	<option>G4</option>	<option>G#4</option>
+		<option>A4</option>	<option>Bb4</option>	<option>B4</option>	<option>C5</option>
+		<option>C#5</option>	<option>D5</option>	<option>Eb5</option>	<option>E5</option>
+		<option>F5</option>	<option>F#5</option>	<option>G5</option>	<option>G#5</option>
+		<option>A5</option>	<option>Bb5</option>	<option>B5</option>	<option selected="selected">C6</option>
+		<option>C#6</option>	<option>D6</option>	<option>Eb6</option>	<option>E6</option>
+		<option>F6</option>	<option>F#6</option>	<option>G6</option>	<option>G#6</option>
+		<option>A6</option>	<option>Bb6</option>	<option>B6</option>	<option>C7</option>
+		<option>C#7</option>	<option>D7</option>	<option>Eb7</option>	<option>E7</option>
+		<option>F7</option>	<option>F#7</option>	<option>G7</option>	<option>G#7</option>
+		<option>A7</option>	<option>Bb7</option>	<option>B7</option>	<option>C8</option>
+            </select>
+
+            <br>
+            URL Prefix <input id="url-prefix">
+            URL Postfix <input id="url-postfix">
+
+            <div id="inputs">
+            <div class="search-info">
+                Sound 1 Name:
+
+                <input id="sound-1-name">
+
+                URL:
+
+                <input id="sound-1-url" class="url-input">
+            </div>
+
+            <div class="search-info">
+                Sound 2 Name:
+
+                <input id="sound-2-name">
+
+                URL:
+
+                <input id="sound-2-url" class="url-input">
+            </div>
+
+            <div class="search-info">
+                Sound 3 Name:
+
+                <input id="sound-3-name">
+
+                URL:
+
+                <input id="sound-3-url" class="url-input">
+            </div>
+
+            <div class="search-info">
+                Sound 4 Name:
+
+                <input id="sound-4-name">
+
+                URL:
+
+                <input id="sound-4-url" class="url-input">
+            </div>
+
+            <div class="search-info">
+                Sound 5 Name:
+
+                <input id="sound-5-name">
+
+                URL:
+
+                <input id="sound-5-url" class="url-input">
+            </div>
+
+            <div class="search-info">
+                Sound 6 Name:
+
+                <input id="sound-6-name">
+
+                URL:
+
+                <input id="sound-6-url" class="url-input">
+            </div>
+
+            <div class="search-info">
+                Sound 7 Name:
+
+                <input id="sound-7-name">
+
+                URL:
+
+                <input id="sound-7-url" class="url-input">
+            </div>
+
+            <div class="search-info">
+                Sound 8 Name:
+
+                <input id="sound-8-name">
+
+                URL:
+
+                <input id="sound-8-url" class="url-input">
+            </div>
+            </div>
+
+            <button class="main-create-something" id="submit-button">Submit Sound Set</button>
+
+            <div>Or Batch Input:</div>
+            <textarea id="batch-input"></textarea>
+            <br>
+            <button class="main-create-something" id="submit-button2">Load Batch</button>
+
+        </div>
+
+        <script src="js/usercontrols.js"></script>
+        <script>
+            setupUserControls(document.getElementsByClassName("title-bar-user-controls")[0]);
+        </script>
+
+        <script src="js/omgservice.js"></script>
+        <script>
+            var lineCount = 8;
+            for (var i = 1; i <= lineCount; i++) {
+                urlElement = document.getElementById("sound-" + i + "-url");
+                urlElement.addEventListener("paste", function (e) {
+                    console.log(e.clipboardData.getData("Text"));
+
+                    var nameInput = document.getElementById(e.target.id.replace("url", "name"));
+                    if (nameInput.value.length == 0) {
+
+                        var filename;
+                        filename = e.clipboardData.getData("Text");
+
+                        nameInput.value = filename.split("/").pop().split(".")[0]
+                    }
+                }, false);
+            }
+
+            document.getElementById("submit-button").onclick = function () {
+                var newSoundSet = {type: "SOUNDSET",
+                    omgVersion: 1,
+                    name: document.getElementById("soundset-name").value,
+                    data: [],
+                    chromatic: document.getElementById("chromatic-checkbox").checked,
+                    lowNote: document.getElementById("bottom-note-select").selectedIndex + 9,
+                    defaultSurface: document.getElementById("default-surface").value,
+                    prefix: document.getElementById("url-prefix").value,
+                    postfix: document.getElementById("url-postfix").value
+                };
+
+                if (params.id)
+                    newSoundSet.id = params.id;
+
+                var cap, url
+                for (var i = 1; i <= lineCount; i++) {
+                    url = document.getElementById("sound-" + i + "-url").value;
+                    cap = document.getElementById("sound-" + i + "-name").value;
+                    if (url.length > 0 && cap.length > 0) {
+                        newSoundSet.data.push({url: url, name: cap});
+                    }
+                }
+
+                console.log(JSON.stringify(newSoundSet));
+
+                if (newSoundSet.name.length > 0 && newSoundSet.data.length > 0) {
+                    omg.server.post(newSoundSet, function (response) {
+                        console.log(response);
+
+                        //var responseO = JSON.parse(response);
+                        if (response.id > 0) {
+                            window.location = "soundset.htm?id=" + response.id;
+                        }
+                    });
+                } else {
+                    alert("SoundSet needs a name, and a sound with a caption and url.")
+                }
+            };
+
+
+            document.getElementById("submit-button2").onclick = function () {
+                var newSoundSet = {type: "SOUNDSET",
+                    name: document.getElementById("soundset-name").value,
+                    data: [],
+                };
+
+                var input = document.getElementById("batch-input").value;
+                
+                if (input.startsWith("{")) {
+                    console.log(input)
+                    var ooo = JSON.parse(input);
+                    console.log(ooo)
+                    omg.server.post(ooo, function (response) {
+                        console.log(response);
+                        if (response.id > 0) {
+                            window.location = "soundset.htm?id=" + response.id;
+                        }
+                    });
+                    return;
+                }
+                
+                var lines = input.split("\n");
+                lineCount = lines.length;
+                var inputs = document.getElementById("inputs");
+                
+                var cap, url;
+                for (var i = 1; i <= lines.length; i++) {
+                    if (i > 8) {
+                        var newDiv = document.createElement("div");
+                        newDiv.className = "search-info";
+                        newDiv.innerHTML = 'Sound ' +  i + 
+                                ' Name: <input id="sound-' + i + 
+                                '-name">URL:<input id="sound-' + i + 
+                                '-url" class="url-input">';
+                        inputs.appendChild(newDiv);
+                    }
+                    document.getElementById("sound-" + i + "-url").value = lines[i - 1];
+                    document.getElementById("sound-" + i + "-name").value = lines[i - 1].split("/").pop().split(".")[0];
+                }
+
+            };
+
+            var params = omg.util.getPageParams();
+            if (params.id) {
+
+                omg.server.getId(params.id, function (response) {
+                    document.getElementById("soundset-name").value = response.name;
+                    var newDiv;
+                    for (var i = 0; i < response.data.length; i++) {
+                        document.getElementById("sound-" + (i + 1) + "-url").value =
+                                response.data[i].url;
+                        document.getElementById("sound-" + (i + 1) + "-name").value =
+                                response.data[i].name;
+                    }
+                });
+
+            }
+
+        </script>
+
+    </body>
+</html>

@@ -215,8 +215,18 @@ OMGEmbeddedViewer.prototype.setupControls = function (params) {
         
     };
 
-    viewer.editButton.href = "/gauntlet/?id=" + data.id;
-    viewer.shareButton.href = "/play/" + data.id;
+    if (data.type === "SOUNDSET") {
+        viewer.editButton.href = "/soundset-editor.htm?id=" + data.id;
+        viewer.shareButton.href = "/soundset.htm?id=" + data.id;    
+    }
+    else if (data.type === "PLAYLIST") {
+        viewer.editButton.href = "/playlist.htm?id=" + data.id;
+        viewer.shareButton.href = "/play/" + data.id;
+    }
+    else {
+        viewer.editButton.href = "/gauntlet/?id=" + data.id;
+        viewer.shareButton.href = "/play/" + data.id;    
+    }
 
     var br = document.createElement("br");
     viewer.div.appendChild(br);
