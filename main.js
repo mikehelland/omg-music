@@ -553,6 +553,9 @@ app.get('/admin/uploads', function (req, res) {
     var dir = "www/uploads/" + (req.query.dir || "")
     fs.readdir(dir, (err, contents)=>{
         contents.forEach(file  => {
+            if (file.startsWith(".")) {
+                return
+            }
             uploads.push(file)
 
             //fs.stat(uploadDir + "/" + userDir, (err, stat) => {
@@ -560,7 +563,6 @@ app.get('/admin/uploads', function (req, res) {
             //    }
             //})
         })
-        console.log(uploads)
         res.send(uploads)
     })
 })
