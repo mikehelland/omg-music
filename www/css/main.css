@@ -298,27 +298,27 @@ h3 {
 
 .omg-viewer-song {
     background-color:#99FF99; 
-    border-radius:8px; padding:4px;
+    border-radius:4px; padding:4px;
     border:1px solid #808080;
 }
 .omg-viewer-section {
     background-color:#99AAFF;
-    border-radius:8px; padding:4px;
+    border-radius:4px; padding:4px;
     border:1px solid #808080;
 }
 .omg-viewer-part {
     background-color:#FFFF99;
-    border-radius:8px; padding:4px;
+    border-radius:4px; padding:4px;
     border:1px solid #808080;
 }
 .omg-viewer-soundset {
     background-color:#FF9999; 
-    border-radius:8px; padding:4px;
+    border-radius:4px; padding:4px;
     border:1px solid #808080;
 }
 .omg-viewer-playlist {
    background-color:#d08fc9; 
-   border-radius:8px; padding:4px;
+   border-radius:4px; padding:4px;
    border:1px solid #808080;
 }
 

@@ -483,7 +483,7 @@ app.post('/upload', upload.any(), (req, res) => {
             console.log('Error: ', err);
             res.status(500).send({"error": err.message});
         } else {
-            res.status(200).send({});
+            res.status(200).send({success: true});
         }
     });
 });
@@ -547,6 +547,23 @@ app.get('/admin/gallery-stats', function (req, res) {
     db.run("select body ->> 'type' as type, count(id) from things group by body ->> 'type'", callback)
 })
 
+app.get('/admin/uploads', function (req, res) {
+    console.log(req.query.dir)
+    var uploads = []
+    var dir = "www/uploads/" + (req.query.dir || "")
+    fs.readdir(dir, (err, contents)=>{
+        contents.forEach(file  => {
+            uploads.push(file)
+
+            //fs.stat(uploadDir + "/" + userDir, (err, stat) => {
+            //    if (stat && stat.isDirectory()) {
+            //    }
+            //})
+        })
+        console.log(uploads)
+        res.send(uploads)
+    })
+})
 
 app.use("/admin", express.static('admin', {index: "index.htm"}));
 app.use(express.static('www', {index: "index.htm"}));

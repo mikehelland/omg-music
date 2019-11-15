@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>omg admin uploads</title>
+        <style>
+            #list-fragment {
+                border:1px solid black;
+                position:fixed;
+                left:0px;
+                top:0px;
+                height:99%;
+                width:33%;
+                overflow: scroll;
+            }
+
+            #detail-fragment {
+                position:fixed;
+                left:33%;
+                top:0px;
+                height:99%;
+                width: 33%;
+                overflow: scroll;
+            }
+
+            #detail2-fragment {
+                position:fixed;
+                left:66%;
+                top:0px;
+                height:99%;
+                width: 33%;
+                overflow: scroll;
+            }
+
+            table {
+                border-collapse: collapse;
+                width:100%;
+            }
+            thead {
+                background-color:#AAAAAA;
+                font-size:0.7em;
+                text-align: center;
+            }
+            td {
+                border:1px solid #444444;
+                padding:14px;
+                font-size:0.85em;
+                font-family: 'helvetica neue', helvetica, arial, sans-serif;
+
+            }
+            tbody tr:nth-child(even) {
+                background-color: #EEEEFF;
+            }
+            tbody tr:hover {
+                background-color:#cccccc;
+                cursor:pointer;
+            }
+        </style>
+
+        <link rel="stylesheet" href="/css/main.css" type="text/css" />
+        <link rel="stylesheet" href="/css/search.css" type="text/css" />
+        <link rel="stylesheet" href="/css/viewer.css" type="text/css" />
+
+    </head>
+    <body>
+        <div id="list-fragment">
+                <a href="/admin">Admin</a> > Uploads
+            <table>
+                <thead>
+                <tr>
+                    <td>
+                        User ID
+                    </td>
+                </tr>
+                </thead>
+                <tbody id="table"></tbody>
+            </table>
+        </div>
+        <div id="detail-fragment">
+                <div id="user-id">&nbsp;</div>
+            <table>
+                <thead>
+                <tr>
+                    <td>
+                        Soundset ID
+                    </td>
+                </tr>
+                </thead>
+                <tbody id="table2"></tbody>
+            </table>
+        </div>
+        <div id="detail2-fragment">
+                <div id="soundset-id">&nbsp;</div>
+            <table>
+                <thead>
+                <tr>
+                    <td>
+                        File
+                    </td>
+                </tr>
+                </thead>
+                <tbody id="table3"></tbody>
+            </table>
+        </div>
+
+        
+        <script src="/js/omgservice.js"></script>
+     
+        <script>
+
+var detailInputs = {
+    userId: document.getElementById("user-id"),
+    soundsetId: document.getElementById("soundset-id"),
+}
+var table = document.getElementById("table")
+var table2 = document.getElementById("table2")
+var table3 = document.getElementById("table3")
+omg.server.getHTTP("/admin/uploads", (response) => {
+    response.forEach(file => {
+
+        var tr = document.createElement("tr")
+        var td = document.createElement("td")
+        td.innerHTML = file
+        tr.appendChild(td)
+        table.appendChild(tr)
+
+        tr.onclick = () => {
+            loadDetail(file)
+        }
+    })
+})
+
+var loadDetail = (parent) => {
+    detailInputs.userId.innerHTML = parent
+    table2.innerHTML = ""
+    omg.server.getHTTP("/admin/uploads?dir=" + parent, (response) => {
+        response.forEach(file => {
+
+            var tr = document.createElement("tr")
+            var td = document.createElement("td")
+            td.innerHTML = file
+            tr.appendChild(td)
+            table2.appendChild(tr)
+
+            tr.onclick = () => {
+                loadDetail2(parent, file)
+            }
+        })
+    })
+}
+
+var loadDetail2 = (grandParent, parent) => {
+    detailInputs.soundsetId.innerHTML = parent
+    table3.innerHTML = ""
+    omg.server.getHTTP("/admin/uploads?dir=" + grandParent + "/" + parent, (response) => {
+        response.forEach(file => {
+
+            var tr = document.createElement("tr")
+            var td = document.createElement("td")
+            td.innerHTML = file
+            tr.appendChild(td)
+            table3.appendChild(tr)
+        })
+    })
+}
+
+        
+        
+        </script>
+    </body>

@@ -188,6 +188,8 @@ var makeListItem = (data) => {
     urlInput.value = data.url
     div.appendChild(urlInput)
     inputsDiv.appendChild(div)
+    var statusDiv = document.createElement("span")
+    div.appendChild(statusDiv)
 
     urlInput.addEventListener("paste", function (e) {
         if (nameInput.value.length == 0) {
@@ -230,6 +232,7 @@ var makeListItem = (data) => {
     }
 
     inputs.data.push({nameInput: nameInput, urlInput, urlInput})
+    return statusDiv
 }
 
 document.getElementById("add-sound").onclick = ()=>{
@@ -269,14 +272,18 @@ dropZone.ondrop = (e) => {
         if (inputs.prefix.value !== autoPrefix) {
             sound.url = autoPrefix + sound.url
         }
-        makeListItem(sound)
+        var statusDiv = makeListItem(sound)
+        statusDiv.innerHTML = "Uploading..."
         soundset.data.push(sound)
 
         var fd = new FormData();
         fd.append('soundsetId', soundset.id);
         fd.append('file', file);
         fd.append('filename', file.name);
-        omg.server.postHTTP("/upload", fd, (res)=>console.log(res));
+        omg.server.postHTTP("/upload", fd, (res)=>{
+            statusDiv.innerHTML = res.success ? 
+                "<font color='green'>Uploaded</font>" : "<font color='red'>Error</font>"
+        });
     }
 
     if (e.dataTransfer.items) {
