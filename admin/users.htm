@@ -108,7 +108,7 @@ omg.server.getHTTP("/admin/users", (response) => {
         td.innerHTML = user.username + (user.admin ? " (Admin)" : "")
         tr.appendChild(td)
         td = document.createElement("td")
-        td.innerHTML = omg.util.getTimeCaption(user.created_at)
+        td.innerHTML = omg.util.getTimeCaption(user.last_login)
         tr.appendChild(td)
         table.appendChild(tr)
 

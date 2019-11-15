@@ -59,7 +59,10 @@ passport.use("login", new LocalStrategy(
                 if(res) {
                     delete user.bpassword;
                     delete user.password;
-                    return done(null, user);
+                    done(null, user);
+                    user = {id: user.id, last_login: new Date()}
+                    db.users.save(user, (err,user)=>{})
+                    return
                 } else {
                     return done(null, false);
                 } 
@@ -519,7 +522,7 @@ app.get('/admin/users', function (req, res) {
     };
 
     var db = app.get("db");
-    options.columns = ["username", "id", "admin", "btc_address", "created_at"]
+    options.columns = ["username", "id", "admin", "btc_address", "created_at", "last_login"]
     db.users.find(find, options, callback)
 })
 
