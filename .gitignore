@@ -6,5 +6,4 @@ nbproject/
 /nbproject/private/
 www/soundsets.json
 www/preview/*
-www/uploads/*
 *.pem
