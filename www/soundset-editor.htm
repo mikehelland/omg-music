@@ -282,7 +282,7 @@ dropZone.ondrop = (e) => {
         fd.append('filename', file.name);
         omg.server.postHTTP("/upload", fd, (res)=>{
             statusDiv.innerHTML = res.success ? 
-                "<font color='green'>Uploaded</font>" : "<font color='red'>Error</font>"
+                "<font color='green'>Uploaded</font>" : ("<font color='red'>Error</font> " + res.error)
         });
     }
 

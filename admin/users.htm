@@ -9,13 +9,13 @@
                 left:0px;
                 top:0px;
                 height:99%;
-                width:30%;
+                width:50%;
                 overflow: scroll;
             }
 
             #detail-fragment {
                 position:absolute;
-                left:30%;
+                left:50%;
                 top:0px;
                 margin:20px;
             }
@@ -55,13 +55,17 @@
                 <a href="/admin">Admin</a> > Users
             <table>
                     <colgroup>
-                        <col width="60%" />
-                        <col width="40%" />
+                        <col width="50%" />
+                        <col width="25%" />
+                        <col width="25%" />
                     </colgroup>
                 <thead>
                 <tr>
                     <td>
                         Username
+                    </td>
+                    <td>
+                        Uploads
                     </td>
                     <td>
                         Last Login
@@ -79,7 +83,13 @@
             last login: <span id="detail-last_login"></span>
             <br>
             btc: <span id="detail-btc_address"></span>
+            <hr>
+            <br>
+            uploaded bytes: <span id="detail-uploaded_bytes"></span>
+            <br>
+            upload limit: <input id="detail-upload_limit"></input>
 
+            <hr>
             <div class="search-things"></div>
         </div>
         
@@ -98,7 +108,11 @@ var detailInputs = {
     created_at: document.getElementById("detail-created_at"),
     last_login: document.getElementById("detail-last_login"),
     btc_address: document.getElementById("detail-btc_address"),
+    uploaded_bytes: document.getElementById("detail-uploaded_bytes"),
+    upload_limit: document.getElementById("detail-upload_limit"),
 }
+
+
 var table = document.getElementById("table")
 omg.server.getHTTP("/admin/users", (response) => {
     response.forEach(user => {
@@ -106,6 +120,10 @@ omg.server.getHTTP("/admin/users", (response) => {
         var tr = document.createElement("tr")
         var td = document.createElement("td")
         td.innerHTML = user.username + (user.admin ? " (Admin)" : "")
+        tr.appendChild(td)
+        td = document.createElement("td")
+        td.innerHTML = omg.util.getFileSizeCaption(user.uploaded_bytes) + 
+                " / " + omg.util.getFileSizeCaption(user.upload_limit)
         tr.appendChild(td)
         td = document.createElement("td")
         td.innerHTML = omg.util.getTimeCaption(user.last_login)
@@ -123,12 +141,21 @@ var loadDetail = (user) => {
     detailInputs.created_at.innerHTML = omg.util.getTimeCaption(user.created_at)
     detailInputs.last_login.innerHTML = omg.util.getTimeCaption(user.last_login)
     detailInputs.btc_address.innerHTML = user.btc_address
+    detailInputs.uploaded_bytes.innerHTML = user.uploaded_bytes
+    detailInputs.upload_limit.value = user.upload_limit
     omg.search({
         user:  user,
         resultList: document.getElementsByClassName("search-things")[0],
         metaData: true,
         viewerParams: {deleteButton: true}
     })
+
+
+    omg.ui.setupInputEvents(detailInputs.upload_limit, user, "upload_limit", function () {
+        omg.server.postHTTP("/user", user, function (e) {
+            console.log(e)
+        });
+    });
 }
         
         

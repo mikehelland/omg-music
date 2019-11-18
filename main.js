@@ -458,7 +458,7 @@ app.post('/preview', upload.any(), (req, res) => {
 });
 
 app.post('/upload', upload.any(), (req, res) => {
-    if (!req.user || !req.user.admin) {
+    if (!req.user) {
         res.status(500).send({"error": "access denied"});
         return;
     }
@@ -467,25 +467,36 @@ app.post('/upload', upload.any(), (req, res) => {
         return;
     }
 
-    var filename = "www/uploads/" + req.user.id
-    if (!fs.existsSync(filename)){
-        fs.mkdirSync(filename);
-    }
-
-    filename = filename + "/" + req.body.soundsetId 
-    if (!fs.existsSync(filename)){
-        fs.mkdirSync(filename);
-    }
-
     filename = filename + "/" + req.body.filename
-    fs.writeFile(filename, req.files[0].buffer, (err) => {
-        if (err) {
-            console.log('Error: ', err);
-            res.status(500).send({"error": err.message});
-        } else {
-            res.status(200).send({success: true});
+    var db = app.get("db")
+    db.users.findOne({id: req.user.id}, (err, user) => {
+        if (err) return res.status(500).send({"error": "user not found"});
+        if (user.upload_limit !== -1 && user.uploaded_bytes + req.files[0].buffer.length >= user.upload_limit) {
+            return res.status(500).send({"error": "upload limit reached"});
         }
-    });
+
+        var filename = "www/uploads/" + req.user.id
+        if (!fs.existsSync(filename)){
+            fs.mkdirSync(filename);
+        }
+    
+        filename = filename + "/" + req.body.soundsetId 
+        if (!fs.existsSync(filename)){
+            fs.mkdirSync(filename);
+        }
+    
+        fs.writeFile(filename, req.files[0].buffer, (err) => {
+            if (err) {
+                console.log('Error: ', err);
+                res.status(500).send({"error": err.message});
+            } else {
+                res.status(200).send({success: true});
+                db.run("update users set uploaded_bytes = uploaded_bytes + " + req.files[0].buffer.length +
+                    "where id = " + req.user.id)
+            }
+        });
+    
+    })
 });
 
 app.get('/live/:room', function (req, res) {
@@ -522,7 +533,7 @@ app.get('/admin/users', function (req, res) {
     };
 
     var db = app.get("db");
-    options.columns = ["username", "id", "admin", "btc_address", "created_at", "last_login"]
+    options.columns = ["username", "id", "admin", "btc_address", "created_at", "last_login", "uploaded_bytes", "upload_limit"]
     db.users.find(find, options, callback)
 })
 

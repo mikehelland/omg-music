@@ -154,6 +154,21 @@ omg.util.getTimeCaption = function (timeMS) {
     return monthday + " " + date.getFullYear();
 };
 
+omg.util.getFileSizeCaption = function (bytes) {
+    if (bytes < 1)
+        return bytes + ""
+    
+    if (bytes / 1000000 >= 1) {
+        return Math.round(bytes / 100000) / 10 + "mb"
+    }
+
+    if (bytes / 1000 >= 1) {
+        return Math.round(bytes / 100) / 10 + "kb"
+    }
+
+    return bytes + " bytes"
+}
+
 omg.util.getUniqueName = function (name, names) {
     var isUnique = true;
     for (var i = 0; i < names.length; i++) {
