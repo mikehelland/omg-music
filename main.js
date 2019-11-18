@@ -100,19 +100,38 @@ passport.use("signup", new LocalStrategy(
 );
 
 
-app.post("/login",
-   passport.authenticate("login", {successRedirect: "/",
-                                   failureRedirect: "/login.htm?invalid"})
-);
+app.post("/login", (req, res, next) => {
+    passport.authenticate('login', function(err, user, info) {
+        if (err) { return next(err); }
+        var fwd = req.body.fwd ? decodeURIComponent(req.body.fwd) : "/"
+        if (!user) { 
+            return res.redirect("/login.htm?invalid&fwd=" + fwd); 
+        }
+        req.logIn(user, function(err) {
+          if (err) { return next(err); }
+          return res.redirect(fwd);
+        });
+      })(req, res, next);
+});
+
 app.get("/logout", function (req, res) {
       req.logout();
       res.redirect("/");
    }
 );
-app.post('/signup', 
-   passport.authenticate("signup", {successRedirect: "/",
-                                   failureRedirect: "/signup.htm?invalid"})
-);
+app.post('/signup', (req, res, next) => {
+    passport.authenticate('signup', function(err, user, info) {
+        if (err) { return next(err); }
+        var fwd = req.body.fwd ? decodeURIComponent(req.body.fwd) : "/"
+        if (!user) { 
+            return res.redirect("/signup.htm?invalid&fwd=" + fwd); 
+        }
+        req.logIn(user, function(err) {
+        if (err) { return next(err); }
+        return res.redirect(fwd);
+        });
+    })(req, res, next);
+});
 
 app.post("/api-login",
    passport.authenticate("login"),
@@ -152,10 +171,18 @@ app.get('/user', function (req, res) {
 
 app.post('/user', function (req, res) {
     var db = app.get('db');
-    if (req.user && req.body && req.user.id === req.body.id) {
+    if (!req.user || !req.body) {
+        return res.send(false);
+    }
+
+    if (req.user.admin || req.user.id === req.body.id) {
         
-        if (req.body.admin && !req.user.admin) {
-            req.body.admin = false
+        if (!req.user.admin) {
+            delete req.body.admin
+            delete req.body.password;
+            delete req.body.bpassword;
+            delete req.body.uploaded_bytes;
+            delete req.body.upload_limit;
         }
 
         //this is so postgres accepts it as json, needs to be a string
@@ -505,9 +532,8 @@ app.get('/live/:room', function (req, res) {
 
 
 app.use('/admin', function(req,res,next){
-
     if (!req.user) {
-        res.redirect("/login.htm");
+        return res.redirect("/login.htm?fwd=%2fadmin" + encodeURIComponent(req.url));
     }
 
     if (req.user && req.user.admin) {

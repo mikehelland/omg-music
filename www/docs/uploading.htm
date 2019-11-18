@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+   <link rel="stylesheet" href="/css/main.css" type="text/css" />
+   <link rel="stylesheet" href="/css/search.css" type="text/css" />
+
+</head>
+<body>
+
+   <div class="main-title-bar">
+         <div class="main-title-bar-content">
+         <a class="main-page-link" href="/index.htm">
+         <span class="main-title-open">Open</span><span class="main-title-media">Music</span><span class="main-title-gallery">.Gallery</span>
+         </a>
+
+         <div class="main-title-bar-right">
+            <div class="title-bar-user-controls"></div>
+         </div>
+      </div>
+
+   </div>
+
+   <div class="main-body">
+
+
+<h1>Files and Uploading in OMG</h1>
+<hr>
+
+<p>
+OMG can use small audio samples from anywhere on the Internet. You can use URLs from your own website,
+or any other file sharing site that gives you a public URL.
+</p>
+
+<p>If you prefer, you may upload files directly to OMG. Every user automatically gets <b>2 mb</b> of storage.</p>
+
+<p>That doesn't sound like much, but for short MP3 samples like a a snare drum, it's more than it seems.</p>
+
+<div class="main-separator"></div>
+
+<div id="upload-usage">
+   <p>You are using <span id="upload-usage-stats"></span></p>
+   <p>To upload audio samples, <a href="/soundset-editor.htm">make a Sound Set</a></p>
+</div>
+
+<p id="not-logged-in"></p>
+
+   </div>
+
+
+   <script src="/js/usercontrols.js"></script>
+   <script src="/js/omgservice.js"></script>
+   <script>
+   var userControls = document.getElementsByClassName("title-bar-user-controls")[0]
+   setupUserControls(userControls, (user) => {
+         document.getElementById("not-logged-in").style.display = "none"
+         document.getElementById("upload-usage-stats").innerHTML = 
+               "<b>" + omg.util.getFileSizeCaption(user.uploaded_bytes) + "</b> of <b>" +
+               omg.util.getFileSizeCaption(user.upload_limit) + "</b>"
+   }, () => {
+      document.getElementById("upload-usage").style.display = "none"
+      document.getElementById("not-logged-in").innerHTML = userControls.innerHTML
+   });
+   </script>
+
+
+</body>
+</html>

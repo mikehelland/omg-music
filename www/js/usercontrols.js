@@ -2,7 +2,7 @@ if (typeof omg == "undefined") {
    omg = {};
 }
 
-function setupUserControls(div, successCallback) {
+function setupUserControls(div, successCallback, failCallback) {
    var loggedIn = false;
    var user;
 
@@ -18,16 +18,23 @@ function setupUserControls(div, successCallback) {
          if (window.location.protocol !== "https:") {
              httpsURL = "https://" + window.location.host + "/";
          }
+
+         var fwd = "?fwd=" + encodeURIComponent(window.location.pathname + window.location.search)
          //div.omg.notLoggedIn.innerHTML = "<a href='" + httpsURL + 
-         div.innerHTML = "<a href='" + httpsURL + 
-                 "login.htm'>Log in</a> | <a href='" + httpsURL + "signup.htm'>Sign up</a>";
+         div.innerHTML = "<a href='" + httpsURL +
+                 "login.htm" + fwd + "'>Log in</a> | <a href='" + httpsURL + "signup.htm" + fwd + "'>Sign up</a>";
          //div.appendChild(div.omg.notLoggedIn);
       }
+
+      if (typeof failCallback == "function") {
+         failCallback(user);
+      }
+
    };
 
    var onLoggedIn = function () {
 
-	  div.innerHTML = "<a href='user.htm'>" + user.username + "</a>";
+	  div.innerHTML = "<a href='/user.htm'>" + user.username + "</a>";
 
       var el = document.createElement("div");
       el.style.display = "none";

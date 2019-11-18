@@ -370,7 +370,11 @@ var remove = function (item) {
 }
         </script>
         <script>
-            setupUserControls(document.getElementsByClassName("title-bar-user-controls")[0], setupPage);
+            var userControls = document.getElementsByClassName("title-bar-user-controls")[0]
+            setupUserControls(userControls, setupPage, () => {
+                document.getElementsByClassName("main-body")[0].innerHTML = 
+                    "<h3>To Add / Edit a sound set please " + userControls.innerHTML + "</h3>"
+            });
         </script>
     
     </body>

@@ -155,10 +155,15 @@ omg.util.getTimeCaption = function (timeMS) {
 };
 
 omg.util.getFileSizeCaption = function (bytes) {
-    if (bytes < 1)
+    if (bytes < 1) {
         return bytes + ""
+    }
     
-    if (bytes / 1000000 >= 1) {
+    if (bytes / 1000000000 >= 1) {
+        return Math.round(bytes / 10000000) / 10 + "gb"
+    }
+
+        if (bytes / 1000000 >= 1) {
         return Math.round(bytes / 100000) / 10 + "mb"
     }
 
@@ -166,7 +171,7 @@ omg.util.getFileSizeCaption = function (bytes) {
         return Math.round(bytes / 100) / 10 + "kb"
     }
 
-    return bytes + " bytes"
+    return bytes + " b"
 }
 
 omg.util.getUniqueName = function (name, names) {

@@ -30,6 +30,8 @@
       <div class="user-info">
          Account created: <span class="user-created-at"></span>
       </div>
+
+      <div class="main-separator"></div>
       <div class="user-info">
           Tip Jar Bitcoin address:
           <input id="btc-address">
@@ -37,6 +39,19 @@
 
       <div class="main-separator"></div>
 
+      <div class="user-info">
+         Upload Usage:
+         <span id="upload-usage"></span>
+         <a href="docs/uploading.htm">(About uploading)</a>
+     </div>
+
+      <div class="main-separator"></div>
+
+
+      <div class="user-info">
+         User Things:
+      </div>
+      
       <div class="search-things">
 
          <!--<div class="user-thing">
@@ -69,6 +84,9 @@
          document.getElementsByClassName("user-username")[0].innerHTML = user.username;
 
          document.getElementsByClassName("user-created-at")[0].innerHTML = omg.util.getTimeCaption(user.created_at);
+         document.getElementById("upload-usage").innerHTML = 
+            omg.util.getFileSizeCaption(user.uploaded_bytes) + " / " + 
+            omg.util.getFileSizeCaption(user.upload_limit)
 
          omg.search({
             user:  user,
