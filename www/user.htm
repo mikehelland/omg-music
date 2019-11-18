@@ -25,6 +25,8 @@
 
    <div class="main-body">
 
+      <div class="left-or-top-column">
+
       <h1 class="user-username"></h1>
       <div><a href="/logout">Log Out</a></div>
       <div class="user-info">
@@ -42,21 +44,36 @@
       <div class="user-info">
          Upload Usage:
          <span id="upload-usage"></span>
-         <a href="docs/uploading.htm">(About uploading)</a>
+         <a href="docs/uploading.htm"><br>(About uploading)</a>
      </div>
+     <div class="main-separator"></div>
 
-      <div class="main-separator"></div>
-
-
-      <div class="user-info">
-         User Things:
       </div>
       
+      <div class="main-column">
+            <div id="search-info" class="search-info">
+                  <select id="filter-type">
+                       <option value="">All Types</option>
+                       <option value="SONG">Songs</option>
+                       <option value="PLAYLIST">Playlists</option>
+                       <option value="SECTION">Sections</option>
+                       <option value="MELODY">Melodies</option>
+                       <option value="BASSLINE">Basslines</option>
+                       <option value="DRUMBEAT">Drumbeats</option>
+                       <option value="SOUNDSET">SoundSets</option>
+                  </select>
+      
+                  <form id="search-form">
+                   <input class="main-search-input" id="query" name="q" placeholder="Search"></input>
+                   <input class="main-search-submit" type="submit" value="OMG!"></input>
+                  </form>
+      
+                   <span class="search-info-terms">search terms</span>
+            </div>      
       <div class="search-things">
-
          <!--<div class="user-thing">
          </div>-->
-
+      </div>
       </div>
 
    </div>
@@ -105,6 +122,21 @@
             });
          });
 
+         var searchForm = document.getElementById("search-form")
+         var queryInput = document.getElementById("query")
+         var filterTypeInput = document.getElementById("filter-type")
+         searchForm.onsubmit = () => {
+            omg.search({
+               user:  user,
+               resultList: document.getElementsByClassName("search-things")[0],
+               metaData: true,
+               viewerParams: {deleteButton: true},
+               type: filterTypeInput.value,
+               q: queryInput.value
+            }) 
+            return false
+         }
+         console.log(searchForm)
       });
    </script>
 

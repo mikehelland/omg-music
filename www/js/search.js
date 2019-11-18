@@ -69,8 +69,6 @@ omg.loadSearchResults = function (params, results) {
         }
         new OMGEmbeddedViewer(viewerParams);
 
-        params.resultList.appendChild(document.createElement("br"));
-
         resultDiv.onclick = function () {
             var page;
             if (result.type == "SOUNDSET") {

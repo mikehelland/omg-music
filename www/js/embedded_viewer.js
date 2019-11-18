@@ -233,11 +233,18 @@ OMGEmbeddedViewer.prototype.setupControls = function (params) {
     
     var height = params.height || 150;
 
-    viewer.canvas = document.createElement("canvas");
-    viewer.canvas.className = "omg-viewer-canvas";
-    viewer.div.appendChild(viewer.canvas);
-    viewer.canvas.width = viewer.canvas.clientWidth;
-    viewer.canvas.height = height; //viewer.canvas.clientHeight;
+    if (data.type === "SOUNDSET" || data.type === "PLAYLIST") {
+        viewer.flexBox = document.createElement("div")
+        viewer.div.appendChild(viewer.flexBox)
+
+    }
+    else {
+        viewer.canvas = document.createElement("canvas");
+        viewer.canvas.className = "omg-viewer-canvas";
+        viewer.div.appendChild(viewer.canvas);
+        viewer.canvas.width = viewer.canvas.clientWidth;
+        viewer.canvas.height = height; //viewer.canvas.clientHeight;    
+    }
 
     var className = "omg-viewer-" + data.type.toLowerCase();
     this.div.classList.add(className);
@@ -288,8 +295,12 @@ OMGEmbeddedViewer.prototype.setupControls = function (params) {
 
 OMGEmbeddedViewer.prototype.drawCanvas = function (data) {
     
-    if (data.type === "SOUNDSET" || data.type === "PLAYLIST") {
-        //todo this.loadSoundSet(data);
+    if (data.type === "SOUNDSET") {
+        this.loadSoundSet(data);
+        return;
+    }
+    if (data.type === "PLAYLIST") {
+        this.loadPlayList(data);
         return;
     }
 
@@ -481,3 +492,18 @@ OMGEmbeddedViewer.prototype.draw = function () {
     }
 };
 
+OMGEmbeddedViewer.prototype.loadPlayList = function (data) {
+    data.data.forEach((item) => {
+        var div = document.createElement("div")
+        div.innerHTML = item.name
+        this.flexBox.appendChild(div)
+    })
+}
+
+OMGEmbeddedViewer.prototype.loadSoundSet = function (data) {
+    data.data.forEach((item) => {
+        var div = document.createElement("div")
+        div.innerHTML = item.name
+        this.flexBox.appendChild(div)
+    })
+}
