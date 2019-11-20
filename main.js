@@ -99,6 +99,18 @@ passport.use("signup", new LocalStrategy(
     })
 );
 
+app.use(function(request, response, next){
+    if(!request.secure){
+        var host = request.headers.host
+        if (host === "localhost:8080") {
+            host = "localhost:8081"
+        }
+        response.redirect("https://" + host + request.url);
+    }
+    else {
+        next()
+    }
+});
 
 app.post("/login", (req, res, next) => {
     passport.authenticate('login', function(err, user, info) {
