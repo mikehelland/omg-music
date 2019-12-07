@@ -53,6 +53,9 @@ body {
    color:white;
    padding-left:8px;
 }
+.main-nav-drawer-icon {
+   cursor: pointer;
+}
 .title-bar-user-menu {
    cursor: pointer;
    display:none;
@@ -68,7 +71,7 @@ body {
 
 .main-nav {
    padding-top:8px;
-   width:180px;
+   width:200px;
    background-color:#282828;
    color:white;
    position: fixed;
@@ -92,16 +95,22 @@ body {
 .main-column {
    flex-grow: 1;
    padding:16px 20px;
-   margin-left:180px;
+   margin-left:200px;
 }
 
 @media (max-width:750px){
+   .main-body {
+      display: block;
+   }
    .main-column {
       width:90%;
       margin:auto;
    }
    .main-nav {
       display:none;
+      position: absolute;
+      width:80%;
+      z-index: 1;
    }
 }
 

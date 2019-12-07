@@ -14,22 +14,10 @@
    
    <style>
        @media (max-width:750px){
-            .title-bar-user-controls {
-                 display:none;
-             }
-             .title-bar-user-menu {
-                 margin-top:-5px;
-                 display:block;
-             }
        }
        .main-column {
            background-color: white;
            color:black;
-           margin-left:220px;
-       }
-
-       .main-nav {
-           width:220px;
        }
 
    </style>
@@ -39,14 +27,14 @@
 
 <div class="main-title-bar">
    <div class="main-title-bar-content">
-       <div class="main-page-link">
-       <a href="/"><span class="main-title-open">Open</span><span class="main-title-media">Music</span><span class="main-title-gallery">.Gallery</span></a>
-       </div>
+        <div class="main-page-link">
+            <span class="main-nav-drawer-icon">&#9776;</span>
+            <a href="/"><span class="main-title-open">Open</span><span class="main-title-media">Music</span><span class="main-title-gallery">.Gallery</span></a>
+        </div>
 
-      <div class="main-title-bar-right">
-         <div class="title-bar-user-controls"></div>
-         <div class="title-bar-user-menu">&#9776;</div>
-      </div>
+        <div class="main-title-bar-right">
+            <div class="title-bar-user-controls"></div>
+        </div>
 
    </div>
 </div>
@@ -89,6 +77,14 @@
             links[i].style.backgroundColor = "#808080"
         }
     }
+
+    var menuVisible = false;
+    document.getElementsByClassName("main-nav-drawer-icon")[0].onclick = function () {
+        document.getElementsByClassName("main-nav")[0].style.display = menuVisible ? 
+                "" : "block";
+        menuVisible = !menuVisible;
+    };
+
 </script>
 </body>
 

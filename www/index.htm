@@ -34,15 +34,14 @@
 
 <div class="main-title-bar">
    <div class="main-title-bar-content">
-       <div class="main-page-link">
-       <a href="/"><span class="main-title-open">Open</span><span class="main-title-media">Music</span><span class="main-title-gallery">.Gallery</span></a>
-       </div>
+        <div class="main-page-link">
+            <span class="main-nav-drawer-icon">&#9776;</span>
+            <a href="/"><span class="main-title-open">Open</span><span class="main-title-media">Music</span><span class="main-title-gallery">.Gallery</span></a>
+        </div>
 
-      <div class="main-title-bar-right">
-         <div class="title-bar-user-controls"></div>
-         <div class="title-bar-user-menu">&#9776;</div>
-      </div>
-
+        <div class="main-title-bar-right">
+            <div class="title-bar-user-controls"></div>
+        </div>    
    </div>
 </div>
 <div class="main-footer-bar">
@@ -221,8 +220,8 @@ window.onload = function () {
 };
 
 var menuVisible = false;
-document.getElementsByClassName("title-bar-user-menu")[0].onclick = function () {
-    document.getElementsByClassName("left-column")[0].style.display = menuVisible ? 
+document.getElementsByClassName("main-nav-drawer-icon")[0].onclick = function () {
+    document.getElementsByClassName("main-nav")[0].style.display = menuVisible ? 
             "" : "block";
     menuVisible = !menuVisible;
 };
