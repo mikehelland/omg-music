@@ -24,7 +24,7 @@ return `<!DOCTYPE html>
 <html>
 <head>
 
-   <link rel="stylesheet" href="/css/main.css" type="text/css" />
+   <link rel="stylesheet" href="/css/main2.css" type="text/css" />
    <link rel="stylesheet" href="/css/viewer.css" type="text/css" />
    <meta property="og:image" content="http://openmusic.gallery/preview/${result.id}.png"/>
    <meta property="og:image:url" content="http://openmusic.gallery/preview/${result.id}.png"/>
@@ -36,6 +36,7 @@ return `<!DOCTYPE html>
    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
    <title>Listen to ${resultCaption} - OpenMusic.Gallery</title>
     <style>html,body {height:100%; margin:0; }
+        .main-body {display: block; max-width:90%; margin:46px auto 0;}
     </style>
 
     <script>
@@ -49,13 +50,13 @@ return `<!DOCTYPE html>
    <div class="main-body">
 
       <div id="omgviewer"><div class="beat-marker"></div></div>
-      
-      <p>Make your own music with OpenMusic.Gallery:</p>
+      <br>
       <div class="site-tools">
-            <a target="_blank" href="/gauntlet/">
-                      <img src="/img/technogauntlet.png">Go to Techno GAUNTLET
-            </a> <span class="tools-seperator">|</span>
-            <a href="/docs/what_is_open_music.htm"><img src="/favicon.ico">What is open music?</a>
+            <a href="/">&#8962; Home</a>
+            <span class="tools-separator">|</span>
+            <a target="_blank" href="/gauntlet/">&plus; Create Music
+            </a> <span class="tools-separator">|</span>
+            <a href="/docs?what-is-this">What is this?</a>
       </div>
       
    </div>

@@ -14,11 +14,12 @@ body {
 }
 .main-title-bar-content {
    padding:10px;   
-
+   display:flex;
 }
 .main-page-link {
    text-decoration:none;
    display:inline-block;
+   flex-grow: 1;
 }
 .main-title-open {
    color:#FFFF88;
@@ -45,7 +46,8 @@ body {
 }
 
 .main-title-bar-right {
-   float:right;
+   text-align: right;
+   flex-grow: 1;
 }
 
 .main-title-bar a {
@@ -98,6 +100,13 @@ body {
    margin-left:200px;
 }
 
+.main-description {
+   text-align: center;
+   flex-grow: 2;
+   font-style: italic;
+   font-size: 80%;
+}
+
 @media (max-width:750px){
    .main-body {
       display: block;
@@ -111,6 +120,9 @@ body {
       position: absolute;
       width:80%;
       z-index: 1;
+   }
+   .main-description {
+      display: none;
    }
 }
 

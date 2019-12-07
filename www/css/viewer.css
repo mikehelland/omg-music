@@ -104,12 +104,20 @@
    opacity:0.7;
    font-size:0.9em;
 }
-
 .site-tools {
-   background:#F8F8F8;
-   font-family: Helvetica, Arial, sans-serif;
-   font-size: 12px;
-   padding:1%;
+   text-align: center;
+}
+.site-tools a {
+   text-decoration: none;
+   color:white;
+   padding:5px;
+   font-size:110%;
+}
+.site-tools a:hover {
+   text-decoration: underline;
+}
+.tools-separator {
+   color: #808080;
 }
 
 .loader {

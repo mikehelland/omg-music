@@ -83,9 +83,7 @@ passport.use("signup", new LocalStrategy(
             }
 
             bcrypt.hash(password, 10, function(err, hash) {
-                var newUser = {username: username, bpassword: hash, 
-                    password: "",
-                    admin:false};
+                var newUser = {username: username, bpassword: hash, admin:false};
                 db.users.save(newUser, function (err, user) {
                     if (err) {
                         return done(err);
