@@ -119,3 +119,16 @@ body {
    padding: 20px;
 
 }
+
+.feed-options {
+   display: flex;
+   flex-wrap: wrap;
+}
+.feed-options select {
+   flex-grow: 1;
+   margin: 2px;
+}
+.feed-options input {
+   flex-grow: 2;
+   margin: 2px;
+}

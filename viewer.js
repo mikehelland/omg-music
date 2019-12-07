@@ -33,6 +33,7 @@ return `<!DOCTYPE html>
    <meta property="og:image:height" content="630" />
    <meta property="og:description" content="Find, create, and customize music for your project. For Free."/>
    <meta property="og:title" content="Listen to ${resultCaption}"/>
+   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
    <title>Listen to ${resultCaption} - OpenMusic.Gallery</title>
     <style>html,body {height:100%; margin:0; }
     </style>
