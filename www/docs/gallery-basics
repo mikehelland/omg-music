@@ -1,5 +1,3 @@
-        <i>Gallery Basics</i>
-
         <h3>What is actually in the Gallery?</h3>
         <p>The gallery contains <b>things</b> which are stored as text files (JSON). 
             Here are the different <b>types</b> of <b>things</b>:
@@ -34,11 +32,8 @@
 
         <hr>
 
-        <p>A <b>Soundset</b> can be created in the <a href="/soundset-editor.htm">Soundset Editor</a>.
-            A <b>Playlist</b> can be created by pressing "Add To Playlist" while browsing the <a href="/">gallery</a>. 
-            The other <b>types</b> are created in the <a href="/gauntlet">Gauntlet Music Editor</a>.
-        </p>
-
-        <hr>
-
-        <p>Next > Editor</p>
+        <ul>
+            <li>A <b>Soundset</b> can be created in the <a href="/soundset-editor.htm">Soundset Editor</a>.</li>
+            <li>A <b>Playlist</b> can be created by pressing "Add To Playlist" while browsing the <a href="/">gallery</a>. </li>
+            <li>The other <b>types</b> are created in the <a href="/gauntlet">Gauntlet Music Editor</a>.</li>
+        </ul>

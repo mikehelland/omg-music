@@ -19,6 +19,9 @@
            background-color: white;
            color:black;
        }
+       .footer {
+           text-align: center;
+       }
 
    </style>
 </head>
@@ -44,11 +47,13 @@
 
     <nav class="main-nav">
         <ul>
+            <li><a href="/">Home</a></li>
             <li><a href="?what-is-this">What is this?</a></li>
             <li><a href="?gallery-basics">Gallery Basics</a></li>
             <li><a href="?editor">Editor</a></li>
             <li><a href="?vertical">Vertical Surface</a></li>
             <li><a href="?sequencer">Sequencer Surface</a></li>
+            <li><a href="?game-dev">Game Development</a></li>
             <li><a href="?live">Live</a></li>
             <li><a href="?midi">MIDI</a></li>
             <li><a href="?btc">BTC Tip Jar</a></li>
@@ -64,19 +69,31 @@
 </div> <!--main-body-->
 <script>
     var page = location.search.substr(1) || "what-is-this" 
-    var xhr = new XMLHttpRequest()
-    xhr.open("GET", page)
-    xhr.onreadystatechange = (e) => {
-        document.getElementsByClassName("main-column")[0].innerHTML = xhr.responseText
-    }
-    xhr.send()
+    var header = ""
+    var footer = "<hr><div class='footer'>"
 
     var links = document.getElementsByTagName("a")
     for (var i = 0; i < links.length; i++) {
         if (links[i].href.indexOf("?" + page) > -1) {
-            links[i].style.backgroundColor = "#808080"
+            links[i].style.backgroundColor = "#606060"
+            header = "Docs > <i>" + links[i].innerHTML + "</i><hr>"
+            if (i > 1) {
+                footer = footer + "<a href='" + links[i - 1].href + "'>" + links[i - 1].innerHTML + "</a> < Prev |"
+            }
+            if (i < links.length - 1) {
+                footer = footer + " Next > <a href='" + links[i + 1].href + "'>" + links[i + 1].innerHTML + "</a>"
+            }
         }
     }
+    footer += "</div>"
+
+
+    var xhr = new XMLHttpRequest()
+    xhr.open("GET", page)
+    xhr.onreadystatechange = (e) => {
+        document.getElementsByClassName("main-column")[0].innerHTML = header + xhr.responseText + footer
+    }
+    xhr.send()
 
     var menuVisible = false;
     document.getElementsByClassName("main-nav-drawer-icon")[0].onclick = function () {
