@@ -20,8 +20,14 @@ omg.search = function (params, callback) {
     if (params.page) {
         url = url + "&page=" + params.page;
     }
-    if (params.user) {
+    if (params.user_id) {
         url = url + "&user_id=" + params.user.id;
+    }
+    if (params.users) {
+        url = url + "&users=" + params.users;
+    }
+    if (params.sort) {
+        url = url + "&sort=" + params.sort;
     }
 
     omg.server.getHTTP(url, function (results) {

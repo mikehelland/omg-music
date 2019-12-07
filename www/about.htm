@@ -42,25 +42,25 @@
       text-align: center;
    }
    #panel-how-it-works {
-      background-color: #EEEEEE;
-   }
-   #panel-featured {
-      background-color: #DDDDDD;
-      text-align: right;
-   }
-   #panel-techno-gauntlet {
-      background-color: #EEEEEE;
-      text-align: right;
-   }
-   #panel-learn {
       background-color: #DDDDDD;
    }
    #panel-game {
-      background-color: #EEEEEE;
+      background-color: #CCCCCC;
       text-align: right;
    }
-
+   #panel-mike {
+      background-color: #404040;
+      color:white;
+      text-align: right;
+   }
+   #panel-mike a {
+      color:white;
+   }
+   #panel-live {
+      background-color: #FFFFFF;
+   }
    </style>
+   <link rel="stylesheet" type="text/css" href="/css/viewer.css">
 </head>
 <body>
 
@@ -70,7 +70,6 @@
       <div id="main-logo"><a href="/"><span class="main-title-open">Open</span><span class="main-title-music">Music</span><span class="main-title-gallery">.Gallery</span></a></div>
 
       <div id="main-nav">
-         <a href="/browse.htm">Browse</a>
          <a href="/create.htm">Create</a>
          <a href="/learn.htm">Learn</a>
       </div>
@@ -82,7 +81,7 @@
       <h2>Find, customize, and create music for your project</h2>
 
       <p>OpenMusic.Gallery is a musical instrument, a digital audio workstation, and a distribution platform
-         for royalty-free "<a href="/docs/what-is-open-music.htm">open music</a>", that is collaborative, decentralized, and 
+         for royalty-free "<a href="/docs?what-is-this">open music</a>", that is collaborative, decentralized, and 
          <a href="https://github.com/mikehelland/openmusic.gallery">open source</a>.
       </p>
 
@@ -93,51 +92,15 @@
    <div class="panel-content">
       <h3>How does it work?</h3>
 
-      <p>Sounds files on the Internet can be arranged into drumbeats and melodies, which 
+      <p>Sound files on the Internet can be arranged into drumbeats and melodies, which 
          can be combined to make larger works of music. 
       </p>
-      <p>Here is an example drumbeat:</p>
+      <div id="drum-example"></div>
 
-      <p>Here is an example Melody:</p>
-
-      <p>Like everything in the Gallery, you can click "Edit" to remix and remash these examples.</p>
-   </div>
-</div>
-<div id="panel-featured">
-   <div class="panel-content">
-
-      <h3>Today's featured content:</h3>
-            
-      <div id="featured-box">[FEATURED CONTENT]</div>
-
-   </div>            
-</div>
-
-<div id="panel-browse">
-   <div class="panel-content">
-      <h3>Browse and Search</h3>
-      <p>The Gallery may already have what you're looking for!</p>
-      <p><a href="/browse.htm">Browse / Search the Gallery</a></p>
-   </div>
-</div>
-      
-<div id="panel-techno-gauntlet">
-   <div class="panel-content">
-      <h3>Techno GAUNTLET</h3>
-      <p>Techno GAUNTLET is the most powerful editor for music on OMG. It does.... lots.</p>
-      <p>Go to <a href="/gauntlet">Techno GAUNTLET</a></p>
+      <p>You can click "Remix" on anything in the gallery to make your own version.</p>
    </div>
 </div>
 
-<div id="panel-learn">
-   <div class="panel-content">   
-      <h3>Learn</h3>
-      <p>OMG has video tutorials that to get you up and running, 
-         whether you are new to music or an experienced musician.
-      </p>
-      <p>Go to the <a href="/learn.htm">Learning Page</a></p>
-   </div>
-</div>         
 
 <div id="panel-game">
       <div class="panel-content">   
@@ -146,16 +109,44 @@
          </p>
          <p>Find out more at the <a href="/docs/game-dev.htm">Game Dev Page</a></p>
       </div>
-   </div>         
+</div>         
    
-<div id="panel-additional-features">
-   <div class="panel-content">   
-      <p>Additional Features:</p>
+<div id="panel-live">
+   <div class="panel-content">
+
+      <h3>OMG Live!</h3>
       <ul>
-         <li>Built-in Support for Bitcoin tipjars</li>
+      <li>Connect directly with collaborators instead of sending files back and forth.</li>
+      
+      <li>Bring a live audience in on the action.</li>
+
+      <li>Remote control with other devices to make multi-screen instruments.</li>
       </ul>
+   </div>            
+</div>
+
+<div id="panel-mike">
+   <div class="panel-content">
+      <h3>The Author</h3>
+      <p>OMG is written by <a href="https://mikehelland.com">Mike Helland</a></p>
+      <p>Any questions or comments: <a href="mailto:mike@mikehelland.com">mike@mikehelland.com</a></p>
    </div>
 </div>
+
+
+<script src="/omg.js"></script>
+<script src="/js/embedded_viewer.js"></script>
+<script>
+omg.server.getId(621, data => new OMGEmbeddedViewer({ //1277
+   id: data.id, height: 100,
+   data: data,
+   div: document.getElementById("drum-example")
+   //onPlay: fpa.onPlay, onStop: fpa.onStop
+}));
+
+
+
+</script>
 
 </body>
 </html>

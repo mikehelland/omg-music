@@ -117,7 +117,7 @@ app.post("/login", (req, res, next) => {
         if (err) { return next(err); }
         var fwd = req.body.fwd ? decodeURIComponent(req.body.fwd) : "/"
         if (!user) { 
-            return res.redirect("/login.htm?invalid&fwd=" + fwd); 
+            return res.redirect("/signin.htm?invalid-login&fwd=" + fwd); 
         }
         req.logIn(user, function(err) {
           if (err) { return next(err); }
@@ -136,7 +136,7 @@ app.post('/signup', (req, res, next) => {
         if (err) { return next(err); }
         var fwd = req.body.fwd ? decodeURIComponent(req.body.fwd) : "/"
         if (!user) { 
-            return res.redirect("/signup.htm?invalid&fwd=" + fwd); 
+            return res.redirect("/signin.htm?invalid-signup&fwd=" + fwd); 
         }
         req.logIn(user, function(err) {
         if (err) { return next(err); }
@@ -249,6 +249,9 @@ omg.getRecords = function (req, res, options, callback) {
     if (req.query.user_id) {
         find["body ->> 'user_id'"] = req.query.user_id;
     }
+    if (req.query.users === "me") {
+        find["body ->> 'user_id'"] = req.user ? req.user.id : -1;
+    }
     if (req.query.type) {
         if (req.query.type === "MELODY" || req.query.type === "BASSLINE" || req.query.type === "DRUMBEAT") {
             find["body ->> 'partType'"] = req.query.type;
@@ -265,11 +268,16 @@ omg.getRecords = function (req, res, options, callback) {
         }
     }
 
+    if (req.query.sort) {
+        if (req.query.sort === "most-plays") {
+            options.order = "playcount desc"
+        }
+    }
 
     if (req.query.q) {
         find = {keys:["body ->> 'tags'", "body ->> 'name'"], term: req.query.q};
-            options.columns = ["playcount", "id", "body"]
-            db.things.find(find, options, callback)    
+        options.columns = ["playcount", "id", "body"]
+        db.things.find(find, options, callback)    
     }
     else {
         options.columns = ["playcount", "id", "body"]
@@ -282,6 +290,9 @@ omg.getDocs = function (req, res, options, callback) {
     var find = {}
     if (req.query.user_id) {
         find.user_id = req.query.user_id;
+    }
+    if (req.query.users === "me") {
+        find.user_id = req.user ? req.user.id : -1;
     }
     if (req.query.type) {
         if (req.query.type === "MELODY" || req.query.type === "BASSLINE" || req.query.type === "DRUMBEAT") {

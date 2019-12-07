@@ -52,8 +52,8 @@ OMGEmbeddedViewer.prototype.setupControls = function (params) {
     viewer.userDiv = document.createElement("div");
     viewer.datetimeDiv = document.createElement("div");
 
-    viewer.playButton.innerHTML = "&#9654";
-    viewer.editButton.innerHTML = "Edit";
+    viewer.playButton.innerHTML = "&nbsp;&#9654";
+    viewer.editButton.innerHTML = "Remix";
     viewer.shareButton.innerHTML = "Link";
     viewer.tipButton.innerHTML = "Tip";
     viewer.voteButton.innerHTML = "&#x2B06";
@@ -121,14 +121,14 @@ OMGEmbeddedViewer.prototype.setupControls = function (params) {
         var pbClass = viewer.playButton.className;
         viewer.player.onStop = function () {
             viewer.playButton.className = pbClass;
-            viewer.playButton.innerHTML = "&#9654;";
+            viewer.playButton.innerHTML = "&nbsp;&#9654;";
             if (typeof params.onStop === "function") {
                 params.onStop();
             }
         };
         viewer.player.onPlay = function (info) {
             viewer.playButton.className = pbClass;
-            viewer.playButton.innerHTML = "&#9642;";        
+            viewer.playButton.innerHTML = "&#9724;";
             if (typeof params.onPlay === "function") {
                 params.onPlay(viewer.player, info);
             }
@@ -247,6 +247,7 @@ OMGEmbeddedViewer.prototype.setupControls = function (params) {
     }
 
     var className = "omg-viewer-" + data.type.toLowerCase();
+    this.div.classList.add("omg-viewer");
     this.div.classList.add(className);
     
     if (this.song) {

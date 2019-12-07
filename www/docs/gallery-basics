@@ -1,0 +1,44 @@
+        <i>Gallery Basics</i>
+
+        <h3>What is actually in the Gallery?</h3>
+        <p>The gallery contains <b>things</b> which are stored as text files (JSON). 
+            Here are the different <b>types</b> of <b>things</b>:
+        </p>
+        <ul>
+            <li>Soundset</li>
+            <li>Drumbeat</li>
+            <li>Melody</li>
+            <li>Section</li>
+            <li>Song</li>
+            <li>Playlist</li>
+        </ul>
+        <p>
+            A <b>Soundset</b> contains a list of URLs to audio samples.
+        </p>
+        <p>
+            A <b>Drumbeat</b> and a <b>Melody</b> describe when and how to play the samples in a <b>Soundset</b>.
+        </p>
+        <p>
+            A <b>Section</b> contains one or more <b>Drumbeats</b> and <b>Melodies</b> to be played simultaneously.
+        </p>
+        <p>
+            A <b>Song</b> contains one or more <b>Sections</b> to be played one-after-another.
+        </p>
+        <p>
+            A <b>Playlist</b> is, of course, a list of <b>Songs</b>.
+        </p>
+
+        <hr>
+
+        <p><b>Things</b> posted to the gallery can be <b>remixed</b> by other users.
+
+        <hr>
+
+        <p>A <b>Soundset</b> can be created in the <a href="/soundset-editor.htm">Soundset Editor</a>.
+            A <b>Playlist</b> can be created by pressing "Add To Playlist" while browsing the <a href="/">gallery</a>. 
+            The other <b>types</b> are created in the <a href="/gauntlet">Gauntlet Music Editor</a>.
+        </p>
+
+        <hr>
+
+        <p>Next > Editor</p>

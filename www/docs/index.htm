@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta property="og:image" content="http://openmusic.gallery/img/section.png"/>
+    <meta property="og:description" content="Find, create, and customize music for your project. For Free."/>
+    <meta property="og:title" content="OpenMusic.Gallery"/>
+    <meta property="og:url" content="http://openmusic.gallery"/>
+    <title>OpenMusic.Gallery - Docs</title>
+   <link rel="stylesheet" type="text/css" href="/css/main2.css">
+   <link rel="stylesheet" type="text/css" href="/css/search.css">
+   <link rel="stylesheet" type="text/css" href="/css/viewer.css"/>
+   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+   
+   <style>
+       @media (max-width:750px){
+            .title-bar-user-controls {
+                 display:none;
+             }
+             .title-bar-user-menu {
+                 margin-top:-5px;
+                 display:block;
+             }
+       }
+       .main-column {
+           background-color: white;
+           color:black;
+           margin-left:220px;
+       }
+
+       .main-nav {
+           width:220px;
+       }
+
+   </style>
+</head>
+
+<body>
+
+<div class="main-title-bar">
+   <div class="main-title-bar-content">
+       <div class="main-page-link">
+       <a href="/"><span class="main-title-open">Open</span><span class="main-title-media">Music</span><span class="main-title-gallery">.Gallery</span></a>
+       </div>
+
+      <div class="main-title-bar-right">
+         <div class="title-bar-user-controls"></div>
+         <div class="title-bar-user-menu">&#9776;</div>
+      </div>
+
+   </div>
+</div>
+    
+<div class="main-body">
+
+
+    <nav class="main-nav">
+        <ul>
+            <li><a href="?what-is-this">What is this?</a></li>
+            <li><a href="?gallery-basics">Gallery Basics</a></li>
+            <li><a href="?editor">Editor</a></li>
+            <li><a href="?vertical">Vertical Surface</a></li>
+            <li><a href="?sequencer">Sequencer Surface</a></li>
+            <li><a href="?live">Live</a></li>
+            <li><a href="?midi">MIDI</a></li>
+            <li><a href="?btc">BTC Tip Jar</a></li>
+        </ul>
+        <!--todo recent list somewhere?-->
+    </nav>
+    
+    
+    <div class="main-column">
+    
+    </div>
+
+</div> <!--main-body-->
+<script>
+    var page = location.search.substr(1) || "what-is-this" 
+    var xhr = new XMLHttpRequest()
+    xhr.open("GET", page)
+    xhr.onreadystatechange = (e) => {
+        document.getElementsByClassName("main-column")[0].innerHTML = xhr.responseText
+    }
+    xhr.send()
+
+    var links = document.getElementsByTagName("a")
+    for (var i = 0; i < links.length; i++) {
+        if (links[i].href.indexOf("?" + page) > -1) {
+            links[i].style.backgroundColor = "#808080"
+        }
+    }
+</script>
+</body>
+
+</html>

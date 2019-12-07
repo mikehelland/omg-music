@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+   <link rel="stylesheet" type="text/css" href="css/main2.css">
+   <style>
+      .invalid-login, .invalid-signup {color:red; display:none;}
+      .main-body {display: block; color:white; width:90%; margin:auto; margin-top:50px;}
+   </style>
+</head>
+
+<body>
+
+<div class="main-title-bar">
+   <div class="main-title-bar-content">
+      <a class="main-page-link" href="index.htm">
+         <span class="main-title-open">Open</span><span class="main-title-media">Music</span><span class="main-title-gallery">.Gallery</span>
+      </a>
+   </div>
+</div>
+
+<div class="main-body">
+
+    <h2>
+        Login
+    </h2>
+
+    <div class="invalid-login">Username or password is wrong.</div>
+
+    <form action="/login" method="post">
+        <input name="username" type="text" placeholder="username"/>
+        <input name="password" type="password" placeholder="password"/>
+        <input type="submit" value="Log In"/>
+        <input id="login-fwd" name="fwd" type="hidden" value=""/>
+    </form>
+    
+    <div class="main-separator">
+    </div>
+      
+   <h2>
+      Create a New Account
+   </h2>
+
+   <div class="invalid-signup">Username already exists.</div>
+
+   <form action="/signup" method="post">
+      <input name="username" type="text" placeholder="username"/>
+      <input name="password" type="password" placeholder="password"/>
+      <input type="submit" value="Log In"/>
+      <input id="signup-fwd" name="fwd" type="hidden" value=""/>
+   </form>
+
+</div> <!--main-body-->
+<script>
+var q = window.location.search
+if (q.indexOf("invalid-login") > -1) {
+   document.getElementsByClassName("invalid-login")[0].style.display = "block";
+}
+if (q.indexOf("invalid-signup") > -1) {
+   document.getElementsByClassName("invalid-signup")[0].style.display = "block";
+}
+if (q.indexOf("fwd=") > -1) {
+   var fwd = q.substr(q.indexOf("fwd=") + 4)
+   if (fwd.indexOf("&") > -1) {
+      fwd = fwd.substr(0, fwd.indexOf("&"))
+   }
+   document.getElementById("signup-fwd").value = fwd
+   document.getElementById("login-fwd").value = fwd
+}
+</script>
+</body>
+</html>

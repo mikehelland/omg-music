@@ -1,0 +1,20 @@
+        <h3>What is OpenMusic.Gallery?</h3>
+
+        <p>OpenMusic.Gallery is a platform for making and sharing <b>open music</b>.</p>
+        
+        <hr>
+
+        <h3>What is "open music"?</h3>
+
+        <p>It's open source applied to music.</p>
+        <p>You could download a compiled app, or you could download the source code</p>
+        <p>Now apply that to music. Instead of getting the finished MP3, you get the individual samples and control over the mixer.</p>
+        <p>You can change the tempo, the key, the levels, the FX, and the individual notes.</p>
+
+        <hr>
+
+        <h3>How do I get it?</h3>
+
+        <p>You already got it. It's free and runs in your web browser. You're using it now.</p>
+
+        <p>Browse <a href="/">the Gallery</a> or <a href="/gauntlet">create something new</a></p>

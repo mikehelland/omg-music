@@ -4,12 +4,15 @@ body {
 }
 
 .main-title-bar {
-   font-size: 1.1em;
-   background-image: linear-gradient(#888888, #333);
+   /*font-size: 1.1em;
+   background-image: linear-gradient(#888888, #333);*/
+   background-image: linear-gradient(#808080, #888888 );
    top:0px;
    width:100%;
    position:fixed;
    z-index:1;
+   /*font-family: Arial, Helvetica, sans-serif;*/
+
 }
 .main-footer-bar {
    font-size: 0.7em;
@@ -26,11 +29,17 @@ body {
 }
 
 .main-title-bar-right {
-   font-size: 0.8em;
+   /*font-size: 0.8em;*/
    color:white;
-   width:130px;
-   text-align: right;
-   padding:3px;
+   /*width:130px;
+   text-align: right;*/
+   float:right;
+   /*padding:3px;*/
+}
+.main-title-bar-right a {
+   text-decoration: none;
+   color:white;
+   padding-left:8px;
 }
 .title-bar-user-menu {
    cursor: pointer;
@@ -40,20 +49,18 @@ body {
 }
 
 .main-title-bar-content {
-   max-width:90%;   /*950px;*/
+   max-width:90%;
    margin:auto;
    padding:10px;   
    position:relative;
-   display:flex;
-   justify-content: space-between;
 }
 
 .main-page-link {
    text-decoration:none;
+   display:inline-block;
 }
 
 .main-page-link {
-    font-family: sans-serif;
 }
 .main-title-open {
    color:#FFFF88;
@@ -226,12 +233,13 @@ form {
 
 .left-column, .left-or-top-column {
 	/*float:left;*/
-	width:18%;
-	background-image:linear-gradient(to right, #FFFFFF, #F8F8F8);
+	width:240px;
+   /*background-image:linear-gradient(to bottom, #888888, #808080);
+   font-size: 1.1em;*/
 	margin-top:0px;
 	font-family: Helvetica, Arial, sans-serif;
-	font-size: 12px;
-	margin-top:59px;
+	
+	margin-top:10px;
 	padding:0%;
 	position:fixed;
 }
@@ -242,19 +250,19 @@ form {
 	margin-left:21%;
 }
 
-.left-column ul {
-	list-style-type:none;
-	padding:5px;
+
+nav {
 	margin:0px;
-	font-size:11pt;
+   padding:24px 4px;
+	color:black;
 }
-.nav {
-	margin:0px;
-	padding:4px;
+
+.left-column a {
+   text-decoration:none;
 }
 
 
-.nav:hover {
+nav:hover {
 	background:#FCFCFC;
 	border:1px solid #888888;
 	border-radius:3px;
@@ -277,8 +285,6 @@ form {
 }
 
 .site-tools a, .left-column ul > a {
-	text-decoration:none;
-	color:black;
 }
 
 .site-tools .tools-seperator {
@@ -296,7 +302,7 @@ h3 {
     width:100%;
 }
 
-.omg-viewer-song {
+/*.omg-viewer-song {
     background-color:#99FF99; 
     border-radius:4px; padding:4px;
     border:1px solid #808080;
@@ -321,7 +327,7 @@ h3 {
    border-radius:4px; padding:4px;
    border:1px solid #808080;
 }
-
+*/
 
 .omg-soundset {border-spacing:10px; 
 	background-color:#FF9999; 

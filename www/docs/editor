@@ -1,0 +1,29 @@
+<h3>The Music Editor</h3>
+
+<p>Also known as <b>Gauntlet</b>, OMG's built-in editor puts 
+<i>you</i> in control of the musical puzzle pieces.</p>
+
+<p>In a landscape window, the editor shows two <b>panels</b>, the <b>main panel</b> to the left
+    and a <b>detail panel</b> to the right. In a portrait window (like a mobile device), 
+    the editor shows one <b>panel</b> at a time, along with a <b>Back</b> button to return to the <b>main panel</b>.
+    </p>
+
+<p>The <b>Panels</b> are:</p>
+
+<ul>
+<li>Main</li>
+<li>User</li>
+<li>Song</li>
+<li>Section</li>
+<li>Save</li>
+<li>Beats</li>
+<li>Key</li>
+<li>Chord Progression</li>
+<li>Vertical Surface</li>
+<li>Sequencer Surface</li>
+<li>Part Options</li>
+<li>Song Options</li>
+<li>Add Part</li>
+<li>Mix</li>
+<li>Live</li>
+</ul>

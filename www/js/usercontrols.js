@@ -22,7 +22,7 @@ function setupUserControls(div, successCallback, failCallback) {
          var fwd = "?fwd=" + encodeURIComponent(window.location.pathname + window.location.search)
          //div.omg.notLoggedIn.innerHTML = "<a href='" + httpsURL + 
          div.innerHTML = "<a href='" + httpsURL +
-                 "login.htm" + fwd + "'>Log in</a> | <a href='" + httpsURL + "signup.htm" + fwd + "'>Sign up</a>";
+                 "signin.htm" + fwd + "'>Sign in</a>";
          //div.appendChild(div.omg.notLoggedIn);
       }
 

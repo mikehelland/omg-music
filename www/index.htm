@@ -7,7 +7,7 @@
     <meta property="og:title" content="OpenMusic.Gallery"/>
     <meta property="og:url" content="http://openmusic.gallery"/>
     <title>OpenMusic.Gallery</title>
-   <link rel="stylesheet" type="text/css" href="css/main.css">
+   <link rel="stylesheet" type="text/css" href="css/main2.css">
    <link rel="stylesheet" type="text/css" href="css/search.css">
    <link rel="stylesheet" href="css/viewer.css" type="text/css" />
    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
@@ -22,6 +22,11 @@
                  display:block;
              }
        }
+
+       .main-nav li:first-child {
+            background-color:#888888;
+        }
+
    </style>
 </head>
 
@@ -30,15 +35,11 @@
 <div class="main-title-bar">
    <div class="main-title-bar-content">
        <div class="main-page-link">
-       <span class="main-title-open">Open</span><span class="main-title-media">Music</span><span class="main-title-gallery">.Gallery</span>
-       </div>
-
-       <div class="main-description">
-          Find, create, and customize music for your project.
+       <a href="/"><span class="main-title-open">Open</span><span class="main-title-media">Music</span><span class="main-title-gallery">.Gallery</span></a>
        </div>
 
       <div class="main-title-bar-right">
-         <div class="title-bar-user-controls">Log in | Sign up</div>
+         <div class="title-bar-user-controls"></div>
          <div class="title-bar-user-menu">&#9776;</div>
       </div>
 
@@ -68,80 +69,46 @@
 <div class="main-body">
 
 
-    <div class="left-column">
-        
-        <!--My Projects
+    <nav class="main-nav">
         <ul>
-            <!--<li class="nav"><img src="favicon.ico">(Not Logged In)</li>
-            <a href="bam/"><li class="nav"><img src="img/melody.png">Create a Melody</li></a>
-        </ul>-->
-
-        <div class="main-separator">
-        </div>
-
-        Make music with...
-          <ul>
-            <a href="gauntlet/">
-                  <li class="nav"><img src="img/technogauntlet.png">Techno GAUNTLET</li>
-            </a>
-            <!--a href="bam/?type=section"><li class="nav"><img src="img/beat.png">Simple Editor</li></a>-->
-
-          </ul>
-
-        <div class="main-separator">
-        </div>
-
-        Learn More:
-          <ul>
-              <a href="docs/omg_basics.htm"><li class="nav"><img src="favicon.ico">OMG Basics</li></a>
-              <a href="docs/what_is_open_music.htm"><li class="nav"><img src="favicon.ico">What is open music?</li></a>
-              <a href="docs/gamedev.htm"><li class="nav"><img src="favicon.ico">Game Development Guide</li></a>
-              <a href="docs/omg_formats.htm"><li class="nav"><img src="favicon.ico">OMG Data Formats</li></a>
-          </ul>
-        
-    </div>
+            <li><a href="/">&#8962; Home</a></li>
+            <li><a href="gauntlet/">&plus; Create</a></li>
+            <li><a href="/docs/uploading.htm">&uparrow; Uploads</a></li>
+            <li><a href="/learn.htm">? Tutorials</a></li>
+            <li><a href="/docs/">? Docs</a></li>
+            <li><a href="/about.htm">? About</a></li>
+        </ul>
+        <!--todo recent list somewhere?-->
+    </nav>
     
     
     <div class="main-column">
         
-        
-        <div class="select-area-bar">
-            <a href="#most-plays" id="select-most-plays-area-button" class="current-select-area-button">Most Plays</a>
-            <!--<div id="select-popular-area-button" class="select-area-button">Most Popular</div>-->
-            <a href="#most-recent" id="select-recent-area-button" class="select-area-button">Most Recent</a>
+        <div class="feed-options">
+            <select id="search-user">
+                <option value="">All Users</option>
+                <!--todo <option value="following">Following</option>-->
+                <option value="me">Me</option>
+            </select>
+            <select id="search-type">
+                <option value="">All Types</option>
+                <option value="SONG">Songs</option>
+                <option value="PLAYLIST">Playlists</option>
+                <option value="SECTION">Sections</option>
+                <option value="MELODY">Melodies</option>
+                <option value="BASSLINE">Basslines</option>
+                <option value="DRUMBEAT">Drumbeats</option>
+                <option value="SOUNDSET">SoundSets</option>
+           </select>
+           <select id="search-sort">
+                <option value="">Most Recent</option>
+                <option value="most-plays">Most Plays</option>
+                <!--<option value="most-remixes">Most Remixes</option>-->
+            </select>
+            <input class="main-search-input" id="search-terms" name="q" placeholder="Search"></input>
         </div>
                 
-        <div id="most-plays-area" class="frontpage-area">
-            <div id ="most-plays-list"></div>
-            
-        </div>
-        
-    
-        <div id="most-recent-area" class="frontpage-area">
-          <div id="search-info" class="search-info">
-            <select id="filter-type">
-                 <option value="">All Types</option>
-                 <option value="SONG">Songs</option>
-                 <option value="PLAYLIST">Playlists</option>
-                 <option value="SECTION">Sections</option>
-                 <option value="MELODY">Melodies</option>
-                 <option value="BASSLINE">Basslines</option>
-                 <option value="DRUMBEAT">Drumbeats</option>
-                 <option value="SOUNDSET">SoundSets</option>
-            </select>
-
-            <form onsubmit="return newSearch(),false;">
-             <input class="main-search-input" id="query" name="q" placeholder="Search"></input>
-             <input class="main-search-submit" type="submit" value="OMG!"></input>
-            </form>
-
-             <span class="search-info-terms">search terms</span>
-        </div>
-
-        <a name="most-recent"></a>
         <div class="search-things"></div>
-
-      </div>
 
 
     </div>
@@ -163,50 +130,15 @@
 setupUserControls(document.getElementsByClassName("title-bar-user-controls")[0]);
 
 var fpa = {};
-fpa.mostPlaysArea = document.getElementById("most-plays-area");
-fpa.mostRecentArea = document.getElementById("most-recent-area");
+fpa.params = omg.util.getPageParams();
 
-fpa.mostPlaysButton = document.getElementById("select-most-plays-area-button");
-fpa.recentButton = document.getElementById("select-recent-area-button");
+//var searchTermsDiv = document.getElementsByClassName("search-info-terms")[0];
+//searchTermsDiv.innerHTML = parameters.q || "";
 
-fpa.showMostPlaysArea = function () {
-    fpa.mostPlaysButton.className = "current-select-area-button";
-    fpa.recentButton.className = "select-area-button";
-
-    fpa.mostRecentArea.style.display = "none";
-    fpa.mostPlaysArea.style.display = "block";
-
-    if (!fpa.loadedMostPlaysArea) {
-        fpa.loadedMostPlaysArea = true;
-        var list = document.getElementById("most-plays-list");
-        omg.server.getHTTP("/most-plays/", results => {
-            results.forEach(result => {
-                var div = document.createElement("div");
-                div.className = "omgviewer";
-
-                var params = {result: result, 
-                    height: 180,
-                    div: div, 
-                    onPlay: fpa.onPlay, onStop: fpa.onStop};
-
-                list.appendChild(div);
-                list.appendChild(document.createElement("br"));
-                new OMGEmbeddedViewer(params);
-                
-            });
-        });
-    }
-};
-fpa.showRecentArea = function () {
-    fpa.recentButton.className = "current-select-area-button";
-    fpa.mostPlaysButton.className = "select-area-button";
-
-    fpa.mostRecentArea.style.display = "block";
-    fpa.mostPlaysArea.style.display = "none";
-        
-        fpa.search();
-    //search(parameters);
-};
+fpa.params.resultList = document.getElementsByClassName("search-things")[0];
+fpa.params.onPlay = fpa.onPlay;
+fpa.params.onStop = fpa.onStop;
+fpa.params.metaData = true
 
 fpa.globalPlayer = {
     deckA: {
@@ -256,45 +188,35 @@ fpa.showPlayerBar = function () {
 }
 
 fpa.search = function () {
-    var parameters = omg.util.getPageParams();
-
-    var searchTermsDiv = document.getElementsByClassName("search-info-terms")[0];
-    searchTermsDiv.innerHTML = parameters.q || "";
-
-    parameters.resultList = document.getElementsByClassName("search-things")[0];
-    parameters.onPlay = fpa.onPlay;
-    parameters.onStop = fpa.onStop;
-    parameters.metaData = true
-
-    var filterType = document.getElementById("filter-type");
-    var type = parameters.type || "";
-    filterType.onchange = function () {
-        //todo set the location?
-        parameters.type = filterType.value;
-
-        parameters.resultList.innerHTML = "";
-        omg.search(parameters);
-    };
-    
-    omg.search(parameters);
-
+    fpa.params.type = fpa.searchType.value
+    fpa.params.sort = fpa.searchSort.value
+    fpa.params.users = fpa.searchUser.value
+    fpa.params.q = fpa.searchTerms.value
+    omg.search(fpa.params);
 };
 
+fpa.searchType = document.getElementById("search-type");
+fpa.searchSort = document.getElementById("search-sort");
+fpa.searchUser = document.getElementById("search-user");
+fpa.searchTerms = document.getElementById("search-terms");
 
-fpa.mostPlaysButton.onclick = function () {
-    fpa.showMostPlaysArea();
-};
-fpa.recentButton.onclick = function () {
-    fpa.showRecentArea();
-};
+fpa.searchType.onchange = fpa.search
+fpa.searchSort.onchange = fpa.search
+fpa.searchUser.onchange = fpa.search
+fpa.searchTerms.onkeypress = e => {
+    if (e.charCode === 13) {
+        fpa.search()
+    }
+}
+
 
 window.onload = function () {
+    fpa.search()
+
     if (window.location.hash.length === 0 || window.location.hash === "#most-plays") {
-            fpa.showMostPlaysArea();
     }
-    console.log(window.location.hash);
     if (window.location.hash === "#most-recent") {
-            fpa.showRecentArea();
+        //todo
     }
 };
 
@@ -304,6 +226,7 @@ document.getElementsByClassName("title-bar-user-menu")[0].onclick = function () 
             "" : "block";
     menuVisible = !menuVisible;
 };
+
 </script>
 </body>
 
