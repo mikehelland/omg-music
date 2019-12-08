@@ -1,0 +1,20 @@
+
+<p>The Gauntlet Editor accepts MIDI input from keyboards and drumpads.</p>
+
+<hr>
+
+<h3>NOTE: As of 2019 this only works on Chrome.</h3>
+
+<hr>
+
+<ol>
+        <li>Connect your MIDI controller (usually a keyboard) by USB</li>
+        <li>Open the <a href="/gauntlet">Gauntlet Editor</a></li>
+        <li>Go to the <a href="?editor-panel-part-options">Part Options panel</a> of the part to control</li>
+        <li>Set the MIDI Channel to <b>All</b> or the channel <b>1</b> thru <b>16</b> of your controller</li>
+</ol>
+
+<p>The controller will now send MIDI input to the <b>Part</b>, including <b>Note On</b>, <b>Note Off</b>,
+and changes to other wheels and knobs of the MIDI controller </p>
+
+<p>See the source code for technical MIDI details.</p>
