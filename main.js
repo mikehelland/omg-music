@@ -515,7 +515,6 @@ app.post('/upload', upload.any(), (req, res) => {
         return;
     }
 
-    filename = filename + "/" + req.body.filename
     var db = app.get("db")
     db.users.findOne({id: req.user.id}, (err, user) => {
         if (err) return res.status(500).send({"error": "user not found"});
@@ -533,6 +532,7 @@ app.post('/upload', upload.any(), (req, res) => {
             fs.mkdirSync(filename);
         }
     
+        filename = filename + "/" + req.body.filename
         fs.writeFile(filename, req.files[0].buffer, (err) => {
             if (err) {
                 console.log('Error: ', err);
