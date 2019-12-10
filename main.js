@@ -518,6 +518,9 @@ app.post('/upload', upload.any(), (req, res) => {
     var db = app.get("db")
     db.users.findOne({id: req.user.id}, (err, user) => {
         if (err) return res.status(500).send({"error": "user not found"});
+        if (typeof user.upload_limit === "string") {
+            user.upload_limit = parseInt(user.upload_limit)
+        }
         if (user.upload_limit !== -1 && user.uploaded_bytes + req.files[0].buffer.length >= user.upload_limit) {
             return res.status(500).send({"error": "upload limit reached"});
         }
