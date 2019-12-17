@@ -136,18 +136,18 @@ var canvasEndEvent = function (x, y) {
 
 
 
-canvas.ontouchstart = function (e) {
+canvas.addEventListener("touchstart", function (e) {
 	e.preventDefault();
 	canvasDownEvent(e.targetTouches[0].pageX, e.targetTouches[0].pageY);
-};
-canvas.ontouchmove = function (e) {
+});
+canvas.addEventListener("touchmove", function (e) {
 	e.preventDefault();
 	canvasMoveEvent(e.targetTouches[0].pageX, e.targetTouches[0].pageY);
-};
-canvas.ontouchend = function (e) {
+});
+canvas.addEventListener("touchend", function (e) {
 	e.preventDefault();
 	canvasEndEvent(-1, -1);
-};
+});
 
 
 canvas.onmousedown = function (e) {

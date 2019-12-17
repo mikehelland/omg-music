@@ -108,7 +108,7 @@ OMGDrumMachine.prototype.setCanvasEvents = function () {
         omgdrums.mouseTouch = false;
     };
     
-    canvas.ontouchstart = function (e) {
+    canvas.addEventListener("touchstart", function (e) {
         e.preventDefault();
 
         for (var i = 0; i < e.changedTouches.length; i++) {
@@ -116,9 +116,9 @@ OMGDrumMachine.prototype.setCanvasEvents = function () {
                              y: e.changedTouches[i].pageY - omgdrums.offsetTop,
                              identifier: e.changedTouches[i].identifier});
         }
-    };
+    });
 
-    canvas.ontouchmove = function (e) {
+    canvas.addEventListener("touchmove", function (e) {
         e.preventDefault();
 
         for (var i = 0; i < e.changedTouches.length; i++) {
@@ -132,9 +132,9 @@ OMGDrumMachine.prototype.setCanvasEvents = function () {
                 }
             }
         }
-    };
+    });
 
-    canvas.ontouchend = function (e) {
+    canvas.addEventListener("touchend", function (e) {
         e.preventDefault();
         for (var i = 0; i < e.changedTouches.length; i++) {
             for (var j = 0; j < omgdrums.touches.length; j++) {
@@ -144,7 +144,7 @@ OMGDrumMachine.prototype.setCanvasEvents = function () {
                 }
             }
         }
-    };
+    });
 };
 
 OMGDrumMachine.prototype.ondown = function (touch) {

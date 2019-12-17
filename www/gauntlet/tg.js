@@ -456,7 +456,7 @@ tg.instrument.show = function (part) {
 
     tg.instrument.part = part;
     tg.instrument.mm = part.mm;
-    tg.instrument.mm.setCanvasEvents();
+    //tg.instrument.mm.setCanvasEvents();
     tg.instrument.mm.backgroundDrawn = false;
     tg.instrument.setMode("WRITE");
 };
@@ -1598,16 +1598,16 @@ function SliderCanvas(canvas, controlInfo, audioNode, data, onchange) {
         m.onmove(e.clientX - offsets.left, e.clientY - offsets.top);};
     canvas.onmouseup = function (e) {m.onup();};
     canvas.onmouseout = function (e) {m.onup();};
-    canvas.ontouchstart = function (e) {
+    canvas.addEventListener("touchstart", function (e) {
         e.preventDefault();
 
         offsets = omg.ui.totalOffsets(canvas);
         m.ondown(e.targetTouches[0].pageX - offsets.left, e.targetTouches[0].pageY - offsets.top);
-    };
-    canvas.ontouchmove = function (e) {
+    });
+    canvas.addEventListener("touchmove", function (e) {
         m.onmove(e.targetTouches[0].pageX - offsets.left, e.targetTouches[0].pageY - offsets.top);
-    };
-    canvas.ontouchend = function (e) {m.onup();};
+    });
+    canvas.addEventListener("touchend", function (e) {m.onup();});
 
     this.div = canvas;
     this.ctx = canvas.getContext("2d");

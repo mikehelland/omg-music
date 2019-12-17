@@ -544,7 +544,7 @@ OMGMelodyMaker.prototype.setCanvasEvents = function () {
         }
     };
 
-    canvas.ontouchstart = function (e) {
+    canvas.addEventListener("touchstart", function (e) {
         if (omgmm.readOnly && omgmm.mode !== "ZOOM") return;
         e.preventDefault();
 
@@ -558,9 +558,9 @@ OMGMelodyMaker.prototype.setCanvasEvents = function () {
                     y: e.changedTouches[i].pageY + omg.ui.getScrollTop() - omgmm.offsets.top,
                     identifier: e.changedTouches[i].identifier});
         }
-    };
+    });
 
-    canvas.ontouchmove = function (e) {
+    canvas.addEventListener("touchmove", function (e) {
         if (omgmm.readOnly && omgmm.mode !== "ZOOM") return;
         e.preventDefault();
 
@@ -577,9 +577,9 @@ OMGMelodyMaker.prototype.setCanvasEvents = function () {
                 }
             }
         }
-    };
+    });
 
-    canvas.ontouchend = function (e) {
+    canvas.addEventListener("touchend", function (e) {
         if (omgmm.readOnly && omgmm.mode !== "ZOOM") return;
         e.preventDefault();
         for (var i = 0; i < e.changedTouches.length; i++) {
@@ -590,7 +590,7 @@ OMGMelodyMaker.prototype.setCanvasEvents = function () {
                 }
             }
         }
-    };
+    });
 
 }
 
