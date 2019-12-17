@@ -190,6 +190,11 @@ OMGSong.prototype.make = function (data) {
         newPart = new OMGPart(null, data);
         return newPart.section.song;
     }
+console.log(data)
+    if (data.type == "SOUNDSET") {
+        newPart = new OMGPart(null, {soundSet: data});
+        return newPart.section.song;
+    }
 
     return null;
 }

@@ -145,3 +145,28 @@
     height:100px;
 }
 
+.omg-soundset-audio-sample {
+   text-align: center;
+   padding:10px;
+   margin:5px;
+   border: 1px solid #808080;
+   border-radius: 18px;
+   width:12em;
+   display:flex;
+   background-color: #F0F0F0;
+   cursor: pointer;
+}
+.omg-soundset-audio-sample a {
+   text-decoration: none;
+   color: black;
+}
+.omg-viewer-soundset-data {
+   display: flex;
+   flex-wrap: wrap;
+}
+.omg-soundset-audio-play {
+   width: 20px;
+}
+.omg-soundset-audio-duration {
+   margin-left: auto;
+}

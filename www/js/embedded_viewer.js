@@ -6,6 +6,8 @@ if (typeof omg === "undefined") {
 }
 
 function OMGEmbeddedViewer(params) {
+    this.playChar = "&nbsp;&#9654;"
+    this.stopChar = "&#9724;"
 
     if (params.result) {
         params.data = params.result.body
@@ -124,6 +126,12 @@ OMGEmbeddedViewer.prototype.setupControls = function (params) {
         
     viewer.playButton.onclick = function () {
         viewer.playButtonClass = viewer.playButton.className;
+        
+        if (type === "SOUNDSET") {
+            viewer.playSoundSet()
+            return
+        }
+
         if (typeof params.onplaybuttonclick === "function") {
             params.onplaybuttonclick(viewer);
             if (!viewer.playButton.hasBeenClicked) {
@@ -227,11 +235,12 @@ OMGEmbeddedViewer.prototype.setupControls = function (params) {
         
     };
 
-    if (data.type === "SOUNDSET") {
-        viewer.editButton.href = "/soundset-editor.htm?id=" + data.id;
-        viewer.shareButton.href = "/soundset.htm?id=" + data.id;    
-    }
-    else if (data.type === "PLAYLIST") {
+    //todo edit the soundset if its the current users
+    //if (data.type === "SOUNDSET") {
+    //    viewer.editButton.href = "/soundset-editor.htm?id=" + data.id;
+    //    viewer.shareButton.href = "/soundset.htm?id=" + data.id;    
+    //}
+    if (data.type === "PLAYLIST") {
         viewer.editButton.href = "/playlist.htm?id=" + data.id;
         viewer.shareButton.href = "/play/" + data.id;
     }
@@ -247,6 +256,7 @@ OMGEmbeddedViewer.prototype.setupControls = function (params) {
 
     if (data.type === "SOUNDSET" || data.type === "PLAYLIST") {
         viewer.flexBox = document.createElement("div")
+        viewer.flexBox.className = "omg-viewer-" + data.type.toLowerCase() + "-data"
         viewer.div.appendChild(viewer.flexBox)
 
     }
@@ -519,11 +529,77 @@ OMGEmbeddedViewer.prototype.loadPlayList = function (data) {
 }
 
 OMGEmbeddedViewer.prototype.loadSoundSet = function (data) {
+    this.audioSamples = []
     data.data.forEach((item) => {
         var div = document.createElement("div")
-        div.innerHTML = item.name
+        var audio = document.createElement("audio")
+        var link = document.createElement("a")
+        var playButton = document.createElement("div")
+        var duration = document.createElement("div")
+        playButton.className = "omg-soundset-audio-play"
+        duration.className = "omg-soundset-audio-duration"
+        playButton.innerHTML = this.playChar
+        div.appendChild(playButton)
+        link.src = data.prefix + item.url + data.postfix
+        link.innerHTML = item.name
+        div.appendChild(link)
+        div.appendChild(duration)
+        div.className = "omg-soundset-audio-sample"
         this.flexBox.appendChild(div)
+
+        var isPlaying = false
+        audio.oncanplaythrough = () => {
+            var min = Math.floor(audio.duration / 60)
+            duration.innerHTML = min + ":" + Math.round(audio.duration - min * 60).toString().padStart(2, "0")
+        }
+        audio.src = data.prefix + item.url + data.postfix
+        audio.onended = () => {
+            playButton.innerHTML = this.playChar
+            isPlaying = false
+        }
+        div.onclick = () => {
+            if (isPlaying) {
+                audio.pause()
+                audio.currentTime = 0
+                playButton.innerHTML = this.playChar
+            }
+            else{
+                audio.play()
+                playButton.innerHTML = this.stopChar
+            }
+            isPlaying = !isPlaying
+        }
+        console.log(this)
+        this.audioSamples.push({div: div, audio: audio})
     })
+}
+
+OMGEmbeddedViewer.prototype.playSoundSet = function () {
+    if (this.playingSample) {
+        this.playingSample.audio.removeEventListener("ended", this.playingSoundSetListener)
+        this.playingSample.div.onclick()
+        this.showStopped()
+        return
+    }
+
+    this.showPlaying()
+    var i = 0
+    var playNext = () => {
+        this.playingSoundSetListener = () => {
+            this.audioSamples[i].audio.removeEventListener("ended", this.playingSoundSetListener)
+            i++
+            if (i < this.audioSamples.length) {
+                playNext()
+            }
+            else {
+                this.showStopped()
+            }
+        }
+        this.audioSamples[i].audio.addEventListener("ended", this.playingSoundSetListener)
+        this.audioSamples[i].div.onclick()
+        this.playingSample = this.audioSamples[i]
+    }
+    playNext()
 }
 
 OMGEmbeddedViewer.prototype.showLoading = function () {
@@ -532,15 +608,16 @@ OMGEmbeddedViewer.prototype.showLoading = function () {
 OMGEmbeddedViewer.prototype.showPlaying = function () {
     this.playButton.className = this.playButtonClass;
     this.isPlaying = true
-    this.playButton.innerHTML = "&#9724;";
+    this.playButton.innerHTML = this.stopChar;
     this.beatMarker.style.display = "block"
     this.subbeatsPlayed = 0;
 }
 OMGEmbeddedViewer.prototype.showStopped = function () {
     this.playButton.className = this.playButtonClass;
     this.isPlaying = false
-    this.playButton.innerHTML = "&nbsp;&#9654;";
+    this.playButton.innerHTML = this.playChar;
     this.beatMarker.style.display = "none"
+    this.playingSample = undefined
 }
 OMGEmbeddedViewer.prototype.onloop = function () {
     this.subbeatsPlayed = 0

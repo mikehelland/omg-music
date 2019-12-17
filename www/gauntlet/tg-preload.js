@@ -117,7 +117,7 @@ tg.getSong = function (callback) {
 };
 
 tg.preloadSong = function (songData) {
-    tg.song = new OMGSong(null, songData);    
+    tg.song = OMGSong.prototype.make(songData);
     document.getElementById("tool-bar-song-button").innerHTML = tg.song.data.name || "(Untitled)";
     
     var section = tg.song.sections[0];
