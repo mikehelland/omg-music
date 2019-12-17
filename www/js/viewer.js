@@ -36,7 +36,7 @@ omg.ui.setupNoteImages();
 viewer.loadPlayer = function (dataToPlay) {
     viewer.player = new OMusicPlayer();
     console.log(dataToPlay);
-    viewer.omgsong = viewer.player.makeOMGSong(dataToPlay);
+    viewer.omgsong = OMGSong.prototype.make(dataToPlay);
     console.log(viewer.omgsong);
     viewer.sectionWidth = Math.max(viewer.sectionWidth,
             viewer.div.clientWidth / viewer.omgsong.sections.length);

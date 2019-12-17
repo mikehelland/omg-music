@@ -24,7 +24,7 @@ return `<!DOCTYPE html>
 <html>
 <head>
 
-   <link rel="stylesheet" href="/css/main2.css" type="text/css" />
+   <link rel="stylesheet" href="/css/main.css" type="text/css" />
    <link rel="stylesheet" href="/css/viewer.css" type="text/css" />
    <meta property="og:image" content="http://openmusic.gallery/preview/${result.id}.png"/>
    <meta property="og:image:url" content="http://openmusic.gallery/preview/${result.id}.png"/>
@@ -35,10 +35,9 @@ return `<!DOCTYPE html>
    <meta property="og:title" content="Listen to ${resultCaption}"/>
    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
    <title>Listen to ${resultCaption} - OpenMusic.Gallery</title>
-    <style>html,body {height:100%; margin:0; }
-        .main-body {display: block; max-width:90%; margin:46px auto 0;}
+    <style>
+    header {display:flex;}
     </style>
-
     <script>
     var data = ${pageData};
     console.log(data);
@@ -46,8 +45,19 @@ return `<!DOCTYPE html>
 
 </head>
 <body>
+    <header>
+        <a class="main-page-link" href="/">
+        <span class="main-title-open">Open</span><span class="main-title-media">Music</span><span class="main-title-gallery">.Gallery</span>
+        </a>
 
-   <div class="main-body">
+        <div class="main-description">
+            Find, create, and customize music for your project.
+        </div>
+
+        <div class="title-bar-user-controls"></div>
+    </header>
+
+    <div class="main-body">
 
       <div id="omgviewer"><div class="beat-marker"></div></div>
       <br>
@@ -59,24 +69,7 @@ return `<!DOCTYPE html>
             <a href="/docs?what-is-this">What is this?</a>
       </div>
       
-   </div>
-
-   <div class="main-title-bar">
-      <div class="main-title-bar-content">
-      <a class="main-page-link" href="/">
-         <span class="main-title-open">Open</span><span class="main-title-media">Music</span><span class="main-title-gallery">.Gallery</span>
-      </a>
-
-       <div class="main-description">
-          Find, create, and customize music for your project.
-       </div>
-
-         <div class="main-title-bar-right">
-            <div class="title-bar-user-controls"></div>
-         </div>
-
-      </div>
-   </div>
+    </div>
 
    <script src="/omg-music/omgclasses.js"></script>
    <script src="/omg-music/tuna-min.js"></script>

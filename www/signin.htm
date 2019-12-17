@@ -2,23 +2,20 @@
 <html>
 
 <head>
-   <link rel="stylesheet" type="text/css" href="css/main2.css">
+   <link rel="stylesheet" type="text/css" href="css/main.css">
    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
    <style>
       .invalid-login, .invalid-signup {color:red; display:none;}
-      .main-body {display: block; color:white; width:90%; margin:auto; margin-top:50px;}
    </style>
 </head>
 
 <body>
 
-<div class="main-title-bar">
-   <div class="main-title-bar-content">
-      <a class="main-page-link" href="index.htm">
-         <span class="main-title-open">Open</span><span class="main-title-media">Music</span><span class="main-title-gallery">.Gallery</span>
-      </a>
-   </div>
-</div>
+<header>
+   <a class="main-page-link" href="index.htm">
+      <span class="main-title-open">Open</span><span class="main-title-media">Music</span><span class="main-title-gallery">.Gallery</span>
+   </a>   
+</header>
 
 <div class="main-body">
 
@@ -26,28 +23,31 @@
         Login
     </h2>
 
+    <p>If you have an account already, login here:</p>
+
     <div class="invalid-login">Username or password is wrong.</div>
 
     <form action="/login" method="post">
         <input name="username" type="text" placeholder="username"/>
         <input name="password" type="password" placeholder="password"/>
-        <input type="submit" value="Log In"/>
+        <input type="submit" value="Login"/>
         <input id="login-fwd" name="fwd" type="hidden" value=""/>
     </form>
     
-    <div class="main-separator">
-    </div>
+    <hr>
       
    <h2>
-      Create a New Account
+      Signup
    </h2>
+
+   <p>Create a new account. Just a username and password, that's it!</p>
 
    <div class="invalid-signup">Username already exists.</div>
 
    <form action="/signup" method="post">
       <input name="username" type="text" placeholder="username"/>
       <input name="password" type="password" placeholder="password"/>
-      <input type="submit" value="Log In"/>
+      <input type="submit" value="Signup"/>
       <input id="signup-fwd" name="fwd" type="hidden" value=""/>
    </form>
 

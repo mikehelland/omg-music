@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+    #play-button-canvas {
+        height:42px;
+        position:absolute;
+        width:100%;
+    }
+    #play-button-caption {
+        font-size:30px;
+        text-align:center;
+        height:38px;
+        cursor: pointer;
+        position:absolute;
+        width:100%;
+        font-weight:bold;
+        padding:4px 0 0;
+    }
+    #play-button-meter {
+        opacity:0.5;
+        width:100%;
+        position:absolute;
+        height:42px;    
+    }
+    html,
+    body {
+        font-family:sans-serif;
+        height:100%;
+        width:100%;
+        background-color:black;
+        padding:0px;
+        margin:0px;
+        color:white;
+        font-size:0.8em;
+    }
+    </style>
+    <title>Techno GAUNTLET</title>
+</head>
+<body>
+
+<div id="main-fragment">
+
+    <canvas id="play-button-canvas"></canvas>
+    <div id="play-button-meter"></div>
+    <div id="play-button-caption"></div>
+</div>
+
+    <script src="../omg-music/omgclasses.js"></script>
+    <script src="../js/omgservice.js"></script>
+    <script src="../omg-music/tuna-min.js"></script>
+    <script src="../omg-music/omusic_player.js"></script>
+    <script src="../omg-music/fx.js"></script>
+    <script src="../js/peakmeter.js"></script>
+
+    <script>
+
+if (typeof tg !== "object") var tg = {}; 
+if (typeof omg !== "object") var omg = {}; 
+
+tg.playButton = document.getElementById("play-button-canvas");
+tg.playButtonCaption = document.getElementById("play-button-caption");
+tg.playButtonMeter = document.getElementById("play-button-meter");
+
+tg.loadSong = function (songData, source, callback) {
+    
+    var className = songData.constructor.name;
+    if (className === "OMGSong") {
+        tg.song = songData;
+    }
+    else {
+        tg.song = new OMGSong(null, songData);
+    }
+    
+    if (tg.player) {
+        tg.player.prepareSong(tg.song, callback);
+    }
+    //tg.setupSongListeners(source);
+    tg.peakMeter = new PeakMeter(tg.song.postFXGain, tg.playButtonMeter, tg.player.context);
+    if (!tg.peakMeterUpdate) {
+        tg.peakMeterUpdate = function() {
+            tg.peakMeter.updateMeter();
+            window.requestAnimationFrame(tg.peakMeterUpdate);
+        };
+        tg.peakMeterUpdate()
+    }
+};
+
+tg.player = new OMusicPlayer();
+tg.player.loadFullSoundSets = false;
+tg.song = new OMGSong()
+tg.player.prepareSong(tg.song);
+
+
+tg.player.onPlay = function () {
+    tg.drawPlayButton(0);
+    tg.playButtonCaption.innerHTML = "STOP";
+};
+tg.player.onStop = function () {
+    tg.drawPlayButton();
+    tg.playButtonCaption.innerHTML = "PLAY";
+};
+
+tg.player.onBeatPlayedListeners.push(function (isubbeat, section) {
+    tg.drawPlayButton(isubbeat);
+});
+    
+
+tg.playButtonCaption.onclick = function () {
+    if (tg.player.playing) {
+        tg.player.stop();
+    }
+    else {
+        tg.player.play();
+    }
+};
+
+tg.playButton.width = tg.playButton.clientWidth;
+tg.playButton.height = tg.playButton.clientHeight;
+tg.playButtonContext = tg.playButton.getContext("2d");
+tg.drawPlayButton = function (subbeat) {
+    if (!tg.song) {
+        return;
+    }
+    tg.playButton.width = tg.playButton.width;
+    tg.playButtonContext.globalAlpha = 0.6;
+
+    var beatWidth = tg.playButton.width / 
+        (tg.song.data.beatParams.measures * tg.song.data.beatParams.beats);
+
+    if (tg.player.playing) {
+        tg.playButtonContext.fillStyle = "#00FF00";
+        tg.playButtonContext.fillRect(beatWidth * Math.floor(subbeat / tg.song.data.beatParams.subbeats), 
+            0, beatWidth, tg.playButton.height);        
+    }
+    else {
+        tg.playButtonContext.fillStyle = "#FF0000";
+        tg.playButtonContext.fillRect(0, 0, tg.playButton.width, tg.playButton.height);        
+    }
+
+    tg.playButtonContext.fillStyle = "white";
+    tg.playButtonContext.strokeStyle = "white";
+    tg.playButtonContext.strokeRect(0, 0, tg.playButton.width, tg.playButton.height);
+    for (var beat = 1; 
+            beat <= tg.song.data.beatParams.beats * tg.song.data.beatParams.measures; 
+            beat++) {
+        tg.playButtonContext.fillRect(beat * beatWidth, 0, 
+                    beat % tg.song.data.beatParams.beats == 0 ? 2 : 1, 
+                    tg.playButton.height);
+    }
+};
+
+tg.drawPlayButton();
+tg.playButtonCaption.innerHTML = "PLAY";
+
+
+tg.play = () => {
+    tg.player.loopSection = -1
+    tg.song.loop = tg.song.arrangement.length === 0;
+    if (!tg.player.playing) {
+        tg.player.play()
+    }
+}    
+    
+    </script>
+
+
+</body>
+</html>

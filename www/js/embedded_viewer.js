@@ -12,8 +12,11 @@ function OMGEmbeddedViewer(params) {
         params.data.id = params.result.id
     }
 
-    this.player = new OMusicPlayer();
-    this.song = this.player.makeOMGSong(params.data);
+    if (!params.useExternalPlayer) {
+        this.player = new OMusicPlayer();
+    }
+
+    this.song = OMGSong.prototype.make(params.data);
     this.predraw = params.predraw;
     
     if (!params.canvas && params.div) {
@@ -41,7 +44,7 @@ OMGEmbeddedViewer.prototype.setupControls = function (params) {
     div.style.position = "relative";
     //div.style.overflowX = "scroll";
 
-    viewer.padding = 8;
+    viewer.padding = 0;
 
     viewer.playButton = document.createElement("div");
     viewer.editButton = document.createElement("a");
@@ -75,6 +78,7 @@ OMGEmbeddedViewer.prototype.setupControls = function (params) {
         resultCaption = "(" + type.substring(0, 1).toUpperCase() +
                 type.substring(1).toLowerCase() + ")";
     }
+    viewer.caption = resultCaption;
 
     var resultData = document.createElement("div");
     resultData.className = "omg-thing-title";
@@ -84,6 +88,8 @@ OMGEmbeddedViewer.prototype.setupControls = function (params) {
     resultData = document.createElement("div");
     resultData.className = "omg-thing-user";
     resultData.innerHTML = result.username ? "by " + result.username : "";
+    viewer.caption += " " + resultData.innerHTML
+
     resultDiv.appendChild(resultData);
 
     var rightData = document.createElement("div");
@@ -117,7 +123,16 @@ OMGEmbeddedViewer.prototype.setupControls = function (params) {
     viewer.div.appendChild(viewer.beatMarker);
         
     viewer.playButton.onclick = function () {
-        
+        viewer.playButtonClass = viewer.playButton.className;
+        if (typeof params.onplaybuttonclick === "function") {
+            params.onplaybuttonclick(viewer);
+            if (!viewer.playButton.hasBeenClicked) {
+                viewer.playButton.hasBeenClicked = true;                
+                omg.server.postHTTP("/playcount", {id: data.id});
+            }
+            return
+        }
+
         var pbClass = viewer.playButton.className;
         viewer.player.onStop = function () {
             viewer.playButton.className = pbClass;
@@ -142,9 +157,7 @@ OMGEmbeddedViewer.prototype.setupControls = function (params) {
             viewer.beatMarker.style.display = "block";
             viewer.subbeatsPlayed = 0;
             viewer.playButton.className = pbClass + " loader";
-            viewer.player.onloop = function () {
-                viewer.subbeatsPlayed = 0;
-            };
+            viewer.player.onloop = () => viewer.onloop();
 
             if (viewer.prepared) {
                 viewer.player.play();
@@ -157,8 +170,7 @@ OMGEmbeddedViewer.prototype.setupControls = function (params) {
             }
             
             if (!viewer.playButton.hasBeenClicked) {
-                viewer.playButton.hasBeenClicked = true;
-                
+                viewer.playButton.hasBeenClicked = true;                
                 omg.server.postHTTP("/playcount", {id: data.id}, result=>console.log(result));
             }
         }
@@ -317,9 +329,12 @@ OMGEmbeddedViewer.prototype.drawCanvas = function (data) {
         var beatsInSection = this.song.data.beatParams.measures * this.song.data.beatParams.beats * this.song.data.beatParams.subbeats;
         viewer.subbeatsPlayed = 0;
         viewer.beatMarker.style.width = pxPerBeat + "px";
-        viewer.player.onBeatPlayedListeners.push(function (isubbeat, isection) {
+        viewer.onBeatPlayedListener = function (isubbeat, isection) {
              viewer.beatMarker.style.left = pxPerBeat * viewer.subbeatsPlayed++ + "px";
-        });
+        };
+        if (this.player) {
+            this.player.onBeatPlayedListeners.push(viewer.onBeatPlayedListener)
+        }
     }
 
 };
@@ -335,7 +350,9 @@ OMGEmbeddedViewer.prototype.getDrawingData = function () {
         var chordedData = [];
         chordedData.sectionName = section.data.name;
         for (var ic = 0; ic < section.data.chordProgression.length; ic++) {
-            viewer.player.rescaleSection(section, section.data.chordProgression[ic]);            
+            if (viewer.player) { //todo make this work without a player? maybe just move up and down
+                viewer.player.rescaleSection(section, section.data.chordProgression[ic]);            
+            }
             var sectionData = viewer.getSectionDrawingData(section);
             chordedData.push(sectionData);
         }        
@@ -507,4 +524,24 @@ OMGEmbeddedViewer.prototype.loadSoundSet = function (data) {
         div.innerHTML = item.name
         this.flexBox.appendChild(div)
     })
+}
+
+OMGEmbeddedViewer.prototype.showLoading = function () {
+    this.playButton.className = this.playButtonClass + " loader";
+}
+OMGEmbeddedViewer.prototype.showPlaying = function () {
+    this.playButton.className = this.playButtonClass;
+    this.isPlaying = true
+    this.playButton.innerHTML = "&#9724;";
+    this.beatMarker.style.display = "block"
+    this.subbeatsPlayed = 0;
+}
+OMGEmbeddedViewer.prototype.showStopped = function () {
+    this.playButton.className = this.playButtonClass;
+    this.isPlaying = false
+    this.playButton.innerHTML = "&nbsp;&#9654;";
+    this.beatMarker.style.display = "none"
+}
+OMGEmbeddedViewer.prototype.onloop = function () {
+    this.subbeatsPlayed = 0
 }

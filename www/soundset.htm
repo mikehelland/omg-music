@@ -3,7 +3,6 @@
     <head>
 
         <link rel="stylesheet" href="css/main.css" type="text/css" />
-        <link rel="stylesheet" href="css/search.css" type="text/css" />
 
         <style>
             .url-input {width: 300px;}
@@ -15,27 +14,24 @@
     </head>
     <body>
 
-        <div class="main-title-bar">
-            <div class="main-title-bar-content">
-                <a class="main-page-link" href="index.htm">
-                    <span class="main-title-open">Open</span><span class="main-title-media">Music</span><span class="main-title-gallery">.Gallery</span>
-                </a>
+        <header>
+            <a class="main-page-link" href="index.htm">
+                <span class="main-title-open">Open</span><span class="main-title-media">Music</span><span class="main-title-gallery">.Gallery</span>
+            </a>
 
-                <div class="main-title-bar-right">
-                    <div class="title-bar-user-controls"></div>
-                </div>
-            </div>
-
-        </div>
+            <div class="title-bar-user-controls"></div>
+        </header>
 
         <div class="main-body">
 
             <h1>Sound Set: <span id="soundset-name"></span></h1>
 
+            <hr>
 
             <div id="sound-list" class="search-info">
             </div>
 
+            <hr>
 
             <a href="soundset-editor.htm">
                 <button class="main-create-something" id="create-another-button">

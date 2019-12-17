@@ -1,11 +1,90 @@
-        <h3>What is actually in the Gallery?</h3>
+<style>
+    #overview-visual .omg-song {padding: 8px;}
+    #overview-visual .omg-section {padding: 8px; width:20%;}
+    #overview-visual .omg-part {padding: 8px;}
+    .omg-part {background-color:#FFFF99; border-radius:8px; 
+        margin:2px; 
+        flex-grow:1;	
+        font-size:1em; 
+    }
+    .omg-section {background-color:#99AAFF; border-radius:8px;
+        font-size:1em; 
+        padding:3px; margin:3px;
+    	opacity:0.6;
+    }
+    .omg-song {border-spacing:10px; 
+        background-color:#99FF99; 
+        font-size:1em; 
+        border-radius:8px; padding:4px;
+        border:1px solid #808080;
+        opacity:0.6;
+        transition: opacity 0.3s ease-in-out;	
+    }
+    .omg-song-data {
+        display:flex;
+    }
+    .omg-section:hover, .omg-song:hover {
+        opacity:1;
+    }
+    .main-column li {padding:0.25em;}
+</style>
+
+<p><b>Overview:</b> A <em><b>Song</b></em> is made of 
+	<em><b>Sections</b></em>, and <em><b>Sections</b></em> are made of 
+	<em><b>Parts</b></em>.</p>
+
+
+<div id="overview-visual" class="omg-song">
+	Song
+	<div class="omg-song-data">
+	<div class="omg-section">
+		Section 
+		<div class="omg-part">Part</div>
+		<div class="omg-part">Part</div>
+	</div>
+	<div class="omg-section">
+		Section
+		<div class="omg-part">Part</div>
+		<div class="omg-part">Part</div>
+	</div>
+	<div class="omg-section">
+		Section
+		<div class="omg-part">Part</div>
+		<div class="omg-part">Part</div>
+		<div class="omg-part">Part</div>
+	</div>
+	<div class="omg-section">
+		Section
+		<div class="omg-part">Part</div>
+		<div class="omg-part">Part</div>
+		<div class="omg-part">Part</div>
+	</div>
+        <div class="omg-section">
+        Section 
+        <div class="omg-part">Part</div>
+        <div class="omg-part">Part</div>
+        </div>
+
+	</div>
+</div>
+
+<ul>
+<li><em><b>Sections</b></em> are played one after another, <em>eg. Intro -> Verse -> Chorus -> Outro</em></li>
+<li><em><b>Parts</b></em> (such as melodies, basslines, and drumbeats) are played together in a <em><b>Section</b></em>.</li>
+</ul>
+
+<hr>
+
         <p>The gallery contains <b>things</b> which are stored as text files (JSON). 
             Here are the different <b>types</b> of <b>things</b>:
         </p>
         <ul>
             <li>Soundset</li>
-            <li>Drumbeat</li>
-            <li>Melody</li>
+            <li>Part</li>
+            <ul>
+                <li>Drumbeat</li>
+                <li>Melody</li>
+            </ul>
             <li>Section</li>
             <li>Song</li>
             <li>Playlist</li>
@@ -14,10 +93,10 @@
             A <b>Soundset</b> contains a list of URLs to audio samples.
         </p>
         <p>
-            A <b>Drumbeat</b> and a <b>Melody</b> describe when and how to play the samples in a <b>Soundset</b>.
+            A <b>Part</b> describes when and how to play the samples in a <b>Soundset</b>. A <b>Part</b> is a <b>Drumbeat</b> or <b>Melody</b>
         </p>
         <p>
-            A <b>Section</b> contains one or more <b>Drumbeats</b> and <b>Melodies</b> to be played simultaneously.
+            A <b>Section</b> contains one or more <b>Parts</b> to be played simultaneously.
         </p>
         <p>
             A <b>Song</b> contains one or more <b>Sections</b> to be played one-after-another.

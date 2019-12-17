@@ -7,17 +7,20 @@
     <meta property="og:title" content="OpenMusic.Gallery"/>
     <meta property="og:url" content="http://openmusic.gallery"/>
     <title>OpenMusic.Gallery - Docs</title>
-   <link rel="stylesheet" type="text/css" href="/css/main2.css">
-   <link rel="stylesheet" type="text/css" href="/css/search.css">
-   <link rel="stylesheet" type="text/css" href="/css/viewer.css"/>
+   <link rel="stylesheet" type="text/css" href="/css/main.css">
    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
    
    <style>
        @media (max-width:750px){
-       }
+            .main-nav {
+                display:none;
+            }
+        }
        .main-column {
            background-color: white;
            color:black;
+           padding: 1em;
+           flex-grow: 1;
        }
        .footer {
            text-align: center;
@@ -25,26 +28,31 @@
        hr {
            border:1px solid #CCCCCC;
        }
+       .main-nav {
+           overflow-y: auto;
+           width:220px;
+           min-width: 220px;
+       }
+       .main-body {
+           display: flex;
+           width:100%;
+       }
 
    </style>
 </head>
 
 <body>
 
-<div class="main-title-bar">
-   <div class="main-title-bar-content">
-        <div class="main-page-link">
-            <span class="main-nav-drawer-icon">&#9776;</span>
-            <a href="/"><span class="main-title-open">Open</span><span class="main-title-media">Music</span><span class="main-title-gallery">.Gallery</span></a>
-        </div>
+<header>
+    <div class="main-page-link">
+        <span class="main-nav-drawer-icon">&#9776;</span>
+        <a href="/"><span class="main-title-open">Open</span><span class="main-title-media">Music</span><span class="main-title-gallery">.Gallery</span></a>
+    </div>
 
-        <div class="main-title-bar-right">
-            <div class="title-bar-user-controls"></div>
-        </div>
+    <div class="title-bar-user-controls"></div>
 
-   </div>
-</div>
-    
+</header>    
+
 <div class="main-body">
 
 
@@ -54,12 +62,14 @@
             <li><a href="?what-is-this">What is this?</a></li>
             <li><a href="?gallery-basics">Gallery Basics</a></li>
             <li><a href="?editor">Editor</a></li>
-            <li><a href="?vertical">Vertical Surface</a></li>
-            <li><a href="?sequencer">Sequencer Surface</a></li>
+            <li><a href="?vertical-surface">Vertical Surface</a></li>
+            <li><a href="?sequencer-surface">Sequencer Surface</a></li>
             <li><a href="?game-dev">Game Development</a></li>
             <li><a href="?live">Live</a></li>
             <li><a href="?midi">MIDI</a></li>
             <li><a href="?btc">BTC Tip Jar</a></li>
+            <li><a href="?all-videos">All Videos</a></li>
+            <li><a href="/about.htm">About</a></li>
         </ul>
         <!--todo recent list somewhere?-->
     </nav>
@@ -79,7 +89,7 @@
     for (var i = 0; i < links.length; i++) {
         if (links[i].href.indexOf("?" + page) > -1) {
             links[i].style.backgroundColor = "#606060"
-            header = "Docs > <i>" + links[i].innerHTML + "</i><hr>"
+            header = "<div class='doc-header'>Docs > <i>" + links[i].innerHTML + "</i><hr></div>"
             if (i > 1) {
                 footer = footer + "<a href='" + links[i - 1].href + "'>" + links[i - 1].innerHTML + "</a> < Prev |"
             }

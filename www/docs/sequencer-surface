@@ -1,0 +1,28 @@
+<p>The <b>sequencer surface</b> is a drum machine for making beats.</p>
+
+<h3><a target="_out" href="https://www.youtube.com/watch?v=ftY8k-d8-e4">WATCH: How to Make Beats with the Sequencer Surface</a></h3>
+
+<h3>Sequencer Surface Tips</h3>
+<ul>
+<li>The sequencer is in <b>general view</b> by default.
+<li>In <b>general view</b>:<li>
+<ul>
+    <li>You see all beats for all sounds in a <b>sound set</b>.</li>
+    <li>The surface is divided horizontally for each sound.</li>
+    <li>The surface is divided vertically for each <b>subbeat</b> in the <b>section</b>.</li>
+    <li>The beats count left to right and then loop.</li>
+    <li>Press a <b>sound name</b> to enter <b>specific view</b> for that <b>sound</b>.</li>
+</ul>
+<li>In <b>specific view</b></li>
+<ul>
+    <li>You see just the beats to play for a specific sound.</li>
+    <li>The beats count left to right, then left to right on the next row, and so on.</li>
+    <li>The down beats (1, 2, 3, 4) are in the first vertical column.</li>
+    <li>Press the selected <b>sound name</b> to go back to <b>general view</b>.</li>
+</ul>
+<li>The downbeats (1, 2, 3, 4) are accented in grey.</li>
+<li>A filled box means that sound will be played at that subbeat during playback.</li>
+<li>You can change the volume of the sound to loud, medium, or soft, with the 3 above the grid.</li> 
+<li>You can double tap a <b>sound name</b> to Mute or Unmute a sound.</li>
+<li>You can drag your finger or cursor around the grid and things will turn on and off.</li>
+</ul>

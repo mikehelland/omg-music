@@ -4,54 +4,46 @@
    <title>User - OpenMusic.Gallery</title>
 
    <link rel="stylesheet" href="css/main.css" type="text/css" />
-   <link rel="stylesheet" href="css/search.css" type="text/css" />
    <link rel="stylesheet" href="css/viewer.css" type="text/css" />
 
 </head>
 <body>
 
-   <div class="main-title-bar">
-      <div class="main-title-bar-content">
-      <a class="main-page-link" href="index.htm">
-         <span class="main-title-open">Open</span><span class="main-title-media">Music</span><span class="main-title-gallery">.Gallery</span>
-      </a>
-
-      <div class="main-title-bar-right">
-         <div class="title-bar-user-controls"></div>
-      </div>
-
-      </div>
-   </div>
+   <header>
+      <a href="/"><span class="main-title-open">Open</span><span class="main-title-media">Music</span><span class="main-title-gallery">.Gallery</span></a>
+      <div class="title-bar-user-controls"></div>
+   </header>
 
    <div class="main-body">
 
       <div class="left-or-top-column">
 
-      <h1 class="user-username"></h1>
+      <h1 class="user-username">&nbsp;</h1>
       <div><a href="/logout">Log Out</a></div>
       <div class="user-info">
          Account created: <span class="user-created-at"></span>
       </div>
 
-      <div class="main-separator"></div>
+      <hr>
       <div class="user-info">
           Tip Jar Bitcoin address:
           <input id="btc-address">
       </div>
 
-      <div class="main-separator"></div>
+      <hr>
 
       <div class="user-info">
          Upload Usage:
          <span id="upload-usage"></span>
          <a href="docs/uploading.htm"><br>(About uploading)</a>
-     </div>
-     <div class="main-separator"></div>
+      </div>
+     
+      <hr>
 
       </div>
       
       <div class="main-column">
-            <div id="search-info" class="search-info">
+            <div class="feed-options">
                   <select id="filter-type">
                        <option value="">All Types</option>
                        <option value="SONG">Songs</option>
@@ -68,7 +60,7 @@
                    <input class="main-search-submit" type="submit" value="OMG!"></input>
                   </form>
       
-                   <span class="search-info-terms">search terms</span>
+                   <span class="search-info-terms"></span>
             </div>      
       <div class="search-things">
          <!--<div class="user-thing">

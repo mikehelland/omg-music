@@ -15,7 +15,7 @@ tg.backButton = document.getElementById("back-button");
 tg.mainToolbar = document.getElementById("tool-bar");
 tg.mainBottomToolbar = document.getElementById("main-fragment-bottom-row");
 
-tg.loadSong = function (songData, source) {
+tg.loadSong = function (songData, source, callback) {
     
     var className = songData.constructor.name;
     if (className === "OMGSong") {
@@ -26,7 +26,7 @@ tg.loadSong = function (songData, source) {
     }
     
     if (tg.player) {
-        tg.player.prepareSong(tg.song);
+        tg.player.prepareSong(tg.song, callback);
         tg.songOptionsFragment.isSetupForSong = false;
     }
     
@@ -2925,8 +2925,15 @@ tg.peakMeters.update = function() {
     }
 };
 
-if (window.innerWidth > window.innerHeight) {
+if (window.innerWidth > window.innerHeight && !tg.singlePanel) {
     tg.userFragment.button.onclick();
     tg.userFragment.tabs.help.header.onclick();
 }
 
+tg.play = () => {
+    tg.player.loopSection = -1
+    tg.song.loop = tg.song.arrangement.length === 0;
+    if (!tg.player.playing) {
+        tg.player.play()
+    }
+}

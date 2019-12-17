@@ -1,42 +1,9 @@
-<!DOCTYPE html>
-<html>
-<head>
-   <title>OpenMusic.Gallery</title>
    <style>
-   body {
-      font-size: 120%;
-      margin:0px;
-   }
-   #main-logo {
-      display: inline-block;
-   }
-   .main-title-open {
-      color:#FFFF88;
-   }
-   .main-title-music {
-      color:#88FFFF;
-   }
-   .main-title-gallery {
-      color:#FFFFFF;
-   }
-   #main-nav {
-      float: right;
-   }
-   #main-nav a {
-      padding-left:8px;
-      color:white;
-   }
    .panel-content {
       font-family: Arial, Helvetica, sans-serif;
       max-width: 840px;
       margin:auto;
       padding:20px;
-   }
-   #panel-top {
-      background-image: linear-gradient(#888888, #333);
-   }
-   #panel-top a {
-      text-decoration: none;
    }
    iframe {
       float:right;
@@ -50,22 +17,14 @@
    .panel-desc {
       float:right;
    }
-
+   .main-column {
+      padding-left:0px;
+      padding-right:0px;
+   }
+   .doc-header {
+      padding-left:20px;
+   }
    </style>
-   <link rel="stylesheet" type="text/css" href="/css/viewer.css">
-</head>
-<body>
-
-<div id="panel-top">
-   <div class="panel-content">
-      
-      <div id="main-logo"><a href="/"><span class="main-title-open">Open</span><span class="main-title-music">Music</span><span class="main-title-gallery">.Gallery</span></a></div>
-
-      <div id="main-nav">
-         <a href="/gauntlet">Create</a>
-      </div>
-   </div>            
-</div>
    
 
 <div class="panel">

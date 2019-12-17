@@ -1,0 +1,16 @@
+
+<h3><a target="_out" href="https://www.youtube.com/watch?v=icR14AGVNHM">WATCH: Video Tutorial: Make Bitcoin with OMG</a></h3>		
+<p>
+Each <b>thing</b> in the gallery has a <b>Tip Jar</b> that accepts Bitcoin (BTC).
+</p>
+<h4>How to make Bitcoin on OMG:</h4>
+<ol>
+<li>Download a Bitcoin wallet such as <a target="_out" href="https://electrum.org/#download">Electrum</a></li>
+<li>Follow the setup instructions</li>
+<li>Click on "Receive Money"</li>
+<li>Copy the Bitcoin address</li>
+Then:
+<li>Paste the address in the <b>btc-address</b> on your <a href="/user.htm">User Page</a></li>
+Or:
+<li>Paste the address in the <b>btc-address</b> on the <b>song panel</b> in the editor</li>
+</ol>
