@@ -456,6 +456,7 @@ tg.instrument.show = function (part) {
 
     tg.instrument.part = part;
     tg.instrument.mm = part.mm;
+    //todo was this here for a reason? causes a problem now
     //tg.instrument.mm.setCanvasEvents();
     tg.instrument.mm.backgroundDrawn = false;
     tg.instrument.setMode("WRITE");

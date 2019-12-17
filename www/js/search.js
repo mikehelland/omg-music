@@ -94,28 +94,6 @@ omg.loadSearchResults = function (params, results) {
 
 };
 
-
-
-var previousButton = document.getElementById("search-previous-button");
-var nextButton = document.getElementById("search-next-button");
-if (previousButton) {
-	previousButton.onclick = function () {
-		parameters.page--;
-		search(parameters);
-	};
-}
-if (nextButton) {
-	nextButton.onclick = function () {
-		parameters.page++;
-		search(parameters);
-	};
-}
-
-var onPlay = function (info) {
-    
-};
-
-
 function getBackgroundColor(type) {
    if (type === "SONG") {
       return "#99FF99";

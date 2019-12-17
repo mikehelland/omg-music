@@ -25,7 +25,7 @@ const bcrypt = require('bcrypt');
     
 app.use(cors());
 
-app.use(bodyParser.json());
+app.use(bodyParser.json({limit: '250kb', extended: true}))
 app.use(bodyParser.urlencoded({ extended: true}));
 app.use(cookieParser());
 app.use(require('express-session')({
