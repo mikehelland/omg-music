@@ -750,6 +750,72 @@ OMGSong.prototype.getData = function () {
     return this.data;
 };
 
+OMGSong.prototype.make = function (data) {
+    var newSong;
+    var newSection;
+    var newPart;
+
+    if (!data) {
+        return null;
+    }
+
+    var className = data.constructor.name;
+
+    if (className == "OMGSong") {
+        return data;
+    }
+
+    if (className == "OMGPart") {
+
+        newSong = new OMGSong();
+        newSection = new OMGSection(null, null, newSong);
+        newSection.parts.push(data);
+        data.section = newSection;
+
+        if (data.data.beatParams) {
+            newSection.data.beatParams = data.data.beatParams;
+            newSong.data.beatParams = newSection.data.beatParams;
+        }
+        return newSong;
+    }
+
+    if (className == "OMGSection") {
+
+        newSong = new OMGSong();
+        newSong.sections.push(data);
+        if (data.data.beatParams)
+            newSong.data.beatParams = data.data.beatParams;
+        if (data.data.keyParams)
+            newSong.data.keyParams = data.data.keyParams;
+        
+        data.song = newSong;
+        return newSong;
+    }
+
+    if (!data.type) {
+        return null;
+    }
+
+    var newSong;
+    if (data.type == "SONG") {
+        newSong = new OMGSong(null, data);
+        return newSong;
+    }
+
+    if (data.type == "SECTION") {
+        //newSong = new OMGSong();
+        newSection = new OMGSection(null, data);
+        return newSection.song;
+    }
+
+    if (data.type == "PART") {
+        newPart = new OMGPart(null, data);
+        return newPart.section.song;
+    }
+
+    return null;
+}
+
 function OMGSection(div, data, song) {
     var partData;
     var part;
@@ -1502,7 +1568,7 @@ OMusicPlayer.prototype.prepareSongFromURL = function (url, callback) {
     fetch(url).then(function (response) {
         response.json().then(data => {
             try {
-                var song = p.makeOMGSong(data);
+                var song = OMGSong.prototype.make(data);
                 p.prepareSong(song, callback);
             }
             catch (e) {
@@ -2136,72 +2202,6 @@ OMusicPlayer.prototype.getSoundURL = function (soundSet, note) {
             (soundSet.postfix || "");    
     
     return note.sound;
-};
-
-OMusicPlayer.prototype.makeOMGSong = function (data) {
-    var newSong;
-    var newSection;
-    var newPart;
-
-    if (!data) {
-        return null;
-    }
-
-    var className = data.constructor.name;
-
-    if (className == "OMGSong") {
-        return data;
-    }
-
-    if (className == "OMGPart") {
-
-        newSong = new OMGSong();
-        newSection = new OMGSection(null, null, newSong);
-        newSection.parts.push(data);
-        data.section = newSection;
-
-        if (data.data.beatParams) {
-            newSection.data.beatParams = data.data.beatParams;
-            newSong.data.beatParams = newSection.data.beatParams;
-        }
-        return newSong;
-    }
-
-    if (className == "OMGSection") {
-
-        newSong = new OMGSong();
-        newSong.sections.push(data);
-        if (data.data.beatParams)
-            newSong.data.beatParams = data.data.beatParams;
-        if (data.data.keyParams)
-            newSong.data.keyParams = data.data.keyParams;
-        
-        data.song = newSong;
-        return newSong;
-    }
-
-    if (!data.type) {
-        return null;
-    }
-
-    var newSong;
-    if (data.type == "SONG") {
-        newSong = new OMGSong(null, data);
-        return newSong;
-    }
-
-    if (data.type == "SECTION") {
-        //newSong = new OMGSong();
-        newSection = new OMGSection(null, data);
-        return newSection.song;
-    }
-
-    if (data.type == "PART") {
-        newPart = new OMGPart(null, data);
-        return newPart.section.song;
-    }
-
-    return null;
 };
 
 OMusicPlayer.prototype.updatePartVolumeAndPan = function (part) {
