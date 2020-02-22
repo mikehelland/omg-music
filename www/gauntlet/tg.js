@@ -2928,7 +2928,7 @@ tg.peakMeters.update = function() {
 
 if (window.innerWidth > window.innerHeight && !tg.singlePanel) {
     tg.userFragment.button.onclick();
-    tg.userFragment.tabs.help.header.onclick();
+    //tg.userFragment.tabs.help.header.onclick();
 }
 
 tg.play = () => {

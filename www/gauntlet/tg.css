@@ -118,7 +118,7 @@ body {
 }
 
 #key-button, #chords-button {
-    border-left:1px solid #000088;
+    border-left:1px solid #808080;
         cursor: pointer;
 }
 #beats-button {
@@ -128,8 +128,8 @@ body {
 .part, #song-controls {
     right:2px;
     display:flex;
-    border:1px solid #000088;
-    border-radius:5px;
+    /*border:1px solid #000088;
+    border-radius:5px;*/
     margin:1px;
 }
 

@@ -819,6 +819,7 @@ OMusicPlayer.prototype.loadSound = function (sound, onload) {
         else {
             p.context.decodeAudioData(buffer, function (buffer) {
                 p.loadedSounds[key] = buffer;
+                buffer.omgIsMP3 = url.toLowerCase().endsWith(".mp3");
                 onload(key);
             }, function () {
                 console.warn("error loading sound url: " + url);
@@ -839,6 +840,7 @@ OMusicPlayer.prototype.downloadSound = function (url, key, onload, secondTry) {
         var data = request.response.slice(0);
         p.context.decodeAudioData(request.response, function (buffer) {
             p.loadedSounds[key] = buffer;
+            buffer.omgIsMP3 = url.toLowerCase().endsWith(".mp3")
             onload(key);
             if (omg.util) {
                 omg.util.saveSound(key, data);
@@ -1124,7 +1126,7 @@ OMusicPlayer.prototype.playSound = function (sound, part, audioParams, strength)
 
         source.playbackRate.value = warp;
 
-        source.start(p.nextBeatTime);
+        source.start(p.nextBeatTime, source.buffer.omgIsMP3 ? 0.052 : 0);
         
         return source;
     }
