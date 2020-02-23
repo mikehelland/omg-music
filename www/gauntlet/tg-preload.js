@@ -34,7 +34,7 @@ tg.setupPartButton = function (omgpart) {
     var bigbutton = document.createElement("div");
     bigbutton.className = "part-button";
     bigbutton.innerHTML = omgpart.data.name;
-    bigbutton.onclick = function (e) {
+    omgpart.mainFragmentButtonOnClick = function (e) {
         tg.hideDetails();
         if (omgpart.data.surface.url === "PRESET_SEQUENCER") {
             tg.sequencer.show(omgpart);            
@@ -44,6 +44,13 @@ tg.setupPartButton = function (omgpart) {
         }
         tg.newChosenButton(bigbutton);
     };
+    bigbutton.onmousedown = function () {
+        tg.partButtonOnDown(bigbutton, omgpart)
+    }
+    bigbutton.addEventListener("touchstart", function (e) {
+        e.preventDefault()
+        tg.partButtonOnDown(bigbutton, omgpart)
+    })
     partDiv.appendChild(bigbutton);
     omgpart.mainFragmentButton = bigbutton;
     

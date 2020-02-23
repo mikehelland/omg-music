@@ -14,6 +14,7 @@ function OMusicPlayer() {
     
     p.latency = 20;
     p.latencyMonitor = 0;
+    p.mp3PlayOffset = 0.052
     
     p.context = p.getAudioContext();
     p.tuna = omg.tuna;
@@ -1126,7 +1127,7 @@ OMusicPlayer.prototype.playSound = function (sound, part, audioParams, strength)
 
         source.playbackRate.value = warp;
 
-        source.start(p.nextBeatTime, source.buffer.omgIsMP3 ? 0.052 : 0);
+        source.start(p.nextBeatTime, source.buffer.omgIsMP3 ? p.mp3PlayOffset : 0);
         
         return source;
     }

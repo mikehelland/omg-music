@@ -57,7 +57,7 @@ tg.setupSongListeners = function (source) {
     tg.song.onPartAddListeners.push(function (part, source) {
         var div = tg.loadPart(part);
         if (source === "addPartFragment") {
-            div.getElementsByClassName("part-button")[0].onclick();
+            part.mainFragmentButtonOnClick();
         }
     });
 
@@ -323,7 +323,7 @@ tg.sequencer.setup = function () {
         if (section !== tg.sequencer.part.section) {
             var newPart = section.getPart(tg.sequencer.part.data.name);
             if (newPart) {
-                newPart.mainFragmentButton.onclick();
+                newPart.mainFragmentButtonOnClick();
             }
         }
 
@@ -429,7 +429,7 @@ tg.instrument.setup = function () {
         if (section !== tg.instrument.part.section) {
             var newPart = section.getPart(tg.instrument.part.data.name);
             if (newPart) {
-                newPart.mainFragmentButton.onclick();
+                newPart.mainFragmentButtonOnClick();
             }
         }
 
@@ -1590,23 +1590,24 @@ function SliderCanvas(canvas, controlInfo, audioNode, data, onchange) {
     if (!canvas) {
         canvas = document.createElement("canvas");
     }
-    var offsets = omg.ui.totalOffsets(canvas);
+    this.offsets = omg.ui.totalOffsets(canvas);
     canvas.onmousedown = function (e) {
-        offsets = omg.ui.totalOffsets(canvas);
-        m.ondown(e.clientX - offsets.left, e.clientY - offsets.top);
+        m.offsets = omg.ui.totalOffsets(canvas);
+        m.ondown(e.clientX - m.offsets.left, e.clientY - m.offsets.top);
     };
     canvas.onmousemove = function (e) {
-        m.onmove(e.clientX - offsets.left, e.clientY - offsets.top);};
+        m.onmove(e.clientX - m.offsets.left, e.clientY - m.offsets.top);};
     canvas.onmouseup = function (e) {m.onup();};
     canvas.onmouseout = function (e) {m.onup();};
     canvas.addEventListener("touchstart", function (e) {
         e.preventDefault();
 
-        offsets = omg.ui.totalOffsets(canvas);
-        m.ondown(e.targetTouches[0].pageX - offsets.left, e.targetTouches[0].pageY - offsets.top);
+        m.offsets = omg.ui.totalOffsets(canvas);
+        m.ondown(e.targetTouches[0].pageX - m.offsets.left, e.targetTouches[0].pageY - m.offsets.top);
     });
     canvas.addEventListener("touchmove", function (e) {
-        m.onmove(e.targetTouches[0].pageX - offsets.left, e.targetTouches[0].pageY - offsets.top);
+        console.log("touch move")
+        m.onmove(e.targetTouches[0].pageX - m.offsets.left, e.targetTouches[0].pageY - m.offsets.top);
     });
     canvas.addEventListener("touchend", function (e) {m.onup();});
 
@@ -1697,6 +1698,7 @@ SliderCanvas.prototype.onup = function (e) {
     }
 };
 SliderCanvas.prototype.sizeCanvas = function () {
+    this.offsets = omg.ui.totalOffsets(this.div);
     this.div.width = this.div.clientWidth;
     if (this.controlInfo.type === "xy") {
         this.div.style.height = Math.min(200, this.div.width) + "px";
@@ -2937,4 +2939,62 @@ tg.play = () => {
     if (!tg.player.playing) {
         tg.player.play()
     }
+}
+
+tg.partButtonOnDown = (button, part) => {
+    // if the user holds down, show them a volume slider
+    // otherwise normal click
+    button.tgPressedDownAt = Date.now()
+    button.tgPressing = true
+
+    let reset = () => {
+        button.tgPressing = false
+        if (button.tgSliderShowing) {
+            button.removeChild(button.tgSlider.div)
+        }
+        button.tgSliderShowing = false
+        clearTimeout(handle)
+        button.onmouseleave = undefined
+    }
+    let onup = () => {
+        if (button.tgPressing && !button.tgSliderShowing &&
+                Date.now() - button.tgPressedDownAt < 600) {
+            part.mainFragmentButtonOnClick()
+        }
+        reset()
+    }
+    button.onmouseleave = (e) => {
+        reset()
+    }
+    button.onmouseup = onup
+    button.addEventListener("touchend", onup)
+    button.addEventListener("touchcancel", reset)
+
+    button.addEventListener("touchmove", function (e) {
+        e.preventDefault()
+        if (button.tgSliderShowing) {
+            button.tgSlider.onmove(e.targetTouches[0].pageX - button.tgSlider.offsets.left, 
+                e.targetTouches[0].pageY - button.tgSlider.offsets.top);    
+        }
+    })
+
+    var handle = setTimeout(() => {
+        if (button.tgPressing && !button.tgSliderShowing) {
+            button.tgSliderShowing = true
+
+            var onchange = function () {
+                tg.song.partMuteChanged(part, "mainButtonFragment");
+            };        
+            var volumeProperty = {"property": "gain", "name": "Volume", "type": "slider", "min": 0, "max": 1.5, 
+                    "color": part.data.audioParams.mute ?"#880000" : "#008800", transform: "square"};
+            button.tgSlider = new SliderCanvas(null, volumeProperty, part.gain, part.data.audioParams, onchange);
+            button.tgSlider.div.className = "main-part-button-volume";
+            button.appendChild(button.tgSlider.div)
+            button.tgSlider.sizeCanvas()
+            button.tgSlider.drawCanvas()
+            button.tgSlider.isTouching = true
+        }
+    }, 600)
+
+    
 }

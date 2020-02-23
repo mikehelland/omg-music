@@ -7,6 +7,7 @@ body {
     padding:0px;
     margin:0px;
     color:white;
+    user-select: none;
 }
 
 #main-fragment {
@@ -173,7 +174,8 @@ body {
     flex-grow:8;
     text-align:center;
     background-color:#444444;
-    padding:20px;
+    padding:0px;
+    position:relative;
 }
 
 .part-mute-button {
@@ -222,6 +224,12 @@ body {
     width:98%;
     border-bottom: 1px solid #AAAAAA;
     height:62%;
+    position:absolute;
+}
+
+.main-part-button-volume {
+    height:100%;
+    width:100%;
     position:absolute;
 }
 
@@ -357,7 +365,6 @@ body {
 }
 
 #song-options-button {
-    margin-left:2px;
     flex-grow:0 !important; 
 }
 
