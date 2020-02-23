@@ -1031,11 +1031,7 @@ tg.mixFragment.onshow = function () {
     tg.currentSection.parts.forEach(function (part) {
         tg.makeMixerDiv(part, divs, tg.mixFragment.div);
     });
-    
-    //tg.hideDetails();
-    //tg.mixFragment.style.display = "flex";
-    //tg.newChosenButton(tg.mixButton);
-    
+
     divs.forEach(function (child) {
         child.sizeCanvas();
     });
@@ -1052,7 +1048,7 @@ tg.mixFragment.onshow = function () {
 
 tg.showSubmixFragment = function (part) {
     var divs = [];
-    tg.mixFragment.innerHTML = "";
+    tg.mixFragment.div.innerHTML = "";
     part.data.tracks.forEach(function (track) {
         tg.makeMixerDiv(track, divs, tg.mixFragment.div);        
     });
@@ -1063,6 +1059,7 @@ tg.showSubmixFragment = function (part) {
     divs.forEach(function (child) {
         child.sizeCanvas();
     });
+    tg.currentFragment = tg.mixFragment;
 };
 
 tg.makeMixerDiv = function (part, divs, listDiv) {
