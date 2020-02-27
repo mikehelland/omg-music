@@ -13,7 +13,6 @@ tg.liveButton = document.getElementById("live-button");
 tg.detailFragment = document.getElementById("detail-fragment");
 tg.backButton = document.getElementById("back-button");
 tg.mainToolbar = document.getElementById("tool-bar");
-tg.mainBottomToolbar = document.getElementById("main-fragment-bottom-row");
 
 tg.loadSong = function (songData, source, callback) {
     
@@ -1077,19 +1076,19 @@ tg.makeMixerDiv = function (part, divs, listDiv) {
     var warpProperty = {"property": "warp", "name": "Warp", "type": "slider", "min": 0, "max": 2, resetValue: 1, "color": "#880088"};
     var panProperty = {"property": "pan", "name": "Pan", "type": "slider", "min": -1, "max": 1, resetValue: 0, "color": "#000088"};
     var mixerVolumeCanvas = new SliderCanvas(null, volumeProperty, part.gain, audioParams, onchange);
-    mixerVolumeCanvas.div.className = "mixer-part-volume";
     var mixerWarpCanvas = new SliderCanvas(null, warpProperty, null, audioParams, onchange);
-    mixerWarpCanvas.div.className = "mixer-part-warp";
     var mixerPanCanvas = new SliderCanvas(null, panProperty, part.panner, audioParams, onchange);
+    mixerVolumeCanvas.div.className = "mixer-part-volume";
+    mixerWarpCanvas.div.className = "mixer-part-warp";
     mixerPanCanvas.div.className = "mixer-part-pan";
 
     newContainerDiv.appendChild(mixerVolumeCanvas.div);
-    newContainerDiv.appendChild(mixerWarpCanvas.div);
     newContainerDiv.appendChild(mixerPanCanvas.div);
+    newContainerDiv.appendChild(mixerWarpCanvas.div);
     listDiv.appendChild(newContainerDiv);
     divs.push(mixerVolumeCanvas);
-    divs.push(mixerWarpCanvas);
     divs.push(mixerPanCanvas);
+    divs.push(mixerWarpCanvas);
     
     var captionDiv = document.createElement("div");
     captionDiv.innerHTML = part.name || part.data.name;
@@ -2629,9 +2628,8 @@ tg.presentationFragment.onshow = function () {
     tg.presentationMode = true;
     tg.playButton.style.display = "none";
     tg.playButtonCaption.style.display = "none";
-    tg.partList.style.display = "none";
+    tg.partArea.style.display = "none";
     tg.mainToolbar.style.display = "none";
-    tg.mainBottomToolbar.style.display = "none";
     
     var f = tg.presentationFragment;
     f.presentationMixer.style.display = "flex";
@@ -2669,9 +2667,8 @@ tg.presentationFragment.onshow = function () {
     closeDiv.onclick = function () {
         tg.playButton.style.display = "block";
         tg.playButtonCaption.style.display = "block";
-        tg.partList.style.display = "flex";
+        tg.partArea.style.display = "block";
         tg.mainToolbar.style.display = "flex";
-        tg.mainBottomToolbar.style.display = "flex";        
         document.body.removeChild(closeDiv);
         
         f.presentationMixer.style.display = "none";
@@ -2680,6 +2677,8 @@ tg.presentationFragment.onshow = function () {
 
         tg.song.onPartAudioParamsChangeListeners.splice(
             tg.song.onPartAudioParamsChangeListeners.indexOf(listener), 1);
+        tg.userFragment.button.onclick()
+        tg.userFragment.tabs.settings.header.onclick()
 
     };
     document.body.appendChild(closeDiv);

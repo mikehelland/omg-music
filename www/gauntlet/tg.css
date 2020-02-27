@@ -216,20 +216,14 @@ body {
 }
 
 .mixer-part {
-    flex-grow:1;
-    border:1px solid #000088;
-    border-radius:5px;
-    margin:5px;
     position:relative;
-    padding:1%;
-    min-height: 3em;
+    border-bottom: 1px solid #AAAAAA;
 }
 
 .mixer-part-volume {
     width:98%;
-    border-bottom: 1px solid #AAAAAA;
-    height:62%;
-    position:absolute;
+    border-bottom: 1px solid #202020;
+    height:40px;
 }
 
 .main-part-button-volume {
@@ -239,18 +233,22 @@ body {
 }
 
 .mixer-part-warp {
-    height:35%;
-    width:48%;
-    bottom:1%;
-    right:1%;
-    position:absolute;
+    height:40px;
+    width:50%;
 }
 .mixer-part-pan {
-    height:35%;
-    width:48%;
-    bottom:1%;
-    position:absolute;
+    height:40px;
+    width:50%;
 }
+
+.mixer-part-name {
+    top: 10px;
+    position:absolute;
+    width:100%;
+    text-align:center;
+    pointer-events: none;
+}
+
 
 #key-fragment {
     flex-direction:row;
@@ -482,13 +480,6 @@ body {
 #preset-section-name-list {
     flex-wrap: wrap;
     display:flex;
-}
-
-.mixer-part-name {
-    position:absolute;
-    width:100%;
-    text-align:center;
-    pointer-events: none;
 }
 
 button {

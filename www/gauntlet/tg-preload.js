@@ -1,5 +1,6 @@
 var tg = {
     partList: document.getElementById("part-list"),
+    partArea: document.getElementById("part-area"),
     beatsButton: document.getElementById("beats-button"),
     keyButton: document.getElementById("key-button"),
     chordsButton: document.getElementById("chords-button"),
