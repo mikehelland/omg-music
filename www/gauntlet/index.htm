@@ -13,43 +13,43 @@
     <canvas id="play-button-canvas"></canvas>
     <div id="play-button-meter"></div>
     <div id="play-button-caption"></div>
-    <div id="tool-bar">
-            <div id="main-fragment-user-button">
-                <span class="tool-bar-caption">User</span>
-                <span id="tool-bar-user-button">Login</span>
-            </div>
-            <div id="main-fragment-song-button">
-                <span class="tool-bar-caption">Song</span>
-                <span id="tool-bar-song-button">(Untitled)</span>
-            </div>
-            <div id="main-fragment-section-button">
-                <span class="tool-bar-caption">Section</span>
-                <span id="tool-bar-section-button">Intro</span>
-            </div>
-            <div id="save-button">Save</div>
-    </div>
 
     <div id="song-controls">
+        <div id="mix-button">Mix</div>
         <div id="beats-button"></div>
         <div id="key-button"></div>
         <div id="chords-button">I</div>
+        <div id="song-options-button">&#9776;</div>
     </div>
 
-    <div id="part-list">
-        <!--<div class="part">
-            <div class="part-options-button">|||</div>
-            <div class="part-button">Hip Hop Drumkit</div>
-            <div class="part-mute-button">M</div>
-        </div>-->
+    <div id="part-area">
+        <div id="part-list">
+        </div>
+        <div id="add-part-button">Add&nbsp;Part</div>
     </div>
+
     <div id="presentation-mixer"></div>
     
-        <div id="main-fragment-bottom-row">
-            <div id="song-options-button">&#9776;</div>
-            <div id="add-part-button">Add Part</div>
-            <div id="mix-button">Mix</div>
-            <div id="live-button">Live</div>
+    <div id="tool-bar">
+        <div id="help-button">?</div>
+        <div id="main-fragment-user-button">
+            <span class="tool-bar-caption">user</span>
+            <br>
+            <span id="tool-bar-user-button">Login</span>
         </div>
+        <div id="main-fragment-song-button">
+            <span class="tool-bar-caption">song</span>
+            <br>
+            <span id="tool-bar-song-button">(Untitled)</span>
+        </div>
+        <div id="main-fragment-section-button">
+            <span class="tool-bar-caption">section</span>
+            <br>
+            <span id="tool-bar-section-button">Intro</span>
+        </div>
+        <div id="live-button">Live</div>
+        <div id="save-button">Save</div>
+    </div>
 </div>
     
     <div id="detail-fragment">
@@ -173,8 +173,8 @@
         </div>
         <div id="part-options-fragment" class="fragment">
             <div id="part-options-tabs" class="detail-tab-row">
-                <div id="part-options-tab" class="detail-tab">Options</div>
                 <div id="part-options-fx-tab" class="detail-tab">FX</div>
+                <div id="part-options-tab" class="detail-tab">Options</div>
             </div>
             <div id="part-options-fx" class="detail-fragment-body">
                 <button id="part-options-add-fx-button">Add FX</button>
@@ -258,48 +258,6 @@
                 <button id="user-logout-button">Log Out</button>
 
             </div>
-            <div id="user-fragment-help" class="detail-tab-page detail-fragment-body">
-                <div class="detail-tab-caption">
-                    ?
-                </div>
-
-                <p>Make music with sounds from anywhere on the Internet!</p>
-                <h4>Video Tutorials</h4>
-                <ul>
-                    <li><a href="https://www.youtube.com/watch?v=g8QuIWtXTzs&t=5s" target="_blank">
-                        Overview
-                        </a>
-                    </li>
-                    <li><a href=https://www.youtube.com/watch?v=VfveFUJXNfo" target="_blank">
-                        101: The Vertical Surface
-                        </a>
-                    </li>
-                    <li><a href="https://www.youtube.com/watch?v=ftY8k-d8-e4" target="_blank">
-                        102: The Sequencer Surface</a>
-                    </li>
-                    <li>
-                        <a href="https://www.youtube.com/watch?v=TXpPFBkpXp0" target="_blank">
-                            Game Development
-                        </a>
-                    </li>
-                    <li><a href="https://www.youtube.com/watch?v=4CQcGW6Rwo4" target="_blank">
-                        Video Production
-                    </a></li>
-                    <li><a href="https://www.youtube.com/watch?v=2N1Zh2J1nSY" target="_blank">
-                        Practicing Guitar/Drums/etc
-                    </a></li>
-                </ul>
-
-                <h4>Resources</h4>
-                <ul>
-                    <li><a href="/" target="_blank">OpenMusic.Gallery Home</a></li>
-                    <li><a href="https://reddit.com/r/openmusic" target="_blank">OMG Forum</a></li>
-                    <li><a href="/docs/what_is_open_music.htm" target="_blank">About OMG</a></li>
-                    <li><a href="https://github.com/mikehelland/openmusic.gallery" target="_blank">Source Code</a></li>
-                    <li>Contact: <a href="mailto:mike@mikehelland.com">mike@mikehelland.com</a></li>    
-                </ul>
-
-            </div>
         </div>
         <div id="song-fragment" class="fragment">
             <div class="detail-fragment-body">
@@ -378,6 +336,47 @@
         <div id="presentation-mode-fragment" class="fragment">
             <div id="presentation-part-list"></div>
             <div class="beat-marker" id="presentation-beat-marker"></div>
+        </div>
+        <div id="help-fragment" class="fragment">
+            <div class="detail-fragment-body">
+
+            <p>Make music with sounds from anywhere on the Internet!</p>
+            <h4>Video Tutorials</h4>
+            <ul>
+                <li><a href="https://www.youtube.com/watch?v=g8QuIWtXTzs&t=5s" target="_blank">
+                    Overview
+                    </a>
+                </li>
+                <li><a href=https://www.youtube.com/watch?v=VfveFUJXNfo" target="_blank">
+                    101: The Vertical Surface
+                    </a>
+                </li>
+                <li><a href="https://www.youtube.com/watch?v=ftY8k-d8-e4" target="_blank">
+                    102: The Sequencer Surface</a>
+                </li>
+                <li>
+                    <a href="https://www.youtube.com/watch?v=TXpPFBkpXp0" target="_blank">
+                        Game Development
+                    </a>
+                </li>
+                <li><a href="https://www.youtube.com/watch?v=4CQcGW6Rwo4" target="_blank">
+                    Video Production
+                </a></li>
+                <li><a href="https://www.youtube.com/watch?v=2N1Zh2J1nSY" target="_blank">
+                    Practicing Guitar/Drums/etc
+                </a></li>
+            </ul>
+
+            <h4>Resources</h4>
+            <ul>
+                <li><a href="/" target="_blank">OpenMusic.Gallery Home</a></li>
+                <li><a href="https://reddit.com/r/openmusic" target="_blank">OMG Forum</a></li>
+                <li><a href="/docs/what_is_open_music.htm" target="_blank">About OMG</a></li>
+                <li><a href="https://github.com/mikehelland/openmusic.gallery" target="_blank">Source Code</a></li>
+                <li>Contact: <a href="mailto:mike@mikehelland.com">mike@mikehelland.com</a></li>    
+            </ul>
+
+            </div>
         </div>
             
             

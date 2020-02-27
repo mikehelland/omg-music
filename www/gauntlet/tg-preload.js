@@ -26,7 +26,6 @@ tg.setupPartButton = function (omgpart) {
     obutton = document.createElement("div");
     obutton.className = "part-options-button";
     obutton.innerHTML = "&#9776;";
-    partDiv.appendChild(obutton);
     obutton.onclick = function (e) {
         tg.showFragment(tg.partOptionsFragment, obutton, omgpart);
     };
@@ -51,13 +50,12 @@ tg.setupPartButton = function (omgpart) {
         e.preventDefault()
         tg.partButtonOnDown(bigbutton, omgpart)
     })
-    partDiv.appendChild(bigbutton);
     omgpart.mainFragmentButton = bigbutton;
     
-    var button = document.createElement("div");
-    button.className = "part-mute-button";
-    button.innerHTML = "M";
-    button.onclick = function () {
+    var muteButton = document.createElement("div");
+    muteButton.className = "part-mute-button";
+    muteButton.innerHTML = "M";
+    muteButton.onclick = function () {
         //this should all be in the player!
 
         omgpart.data.audioParams.mute = !omgpart.data.audioParams.mute;
@@ -68,17 +66,20 @@ tg.setupPartButton = function (omgpart) {
             omgpart.preFXGain.gain.setValueAtTime(0, tg.player.context.currentTime)
         }
     }
-    button.refresh = function () {
-        button.style.backgroundColor = omgpart.data.audioParams.mute ?
+    muteButton.refresh = function () {
+        muteButton.style.backgroundColor = omgpart.data.audioParams.mute ?
             "#800000" : "#008000";
     };
-    button.refresh();
+    muteButton.refresh();
     
-    partDiv.appendChild(button);
+    partDiv.appendChild(muteButton);
+    partDiv.appendChild(bigbutton);
+    partDiv.appendChild(obutton);
+    
     tg.partList.appendChild(partDiv);
     
     omgpart.div = partDiv;
-    omgpart.muteButton = button;
+    omgpart.muteButton = muteButton;
     return partDiv;
 };
 

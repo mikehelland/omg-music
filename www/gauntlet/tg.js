@@ -1284,7 +1284,7 @@ tg.partOptionsFragment.setup = function () {
         f.updateTabs(e);
     };
 
-    f.generalTab.onclick({target: f.generalTab});
+    f.fxTab.onclick({target: f.fxTab});
     f.nameInput.onkeypress = function (e) {
         if (e.keyCode === 13) {
             f.part.data.name = e.target.value;      
@@ -1783,9 +1783,6 @@ tg.userFragment = {
             div: document.getElementById("user-fragment-settings"),
             listDiv: document.getElementById("user-fragment-settings-list"),
             logoutButton: document.getElementById("user-logout-button")
-        },
-        help: {
-            div: document.getElementById("user-fragment-help"),
         }
     }
 };
@@ -2522,6 +2519,20 @@ tg.songOptionsFragment.setupMonkeyWaitTime = function (changeable) {
     this.changeableList.appendChild(div);
 };
 
+
+/*
+ * HELP FRAGMENT!
+ * 
+*/
+
+tg.helpFragment = {
+    div: document.getElementById("help-fragment"),
+    button: document.getElementById("help-button"),
+    display: "flex"
+}
+tg.setupFragment(tg.helpFragment)
+
+
 /*
  * LIVE FRAGMENT!
  * 
@@ -2926,7 +2937,7 @@ tg.peakMeters.update = function() {
 };
 
 if (window.innerWidth > window.innerHeight && !tg.singlePanel) {
-    tg.userFragment.button.onclick();
+    tg.helpFragment.button.onclick();
     //tg.userFragment.tabs.help.header.onclick();
 }
 
