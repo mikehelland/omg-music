@@ -97,6 +97,10 @@ body {
 }
 #tool-bar {
     display:flex;
+    opacity: 0.8;
+}
+#tool-bar:hover {
+    opacity: 1;
 }
 
 #tool-bar > div {
@@ -198,11 +202,12 @@ body {
 
 #add-part-button {
     border: 1px solid #404040;
-    margin: 5px;
+    margin: 5px auto;
     padding:12px;
     text-align: center;
     opacity:0.65;
     cursor: pointer;
+    width:6em;
 }
 
 
@@ -758,4 +763,8 @@ h2 {
 #user-fragment-help li {
     margin:0.5em 0;
     font-size: 1.2em;
+}
+
+#chords-button, #chords-fragment-chords-view, .chord-select-button {
+    font-family: 'Times New Roman', Times, serif;
 }
