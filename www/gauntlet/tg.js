@@ -587,7 +587,7 @@ tg.beatsFragment.setupTapTempoButton = function () {
             var msPerBeat = sum / (bf.taps.length - 1)
             var bpm = Math.round(1 / (msPerBeat / 1000) * 60)
             tg.song.data.beatParams.bpm = bpm
-            tg.song.beatsChanged()
+            tg.song.beatsChanged("tapTempoButton")
         }
     }
 }
@@ -602,7 +602,7 @@ tg.beatsFragment.setupForSong = function () {
 
     var beatParams = tg.song.data.beatParams
     var onchange = () => {
-        tg.song.beatsChanged()
+        tg.song.beatsChanged("beatsFragment")
         if (!tg.player.playing) {
             tg.drawPlayButton()
         }
@@ -640,9 +640,15 @@ tg.beatsFragment.setupForSong = function () {
     bf.paramsList.appendChild(bf.shuffleRange.div)        
 };
 
-tg.beatsFragment.refresh = function () {
+tg.beatsFragment.refresh = function (data, source) {
     var bf = tg.beatsFragment
-
+    if (source === "beatsFragment") {
+        return
+    }
+    if (source === "tapTempoButton") {
+        bf.bpmRange.drawCanvas();
+        return
+    }
     bf.bpmRange.drawCanvas();
     bf.measuresRange.drawCanvas();
     bf.beatsRange.drawCanvas();
