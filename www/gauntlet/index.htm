@@ -72,17 +72,11 @@
             </div>
         </div>
         <div id="beats-fragment" class="fragment">
-            <br>
-            <div><span id="bpm-label">X</span> bpm</div>
-            <input id="bpm-range" min="20" max="220" value="120" type="range">
-            <div><span id="measures-label">X</span> Measures</div>
-            <input id="measures-range" min="1" max="8" value="2" type="range">
-            <div><span id="beats-label">X</span> Beats</div>
-            <input id="beats-range" min="1" max="8" value="4" type="range">
-            <div><span id="subbeats-label">X</span> Subbeats</div>
-            <input id="subbeats-range" min="1" max="8" value="4" type="range">
-            <div><span id="shuffle-label">X</span>% Shuffle</div>
-            <input id="shuffle-range" min="0" max="60" value="0" type="range">
+            <div class="detail-fragment-body">
+                <h2>Beat Parameters</h2>
+                <button id="beats-fragment-tap-button">Tap Tempo</button>
+                <div id="beats-fragment-parameters-list"></div>
+            </div>
         </div>
         <div id="key-fragment" class="fragment">
             <div id="key-list">

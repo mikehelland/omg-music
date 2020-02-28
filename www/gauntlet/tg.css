@@ -176,6 +176,9 @@ body {
     padding-left: 20px !important;
     padding-right: 20px !important;
 }
+#mix-button {
+    width:34px;
+}
 
 .part-button {
     flex-grow:8;
@@ -208,16 +211,6 @@ body {
     opacity:0.65;
     cursor: pointer;
     width:6em;
-}
-
-
-#beats-fragment {
-    text-align:center;
-    font-size: 1.5em;
-}
-
-#beats-fragment input {
-    width:60%;
 }
 
 .mixer-part {

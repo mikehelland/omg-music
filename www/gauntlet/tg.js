@@ -26,7 +26,6 @@ tg.loadSong = function (songData, source, callback) {
     
     if (tg.player) {
         tg.player.prepareSong(tg.song, callback);
-        tg.songOptionsFragment.isSetupForSong = false;
     }
     
     tg.loadSection(tg.song.sections[0]);
@@ -542,18 +541,19 @@ tg.beatsButton.onclick = function () {
 
 tg.beatsFragment = {
     div: document.getElementById("beats-fragment"),
-    subbeatsLabel: document.getElementById("subbeats-label"),
-    beatsLabel: document.getElementById("beats-label"),
-    measuresLabel: document.getElementById("measures-label"),
-    bpmLabel: document.getElementById("bpm-label"),
-    shuffleLabel: document.getElementById("shuffle-label"),
-
-    subbeatsRange: document.getElementById("subbeats-range"),
-    beatsRange: document.getElementById("beats-range"),
-    measuresRange: document.getElementById("measures-range"),
-    bpmRange: document.getElementById("bpm-range"),
-    shuffleRange: document.getElementById("shuffle-range"),
+    paramsList: document.getElementById("beats-fragment-parameters-list"),
+    tapButton: document.getElementById("beats-fragment-tap-button"),
     onshow: function () {
+
+        if (this.song !== tg.song) {
+            this.setupForSong()
+        }
+
+        this.bpmRange.sizeCanvas();
+        this.measuresRange.sizeCanvas();
+        this.beatsRange.sizeCanvas();
+        this.subbeatsRange.sizeCanvas();
+        this.shuffleRange.sizeCanvas();
         tg.beatsFragment.refresh();    
         tg.song.onBeatChangeListeners.push(tg.beatsFragment.refresh);
     },
@@ -563,65 +563,91 @@ tg.beatsFragment = {
     }
 };
 
-tg.beatsFragment.setup = function () {
-    var bf= tg.beatsFragment;
+tg.beatsFragment.setupTapTempoButton = function () {
+    var bf = tg.beatsFragment;
 
-    var onSubeatsChange = function (e) {
-        tg.song.data.beatParams.subbeats = bf.subbeatsRange.value * 1;
-        tg.song.beatsChanged();
-    };
-    bf.subbeatsRange.ontouchmove = onSubeatsChange;
-    bf.subbeatsRange.onmousemove = onSubeatsChange;
-    bf.subbeatsRange.onmousedown = onSubeatsChange;
-    bf.subbeatsRange.onchange = onSubeatsChange;
-    var onBeatsChange = function (e) {
-        tg.song.data.beatParams.beats = bf.beatsRange.value * 1;
-        tg.song.beatsChanged();
-    };
-    bf.beatsRange.ontouchmove = onBeatsChange;
-    bf.beatsRange.onmousemove = onBeatsChange;
-    bf.beatsRange.onmousedown = onBeatsChange;
-    bf.beatsRange.onchange = onBeatsChange;
-    var onMeasuresChange = function (e) {
-        tg.song.data.beatParams.measures = bf.measuresRange.value * 1;
-        tg.song.beatsChanged();
-    };
-    bf.measuresRange.ontouchmove = onMeasuresChange;
-    bf.measuresRange.onmousemove = onMeasuresChange;
-    bf.measuresRange.onmousedown = onMeasuresChange;
-    bf.measuresRange.onchange = onMeasuresChange;
-    var onBpmChange = function (e) {
-        tg.song.data.beatParams.bpm = bf.bpmRange.value * 1;
-        tg.player.newBPM = bf.bpmRange.value;
-        tg.setSongControlsUI();
-        tg.song.beatsChanged();
-    };
-    bf.bpmRange.ontouchmove = onBpmChange;
-    bf.bpmRange.onmousemove = onBpmChange;
-    bf.bpmRange.onmousedown = onBpmChange;
-    bf.bpmRange.onchange = onBpmChange;
-    var onShuffleChange = function (e) {
-        tg.song.data.beatParams.shuffle = bf.shuffleRange.value / 100;
-        tg.song.beatsChanged();
-    };
-    bf.shuffleRange.ontouchmove = onShuffleChange;
-    bf.shuffleRange.onmousemove = onShuffleChange;
-    bf.shuffleRange.onmousedown = onShuffleChange;
-    bf.shuffleRange.onchange = onShuffleChange;
+    bf.tapButton.onmousedown = (e) => {
+        e.preventDefault()
+
+        if (!bf.lastTap || Date.now() - bf.lastTap > 2000) {
+            bf.taps = []
+        }
+        else if (bf.taps.length >= 6) {
+            bf.taps.splice(0, bf.taps.length - 6)
+        }
+    
+        bf.lastTap = Date.now()
+        bf.taps.push(bf.lastTap)
+
+        if (bf.taps.length >= 2) {
+            var sum = 0
+            for (var i = 1; i < bf.taps.length; i++) {
+                sum += bf.taps[i] - bf.taps[i - 1]
+            }
+            var msPerBeat = sum / (bf.taps.length - 1)
+            var bpm = Math.round(1 / (msPerBeat / 1000) * 60)
+            tg.song.data.beatParams.bpm = bpm
+            tg.song.beatsChanged()
+        }
+    }
+}
+
+tg.beatsFragment.setup = function () {
+    tg.beatsFragment.setupTapTempoButton()
+}
+
+tg.beatsFragment.setupForSong = function () {
+    bf = this
+    bf.paramsList.innerHTML = ""
+
+    var beatParams = tg.song.data.beatParams
+    var onchange = () => {
+        tg.song.beatsChanged()
+        if (!tg.player.playing) {
+            tg.drawPlayButton()
+        }
+    }
+
+    var bpmProperty = {"property": "bpm", "name": "BPM", "type": "slider", "min": 20, "max": 250, 
+            "color": "#008800", step: 1};
+    bf.bpmRange = new SliderCanvas(null, bpmProperty, null, beatParams, onchange);
+    bf.bpmRange.div.className = "fx-slider";
+
+    var measuresProperty = {"property": "measures", "name": "Measures", "type": "options", options: [1,2,3,4], 
+            "color": "#008800"};
+    bf.measuresRange = new SliderCanvas(null, measuresProperty, null, beatParams, onchange);
+    bf.measuresRange.div.className = "fx-slider";
+        
+    var beatsProperty = {"property": "beats", "name": "Beats", "type": "options", options: [1,2,3,4,5,6,7,8], 
+    "color": "#008800"};
+    bf.beatsRange = new SliderCanvas(null, beatsProperty, null, beatParams, onchange);
+    bf.beatsRange.div.className = "fx-slider";
+            
+    var subbeatsProperty = {"property": "subbeats", "name": "Subbeats", "type": "options", options: [1,2,3,4,5,6,7,8], 
+    "color": "#008800"};
+    bf.subbeatsRange = new SliderCanvas(null, subbeatsProperty, null, beatParams, onchange);
+    bf.subbeatsRange.div.className = "fx-slider";
+        
+    var shuffleProperty = {"property": "shuffle", "name": "Shuffle", "type": "slider", "min": 0, "max": 1, 
+            "color": "#008800", step: 0.01};
+    bf.shuffleRange = new SliderCanvas(null, shuffleProperty, null, beatParams, onchange);
+    bf.shuffleRange.div.className = "fx-slider";
+
+    bf.paramsList.appendChild(bf.bpmRange.div)
+    bf.paramsList.appendChild(bf.measuresRange.div)
+    bf.paramsList.appendChild(bf.beatsRange.div)
+    bf.paramsList.appendChild(bf.subbeatsRange.div)
+    bf.paramsList.appendChild(bf.shuffleRange.div)        
 };
 
 tg.beatsFragment.refresh = function () {
-    tg.beatsFragment.subbeatsLabel.innerHTML = tg.song.data.beatParams.subbeats;
-    tg.beatsFragment.beatsLabel.innerHTML = tg.song.data.beatParams.beats;
-    tg.beatsFragment.measuresLabel.innerHTML = tg.song.data.beatParams.measures;
-    tg.beatsFragment.bpmLabel.innerHTML = tg.song.data.beatParams.bpm;
-    tg.beatsFragment.shuffleLabel.innerHTML = Math.round(tg.song.data.beatParams.shuffle * 100);
-    tg.beatsFragment.subbeatsRange.value = tg.song.data.beatParams.subbeats;
-    tg.beatsFragment.beatsRange.value = tg.song.data.beatParams.beats;
-    tg.beatsFragment.measuresRange.value = tg.song.data.beatParams.measures;
-    tg.beatsFragment.bpmRange.value = tg.song.data.beatParams.bpm;
-    tg.beatsFragment.shuffleRange.value = tg.song.data.beatParams.shuffle * 100;
+    var bf = tg.beatsFragment
 
+    bf.bpmRange.drawCanvas();
+    bf.measuresRange.drawCanvas();
+    bf.beatsRange.drawCanvas();
+    bf.subbeatsRange.drawCanvas();
+    bf.shuffleRange.drawCanvas();
 };
 
 /*
@@ -640,6 +666,26 @@ tg.keyFragment = {
     display: "flex",
     onshow: function () {
         tg.song.onKeyChangeListeners.push(tg.keyFragment.listener);
+        if (this.lastKey) {
+            this.lastKey.classList.remove("selected-list-item");
+        }
+        var selectedKeyDiv = this.keyList.childNodes[tg.song.data.keyParams.rootNote]
+        if (selectedKeyDiv) {
+            selectedKeyDiv.classList.add("selected-list-item");
+            this.lastKey = selectedKeyDiv;
+        }
+        
+        if (this.lastScale) {
+            this.lastScale.classList.remove("selected-list-item");
+        }
+        for (var i = 0; i < omg.ui.scales.length; i++) {
+            if (omg.ui.scales[i].value.join() === tg.song.data.keyParams.scale.join()) {
+                let scaleDiv = this.scaleList.childNodes[i]
+                scaleDiv.classList.add("selected-list-item");
+                this.lastScale = scaleDiv;
+    
+            }
+        }
     },
     onhide: function () {
         var i = tg.song.onKeyChangeListeners.indexOf(tg.keyFragment.listener);
@@ -652,24 +698,21 @@ tg.keyFragment = {
 tg.keyFragment.setup = function () {
     var kf = tg.keyFragment;
     
-    var lastKey;
-    var lastScale;
-
     kf.listener = function (keyParams, source) {
         if (source === "keyFragment") return;
-        if (lastKey) {
-            lastKey.classList.remove("selected-list-item");
+        if (kf.lastKey) {
+            kf.lastKey.classList.remove("selected-list-item");
         }
-        lastKey = kf.keyList.children[keyParams.rootNote];
-        lastKey.classList.add("selected-list-item");
+        kf.lastKey = kf.keyList.children[keyParams.rootNote];
+        kf.lastKey.classList.add("selected-list-item");
         
         for (var i = 0; i < omg.ui.scales.length; i++) {
             if (omg.ui.scales[i].value.join() === keyParams.scale.join()) {
-                if (lastScale) {
-                    lastScale.classList.remove("selected-list-item");
+                if (kf.lastScale) {
+                    kf.lastScale.classList.remove("selected-list-item");
                 }
-                lastScale = kf.scaleList.children[i];
-                lastScale.classList.add("selected-list-item");
+                kf.lastScale = kf.scaleList.children[i];
+                kf.lastScale.classList.add("selected-list-item");
                 break;
             }
         }
@@ -681,20 +724,16 @@ tg.keyFragment.setup = function () {
     omg.ui.keys.forEach(function (key) {
         var keyDiv = document.createElement("div");
         keyDiv.className = "key-select-button";
-        if (keyI === tg.song.data.keyParams.rootNote) {
-            keyDiv.classList.add("selected-list-item");
-            lastKey = keyDiv;
-        }
         keyDiv.innerHTML = "<p>" + key + "</p>";;
         keyDiv.onclick = (function (i) {
             return function () {
                 tg.song.data.keyParams.rootNote = i;
                 tg.keyChanged("keyFragment");
 
-                if (lastKey) {
-                    lastKey.classList.remove("selected-list-item");
+                if (kf.lastKey) {
+                    kf.lastKey.classList.remove("selected-list-item");
                 }
-                lastKey = keyDiv;
+                kf.lastKey = keyDiv;
                 keyDiv.classList.add("selected-list-item");
             }
         }(keyI));
@@ -705,20 +744,16 @@ tg.keyFragment.setup = function () {
     omg.ui.scales.forEach(function (scale) {
         var scaleDiv = document.createElement("div");
         scaleDiv.className = "scale-select-button";
-        if (scale.value.join() === tg.song.data.keyParams.scale.join()) {
-            scaleDiv.classList.add("selected-list-item");
-            lastScale = scaleDiv;
-        }
         scaleDiv.innerHTML = "<p>" + scale.name + "</p>";
         scaleDiv.onclick = (function (newScale) {
             return function () {
                 tg.song.data.keyParams.scale = newScale;
                 tg.keyChanged("keyFragment");
                 
-                if (lastScale) {
-                    lastScale.classList.remove("selected-list-item");
+                if (kf.lastScale) {
+                    kf.lastScale.classList.remove("selected-list-item");
                 }
-                lastScale = scaleDiv;
+                kf.lastScale = scaleDiv;
                 scaleDiv.classList.add("selected-list-item");
             }
         }(scale.value));
@@ -1666,6 +1701,9 @@ SliderCanvas.prototype.onnewX = function (x, y) {
                  Math.max(this.controlInfo.min, 
             (this.controlInfo.max - this.controlInfo.min) * this.percent + this.controlInfo.min));
     }
+    if (this.controlInfo.step) {
+        value = Math.round(value / this.controlInfo.step) * this.controlInfo.step
+    }
     this.onupdate(value);
 };
 
@@ -2395,9 +2433,8 @@ tg.songOptionsFragment = {
         e.target.classList.add("selected-option");
     },
     onshow: function () {
-        if (!tg.songOptionsFragment.isSetupForSong) {
+        if (!tg.songOptionsFragment.song !== tg.song) {
             tg.songOptionsFragment.setupForSong();
-            tg.songOptionsFragment.isSetupForSong = true;
         }
     }
 };
@@ -2443,6 +2480,8 @@ tg.songOptionsFragment.setupForSong = function () {
     tg.monkey.changeables.forEach(changeable => {
         tg.songOptionsFragment.setupMonkeyChangeable(changeable);
     });
+
+    tg.songOptionsFragment.song = tg.song
 };
 tg.songOptionsFragment.setupMonkeyChangeable = function (changeable) {
     if (!tg.monkey.headDivs) {
