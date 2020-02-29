@@ -1266,9 +1266,11 @@ tg.saveFragment.drawAndPostCanvas = function (data) {
         width: 1200,
         predraw: function () {
             var context = tg.saveFragment.canvas.getContext("2d");
-            context.fillStyle = "#99FF99";
+            var grd = context.createLinearGradient(0,0,200,200);
+            grd.addColorStop(0,"rgb(249, 241, 232)");
+            grd.addColorStop(1,"rgb(205, 214, 227)");
+            context.fillStyle = grd;
             context.fillRect(0, 0, tg.saveFragment.canvas.width, tg.saveFragment.canvas.height);
-            //tg.saveFragment.canvas
         }
     });
     tg.saveFragment.canvas.toBlob(function (blob) {
