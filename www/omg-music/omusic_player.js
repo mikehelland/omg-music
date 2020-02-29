@@ -108,6 +108,12 @@ OMusicPlayer.prototype._play = function () {
     if (!p.playing)
         return;
 
+    if (p.stopOnNextBeat) {
+        p.stopOnNextBeat = false
+        p.stop()
+        return
+    }
+
     p.subbeatLength = 1000 / (beatParams.bpm / 60 * beatParams.subbeats);
 
     if (p.loopSection > -1 && p.loopSection < p.song.sections.length) {
@@ -311,7 +317,7 @@ OMusicPlayer.prototype.setupNextSection = function (fromStart) {
         if (p.arrangementI >= p.song.arrangement.length) {
             p.arrangementI = 0;
             if (!p.song.loop) {
-                p.stop();
+                p.stopOnNextBeat = true
             }
             else {
                 if (p.onloop) p.onloop();

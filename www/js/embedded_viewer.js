@@ -119,8 +119,6 @@ OMGEmbeddedViewer.prototype.setupControls = function (params) {
     viewer.beatMarker = document.createElement("div");
     viewer.beatMarker.className = "beat-marker";
     viewer.beatMarker.style.display = "none";
-    viewer.beatMarker.style.marginTop = viewer.playButton.clientHeight + 8 + "px";
-    //viewer.beatMarker.style.height = height + "px";
     viewer.beatMarker.style.marginLeft = viewer.padding / 2 + "px";
     viewer.div.appendChild(viewer.beatMarker);
         
@@ -145,6 +143,7 @@ OMGEmbeddedViewer.prototype.setupControls = function (params) {
         viewer.player.onStop = function () {
             viewer.playButton.className = pbClass;
             viewer.playButton.innerHTML = "&nbsp;&#9654;";
+            viewer.beatMarker.style.display = "none";
             if (typeof params.onStop === "function") {
                 params.onStop();
             }
@@ -159,8 +158,6 @@ OMGEmbeddedViewer.prototype.setupControls = function (params) {
 
         if (viewer.player.playing) {
             viewer.player.stop();
-            viewer.beatMarker.style.display = "none";
-
         } else {
             viewer.beatMarker.style.display = "block";
             viewer.subbeatsPlayed = 0;
@@ -266,6 +263,8 @@ OMGEmbeddedViewer.prototype.setupControls = function (params) {
         viewer.div.appendChild(viewer.canvas);
         viewer.canvas.width = viewer.canvas.clientWidth;
         viewer.canvas.height = height; //viewer.canvas.clientHeight;    
+        viewer.beatMarker.style.height = height + "px";
+        viewer.beatMarker.style.marginTop = viewer.canvas.offsetTop + "px";
     }
 
     var className = "omg-viewer-" + data.type.toLowerCase();
