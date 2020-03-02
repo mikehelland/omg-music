@@ -145,7 +145,6 @@ OMGEmbeddedViewer.prototype.setupControls = function (params) {
             viewer.playButton.innerHTML = "&nbsp;&#9654;";
             viewer.beatMarker.style.display = "none";
             viewer.subbeatsPlayed = 0;
-            console.log("onstop")
             if (typeof params.onStop === "function") {
                 params.onStop();
             }
@@ -154,7 +153,6 @@ OMGEmbeddedViewer.prototype.setupControls = function (params) {
             viewer.beatMarker.style.display = "block";
             viewer.playButton.className = pbClass;
             viewer.playButton.innerHTML = "&#9724;";
-            console.log("onplay")
             if (typeof params.onPlay === "function") {
                 params.onPlay(viewer.player, info);
             }
@@ -345,7 +343,6 @@ OMGEmbeddedViewer.prototype.drawCanvas = function (data) {
             if (isubbeat > -1) {
                 viewer.subbeatsPlayed++
             }
-            console.log("onbeat", isubbeat, viewer.beatMarker.style.left)
         };
         if (this.player) {
             this.player.onBeatPlayedListeners.push(viewer.onBeatPlayedListener)
@@ -577,7 +574,6 @@ OMGEmbeddedViewer.prototype.loadSoundSet = function (data) {
             }
             isPlaying = !isPlaying
         }
-        console.log(this)
         this.audioSamples.push({div: div, audio: audio})
     })
 }

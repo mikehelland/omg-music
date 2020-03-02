@@ -1646,7 +1646,6 @@ function SliderCanvas(canvas, controlInfo, audioNode, data, onchange) {
         m.ondown(e.targetTouches[0].pageX - m.offsets.left, e.targetTouches[0].pageY - m.offsets.top);
     });
     canvas.addEventListener("touchmove", function (e) {
-        console.log("touch move")
         m.onmove(e.targetTouches[0].pageX - m.offsets.left, e.targetTouches[0].pageY - m.offsets.top);
     });
     canvas.addEventListener("touchend", function (e) {m.onup();});
