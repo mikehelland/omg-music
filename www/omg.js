@@ -813,6 +813,11 @@ OMGSong.prototype.make = function (data) {
         return newPart.section.song;
     }
 
+    if (data.type == "SOUNDSET") {
+        newPart = new OMGPart(null, {soundSet: data});
+        return newPart.section.song;
+    }
+
     return null;
 }
 
@@ -1061,6 +1066,7 @@ function OMusicPlayer() {
     
     p.latency = 20;
     p.latencyMonitor = 0;
+    p.mp3PlayOffset = 0.052
     
     p.context = p.getAudioContext();
     p.tuna = omg.tuna;
@@ -1131,8 +1137,6 @@ OMusicPlayer.prototype.play = function (song) {
     p.currentChordI = 0;
     p.rescaleSection(p.section, p.section.data.chordProgression[0]);
 
-    this._play();
-
     if (typeof (p.onPlay) == "function") {
         // should use the listeners array, but still here because its used
         p.onPlay(p);
@@ -1145,6 +1149,7 @@ OMusicPlayer.prototype.play = function (song) {
         }
     }
 
+    this._play();
 };
 
 OMusicPlayer.prototype._play = function () {
@@ -1154,11 +1159,21 @@ OMusicPlayer.prototype._play = function () {
     if (!p.playing)
         return;
 
+    if (p.stopOnNextBeat) {
+        p.stopOnNextBeat = false
+        p.stop()
+        return
+    }
+
     p.subbeatLength = 1000 / (beatParams.bpm / 60 * beatParams.subbeats);
 
     if (p.loopSection > -1 && p.loopSection < p.song.sections.length) {
         p.section = p.song.sections[p.loopSection];
         p.sectionI = p.loopSection;
+    }
+    
+    if (p.section.chord !== p.section.data.chordProgression[p.currentChordI]) {
+        p.rescaleSection(p.section, p.section.data.chordProgression[p.currentChordI]);
     }
 
     p.playBeat(p.section, p.iSubBeat);
@@ -1357,7 +1372,7 @@ OMusicPlayer.prototype.setupNextSection = function (fromStart) {
         if (p.arrangementI >= p.song.arrangement.length) {
             p.arrangementI = 0;
             if (!p.song.loop) {
-                p.stop();
+                p.stopOnNextBeat = true
             }
             else {
                 if (p.onloop) p.onloop();
@@ -1866,6 +1881,7 @@ OMusicPlayer.prototype.loadSound = function (sound, onload) {
         else {
             p.context.decodeAudioData(buffer, function (buffer) {
                 p.loadedSounds[key] = buffer;
+                buffer.omgIsMP3 = url.toLowerCase().endsWith(".mp3");
                 onload(key);
             }, function () {
                 console.warn("error loading sound url: " + url);
@@ -1886,6 +1902,7 @@ OMusicPlayer.prototype.downloadSound = function (url, key, onload, secondTry) {
         var data = request.response.slice(0);
         p.context.decodeAudioData(request.response, function (buffer) {
             p.loadedSounds[key] = buffer;
+            buffer.omgIsMP3 = url.toLowerCase().endsWith(".mp3")
             onload(key);
             if (omg.util) {
                 omg.util.saveSound(key, data);
@@ -2171,7 +2188,7 @@ OMusicPlayer.prototype.playSound = function (sound, part, audioParams, strength)
 
         source.playbackRate.value = warp;
 
-        source.start(p.nextBeatTime);
+        source.start(p.nextBeatTime, source.buffer.omgIsMP3 ? p.mp3PlayOffset : 0);
         
         return source;
     }
