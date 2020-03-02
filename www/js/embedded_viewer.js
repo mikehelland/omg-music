@@ -368,9 +368,6 @@ OMGEmbeddedViewer.prototype.getDrawingData = function () {
             var sectionData = viewer.getSectionDrawingData(section);
             chordedData.push(sectionData);
         }
-        if (viewer.player) {
-            viewer.player.rescaleSection(section, section.data.chordProgression[0]);
-        }
         viewer.drawingData.sections.push(chordedData);
     });
     

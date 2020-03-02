@@ -119,6 +119,10 @@ OMusicPlayer.prototype._play = function () {
         p.section = p.song.sections[p.loopSection];
         p.sectionI = p.loopSection;
     }
+    
+    if (p.section.chord !== p.section.data.chordProgression[p.currentChordI]) {
+        p.rescaleSection(p.section, p.section.data.chordProgression[p.currentChordI]);
+    }
 
     p.playBeat(p.section, p.iSubBeat);
 
