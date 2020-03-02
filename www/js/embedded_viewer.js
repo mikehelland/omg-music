@@ -484,14 +484,14 @@ OMGEmbeddedViewer.prototype.draw = function () {
                     this.context.fillText(
                         omg.ui.getTextForNote(this.drawingData.sections[isection].notes[inotes][inote]),
                         isection * this.sectionLength + this.subbeatLength * usedBeats * this.beatParams.subbeats, 
-                        30 + (88 - this.drawingData.sections[isection].notes[inotes][inote].scaledNote) / 88 * this.drawingData.sections[isection].notesHeight
+                        (88 - this.drawingData.sections[isection].notes[inotes][inote].scaledNote) / 88 * this.drawingData.sections[isection].notesHeight
                     );
                 }
                 else {
                     this.context.drawImage(
                         omg.ui.getImageForNote(this.drawingData.sections[isection].notes[inotes][inote]),
                         isection * this.sectionLength + this.subbeatLength * usedBeats * this.beatParams.subbeats, 
-                        (88 - this.drawingData.sections[isection].notes[inotes][inote].scaledNote) / 88 * this.drawingData.sections[isection].notesHeight
+                        -36 + (88 - this.drawingData.sections[isection].notes[inotes][inote].scaledNote) / 88 * this.drawingData.sections[isection].notesHeight
                     );
                 }
                 usedBeats += this.drawingData.sections[isection].notes[inotes][inote].beats;
