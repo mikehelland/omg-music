@@ -85,8 +85,6 @@ OMusicPlayer.prototype.play = function (song) {
     p.currentChordI = 0;
     p.rescaleSection(p.section, p.section.data.chordProgression[0]);
 
-    this._play();
-
     if (typeof (p.onPlay) == "function") {
         // should use the listeners array, but still here because its used
         p.onPlay(p);
@@ -99,6 +97,7 @@ OMusicPlayer.prototype.play = function (song) {
         }
     }
 
+    this._play();
 };
 
 OMusicPlayer.prototype._play = function () {

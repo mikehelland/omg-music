@@ -59,7 +59,7 @@ return `<!DOCTYPE html>
 
     <div class="main-body">
 
-      <div id="omgviewer"><div class="beat-marker"></div></div>
+      <div id="omgviewer"></div>
       <br>
       <div class="site-tools">
             <a href="/">&#8962; Home</a>

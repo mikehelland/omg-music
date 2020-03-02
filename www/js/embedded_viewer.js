@@ -144,13 +144,17 @@ OMGEmbeddedViewer.prototype.setupControls = function (params) {
             viewer.playButton.className = pbClass;
             viewer.playButton.innerHTML = "&nbsp;&#9654;";
             viewer.beatMarker.style.display = "none";
+            viewer.subbeatsPlayed = 0;
+            console.log("onstop")
             if (typeof params.onStop === "function") {
                 params.onStop();
             }
         };
         viewer.player.onPlay = function (info) {
+            viewer.beatMarker.style.display = "block";
             viewer.playButton.className = pbClass;
             viewer.playButton.innerHTML = "&#9724;";
+            console.log("onplay")
             if (typeof params.onPlay === "function") {
                 params.onPlay(viewer.player, info);
             }
@@ -159,8 +163,6 @@ OMGEmbeddedViewer.prototype.setupControls = function (params) {
         if (viewer.player.playing) {
             viewer.player.stop();
         } else {
-            viewer.beatMarker.style.display = "block";
-            viewer.subbeatsPlayed = 0;
             viewer.playButton.className = pbClass + " loader";
             viewer.player.onloop = () => viewer.onloop();
 
@@ -339,7 +341,11 @@ OMGEmbeddedViewer.prototype.drawCanvas = function (data) {
         viewer.subbeatsPlayed = 0;
         viewer.beatMarker.style.width = pxPerBeat + "px";
         viewer.onBeatPlayedListener = function (isubbeat, isection) {
-             viewer.beatMarker.style.left = pxPerBeat * viewer.subbeatsPlayed++ + "px";
+            viewer.beatMarker.style.left = pxPerBeat * viewer.subbeatsPlayed + "px";
+            if (isubbeat > -1) {
+                viewer.subbeatsPlayed++
+            }
+            console.log("onbeat", isubbeat, viewer.beatMarker.style.left)
         };
         if (this.player) {
             this.player.onBeatPlayedListeners.push(viewer.onBeatPlayedListener)
@@ -613,6 +619,7 @@ OMGEmbeddedViewer.prototype.showPlaying = function () {
     this.playButton.innerHTML = this.stopChar;
     this.beatMarker.style.display = "block"
     this.subbeatsPlayed = 0;
+    this.beatMarker.style.left = "0px"
 }
 OMGEmbeddedViewer.prototype.showStopped = function () {
     this.playButton.className = this.playButtonClass;
