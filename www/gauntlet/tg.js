@@ -1163,7 +1163,10 @@ tg.saveFragment = {
     savedArea: document.getElementById("save-fragment-saved"),
     overwriteArea: document.getElementById("save-fragment-overwrite"),
     overwriteButton: document.getElementById("save-fragment-overwrite-button"),
-    copyButton: document.getElementById("save-fragment-copy-button")
+    copyButton: document.getElementById("save-fragment-copy-button"),
+    notLoggedInArea: document.getElementById("save-fragment-not-logged-in"),
+    loginButton: document.getElementById("save-fragment-login-button"),
+    saveAnywayButton: document.getElementById("save-fragment-save-anyways-button"),
 };
 tg.saveFragment.setup = function () {
     tg.saveFragment.overwriteButton.onclick = function () {
@@ -1173,10 +1176,29 @@ tg.saveFragment.setup = function () {
         delete tg.song.data.id;
         tg.saveFragment.save()
     };
+    tg.saveFragment.loginButton.onclick = function () {
+        tg.showFragment(tg.userFragment, tg.userFragment.button)
+    }
+    tg.saveFragment.saveAnywayButton.onclick = function () {
+        tg.saveFragment.preSave()
+    }
 };
 
 tg.saveFragment.onshow = function () {
     var f = tg.saveFragment;
+    if (!tg.user) {
+        f.savingCaption.style.display = "none";
+        f.savedArea.style.display = "none";
+        f.overwriteArea.style.display = "none";
+        f.notLoggedInArea.style.display = "block";
+        return
+    }
+    f.preSave()
+};
+
+tg.saveFragment.preSave = function () {
+    var f = tg.saveFragment;
+    f.notLoggedInArea.style.display = "none";
     if (!tg.song.data.id) {
         f.savingCaption.style.display = "block";
         f.savedArea.style.display = "none";
