@@ -846,7 +846,7 @@ tg.makeChordButton = function (chordI) {
  * 
 */
 
-
+tg.addPartButton.style.display = "block"
 tg.addPartButton.onclick = function() {
     tg.showFragment(tg.addPartFragment, tg.addPartButton)
 };
@@ -1931,6 +1931,12 @@ tg.userFragment.tabs.settings.setup = function () {
         {property: "nosleep", default: false, 
             name: "Keep Screen On", type: "options", options: [false, true], onchange: toggleNoSleep
         }
+        ,
+        {property: "showLiveButton", default: false, 
+            name: "Show Live Button", type: "options", options: [false, true], onchange: (value) => {
+                tg.liveButton.style.display = value ? "block" : "none";
+            }
+        }
     ];
     
     this.controls = [];
@@ -2687,11 +2693,16 @@ tg.presentationFragment.onshow = function () {
         var div = document.createElement("div");
         div.className = "presentation-mode-canvas-holder";
         
-        var uiClass = part.data.surface.url === "PRESET_SEQUENCER" ? OMGDrumMachine : OMGMelodyMaker;            
-        part.presentationUI = new uiClass(div, part, {noBackground: true, readOnly: false, captionWidth:0});
-        f.partList.appendChild(div);        
+        if (part.data.surface.url === "PRESET_SEQUENCER") {
+            part.presentationUI = new OMGDrumMachine(div, part, {noBackground: true, readOnly: false, captionWidth:0});
+            f.presentationMixer.appendChild(div);
+        }
+        else {
+            part.presentationUI = new OMGMelodyMaker(div, part, {noBackground: true, readOnly: false, captionWidth:0});
+            f.partList.appendChild(div);
+        }
         
-        tg.makeMixerDiv(part, divs, f.presentationMixer);
+        //tg.makeMixerDiv(part, divs, f.presentationMixer);
 
     });
     tg.currentSection.parts.forEach(function (part) {

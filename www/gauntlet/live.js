@@ -47,6 +47,9 @@ tg.omglive = {
             if (tg.currentFragment === tg.instrument) {
                 tg.instrument.mm.draw();
             }
+            if (tg.presentationMode && part.presentationUI) {
+                part.presentationUI.draw()
+            }
         });
         tg.requirePartMelodyMaker(part);
         callback();

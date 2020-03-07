@@ -976,11 +976,12 @@ OMGMelodyMaker.prototype.setPart = function (part, welcomeStyle) {
 
 OMGMelodyMaker.prototype.drawOMGLiveUsers = function () {
 
-    this.context.fillText("Connect at http://gauntlet.live", 25, 50)
-    var user;
+    this.context.fillText("Join in!", 25, 50)
+    this.context.fillText("https://makemusicday.live", 25, 80)
+
     for (var user in this.part.omglive.users) {
         user = this.part.omglive.users[user];
-        
+
         if (user.shape === "circle") {
             this.context.lineWidth = 5;
             this.context.strokeStyle = user.color;
