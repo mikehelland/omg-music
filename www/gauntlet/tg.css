@@ -763,3 +763,15 @@ h2 {
 #chords-button, #chords-fragment-chords-view, .chord-select-button {
     font-family: 'Times New Roman', Times, serif;
 }
+
+#mic-fragment-recording-list audio {
+    vertical-align: middle;
+}
+
+.mic-fragment-list-remove {
+    margin-top:4px;
+    padding:6px;
+    float:right;
+    border:1px solid #888888;
+    cursor: pointer;
+}

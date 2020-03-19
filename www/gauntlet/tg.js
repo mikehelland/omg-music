@@ -2743,6 +2743,19 @@ tg.micFragment.finalizeRecording = function () {
     audio.controls = true
     audio.src = audioUrl
     this.audioList.appendChild(audio)
+
+    var removeButton = document.createElement("div")
+    removeButton.className = "mic-fragment-list-remove"
+    removeButton.innerHTML = "&times;"
+    this.audioList.appendChild(removeButton)
+    removeButton.onclick = () => {
+        this.audioList.removeChild(removeButton)
+        this.audioList.removeChild(audio)
+        this.audioList.removeChild(nameInput)
+        delete tg.song.soundsToUpload[key]
+        this.part.data.soundSet.data.splice(
+            this.part.data.soundSet.data.indexOf(ssData), 1)
+    }
 }
 
 
