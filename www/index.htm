@@ -227,10 +227,11 @@ fp.searchParams.viewerParams.onplaybuttonclick = function (viewer) {
             fp.searchParams.viewerParams.onplaybuttonclick(viewer)
         }
         if (fp.isMobileDiv.clientWidth) {
+            //gauntlet.src = "gauntlet/micro.htm"
             gauntlet.src = "gauntlet/micro.htm"
         }
         else {
-            gauntlet.src = "gauntlet/mini.htm?blank&singlePanel"
+            gauntlet.src = "gauntlet/?blank&singlePanel"
         }
         return;
     }

@@ -391,7 +391,7 @@ OMusicPlayer.prototype.loadSection = function (section, soundsNeeded) {
     }
 };
 
-OMusicPlayer.prototype.loadPart = function (part, soundsNeeded) {
+OMusicPlayer.prototype.loadPart = function (part, soundsNeeded, callback) {
     var p = this;
 
     if (!part.panner) {
@@ -406,8 +406,13 @@ OMusicPlayer.prototype.loadPart = function (part, soundsNeeded) {
 
     if (part.data.surface.url === "PRESET_SEQUENCER") {
         this.loadDrumbeat(part, soundsNeeded);
+        if (callback) callback()
+    } else if (part.data.surface.url === "PRESET_MIC") {
+        this.loadMic(part, callback)
+        download = false
     } else {
         this.loadMelody(part, soundsNeeded);
+        if (callback) callback()
     }
     
     if (download) {
@@ -601,6 +606,9 @@ OMusicPlayer.prototype.playBeatForPart = function (iSubBeat, part) {
 
     if (part.data.surface.url === "PRESET_SEQUENCER") {
         p.playBeatForDrumPart(iSubBeat, part);
+    } 
+    else if (part.data.surface.url === "PRESET_MIC") {
+        //nothing to do
     } else {
         p.playBeatForMelody(iSubBeat, part);
     }
@@ -1383,10 +1391,29 @@ OMusicPlayer.prototype.getSoundSetForSoundFont = function (name, url) {
 };
 
 
-OMusicPlayer.prototype.mutePart = function (partName, mute) {
-    var part = this.getPart(partName);
-    if (part) {
-        part.data.audioParams.mute = mute || false;
+OMusicPlayer.prototype.mutePart = function (part, mute) {
+    if (typeof part === "string") {
+        part = this.getPart(part);
+    }
+
+    if (!part) {
+        return
+    }
+
+    part.data.audioParams.mute = mute || false;
+    this.song.partMuteChanged(part);
+
+    if (part.osc && part.data.audioParams.mute) {
+        part.preFXGain.gain.cancelScheduledValues(this.context.currentTime)
+        part.preFXGain.gain.setValueAtTime(0, this.context.currentTime)
+    }
+    if (part.inputSource) {
+        if (part.data.audioParams.mute) {
+            part.inputSource.disconnect(part.preFXGain)
+        }
+        else {
+            part.inputSource.connect(part.preFXGain)
+        }
     }
 };
 
@@ -1419,3 +1446,23 @@ OMusicPlayer.prototype.getPart = function (partName) {
     }
 };
 
+OMusicPlayer.prototype.loadMic = function (part, callback) {
+    if (!this.allowMic) {
+        return
+    }
+    var p = this
+    navigator.mediaDevices.getUserMedia({audio: true}).then(stream => {
+        part.inputSource = p.context.createMediaStreamSource(stream)
+        if (!part.data.audioParams.mute) {
+            part.inputSource.connect(part.preFXGain)
+        }
+        if (callback) callback()
+    })
+}
+
+OMusicPlayer.prototype.disconnectMic = function (part) {
+    part.inputSource.disconnect(part.preFXGain)
+    part.inputSource.mediaStream.getTracks().forEach(function(track) {
+        track.stop();
+      });
+}

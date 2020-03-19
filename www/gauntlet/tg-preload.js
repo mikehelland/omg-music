@@ -42,6 +42,9 @@ tg.setupPartButton = function (omgpart) {
         else if (omgpart.data.surface.url === "PRESET_VERTICAL") {
             tg.instrument.show(omgpart);
         }
+        else if (omgpart.data.surface.url === "PRESET_MIC") {
+            tg.showFragment(tg.micFragment, undefined, omgpart);
+        }
         tg.newChosenButton(bigbutton);
     };
     bigbutton.onmousedown = function () {
@@ -57,15 +60,7 @@ tg.setupPartButton = function (omgpart) {
     muteButton.className = "part-mute-button";
     muteButton.innerHTML = "M";
     muteButton.onclick = function () {
-        //this should all be in the player!
-
-        omgpart.data.audioParams.mute = !omgpart.data.audioParams.mute;
-        tg.song.partMuteChanged(omgpart);
-
-        if (omgpart.osc && omgpart.data.audioParams.mute) {
-            omgpart.preFXGain.gain.cancelScheduledValues(tg.player.context.currentTime)
-            omgpart.preFXGain.gain.setValueAtTime(0, tg.player.context.currentTime)
-        }
+        tg.player.mutePart(omgpart, !omgpart.data.audioParams.mute)
     }
     muteButton.refresh = function () {
         muteButton.style.backgroundColor = omgpart.data.audioParams.mute ?

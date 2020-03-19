@@ -100,6 +100,7 @@ tg.loadPart = function (part) {
 
 tg.player = new OMusicPlayer();
 tg.player.loadFullSoundSets = true;
+tg.player.allowMic = true
 if (tg.remoteTo) {
     tg.player.disableAudio = true;
 }
@@ -343,6 +344,9 @@ tg.sequencer.show = function (part) {
         s.beatStrength = s.part.drumMachine.beatStrength;
     }
     s.part = part;
+    if (!part.data.tracks) {
+        part.makeTracks();
+    }
 
     if (!part.drumMachine) {
         part.drumMachine = new OMGDrumMachine(s.surface, part);
@@ -443,6 +447,9 @@ tg.instrument.show = function (part) {
     tg.player.onBeatPlayedListeners.push(tg.instrument.onBeatPlayedListener);
 
     tg.currentFragment = tg.instrument;
+    if (!part.data.notes) {
+        part.data.notes = []
+    }
 
     if (!part.mm) {
         part.mm = new OMGMelodyMaker(tg.instrument.surface, part, tg.player);
@@ -854,7 +861,8 @@ tg.addPartFragment = {
     div: document.getElementById("add-part-fragment"),
     soundSetList: document.getElementById("add-part-soundset-list"),
     gallerySelect: document.getElementById("add-part-gallery-select"),
-    searchInput: document.getElementById("add-part-search")    
+    searchInput: document.getElementById("add-part-search"),
+    micLineButton: document.getElementById("add-part-mic-button")
 };
 tg.addPartFragment.setup = function () {
     var f = tg.addPartFragment;
@@ -908,6 +916,10 @@ tg.addPartFragment.setup = function () {
     f.searchInput.onkeyup = function (e) {
         searchFilter(f.currentList);
     };
+
+    f.micLineButton.onclick = () => {
+        f.addMicPart()
+    }
 };
 
 tg.addPartFragment.loadList = function (source) {
@@ -1036,8 +1048,7 @@ tg.addPart = function (soundSet, source) {
     var names = tg.currentSection.parts.map(section => section.data.name);
     blankPart.name = omg.util.getUniqueName(soundSet.name, names);
     var part = new OMGPart(undefined,blankPart,tg.currentSection);
-    tg.player.loadPart(part);
-    tg.song.partAdded(part, source);
+    tg.player.loadPart(part, undefined, () => tg.song.partAdded(part, source));
     if (tg.presentationMode) tg.presentationFragment.addPart(part);
 };
 
@@ -1047,6 +1058,9 @@ tg.addOsc = function (type, source) {
   tg.addPart(soundSet, source);
 };
 
+tg.addPartFragment.addMicPart = function () {
+    tg.addPart({name: "Mic/Line", defaultSurface: "PRESET_MIC"}, "addPartFragment")
+}
 
 /*
  * MIX FRAGMENT
@@ -1420,16 +1434,10 @@ tg.partOptionsFragment.setup = function () {
     
     f.verticalButton.onclick = function () {
         f.part.data.surface.url = "PRESET_VERTICAL";
-        if (!f.part.data.notes) {
-            f.part.data.notes = [];
-        }
         tg.instrument.show(f.part);
     };
     f.sequencerButton.onclick = function () {
         f.part.data.surface.url = "PRESET_SEQUENCER";
-        if (!f.part.data.tracks) {
-            f.part.makeTracks();
-        }
         tg.sequencer.show(f.part);
     };
     
@@ -2608,6 +2616,93 @@ tg.setupFragment(tg.helpFragment)
 
 
 /*
+ * MIC/LINE FRAGMENT!
+ * 
+*/
+
+tg.micFragment = {
+    div: document.getElementById("mic-fragment"),
+    recordButton: document.getElementById("mic-fragment-record-button"),
+    audioList: document.getElementById("mic-fragment-recording-list"),
+    verticalButton: document.getElementById("mic-fragment-vertical-button"),
+    sequencerButton: document.getElementById("mic-fragment-sequencer-button"),
+    display: "flex"
+}
+
+tg.micFragment.setup = function () {
+
+    this.recordButton.onclick = () => {
+        if (!this.recording) {
+            this.startRecording()
+            this.recordButton.innerHTML = "Recording..."
+        }
+        else {
+            this.stopRecording()
+            this.recordButton.innerHTML = "Start Recording"
+        }
+    }
+
+    this.verticalButton.onclick = () => {
+        tg.player.disconnectMic(this.part)
+        this.part.data.surface.url = "PRESET_VERTICAL"
+        tg.player.setupPartWithSoundSet(this.part.data.soundSet, this.part)
+        this.part.mainFragmentButtonOnClick()
+    }
+    this.sequencerButton.onclick = () => {
+        tg.player.disconnectMic(this.part)
+        this.part.data.surface.url = "PRESET_SEQUENCER"
+        tg.player.setupPartWithSoundSet(this.part.data.soundSet, this.part)
+        this.part.mainFragmentButtonOnClick()
+    }
+}
+
+tg.micFragment.onshow = function (part) {
+    this.part = part
+    this.mediaRecorder = new MediaRecorder(part.inputSource.mediaStream)//, {mimeType: 'audio/wav'})
+}
+
+tg.micFragment.startRecording = function () {
+    this.chunks = []
+    this.recording = true
+    this.mediaRecorder.ondataavailable = (e) => {
+
+        this.chunks.push(e.data)
+        if (!this.recording) {
+
+            const blob = new Blob(this.chunks);
+
+            var key = Math.round(Math.random() * 1000) + "__"
+
+            var reader = new FileReader();
+            reader.readAsArrayBuffer(blob);
+            reader.onloadend = function() {
+                tg.player.context.decodeAudioData(reader.result, function (buffer) {
+                    tg.player.loadedSounds[key] = buffer;
+                })
+            }
+          
+            var audio = document.createElement("audio")
+            var audioUrl = window.URL.createObjectURL(blob)
+            audio.controls = true
+            audio.src = audioUrl
+            this.audioList.appendChild(audio)
+
+            if (!this.part.data.soundSet.data) {
+                this.part.data.soundSet.data = []
+            }
+            this.part.data.soundSet.data.push({name: "temp", url: key})
+        }
+    }
+    this.mediaRecorder.start()
+}
+
+tg.micFragment.stopRecording = function () {
+    this.recording = false
+    this.mediaRecorder.stop()
+}
+
+
+/*
  * LIVE FRAGMENT!
  * 
 */
@@ -2943,10 +3038,9 @@ tg.onmidimessage = function (control, value, channel) {
 
 [{url: "../omg-music/sequencer_surface.js"},
     {url: "../omg-music/vertical_surface.js"},
+    {url: "../js/peakmeter.js", onload: ()=>tg.peakMeters.toggle("All")},
     {url: "../omg-music/monkey.js"},
-    {url: "live.js"},
-    {url: "../js/peakmeter.js", onload: ()=>tg.peakMeters.toggle("All")}
-    //{url: "/js/peakmeter.js"}
+    {url: "live.js"}
 ].forEach(script => {
     scriptTag = document.createElement("script");
     scriptTag.src = script.url;

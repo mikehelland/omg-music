@@ -334,7 +334,7 @@ function OMGPart(div, data, section) {
             this.data.notes = [];
         }     
     }
-    else {
+    else if (this.data.surface.url === "PRESET_SEQUENCER") {
         if (!this.data.tracks) {
             this.makeTracks();
         }
