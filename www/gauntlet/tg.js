@@ -1213,6 +1213,7 @@ tg.saveFragment.onshow = function () {
 tg.saveFragment.preSave = function () {
     var f = tg.saveFragment;
     f.notLoggedInArea.style.display = "none";
+
     if (!tg.song.data.id) {
         f.savingCaption.style.display = "block";
         f.savedArea.style.display = "none";
@@ -1236,6 +1237,8 @@ tg.saveFragment.preSave = function () {
 }
 
 tg.saveFragment.save = function () {
+    tg.saveFragment.saveUploads()
+
     tg.saveFragment.savingCaption.style.display = "block";
     tg.saveFragment.overwriteArea.style.display = "none";
     tg.saveFragment.savedArea.style.display = "none";
@@ -1263,6 +1266,35 @@ tg.saveFragment.save = function () {
     
     });    
 };
+
+tg.saveFragment.saveUploads = function () {
+    if (!tg.song.soundsToUpload || !tg.user) {
+        return
+    }
+
+    // update the soundSet urls first so they get saved before async uploads
+    for (var key in tg.song.soundsToUpload) {
+        var sound = tg.song.soundsToUpload[key]
+        sound.data.url = window.location.origin + "/uploads/" + 
+                tg.user.id + "/mic/" + sound.data.name + key
+    }
+    
+    for (key in tg.song.soundsToUpload) {
+        sound = tg.song.soundsToUpload[key]
+    
+        var fd = new FormData();
+        fd.append('soundsetId', "mic");
+        fd.append('file', sound.blob);
+        fd.append('filename', sound.data.name + key);
+        omg.server.postHTTP("/upload", fd, (res)=>{
+            if (res.error) {
+                console.error(res.error)
+            }
+        });    
+    }
+
+    delete tg.song.soundsToUpload
+}
 
 tg.saveFragment.onSave = function (data) {
     tg.song.data.id = data.id;
@@ -2668,29 +2700,7 @@ tg.micFragment.startRecording = function () {
 
         this.chunks.push(e.data)
         if (!this.recording) {
-
-            const blob = new Blob(this.chunks);
-
-            var key = Math.round(Math.random() * 1000) + "__"
-
-            var reader = new FileReader();
-            reader.readAsArrayBuffer(blob);
-            reader.onloadend = function() {
-                tg.player.context.decodeAudioData(reader.result, function (buffer) {
-                    tg.player.loadedSounds[key] = buffer;
-                })
-            }
-          
-            var audio = document.createElement("audio")
-            var audioUrl = window.URL.createObjectURL(blob)
-            audio.controls = true
-            audio.src = audioUrl
-            this.audioList.appendChild(audio)
-
-            if (!this.part.data.soundSet.data) {
-                this.part.data.soundSet.data = []
-            }
-            this.part.data.soundSet.data.push({name: "temp", url: key})
+            this.finalizeRecording()
         }
     }
     this.mediaRecorder.start()
@@ -2699,6 +2709,40 @@ tg.micFragment.startRecording = function () {
 tg.micFragment.stopRecording = function () {
     this.recording = false
     this.mediaRecorder.stop()
+}
+
+tg.micFragment.finalizeRecording = function () {
+    const blob = new Blob(this.chunks);
+    var key = "_" + Math.random().toString(36).substr(2, 9)
+
+    var reader = new FileReader();
+    reader.readAsArrayBuffer(blob);
+    reader.onloadend = function() {
+        tg.player.context.decodeAudioData(reader.result, function (buffer) {
+            tg.player.loadedSounds[key] = buffer;
+        })
+    }
+
+    if (!this.part.data.soundSet.data) {
+        this.part.data.soundSet.data = []
+    }
+    var ssData = {name: "rec" + (1 + this.part.data.soundSet.data.length), url: key}
+    this.part.data.soundSet.data.push(ssData)
+    if (!tg.song.soundsToUpload) {
+        tg.song.soundsToUpload = {}
+    }
+    tg.song.soundsToUpload[key] = {data: ssData, blob: blob}
+
+    var nameInput = document.createElement("input")
+    nameInput.value = ssData.name
+    this.audioList.appendChild(nameInput)
+    omg.ui.setupInputEvents(nameInput, ssData, "name")
+    
+    var audio = document.createElement("audio")
+    var audioUrl = window.URL.createObjectURL(blob)
+    audio.controls = true
+    audio.src = audioUrl
+    this.audioList.appendChild(audio)
 }
 
 

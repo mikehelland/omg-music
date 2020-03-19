@@ -1461,8 +1461,14 @@ OMusicPlayer.prototype.loadMic = function (part, callback) {
 }
 
 OMusicPlayer.prototype.disconnectMic = function (part) {
-    part.inputSource.disconnect(part.preFXGain)
+    if (!part.inputSource) {
+        return
+    }
+    try {
+        part.inputSource.disconnect(part.preFXGain)
+    }
+    catch (e) {}
     part.inputSource.mediaStream.getTracks().forEach(function(track) {
         track.stop();
-      });
+    });
 }

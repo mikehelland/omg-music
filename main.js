@@ -609,7 +609,6 @@ app.get('/admin/gallery-stats', function (req, res) {
 })
 
 app.get('/admin/uploads', function (req, res) {
-    console.log(req.query.dir)
     var uploads = []
     var dir = "www/uploads/" + (req.query.dir || "")
     fs.readdir(dir, (err, contents)=>{
