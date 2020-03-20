@@ -351,6 +351,7 @@ body {
 .detail-fragment-body {
     margin-left:2em;
     margin-right:2em;
+    flex-grow: 1;
 }
 
 #user-login-invalid {color:red; display:none;}

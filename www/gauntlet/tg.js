@@ -2658,6 +2658,7 @@ tg.micFragment = {
     audioList: document.getElementById("mic-fragment-recording-list"),
     verticalButton: document.getElementById("mic-fragment-vertical-button"),
     sequencerButton: document.getElementById("mic-fragment-sequencer-button"),
+    listFooter: document.getElementById("mic-fragment-list-footer"),
     display: "flex"
 }
 
@@ -2690,7 +2691,10 @@ tg.micFragment.setup = function () {
 
 tg.micFragment.onshow = function (part) {
     this.part = part
-    this.mediaRecorder = new MediaRecorder(part.inputSource.mediaStream)//, {mimeType: 'audio/wav'})
+    this.mediaRecorder = new MediaRecorder(part.inputSource.mediaStream)
+    this.listFooter.style.display = 
+            (this.part.data.soundSet.data && this.part.data.soundSet.data.length > 0) ? 
+            "block" : "none"
 }
 
 tg.micFragment.startRecording = function () {
@@ -2755,7 +2759,12 @@ tg.micFragment.finalizeRecording = function () {
         delete tg.song.soundsToUpload[key]
         this.part.data.soundSet.data.splice(
             this.part.data.soundSet.data.indexOf(ssData), 1)
+        if (this.part.data.soundSet.data.length === 0) {
+            this.listFooter.style.display = "none"
+        }
     }
+
+    this.listFooter.style.display = "block"
 }
 
 
