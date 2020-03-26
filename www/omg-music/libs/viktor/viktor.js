@@ -2531,6 +2531,11 @@ var patchLoader = {
 	_iterateTrees: function( node, matchingNode, isLeafLambda ) {
 		var self = this;
 
+		//mgh this is to avoid doing something fancy here with the fx node I made
+		if (node == null) {
+			return
+		}
+
 		Object.keys( node ).forEach( function( key ) {
 			var prop = node[ key ],
 				matchingProp = matchingNode && matchingNode[ key ],

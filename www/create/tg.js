@@ -442,6 +442,7 @@ tg.instrument.setup = function () {
 tg.instrument.setup();
 
 tg.instrument.show = function (part) {
+    tg.hideDetails()
     tg.instrument.div.style.display = "flex";
 
     tg.player.onBeatPlayedListeners.push(tg.instrument.onBeatPlayedListener);
@@ -913,7 +914,11 @@ tg.addPartFragment.setup = function () {
     document.getElementById("add-square-osc-button").onclick = addOscButtonClick;
     document.getElementById("add-triangle-osc-button").onclick = addOscButtonClick;
 
-    f.loadSynthList()
+    fetch("../omg-music/libs/viktor/viktor_presets.json")
+    .then(function (e) {return e.json();}).then(function (json) {
+        f.loadSynthList(json);
+    }).catch(e=>console.warn(e));
+    
 
     f.searchInput.onkeyup = function (e) {
         searchFilter(f.currentList);
@@ -951,17 +956,17 @@ tg.addPartFragment.loadList = function (source) {
     }).catch(e=>console.error(e));
 };
 
-tg.addPartFragment.loadSynthList = function () {
+tg.addPartFragment.loadSynthList = function (json) {
     var listDiv = this.synthList;
     listDiv.innerHTML = "";
     //for now these are stored in a file and atached to global omg
-    Object.keys(omg.synthPresets).forEach((name) => {
+    Object.keys(json).forEach((name) => {
         var newDiv = document.createElement("div");
         newDiv.className = "soundset-list-item";
         newDiv.innerHTML = name;
         listDiv.appendChild(newDiv);
         newDiv.onclick = function () {
-            tg.addPartFragment.addSynth(name, "addPartFragment");
+            tg.addPartFragment.addSynth(name, json[name], "addPartFragment");
         };
     })
 };
@@ -1079,17 +1084,9 @@ tg.addPartFragment.addMicPart = function () {
     tg.addPart({name: "Mic/Line", defaultSurface: "PRESET_MIC"}, "addPartFragment")
 }
 
-tg.addPartFragment.addSynth = function (patch, source) {
-    var patchName
-    if (omg.synthPresets[patch]) {
-        patchName = patch
-        patch = omg.synthPresets[patch]
-    }
-    else {
-        //todo is this serialized, or shared link?
-    }
-
-    tg.addPart({name: patchName, patch: patch,"octave":5,
+tg.addPartFragment.addSynth = function (name, patch, source) {
+    patch = JSON.parse(JSON.stringify(patch))
+    tg.addPart({name: name, patch: patch,"octave":5,
             "lowNote":0,"highNote":108,"chromatic":true}, source)
 
 }
@@ -1577,7 +1574,7 @@ tg.partOptionsFragment.onshow = function (part) {
         f.submixerButton.style.display = "block";
         f.liveModeButton.style.display = "none";
     }
-    if (part.osc) {
+    if (part.osc || part.synth) {
         f.sequencerButton.style.display = "none";        
     }
 
@@ -3274,8 +3271,7 @@ tg.partButtonOnDown = (button, part) => {
     {url: "../omg-music/vertical_surface.js"},
     {url: "../js/peakmeter.js", onload: ()=>tg.peakMeters.toggle("All")},
     {url: "../omg-music/monkey.js"},
-    {url: "live.js"},
-    {url: "../omg-music/libs/viktor/viktor_presets.js"}, //todo load this later if we need it
+    {url: "live.js"}
 ].forEach(script => {
     scriptTag = document.createElement("script");
     scriptTag.src = script.url;

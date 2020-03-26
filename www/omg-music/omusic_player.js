@@ -800,38 +800,19 @@ OMusicPlayer.prototype.makeOsc = function (part) {
 };
 
 OMusicPlayer.prototype.makeSynth = function (part) {
-    part.synth = new Synth(this.context)
+    part.synth = new Synth(this.context, part.data.soundSet.patch)
     patch = patchLoader.load(part.data.soundSet.patch)
     part.synth.loadPatch(patch.instruments.synth)
     part.synth.outputNode.connect(part.preFXGain)
 
-    var daw = part.data.soundSet.patch.daw
-    if (daw.compressor) {
-        part.data.fx.push(daw.compressor)
-        daw.compressor.name = "Compressor"
-        this.makeFXNodeForPart(daw.compressor, part);
-        delete daw.compressor
-    }
-    if (daw.delay) {
-        part.data.fx.push(daw.delay)
-        daw.delay.name = "Delay"
-        this.makeFXNodeForPart(daw.delay, part);
-        delete daw.delay
-    }
-    if (daw.reverb) {
-        part.data.fx.push(daw.reverb)
-        daw.reverb.name = "Reverb"
-        console.log(daw.reverb)
-        var newGain = daw.reverb.level;
-        daw.reverb.level = 1
-        daw.reverb.wetLevel = newGain;
-        daw.reverb.dryLevel = 1 - ( newGain / 2 );
-        this.makeFXNodeForPart(daw.reverb, part);
-        delete daw.reverb
-    }
-    if (patch.masterVolume) {
-
-    }
+    var fx = part.data.soundSet.patch.daw.fx || []
+    fx.forEach((fxData) => {
+        part.data.fx.push(fxData)
+        this.makeFXNodeForPart(fxData, part);
+    })
+    delete part.data.soundSet.patch.daw.fx
+    
+    //todo if (patch.masterVolume) 
 }
 
 OMusicPlayer.prototype.makeFrequency = function (mapped) {

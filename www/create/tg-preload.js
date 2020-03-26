@@ -35,7 +35,6 @@ tg.setupPartButton = function (omgpart) {
     bigbutton.className = "part-button";
     bigbutton.innerHTML = omgpart.data.name;
     omgpart.mainFragmentButtonOnClick = function (e) {
-        tg.hideDetails();
         if (omgpart.data.surface.url === "PRESET_SEQUENCER") {
             tg.sequencer.show(omgpart);            
         }
