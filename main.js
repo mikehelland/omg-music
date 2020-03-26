@@ -631,6 +631,11 @@ app.use("/admin", express.static('admin', {index: "index.htm"}));
 app.use(express.static('www', {index: "index.htm"}));
 
 
+// don't break gauntlet links
+app.use("/gauntlet", function(request, response, next){
+    response.redirect("/create" + request.url)
+});
+//todo break gauntlet links
 
 
 

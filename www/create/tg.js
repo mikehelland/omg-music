@@ -860,6 +860,7 @@ tg.addPartButton.onclick = function() {
 tg.addPartFragment = {
     div: document.getElementById("add-part-fragment"),
     soundSetList: document.getElementById("add-part-soundset-list"),
+    synthList: document.getElementById("add-part-synth-list"),
     gallerySelect: document.getElementById("add-part-gallery-select"),
     searchInput: document.getElementById("add-part-search"),
     micLineButton: document.getElementById("add-part-mic-button")
@@ -878,10 +879,9 @@ tg.addPartFragment.setup = function () {
     };
 
     var sources = (tg.user && tg.user.sources) || [];
-    fetch("https://mikehelland.github.io/omg-sounds/sources.json")
+    fetch("/omg-music/sources.json")
             .then(function (e) {return e.json();}).then(function (json) {
 
-        
         json.forEach(function (source) {
             sources.push(source)
         })
@@ -912,6 +912,8 @@ tg.addPartFragment.setup = function () {
     document.getElementById("add-saw-osc-button").onclick = addOscButtonClick;
     document.getElementById("add-square-osc-button").onclick = addOscButtonClick;
     document.getElementById("add-triangle-osc-button").onclick = addOscButtonClick;
+
+    f.loadSynthList()
 
     f.searchInput.onkeyup = function (e) {
         searchFilter(f.currentList);
@@ -947,6 +949,21 @@ tg.addPartFragment.loadList = function (source) {
         source.list = json;
         loadList(json);
     }).catch(e=>console.error(e));
+};
+
+tg.addPartFragment.loadSynthList = function () {
+    var listDiv = this.synthList;
+    listDiv.innerHTML = "";
+    //for now these are stored in a file and atached to global omg
+    Object.keys(omg.synthPresets).forEach((name) => {
+        var newDiv = document.createElement("div");
+        newDiv.className = "soundset-list-item";
+        newDiv.innerHTML = name;
+        listDiv.appendChild(newDiv);
+        newDiv.onclick = function () {
+            tg.addPartFragment.addSynth(name, "addPartFragment");
+        };
+    })
 };
 
 tg.addPartFragment.setupAddPartTabs = function () {
@@ -1060,6 +1077,21 @@ tg.addOsc = function (type, source) {
 
 tg.addPartFragment.addMicPart = function () {
     tg.addPart({name: "Mic/Line", defaultSurface: "PRESET_MIC"}, "addPartFragment")
+}
+
+tg.addPartFragment.addSynth = function (patch, source) {
+    var patchName
+    if (omg.synthPresets[patch]) {
+        patchName = patch
+        patch = omg.synthPresets[patch]
+    }
+    else {
+        //todo is this serialized, or shared link?
+    }
+
+    tg.addPart({name: patchName, patch: patch,"octave":5,
+            "lowNote":0,"highNote":108,"chromatic":true}, source)
+
 }
 
 /*
@@ -2812,7 +2844,7 @@ tg.liveFragment.setup = function () {
             f.chatArea.style.display = "block";
             f.chatInput.style.display = "block";
             
-            f.liveUrlInput.value = window.location.origin + "/gauntlet/?live=" + encodeURIComponent(tg.liveRoom);
+            f.liveUrlInput.value = window.location.origin + "/create/?live=" + encodeURIComponent(tg.liveRoom);
         }
         else {
             f.liveModeButton.innerHTML = "OMG Live Mode is OFF";
@@ -2826,7 +2858,7 @@ tg.liveFragment.setup = function () {
         if (e.keyCode === 13) {
             if (f.liveRoomInput.value !== tg.liveRoom) {
                 tg.omglive.switchRoom(f.liveRoomInput.value);
-                f.liveUrlInput.value = window.location.origin + "/gauntlet/?live=" + encodeURIComponent(tg.liveRoom);
+                f.liveUrlInput.value = window.location.origin + "/create/?live=" + encodeURIComponent(tg.liveRoom);
             }
         }
     };
@@ -3102,19 +3134,6 @@ tg.onmidimessage = function (control, value, channel) {
     }
 };
 
-[{url: "../omg-music/sequencer_surface.js"},
-    {url: "../omg-music/vertical_surface.js"},
-    {url: "../js/peakmeter.js", onload: ()=>tg.peakMeters.toggle("All")},
-    {url: "../omg-music/monkey.js"},
-    {url: "live.js"}
-].forEach(script => {
-    scriptTag = document.createElement("script");
-    scriptTag.src = script.url;
-    scriptTag.async = true;
-    scriptTag.onload = script.onload;
-    document.body.appendChild(scriptTag);
-});
-
 tg.requirePartMelodyMaker = function (part) {
     if (part.data.surface.url === "PRESET_VERTICAL" && !part.mm && typeof OMGMelodyMaker !== "undefined") {
         part.mm = new OMGMelodyMaker(tg.instrument.surface, part, tg.player);
@@ -3245,3 +3264,22 @@ tg.partButtonOnDown = (button, part) => {
 
     
 }
+
+
+
+
+//keep this last
+
+[{url: "../omg-music/sequencer_surface.js"},
+    {url: "../omg-music/vertical_surface.js"},
+    {url: "../js/peakmeter.js", onload: ()=>tg.peakMeters.toggle("All")},
+    {url: "../omg-music/monkey.js"},
+    {url: "live.js"},
+    {url: "../omg-music/libs/viktor/viktor_presets.js"}, //todo load this later if we need it
+].forEach(script => {
+    scriptTag = document.createElement("script");
+    scriptTag.src = script.url;
+    scriptTag.async = true;
+    scriptTag.onload = script.onload;
+    document.body.appendChild(scriptTag);
+});

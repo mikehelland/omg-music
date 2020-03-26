@@ -242,7 +242,7 @@ OMGEmbeddedViewer.prototype.setupControls = function (params) {
         viewer.shareButton.href = "/play/" + data.id;
     }
     else {
-        viewer.editButton.href = "/gauntlet/?id=" + data.id;
+        viewer.editButton.href = "/create/?id=" + data.id;
         viewer.shareButton.href = "/play/" + data.id;    
     }
 

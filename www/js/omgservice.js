@@ -342,7 +342,7 @@ omg.util.loadSearchResults = function (params) {
             button.className = "search-thing-option"
             optionsDiv.appendChild(button)
             button.onclick = function () {
-                window.location = "/gauntlet/?id=" + result.id
+                window.location = "/create/?id=" + result.id
             }
 
             if (result.type === "SONG" || result.type === "SECTION" || result.type === "PART") {

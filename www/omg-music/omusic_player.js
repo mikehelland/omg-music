@@ -799,6 +799,41 @@ OMusicPlayer.prototype.makeOsc = function (part) {
 
 };
 
+OMusicPlayer.prototype.makeSynth = function (part) {
+    part.synth = new Synth(this.context)
+    patch = patchLoader.load(part.data.soundSet.patch)
+    part.synth.loadPatch(patch.instruments.synth)
+    part.synth.outputNode.connect(part.preFXGain)
+
+    var daw = part.data.soundSet.patch.daw
+    if (daw.compressor) {
+        part.data.fx.push(daw.compressor)
+        daw.compressor.name = "Compressor"
+        this.makeFXNodeForPart(daw.compressor, part);
+        delete daw.compressor
+    }
+    if (daw.delay) {
+        part.data.fx.push(daw.delay)
+        daw.delay.name = "Delay"
+        this.makeFXNodeForPart(daw.delay, part);
+        delete daw.delay
+    }
+    if (daw.reverb) {
+        part.data.fx.push(daw.reverb)
+        daw.reverb.name = "Reverb"
+        console.log(daw.reverb)
+        var newGain = daw.reverb.level;
+        daw.reverb.level = 1
+        daw.reverb.wetLevel = newGain;
+        daw.reverb.dryLevel = 1 - ( newGain / 2 );
+        this.makeFXNodeForPart(daw.reverb, part);
+        delete daw.reverb
+    }
+    if (patch.masterVolume) {
+
+    }
+}
+
 OMusicPlayer.prototype.makeFrequency = function (mapped) {
     return Math.pow(2, (mapped - 69.0) / 12.0) * 440.0;
 };
@@ -1081,7 +1116,16 @@ OMusicPlayer.prototype.playNote = function (note, part) {
         return;
     }
 
-    if (part.osc) {
+    if (part.synth) {
+        part.baseFrequency = p.makeFrequency(note.scaledNote);
+        var noteFrequency = part.baseFrequency * part.data.audioParams.warp
+        part.synth.onNoteOn(noteFrequency, 100)
+        
+        setTimeout(function () {
+            part.synth.onNoteOff(noteFrequency)
+        }, p.song.data.beatParams.subbeats * note.beats * p.subbeatLength * 0.85);
+    }
+    else if (part.osc) {
         part.baseFrequency = p.makeFrequency(note.scaledNote);
         part.preFXGain.gain.setTargetAtTime(part.data.audioParams.gain, p.nextBeatTime - 0.003, 0.003);
         part.osc.frequency.setValueAtTime(part.baseFrequency * part.data.audioParams.warp, p.nextBeatTime);
@@ -1247,6 +1291,10 @@ OMusicPlayer.prototype.playLiveNotes = function (notes, part) {
             part.liveNotes.liveAudio.bufferGain.gain.setTargetAtTime(0, this.context.currentTime, 0.001);
             part.liveNotes.liveAudio.stop(this.context.currentTime + 0.015);
     }
+    if (part.synth && part.synth.lastFrequency) {
+        part.synth.onNoteOff(part.synth.lastFrequency)
+        part.synth.lastFrequency = 0
+    }
     
     part.liveNotes = notes;
     if (notes.autobeat === 0) {
@@ -1256,6 +1304,11 @@ OMusicPlayer.prototype.playLiveNotes = function (notes, part) {
             part.osc.frequency.setValueAtTime(
                     part.baseFrequency * part.data.audioParams.warp, this.context.currentTime);
             part.preFXGain.gain.setTargetAtTime(part.data.audioParams.gain, this.context.currentTime, 0.003);
+        }
+        else if (part.synth) {
+            part.baseFrequency = this.makeFrequency(notes[0].scaledNote);
+            part.synth.lastFrequency = part.baseFrequency * part.data.audioParams.warp
+            part.synth.onNoteOn(part.synth.lastFrequency, 100)
         }
         else {
             //var sound = this.getSound(part.data.soundSet, notes[0]);
@@ -1278,7 +1331,11 @@ OMusicPlayer.prototype.playLiveNotes = function (notes, part) {
 
 OMusicPlayer.prototype.endLiveNotes = function (part) {
   
-    if (part.osc) {
+    if (part.synth && part.synth.lastFrequency) {
+        part.synth.onNoteOff(part.synth.lastFrequency)
+        part.synth.lastFrequency = 0
+    }
+    else if (part.osc) {
         part.preFXGain.gain.setTargetAtTime(0,
                 this.context.currentTime, 0.003);
     }  
@@ -1366,6 +1423,9 @@ OMusicPlayer.prototype.makeAudioNodesForPart = function (part) {
     
     if (part.data.soundSet.url && part.data.soundSet.url.startsWith("PRESET_OSC")) {
         p.makeOsc(part);
+    }
+    else if (part.data.soundSet.patch) {
+        p.makeSynth(part)
     }
 };
 

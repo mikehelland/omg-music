@@ -9,7 +9,7 @@
 
 <ol>
         <li>Connect your MIDI controller (usually a keyboard) by USB</li>
-        <li>Open the <a href="/gauntlet">Gauntlet Editor</a></li>
+        <li>Open the <a href="/create">OMG Create</a></li>
         <li>Go to the <a href="?editor-panel-part-options">Part Options panel</a> of the part to control</li>
         <li>Set the MIDI Channel to <b>All</b> or the channel <b>1</b> thru <b>16</b> of your controller</li>
 </ol>
