@@ -3145,7 +3145,7 @@ window.onkeypress = function (e) {
 };
 
 tg.peakMeters = {
-    show: "All",
+    show: "Off",
     visibleMeters: []
 };
 
@@ -3267,12 +3267,15 @@ tg.partButtonOnDown = (button, part) => {
 
 //keep this last
 
-[{url: "../omg-music/sequencer_surface.js"},
+var moreScripts = [{url: "../omg-music/sequencer_surface.js"},
     {url: "../omg-music/vertical_surface.js"},
-    {url: "../js/peakmeter.js", onload: ()=>tg.peakMeters.toggle("All")},
     {url: "../omg-music/monkey.js"},
     {url: "live.js"}
-].forEach(script => {
+]
+if (!tg.player.disableAudio) {
+    moreScripts.push({url: "../js/peakmeter.js", onload: ()=> tg.peakMeters.toggle("All")})
+}
+moreScripts.forEach(script => {
     scriptTag = document.createElement("script");
     scriptTag.src = script.url;
     scriptTag.async = true;

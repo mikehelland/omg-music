@@ -89,7 +89,7 @@ OMusicPlayer.prototype.setupFX = function () {
             {"property": "feedback", "name": "Feedback", default: 0.25, "type": "slider", "min": 0, "max": 1.0, axis:"revy"},
         ]
     };    
-    p.fx["Delay"] = {"audioClass" : p.tuna.Delay,
+    p.fx["Delay"] = {"make" : function (data) {return new p.tuna.Delay(data)},
         "controls": [
             {"property": "feedback", default: 0.45, "name": "Feedback", "type": "slider", "min": 0, "max": 1},
             {"property": "delayTime", default: 150, "name": "Delay Time", "type": "slider", "min": 1, "max": 1000},
@@ -98,7 +98,7 @@ OMusicPlayer.prototype.setupFX = function () {
             {"property": "cutoff", default: 2000, "name": "Cutoff", "type": "slider", "min": 20, "max": 22050}
         ]
     };
-    p.fx["Chorus"] = {"audioClass": p.tuna.Chorus,
+    p.fx["Chorus"] = {"make" : function (data) {return new p.tuna.Chorus(data)},
         "controls": [
             {"property": "rate", default: 1.5, "name": "Rate", "type": "slider", "min": 0.01, "max": 8, axis:"x"},
             {"property": "feedback", default: 0.2, "name": "Feedback", "type": "slider", "min": 0, "max": 1},
@@ -107,8 +107,7 @@ OMusicPlayer.prototype.setupFX = function () {
         ]
     };
     
-    p.fx["Phaser"] = {"audioClass": p.tuna.Phaser,
-
+    p.fx["Phaser"] = {"make" : function (data) {return new p.tuna.Phaser(data)},
         "controls": [
             {"property": "rate", default: 1.2, "name": "Rate", "type": "slider", "min": 0.01, "max": 12, axis:"x"},
             {"property": "depth", default: 0.3, "name": "Depth", "type": "slider", "min": 0, "max": 1},
@@ -117,7 +116,7 @@ OMusicPlayer.prototype.setupFX = function () {
             {"property": "baseModulationFrequeny", default: 700, "name": "Base Modulation Freq", "type": "slider", "min": 500, "max": 1500}
         ]
     };        
-    p.fx["Overdrive"] = {"audioClass": p.tuna.Overdrive,
+    p.fx["Overdrive"] = {"make" : function (data) {return new p.tuna.Overdrive(data)},
         "controls" : [
             {"property": "outputGain", default: 0.15, "name": "Output Gain", "type": "slider", "min": 0, "max": 1.5},
             {"property": "drive", default: 0.7, "name": "Drive", "type": "slider", "min": 0, "max": 1, axis:"x"},
@@ -125,7 +124,7 @@ OMusicPlayer.prototype.setupFX = function () {
             {"property": "algorithmIndex", default: 0, "name": "Type", "type": "options", "options": [0,1,2,3,4,5]}
         ]
     };
-    p.fx["Compressor"] = {"audioClass": p.tuna.Compressor,
+    p.fx["Compressor"] = {"make" : function (data) {return new p.tuna.Compressor(data)},
         "controls" : [
             {"property": "threshold", default: -1, "name": "Threshold", "type": "slider", "min": -100, "max": 0},
             {"property": "makeupGain", default: 1, "name": "Makeup Gain", "type": "slider", "min": 0, "max": 10},
@@ -136,7 +135,7 @@ OMusicPlayer.prototype.setupFX = function () {
             {"property": "automakeup", default: true, "name": "Auto Makeup", "type": "options", "options": [false, true]}
         ]
     };
-    p.fx["Reverb"] = {"audioClass": p.tuna.Convolver,
+    p.fx["Reverb"] = {"make" : function (data) {return new p.tuna.Convolver(data)},
         "controls": [
             {"property": "highCut", default: 22050, "name": "High Cut", "type": "slider", "min": 20, "max": 22050, axis:"revy"},
             {"property": "lowCut", default: 20, "name": "Low Cut", "type": "slider", "min": 20, "max": 22050},
@@ -146,7 +145,7 @@ OMusicPlayer.prototype.setupFX = function () {
             {"property": "impulse", default: "/omg-music/impulses/ir_rev_short.wav", "name": "Impulse", "type": "hidden"},
         ]
     };
-    p.fx["Filter"] = {"audioClass": p.tuna.Filter,
+    p.fx["Filter"] = {"make" : function (data) {return new p.tuna.Filter(data)},
         "controls": [
             {"property": "frequency", default: 440, "name": "Frequency", "type": "slider", "min": 20, "max": 22050, axis:"x"},
             {"property": "Q", default: 1, "name": "Q", "type": "slider", "min": 0.001, "max": 100},
@@ -155,20 +154,20 @@ OMusicPlayer.prototype.setupFX = function () {
                 "options": ["lowpass", "highpass", "bandpass", "lowshelf", "highshelf", "peaking", "notch", "allpass"]},
         ]
     };
-    p.fx["Cabinet"] = {"audioClass": p.tuna.Cabinet,
+    p.fx["Cabinet"] = {"make" : function (data) {return new p.tuna.Cabinet(data)},
         "controls": [
             {"property": "makeupGain", default: 1, "name": "Makeup Gain", "type": "slider", "min": 0, "max": 20},
             {"property": "impulse", default: "/omg-music/impulses/impulse_guitar.wav", "name": "Impulse", "type": "hidden"}
         ]
     };
-    p.fx["Tremolo"] = {"audioClass": p.tuna.Tremolo,
+    p.fx["Tremolo"] = {"make" : function (data) {return new p.tuna.Tremolo(data)},
         "controls": [
             {"property": "intensity", default: 0.3, "name": "Intensity", "type": "slider", "min": 0, "max": 1, axis:"revy"},
             {"property": "rate", default: 4, "name": "Rate", "type": "slider", "min": 0.001, "max": 8, axis:"x"},
             {"property": "stereoPhase", default: 0, "name": "Stereo Phase", "type": "slider", "min": 0, "max": 180}
         ]
     };
-    p.fx["Wah Wah"] = {"audioClass": p.tuna.WahWah,
+    p.fx["Wah Wah"] = {"make" : function (data) {return new p.tuna.WahWah(data)},
         "controls": [
             {"property": "automode", default: true, "name": "Auto Mode", "type": "options", "options": [false, true]},
             {"property": "baseFrequency", default: 0.5, "name": "Base Frequency", "type": "slider", "min": 0, "max": 1, axis:"x"},
@@ -178,21 +177,21 @@ OMusicPlayer.prototype.setupFX = function () {
             {"property": "sensitivity", default: 0.5, "name": "Sensitivity", "type": "slider", "min": -1, "max": 1}
         ]
     };
-    p.fx["Bitcrusher"] = {"audioClass": p.tuna.Bitcrusher,
+    p.fx["Bitcrusher"] = {"make" : function (data) {return new p.tuna.Bitcrusher(data)},
         "controls": [
             {"property": "bits", default: 4, "name": "Bits", "type": "options", "options": [1,2,4,8,16]},
             {"property": "normfreq", default: 0.1, "name": "Normal Frequency", "type": "slider", "min": 0, "max": 1, "transform": "square", axis:"x"},
             {"property": "bufferSize", default: 4096, "name": "Buffer Size", "type": "options", "options": [256,512,1024,2048,4096,8192,16384]}
         ]
     };
-    p.fx["Moog"] = {"audioClass": p.tuna.MoogFilter,
+    p.fx["Moog"] = {"make" : function (data) {return new p.tuna.MoogFilter(data)},
         "controls": [
             {"property": "cutoff", default: 0.065, "name": "Cutoff", "type": "slider", "min": 0, "max": 1},
             {"property": "resonance", default: 3.5, "name": "Resonance", "type": "slider", "min": 0, "max": 4},
             {"property": "bufferSize", default: 4096, "name": "Buffer Size", "type": "options", "options": [256,512,1024,2048,4096,8192,16384]}
         ]
     };
-    p.fx["Ping Pong"] = {"audioClass": p.tuna.PingPongDelay,
+    p.fx["Ping Pong"] = {"make" : function (data) {return new p.tuna.PingPongDelay(data)},
         "controls": [
             {"property": "wetLevel", default: 0.5, "name": "Wet Level", "type": "slider", "min": 0, "max": 1},
             {"property": "feedback", default: 0.3, "name": "Feedback", "type": "slider", "min": 0, "max": 1},
@@ -248,14 +247,12 @@ OMusicPlayer.prototype.makeFXNode = function (fxName, fxData) {
                 fxData[control.property] = control.default;
             });
         }
-        if (fxInfo.audioClass) {
-            fxNode = new fxInfo.audioClass(fxData);
-        }
-        else {
+        try {
             fxNode = fxInfo.make(fxData);
+            if (fxNode)
+                fxNode.data = fxData;    
         }
-        if (fxNode)
-            fxNode.data = fxData;
+        catch (e) {console.warn("error creating fx", fxName, e)}
     }
     return fxNode;
 };

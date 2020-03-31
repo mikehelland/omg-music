@@ -49,6 +49,7 @@ OMusicPlayer.prototype.getAudioContext = function () {
         omg.tuna = new Tuna(omg.audioContext);
     } catch (e) {
         console.warn("no web audio");
+        this.disableAudio = true
         return null;
     }
 
@@ -394,7 +395,7 @@ OMusicPlayer.prototype.loadSection = function (section, soundsNeeded) {
 OMusicPlayer.prototype.loadPart = function (part, soundsNeeded, callback) {
     var p = this;
 
-    if (!part.panner) {
+    if (!part.panner && !this.disableAudio) {
         this.makeAudioNodesForPart(part);
     }
 
@@ -550,7 +551,7 @@ OMusicPlayer.prototype.prepareSongFromURL = function (url, callback) {
 OMusicPlayer.prototype.prepareSong = function (song, callback) {
     var p = this;
     
-    if (!song.madeAudioNodes) {
+    if (!song.madeAudioNodes && !this.disableAudio) {
         p.makeAudioNodesForSong(song);
     }
     
