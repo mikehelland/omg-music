@@ -1266,7 +1266,7 @@ OMusicPlayer.prototype.setSubbeatMillis = function (subbeatMillis) {
 
 OMusicPlayer.prototype.playLiveNotes = function (notes, part) {
 
-    if (this.context.state === "suspended")
+    if (this.context && this.context.state === "suspended")
         this.context.resume();
     
     if (part.liveNotes && part.liveNotes.liveAudio) {
@@ -1281,7 +1281,10 @@ OMusicPlayer.prototype.playLiveNotes = function (notes, part) {
     part.liveNotes = notes;
     if (notes.autobeat === 0) {
         part.playingI = -1;
-        if (part.osc) {
+        if (this.disableAudio) {
+            //silence
+        }
+        else if (part.osc) {
             part.baseFrequency = this.makeFrequency(notes[0].scaledNote);
             part.osc.frequency.setValueAtTime(
                     part.baseFrequency * part.data.audioParams.warp, this.context.currentTime);
@@ -1304,7 +1307,7 @@ OMusicPlayer.prototype.playLiveNotes = function (notes, part) {
         }
     }
     else {
-        if (!this.playing && this.auditioningParts.indexOf(part) == -1) {
+        if (!this.disableAudio && !this.playing && this.auditioningParts.indexOf(part) == -1) {
             this.auditionPart(part);
         }
         
