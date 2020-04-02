@@ -138,7 +138,29 @@ omg.server.getHTTP("/user/", function (res) {
     if (res) {
         tg.onlogin(res);
     }
+
+    if (tg.omglive) {
+        tg.onLoginLive()
+    }
+    else {
+        tg.onLiveScriptLoaded = tg.onLoginLive
+    }
 });
+
+tg.onLoginLive = function () {
+    if (tg.joinLiveRoom) tg.omglive.join(tg.joinLiveRoom, () => {
+        tg.liveButton.style.display = "block"
+        if (window.innerWidth > window.innerHeight && !tg.singlePanel) {
+            tg.liveButton.onclick()
+        }
+    })
+    if (tg.goLive) tg.omglive.goLive(() => {
+        tg.liveButton.style.display = "block"
+        if (window.innerWidth > window.innerHeight && !tg.singlePanel) {
+            tg.liveButton.onclick()
+        }
+    })    
+}
 
 
 /*
@@ -2810,8 +2832,8 @@ tg.liveFragment = {
     div: document.getElementById("live-fragment"),
     liveModeButton:  document.getElementById("song-omglive-mode"),
     liveUrlInput:  document.getElementById("song-omglive-url"),
-    liveRoomInput:  document.getElementById("song-omglive-room"),
     liveModeDetails:  document.getElementById("song-omglive-details"),
+    connectedTo:  document.getElementById("song-omglive-connected-to"),
     chatArea:  document.getElementById("omglive-chat"),
     chatInput:  document.getElementById("omglive-chat-input"),
     display: "flex"
@@ -2819,7 +2841,7 @@ tg.liveFragment = {
 
 tg.liveFragment.setup = function () {
     var f = tg.liveFragment;
-    tg.liveRoom = tg.liveRoom || "default"; //tg.omglive.getRoomName(f.part);
+
     f.liveModeButton.onclick = function () {
         if (tg.omglive.socket) {
             tg.omglive.socket.disconnect();
@@ -2827,36 +2849,37 @@ tg.liveFragment.setup = function () {
             f.setLiveModeUI();
         }
         else {
-            tg.omglive.turnOn(function () {
-                f.setLiveModeUI();
-            });
+            if (tg.joinLiveRoom) {
+                tg.omglive.join(tg.joinLiveRoom, function () {
+                    f.setLiveModeUI();
+                });    
+            }
+            else {
+                tg.omglive.goLive(function () {
+                    f.setLiveModeUI();
+                });    
+            }
         }
     };
 
     f.setLiveModeUI =  function () {
-        f.liveRoomInput.value = tg.liveRoom;
         if (tg.omglive.socket) {
-            f.liveModeButton.innerHTML = "OMG Live Mode is ON";
-            f.liveModeDetails.style.display = "block";
+            f.liveModeButton.innerHTML = "Disconnect";
+            f.liveModeDetails.style.display = tg.joinLiveRoom ? "none" : "block";
+            f.connectedTo.style.display = tg.joinLiveRoom ? "block" : "none"
             f.chatArea.style.display = "block";
             f.chatInput.style.display = "block";
             
-            f.liveUrlInput.value = window.location.origin + "/create/?live=" + encodeURIComponent(tg.liveRoom);
+            f.connectedTo.innerHTML = "Connected to <b>" + tg.joinLiveRoom + "</b>"
+            f.liveUrlInput.value = window.location.origin + "/create/?join=" + encodeURIComponent(tg.omglive.username);
         }
         else {
-            f.liveModeButton.innerHTML = "OMG Live Mode is OFF";
+            f.connectedTo.innerHTML = "Disconnected from <b>" + tg.joinLiveRoom + "</b>"
+            f.connectedTo.style.display = tg.joinLiveRoom ? "block" : "none"
+            f.liveModeButton.innerHTML = tg.joinLiveRoom ? "Reconnect" : "Go Live!";
             f.liveModeDetails.style.display = "none";            
             f.chatArea.style.display = "none";
             f.chatInput.style.display = "none";
-        }
-    };
-    
-    f.liveRoomInput.onkeypress = function (e) {
-        if (e.keyCode === 13) {
-            if (f.liveRoomInput.value !== tg.liveRoom) {
-                tg.omglive.switchRoom(f.liveRoomInput.value);
-                f.liveUrlInput.value = window.location.origin + "/create/?live=" + encodeURIComponent(tg.liveRoom);
-            }
         }
     };
     
@@ -3191,10 +3214,6 @@ tg.peakMeters.update = function() {
     }
 };
 
-if (window.innerWidth > window.innerHeight && !tg.singlePanel) {
-    tg.helpFragment.button.onclick();
-    //tg.userFragment.tabs.help.header.onclick();
-}
 
 tg.play = () => {
     tg.player.loopSection = -1
@@ -3267,10 +3286,15 @@ tg.partButtonOnDown = (button, part) => {
 
 //keep this last
 
+
 var moreScripts = [{url: "../omg-music/sequencer_surface.js"},
     {url: "../omg-music/vertical_surface.js"},
     {url: "../omg-music/monkey.js"},
-    {url: "live.js"}
+    {url: "live.js", onload: () => {
+        if (tg.onLiveScriptLoaded) {
+            tg.onLiveScriptLoaded()
+        }
+    }}
 ]
 if (!tg.player.disableAudio) {
     moreScripts.push({url: "../js/peakmeter.js", onload: ()=> tg.peakMeters.toggle("All")})
@@ -3282,3 +3306,7 @@ moreScripts.forEach(script => {
     scriptTag.onload = script.onload;
     document.body.appendChild(scriptTag);
 });
+
+if (window.innerWidth > window.innerHeight && !tg.singlePanel && !tg.joinLiveRoom && !tg.goLive) {
+    tg.helpFragment.button.onclick();
+}

@@ -554,6 +554,15 @@ app.get('/live/:room', function (req, res) {
     res.send(remote(req.params.room));
 });
 
+app.get('/rooms', function (req, res) {
+    var roomsArray = []
+    for (var room in rooms) {
+        //todo is public?
+        roomsArray.push(rooms[room].song)
+    }
+    res.send(roomsArray);
+})
+
 
 app.use('/admin', function(req,res,next){
     if (!req.user) {
@@ -764,12 +773,29 @@ omgSocket.on("connection", function (socket) {
         socket.join(room);
         
         if (!rooms[room]) {
+            data.song.username = user
+            data.song.last_modified = Date.now()
             rooms[room] = {users:{}, song: data.song};
             socket.emit("join", {});
         }
         else {
             socket.emit("join", rooms[room]);
         }
+        
+        rooms[room].users[user] = Date.now();
+        omgSocket.in(room).emit("chat", {text: "[" + room + "]: " + user + " has joined"});
+    });
+    socket.on("joinSession", function (data) {
+        room = data.room;
+        user = data.user;
+    
+        if (!rooms[room]) {
+            socket.emit("join", false);
+            return
+        }
+    
+        socket.join(room);        
+        socket.emit("join", rooms[room]);
         
         var userString = "";
         var users = 0;

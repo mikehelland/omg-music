@@ -719,6 +719,15 @@ h2 {
     width:50%;
 }
 
+#live-fragment .detail-fragment-body {
+    display: flex;
+    flex-direction: column;
+}
+
+#song-omglive-connected-to, #song-omglive-join-at {
+    text-align: center;
+}
+
 #omglive-chat {
     width: 95%;
     color:white;
@@ -728,9 +737,6 @@ h2 {
     border:0px;
 }
 
-#omglive-chat-input {
-    width: 95%;
-}
 #presentation-part-list {
     width:100%;
     display:flex;

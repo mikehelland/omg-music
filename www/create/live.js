@@ -54,11 +54,11 @@ tg.omglive = {
         tg.requirePartMelodyMaker(part);
         callback();
     },
-    turnOn: function (callback) {
+    turnOn: function (action, callback) {
 
         if (typeof io === "undefined") {
             tg.omglive.setup(function () {
-                tg.omglive.turnOn(callback);
+                tg.omglive.turnOn(action, callback);
             });
             return;
         }
@@ -68,8 +68,7 @@ tg.omglive = {
         var url = window.location.origin.replace("http:", "https:");
 
         tg.omglive.socket = io(url + "/omg-live");
-        tg.omglive.socket.emit("startSession", 
-                {room: tg.liveRoom, user: tg.omglive.username, song: tg.song.getData()});
+
         tg.omglive.socket.on("data", function (data) {
             tg.omglive.ondata(data);
         });
@@ -86,6 +85,23 @@ tg.omglive = {
         tg.onLoadSongListeners.push(tg.omglive.onLoadSongListener);
 
         callback();
+    },
+    goLive: function (callback) {
+        tg.omglive.turnOn("goLive", function () {
+            tg.omglive.socket.emit("startSession", 
+                {room: tg.omglive.username, user: tg.omglive.username, song: tg.song.getData()});            
+            if (callback) callback()
+        })
+    },
+    join: function (roomName, callback) {
+        tg.joinLiveRoom = roomName
+        tg.omglive.turnOn("join", function () {
+
+            tg.omglive.socket.emit("joinSession", 
+                {room: roomName, user: tg.omglive.username});
+
+            if (callback) callback()
+        })
     }
 };
 
@@ -362,7 +378,7 @@ tg.omglive.onPlayListener = function (play) {
 };
 
 tg.omglive.onjoin = function (data) {
-    if (data.song && tg.remoteTo) {
+    if (data.song && (tg.remoteTo || tg.joinLiveRoom)) {
         tg.loadSong(data.song, "omglive");
     }
     if (data.offer) {

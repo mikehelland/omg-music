@@ -40,7 +40,7 @@ omg.loadSearchResults = function (params, results) {
 
     params.resultList.innerHTML = ""
 
-    if (params.page && params.page > 1) {
+    if (params.page && params.page > 1 && !params.noNextPrev) {
         var prevButton = document.createElement("button")
         prevButton.innerHTML = "< Previous"
         params.resultList.appendChild(prevButton)
@@ -84,14 +84,15 @@ omg.loadSearchResults = function (params, results) {
         };
    });
 
-    var nextButton = document.createElement("button")
-    nextButton.innerHTML = "Next >"
-    params.resultList.appendChild(nextButton)
-    nextButton.onclick = () => {
-        params.page = (params.page || 1) + 1
-        omg.search(params)
+    if (!params.noNextPrev) {
+        var nextButton = document.createElement("button")
+        nextButton.innerHTML = "Next >"
+        params.resultList.appendChild(nextButton)
+        nextButton.onclick = () => {
+            params.page = (params.page || 1) + 1
+            omg.search(params)
+        }    
     }
-
 };
 
 function getBackgroundColor(type) {

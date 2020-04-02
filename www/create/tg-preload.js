@@ -86,17 +86,22 @@ tg.getSong = function (callback) {
             if (param.startsWith("id=")) {
                 id = param.split("=")[1];
             }
-            if (param.startsWith("blank")) {
+            else if (param === "blank") {
                 blank = true;
             }
-            if (param.startsWith("singlePanel")) {
+            else if (param === "singlePanel") {
                 tg.singlePanel = true;
             }
-            if (param.startsWith("remoteTo")) {
+            else if (param.startsWith("remoteTo=")) {
                 tg.remoteTo = param.split("=")[1];
+                blank = true
             }
-            if (param.startsWith("live=")) {
-                tg.liveRoom = param.split("=")[1];
+            else if (param.startsWith("join=")) {
+                tg.joinLiveRoom = param.split("=")[1];
+                blank = true
+            }
+            else if (param === "goLive") {
+                tg.goLive = true
             }
         });
     }
