@@ -146,7 +146,7 @@ OMGEmbeddedViewer.prototype.setupControls = function (params) {
 
         if (typeof params.onplaybuttonclick === "function") {
             params.onplaybuttonclick(viewer);
-            if (!viewer.playButton.hasBeenClicked) {
+            if (!viewer.playButton.hasBeenClicked && !room) {
                 viewer.playButton.hasBeenClicked = true;                
                 omg.server.postHTTP("/playcount", {id: data.id});
             }
@@ -188,7 +188,7 @@ OMGEmbeddedViewer.prototype.setupControls = function (params) {
                 });
             }
             
-            if (!viewer.playButton.hasBeenClicked) {
+            if (!viewer.playButton.hasBeenClicked && !room) {
                 viewer.playButton.hasBeenClicked = true;                
                 omg.server.postHTTP("/playcount", {id: data.id}, result=>console.log(result));
             }
