@@ -1,0 +1,62 @@
+
+<p>Users can connect with other users and devices in a few different ways, which can be combined.</p>
+
+<hr>
+
+<h3>Join Mode</h3>
+
+<p>In this mode, one user goes live, and one or more users will join them. 
+All joined devices make sound. This is for connecting users and devices in different 
+geographic locations.</p>
+
+<ul>
+        <li>Step 1: a user "goes live".</li>
+        <ul>
+                <li>Click <a href="/create?goLive">Go Live</a> on the <a href="/live.htm">Live Page</a></li>
+                - or - 
+                <li>Turn on the "Live Button", in the settings in OMG Create.</li>
+                <li>Click "Go Live!""</li>
+        </ul>
+        <li>Step 2: other users join at "https://openmusic.gallery/create?join=[user]"</li>
+</ul>
+
+<hr>
+
+<h3>Remote Mode</h3>
+
+<p>In this mode, one user goes live, and one or more devices act as remote controllers 
+for the session. The remote controllers don't make sounds. This is for when users and devices are in the same
+room.</p>
+
+<ul>
+        <li>Step 1: a user "goes live".</li>
+        <ul>
+                <li>Click <a href="/create?goLive">Go Live</a> on the <a href="/live.htm">Live Page</a></li>
+                - or - 
+                <li>Turn on the "Live Button", in the settings in OMG Create.</li>
+                <li>Click "Go Live!""</li>
+        </ul>
+        <li>Step 2: other users join at "https://openmusic.gallery/create?remoteTo=[user]"</li>
+</ul>
+
+<p>This is how the Touchscreen Guitar and the Techno Gauntlet works.</p>
+
+<hr>
+
+<h3>Audience Mode</h3>
+
+<p>In this mode, one user goes live with a single part, and one or more users can contribute to that part.
+If multiple users are connected, melodies that include a note for each input are played. In a live 
+situation this mode allows the audience to use their mobile devices to become part of the performance.
+</p>
+
+<ul>
+        <li>Step 1: Turn on OMG Live for a part.</li>
+        <ul>
+                <li>Choose a part, such as Sine Oscillator, and click the &#9776;</li>
+                <li>Click the Options Tab</li>
+                <li>Click "Go Live!""</li>
+        </ul>
+        <li>Step 2: other users join at "https://openmusic.gallery/live/[user]-[partName]"</li>
+</ul>
+
