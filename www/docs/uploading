@@ -1,24 +1,3 @@
-<!DOCTYPE html>
-<html>
-<head>
-
-   <link rel="stylesheet" href="/css/main.css" type="text/css" />
-
-</head>
-<body>
-
-   <header>
-      <a class="main-page-link" href="/index.htm">
-      <span class="main-title-open">Open</span><span class="main-title-media">Music</span><span class="main-title-gallery">.Gallery</span>
-      </a>
-      <div class="title-bar-user-controls"></div>
-   </header>
-   <div class="main-body">
-
-
-<h1>Files and Uploading in OMG</h1>
-<hr>
-
 <p>
 OMG can use audio samples from anywhere on the Internet. You can:
 </p>
@@ -33,7 +12,7 @@ OMG can use audio samples from anywhere on the Internet. You can:
 
 <p>That doesn't sound like much, but for short MP3 samples like a a snare drum, it's more than it seems.</p>
 
-<div class="main-separator"></div>
+<!--<div class="main-separator"></div>
 
 <div id="upload-usage">
    <p>You are using <span id="upload-usage-stats"></span></p>
@@ -59,7 +38,4 @@ OMG can use audio samples from anywhere on the Internet. You can:
       document.getElementById("not-logged-in").innerHTML = userControls.innerHTML
    });
    </script>
-
-
-</body>
-</html>
+-->

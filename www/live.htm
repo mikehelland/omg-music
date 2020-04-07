@@ -98,6 +98,23 @@
        .main-nav .current-page {
             background-color:#606060;
         }
+
+        .go-live-link {
+            padding: 8px;
+        }
+        .go-live-link a {
+            padding: 12px 20px;
+            border: 1px solid white;
+            border-radius: 2px;
+            color: white;
+            background-color: #606060;
+        }
+        .go-live-link a:visited {
+            color: white;
+        }
+        .go-live-link a:hover {
+            background-color: #808080;
+        }
    </style>
 </head>
 
@@ -123,9 +140,13 @@
         
     <div class="main-column">
         <p>When you Go Live others can join in! <a href="docs?live">Learn more.</a></p>
-        <a href="create?goLive">Go Live!</a>
+        <div class="go-live-link">
+            <p><a href="create?goLive" target="_blank">Go Live!</a></p>
+        </div>
+
+        <hr>
         <h2>
-            Users that are Live now:
+            Users that are Live right now
         </h2>
         
         <div class="search-things"></div>
@@ -175,27 +196,11 @@ fp.searchParams.viewerParams = {}
 fp.searchParams.viewerParams.useExternalPlayer = true
 fp.searchParams.viewerParams.onplaybuttonclick = function (viewer) {
 
-    if (!fp.gauntletLoaded) {
-        viewer.showLoading()
+    if (!fp.showingGauntlet) {
         var welcome = document.getElementById("welcome-panel")
-        var gauntlet = document.createElement("iframe")
-        gauntlet.id = "gauntlet"
-        fp.nowPlaying.appendChild(gauntlet)
-        
         welcome.style.display = "none"
-        gauntlet.style.display = "block"
-        fp.gauntletLoaded = gauntlet
-        fp.gauntletLoaded.onload = () => {
-            window.frames[0].document.body.style.fontSize = "65%"
-            fp.searchParams.viewerParams.onplaybuttonclick(viewer)
-        }
-        if (fp.isMobileDiv.clientWidth) {
-            gauntlet.src = "create/micro.htm"
-        }
-        else {
-            fp.gauntletLoaded.src = "create/?blank" 
-        }
-        return
+        fp.gauntlet.style.display = "block"
+        fp.showingGauntlet = true
     }
 
     var tg = window.frames[0].tg 
@@ -218,40 +223,59 @@ fp.searchParams.viewerParams.onplaybuttonclick = function (viewer) {
         }
         else {
             viewer.showStopped()
-            playListeners.splice(playListeners.indexOf(viewer.onplaylistener), 1);
+            //playListeners.splice(playListeners.indexOf(viewer.onplaylistener), 1);
             beatListeners.splice(beatListeners.indexOf(fp.lastViewer.onBeatPlayedListener), 1);
         }
     }
 
-    tg.omglive.join(viewer.song.data.username, () => {
+    if (tg.joinLiveRoom !== viewer.song.data.username) {
+        if (fp.lastViewer) {
+            fp.lastViewer.showStopped()
+            playListeners.splice(playListeners.indexOf(fp.lastViewer.onplaylistener), 1);
+            beatListeners.splice(beatListeners.indexOf(fp.lastViewer.onBeatPlayedListener), 1);
+        }
+        
+        fp.lastViewer = viewer
+
+        tg.onLoginLive = () =>{} //hack to keep the first load from interfering
+        tg.omglive.join(viewer.song.data.username, () => {
+            if (!tg.player.playing) {
+                tg.playButtonCaption.onclick()
+            }
+            else {
+                viewer.showPlaying()
+            }
+        })
+        tg.player.onPlayListeners.push(viewer.onplaylistener);
+        tg.player.onBeatPlayedListeners.push(viewer.onBeatPlayedListener);
+        tg.player.onloop = () => {
+            viewer.onloop()
+        }
+    }
+    else {
         tg.playButtonCaption.onclick()
-    })
+    }
     fp.nowPlayingTitle.innerHTML = viewer.caption
-
-    tg.player.onPlayListeners.push(viewer.onplaylistener);
-    tg.player.onBeatPlayedListeners.push(viewer.onBeatPlayedListener);
-    tg.player.onloop = () => {
-        console.log("onlooooop")
-        viewer.onloop()
-    }
-
-    if (fp.lastViewer) {
-        fp.lastViewer.showStopped()
-        playListeners.splice(playListeners.indexOf(fp.lastViewer.onplaylistener), 1);
-        beatListeners.splice(beatListeners.indexOf(fp.lastViewer.onBeatPlayedListener), 1);
-    }
-    
-    fp.lastViewer = viewer
 }
 
 window.onload = function () {
     fp.search()
 
-    if (window.location.hash.length === 0 || window.location.hash === "#most-plays") {
+    fp.gauntlet = document.createElement("iframe")
+    fp.gauntlet.id = "gauntlet"
+    fp.nowPlaying.appendChild(fp.gauntlet)
+    
+    fp.gauntlet.onload = () => {
+        window.frames[0].document.body.style.fontSize = "65%"
     }
-    if (window.location.hash === "#most-recent") {
-        //todo
+    if (fp.isMobileDiv.clientWidth) {
+        fp.gauntlet.src = "create/micro.htm"
     }
+    else {
+        fp.gauntlet.src = "create/?blank"
+    }
+    return
+
 };
 
 var menuVisible = false;

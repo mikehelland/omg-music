@@ -63,7 +63,13 @@ tg.omglive = {
             return;
         }
 
-        tg.omglive.users = {};
+        if (tg.omglive.socket) {
+            //if we're already connected, 
+            tg.omglive.socket.emit("leaveSession", {room: tg.liveRoom, user: tg.omglive.username});
+            callback()
+        }
+
+        //tg.omglive.users = {};
         
         var url = window.location.origin.replace("http:", "https:");
 
@@ -95,13 +101,19 @@ tg.omglive = {
     },
     join: function (roomName, callback) {
         tg.joinLiveRoom = roomName
-        tg.omglive.turnOn("join", function () {
-
+        tg.omglive.joinCallback = callback
+        if (tg.omglive.socket) {
+            tg.omglive.removeListeners();
+            tg.omglive.socket.emit("leaveSession", {});
             tg.omglive.socket.emit("joinSession", 
                 {room: roomName, user: tg.omglive.username});
-
-            if (callback) callback()
-        })
+        }
+        else {
+            tg.omglive.turnOn("join", function () {
+                tg.omglive.socket.emit("joinSession", 
+                    {room: roomName, user: tg.omglive.username});
+            })    
+        }
     }
 };
 
@@ -379,7 +391,8 @@ tg.omglive.onPlayListener = function (play) {
 
 tg.omglive.onjoin = function (data) {
     if (data.song && (tg.remoteTo || tg.joinLiveRoom)) {
-        tg.loadSong(data.song, "omglive");
+        tg.loadSong(data.song, "omglive", tg.omglive.joinCallback);
+        tg.omglive.joinCallback = undefined
     }
     if (data.offer) {
         tg.omglive.setupClient(data.offer);

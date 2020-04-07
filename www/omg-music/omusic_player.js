@@ -291,6 +291,7 @@ OMusicPlayer.prototype.setupNextSection = function (fromStart) {
     if (p.loopSection > -1) {
         p.sectionI = p.loopSection;
         p.section = p.song.sections[p.sectionI];
+        if (p.onloop) p.onloop()
         return;
     }
     

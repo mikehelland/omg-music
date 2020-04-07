@@ -558,7 +558,9 @@ app.get('/rooms', function (req, res) {
     var roomsArray = []
     for (var room in rooms) {
         //todo is public?
-        roomsArray.push(rooms[room].song)
+        rooms[room].type = "ROOM"
+        rooms[room].name = room
+        roomsArray.push(rooms[room])
     }
     res.send(roomsArray);
 })
@@ -812,8 +814,13 @@ omgSocket.on("connection", function (socket) {
     });
     socket.on("leaveSession", function (data) {
         delete rooms[room].users[user];
-        omgSocket.in(room).emit("chat", {text: "[" + room + "]: " + user + " has left"});
-        socket.leave(data.room);
+        if (Object.keys(rooms[room].users).length === 0) {
+            delete rooms[room];
+        }
+        else {
+            omgSocket.in(room).emit("chat", {text: "[" + room + "]: " + user + " has left"});
+        }
+        socket.leave(room);
         room = "";
     });
     socket.on("basic", function (data) {
@@ -853,6 +860,10 @@ omgSocket.on("connection", function (socket) {
                 rooms[room].offer = undefined;
             }
             delete rooms[room].users[user];
+
+            if (Object.keys(rooms[room].users).length === 0) {
+                delete rooms[room];
+            }
         }
         omgSocket.in(room).emit("chat", {text: user + " has left"});
     });

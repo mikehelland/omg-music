@@ -18,7 +18,12 @@ function OMGEmbeddedViewer(params) {
         this.player = new OMusicPlayer();
     }
 
-    this.song = OMGSong.prototype.make(params.data);
+    if (params.data.type === "ROOM") {
+        this.song = OMGSong.prototype.make(params.data.song);    
+    }
+    else {
+        this.song = OMGSong.prototype.make(params.data);
+    }
     this.predraw = params.predraw;
     
     if (!params.canvas && params.div) {
@@ -39,6 +44,11 @@ OMGEmbeddedViewer.prototype.setupControls = function (params) {
     if (!data.type) {
         //don't know what to do with this data
         return;
+    }
+
+    if (data.type === "ROOM") {
+        var room = true
+        data = data.song
     }
     
     var viewer = this;
@@ -74,7 +84,10 @@ OMGEmbeddedViewer.prototype.setupControls = function (params) {
 
     var result = data;
     var resultDiv = viewer.div;
-    var resultCaption = result.tags || result.name || "";
+    var resultCaption = result.name || result.tags || "";
+    if (room) {
+        resultCaption = params.data.name
+    }
     var type = result.partType || result.type || "";
     if (resultCaption.length === 0) {
         resultCaption = "(" + type.substring(0, 1).toUpperCase() +
@@ -87,12 +100,13 @@ OMGEmbeddedViewer.prototype.setupControls = function (params) {
     resultData.innerHTML = resultCaption;
     resultDiv.appendChild(resultData);
 
-    resultData = document.createElement("div");
-    resultData.className = "omg-thing-user";
-    resultData.innerHTML = result.username ? "by " + result.username : "";
-    viewer.caption += " " + resultData.innerHTML
-
-    resultDiv.appendChild(resultData);
+    if (!room) {
+        resultData = document.createElement("div");
+        resultData.className = "omg-thing-user";
+        resultData.innerHTML = result.username ? "by " + result.username : "";
+        viewer.caption += " " + resultData.innerHTML
+        resultDiv.appendChild(resultData);    
+    }
 
     var rightData = document.createElement("div");
     rightData.className = "omg-thing-right-data";
@@ -241,6 +255,9 @@ OMGEmbeddedViewer.prototype.setupControls = function (params) {
         viewer.editButton.href = "/playlist.htm?id=" + data.id;
         viewer.shareButton.href = "/play/" + data.id;
     }
+    else if (room) {
+        viewer.shareButton.href = "/create/?join=" + params.data.name;
+    }
     else {
         viewer.editButton.href = "/create/?id=" + data.id;
         viewer.shareButton.href = "/play/" + data.id;    
@@ -282,7 +299,7 @@ OMGEmbeddedViewer.prototype.setupControls = function (params) {
     bottomRow.appendChild(viewer.tipButton);
     bottomRow.appendChild(viewer.shareButton);
 
-    if (data.type === "SONG" || data.type === "PART" || data.type === "SECTION") {
+    if (!room && (data.type === "SONG" || data.type === "PART" || data.type === "SECTION")) {
         resultData = document.createElement("span");
         resultData.className = "omg-music-controls-button";
         resultData.innerHTML = "Add To Playlist";
@@ -309,6 +326,12 @@ OMGEmbeddedViewer.prototype.setupControls = function (params) {
         resultData = document.createElement("span");
         resultData.className = "omg-thing-playcount";
         resultData.innerHTML = params.result.playcount + " &#9658;";
+        bottomRow.appendChild(resultData);        
+    }
+    if (room) {
+        resultData = document.createElement("span");
+        resultData.className = "omg-thing-playcount";
+        resultData.innerHTML = Object.keys(params.data.users).length + " &#9658;";
         bottomRow.appendChild(resultData);        
     }
 
