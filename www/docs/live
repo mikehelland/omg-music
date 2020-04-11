@@ -1,45 +1,61 @@
 
-<p>Users can connect with other users and devices in a few different ways, which can be combined.</p>
+<p>You can connect with other users and devices in different combinable ways.</p>
 
 <hr>
 
 <h3>Join Mode</h3>
 
-<p>In this mode, one user goes live, and one or more users will join them. 
-All joined devices make sound. This is for connecting users and devices in different 
-geographic locations.</p>
+<p>In this mode, one user goes live, and other users join them. 
+All joined devices make sound. This is for connecting users and devices in different places.</p>
 
 <ul>
-        <li>Step 1: a user "goes live".</li>
+        <li>Step 1: <i>user1</i> "goes live".</li>
         <ul>
                 <li>Click <a href="/create?goLive">Go Live</a> on the <a href="/live.htm">Live Page</a></li>
                 - or - 
                 <li>Turn on the "Live Button", in the settings in OMG Create.</li>
                 <li>Click "Go Live!""</li>
         </ul>
-        <li>Step 2: other users join at "https://openmusic.gallery/create?join=[user]"</li>
+        <li>Step 2: other users join at:</li>
+        <ul><li>https://openmusic.gallery/create?join=<i>user1</i></li></ul>
+</ul>
+
+Example:
+<ul>
+        <li>User 1: goes live from Seattle</li>
+        <li>User 2: joins from New York</li>
+        <li>User 3: joins from Paris</li>
 </ul>
 
 <hr>
 
-<h3>Remote Mode</h3>
+<h3>Controller Mode</h3>
 
-<p>In this mode, one user goes live, and one or more devices act as remote controllers 
-for the session. The remote controllers don't make sounds. This is for when users and devices are in the same
-room.</p>
+<p>This is for users and devices in the same room. 
+One device goes live, and others can act like game controllers. The controllers don't make sounds. </p>
 
 <ul>
-        <li>Step 1: a user "goes live".</li>
+        <li>Step 1: <i>user1</i> "goes live".</li>
         <ul>
                 <li>Click <a href="/create?goLive">Go Live</a> on the <a href="/live.htm">Live Page</a></li>
                 - or - 
                 <li>Turn on the "Live Button", in the settings in OMG Create.</li>
                 <li>Click "Go Live!""</li>
         </ul>
-        <li>Step 2: other users join at "https://openmusic.gallery/create?remoteTo=[user]"</li>
+        <li>Step 2: controller devices go to:</li> 
+        <ul><li>https://openmusic.gallery/create?controller=[user]</li></ul>
+        </ul>
 </ul>
 
-<p>This is how the Touchscreen Guitar and the Techno Gauntlet works.</p>
+<h3>Example 1: Home Entertainment</h3>
+<p>You and your mates decide what to watch next. Instead, you decide to jam. Someone puts OMG Create
+on the TV or computer, and goes live. Everyone in the room can use their phone to control the music.</p>
+
+<h3>Example 2: Futuristic Instruments</h3>
+
+<p>You want to build a 21st century instrument like the Touchscreen Guitar or a Techno Gauntlet. 
+Combine whatever smart devices you have around to control all aspects of music, and conduct them
+ like a symphony. </p>
 
 <hr>
 

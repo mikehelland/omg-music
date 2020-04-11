@@ -3035,6 +3035,9 @@ tg.onmidinoteoff = function (noteNumber, channel) {
         if (!(part.midiChannel === channel || part.midiChannel === "All")) {
             return;
         }
+        if (part.data.surface.url === "PRESET_SEQUENCER") {
+            return
+        }
         for (var i = 0; i< part.activeMIDINotes.length; i++) {
             if (part.activeMIDINotes[i].scaledNote === noteNumber) {
                 part.activeMIDINotes.splice(i, 1);
@@ -3062,6 +3065,7 @@ tg.onmidinoteon = function (noteNumber, channel) {
             note.note = noteNumber % part.soundSet.data.length;
         }
         else {
+            //todo this looks horribly inneficient
             for (var i = 0; i < part.mm.frets.length; i++) {
                 if (part.mm.frets[i].note === noteNumber) {
                     note.note = i - part.mm.frets.rootNote;
@@ -3073,7 +3077,16 @@ tg.onmidinoteon = function (noteNumber, channel) {
                 }
             }
         }
-        tg.player.playLiveNotes(part.activeMIDINotes, part, 0); 
+        if (part.data.surface.url === "PRESET_SEQUENCER") {
+            tg.player.playSound(part.data.tracks[note.note].sound, part, 
+                part.data.tracks[note.note].audioParams)
+                if (tg.omglive && tg.omglive.socket) {
+                    tg.omglive.sendPlaySound(note.note, part)
+                }
+        }
+        else {
+            tg.player.playLiveNotes(part.activeMIDINotes, part, 0); 
+        }
 
     });
 };
