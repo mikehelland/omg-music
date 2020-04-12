@@ -35,7 +35,7 @@ tg.omglive = {
         var url = window.location.origin.replace("http:", "https:");
 
         part.socket = io(url + "/omg-live");
-        part.socket.emit("startSession", {room: part.liveRoom, user: tg.omglive.username});
+        part.socket.emit("startBasic", {room: part.liveRoom, user: tg.omglive.username});
         part.socket.on("basic", function (data) {
             if (data.x === -1) {
                 tg.omglive.partDataEnd(part, data);

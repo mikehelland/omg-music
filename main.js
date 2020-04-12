@@ -769,6 +769,11 @@ var omgSocket = io.of("/omg-live");
 omgSocket.on("connection", function (socket) {
     var room = "";
     var user = "";
+    socket.on("startBasic", function (data) {
+        room = "basic_" + data.room;
+        user = data.user;
+        socket.join(room);
+    });
     socket.on("startSession", function (data) {
         room = data.room;
         user = data.user;
@@ -824,7 +829,7 @@ omgSocket.on("connection", function (socket) {
         room = "";
     });
     socket.on("basic", function (data) {
-        io.of("/omg-live").to(data.room).emit("basic", data);
+        io.of("/omg-live").to("basic_" + data.room).emit("basic", data);
     });
     socket.on("data", function (data) {
         socket.to(room).emit("data", data);

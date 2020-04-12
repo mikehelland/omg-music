@@ -257,8 +257,13 @@ tg.showFragment = function (fragment, button, params) {
         fragment.onshow(params);
     }
 
-    if (fragment.tabs && !fragment.lastTab) {
-        fragment.firstTab.onclick();
+    if (fragment.tabs) {
+        if (fragment.lastTab) {
+            fragment.lastTab.onclick();
+        }
+        else {
+            fragment.firstTab.onclick();
+        }
     }
 
 };
@@ -1407,50 +1412,44 @@ tg.saveFragment.drawAndPostCanvas = function (data) {
 
 tg.partOptionsFragment = {
     div: document.getElementById("part-options-fragment"),
-    fxTab: document.getElementById("part-options-fx-tab"),
-    generalTab: document.getElementById("part-options-tab"),
-    fx: document.getElementById("part-options-fx"),
-    general: document.getElementById("part-options-detail"),
-    submixerButton:  document.getElementById("part-options-submixer-button"),
-    liveModeButton:  document.getElementById("part-options-omglive-mode"),
-    midiCanvas:  document.getElementById("part-options-midi-canvas"),
-    liveUrlInput:  document.getElementById("part-options-omglive-url"),
-    liveRoomInput:  document.getElementById("part-options-omglive-room"),
-    liveModeDetails:  document.getElementById("part-options-omglive-details"),
-    verticalButton:  document.getElementById("part-options-vertical-surface"),
-    sequencerButton:  document.getElementById("part-options-sequencer-surface"),
-    surfaceArea:  document.getElementById("part-options-surface-area"),
-    randomizeButton:  document.getElementById("part-options-randomize"),
-    removeButton: document.getElementById("part-options-remove-button"),
-    clearButton: document.getElementById("part-options-clear-button"),
-    nameInput: document.getElementById("part-options-name"),
-    updateTabs: function (e) {
-        if (tg.partOptionsFragment.lastTab) {
-            tg.partOptionsFragment.lastTab.classList.remove("selected-option");
+    tabs: {
+        fx: {
+            div: document.getElementById("part-options-fx"),
+            partFXListDiv: document.getElementById("part-options-fx-list")
+        },
+        options: {
+            div: document.getElementById("part-options-detail"),
+            submixerButton:  document.getElementById("part-options-submixer-button"),
+            liveModeButton:  document.getElementById("part-options-omglive-mode"),
+            midiCanvas:  document.getElementById("part-options-midi-canvas"),
+            liveUrlInput:  document.getElementById("part-options-omglive-url"),
+            liveRoomInput:  document.getElementById("part-options-omglive-room"),
+            liveModeDetails:  document.getElementById("part-options-omglive-details"),
+            verticalButton:  document.getElementById("part-options-vertical-surface"),
+            sequencerButton:  document.getElementById("part-options-sequencer-surface"),
+            surfaceArea:  document.getElementById("part-options-surface-area"),
+            randomizeButton:  document.getElementById("part-options-randomize"),
+            removeButton: document.getElementById("part-options-remove-button"),
+            clearButton: document.getElementById("part-options-clear-button"),
+            nameInput: document.getElementById("part-options-name")        
         }
-        tg.partOptionsFragment.lastTab = e.target;
-        e.target.classList.add("selected-option");
     }
 };
-tg.partOptionsFragment.setup = function () {
+tg.partOptionsFragment.tabs.fx.onshow = function () {
+    tg.setupAddFXButtons(tg.partOptionsFragment.part, 
+        document.getElementById("part-options-add-fx-button"), 
+        document.getElementById("part-options-available-fx"), 
+        this.partFXListDiv);
+    tg.setupPartOptionsFX(tg.partOptionsFragment.part, this.partFXListDiv);
+}
+
+tg.partOptionsFragment.tabs.options.setup = function () {
     var f = this;
-
-    f.fxTab.onclick = function (e) {
-        f.fx.style.display = "block";
-        f.general.style.display = "none";
-        f.updateTabs(e);
-    };
-    f.generalTab.onclick = function (e) {
-        f.fx.style.display = "none";
-        f.general.style.display = "block";
-        f.updateTabs(e);
-    };
-
-    f.fxTab.onclick({target: f.fxTab});
-    f.nameInput.onkeypress = function (e) {
+    var ff = tg.partOptionsFragment;
+    f.nameInput.onkeypress = (e) => {
         if (e.keyCode === 13) {
-            f.part.data.name = e.target.value;      
-            f.part.mainFragmentButton.innerHTML = e.target.value;
+            ff.part.data.name = e.target.value;      
+            ff.part.mainFragmentButton.innerHTML = e.target.value;
         }
     };
 
@@ -1459,22 +1458,21 @@ tg.partOptionsFragment.setup = function () {
             if (!tg.midi) {
                 tg.turnOnMIDI();
             }
-            var index = tg.midiParts.indexOf(f.part);
+            var index = tg.midiParts.indexOf(ff.part);
             if (f.midiCanvas.value === "Off" && index > -1) {
                 tg.midiParts.splice(index, 1);
             }
             else if (f.midiCanvas.value !== "Off" && index === -1) {
-                f.part.activeMIDINotes = [];
-                f.part.activeMIDINotes.autobeat = 1;
-                tg.midiParts.push(f.part);
+                ff.part.activeMIDINotes = [];
+                ff.part.activeMIDINotes.autobeat = 1;
+                tg.midiParts.push(ff.part);
             }
         };
 
         var midiProperty = {"property": "midiChannel", "name": "MIDI Channel", "type": "options",
-                //options: ["Off", "All", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16"],
                 options: ["Off", "All", 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16],
                 "color": "#008800", transform: "square"};
-        this.midiCanvas = new SliderCanvas(this.midiCanvas, midiProperty, undefined, f.part, onchannelchange);
+        this.midiCanvas = new SliderCanvas(this.midiCanvas, midiProperty, undefined, ff.part, onchannelchange);
         this.midiCanvas.div.className = "fx-slider";
     }
     else {
@@ -1487,50 +1485,50 @@ tg.partOptionsFragment.setup = function () {
         if (!tg.monkey) {
             tg.monkey = new OMGMonkey(tg.song, tg.currentSection);
         }
-        if (f.part.data.surface.url === "PRESET_VERTICAL") {
-            f.part.data.notes = tg.monkey.newMelody();
-            tg.player.rescale(f.part, tg.song.data.keyParams, 
+        if (ff.part.data.surface.url === "PRESET_VERTICAL") {
+            ff.part.data.notes = tg.monkey.newMelody();
+            tg.player.rescale(ff.part, tg.song.data.keyParams, 
                 tg.currentSection.data.chordProgression[tg.player.currentChordI]);
         }
         else {
-            tg.monkey.getRandomElement(tg.monkey.getSequencerFunctions(f.part))();
+            tg.monkey.getRandomElement(tg.monkey.getSequencerFunctions(ff.part))();
         }
         f.randomizeImg.className = "monkey-spin";
         setTimeout(function () {f.randomizeImg.className = "monkey";}, 1100);
     };    
     
     f.liveModeButton.onclick = function () {
-        if (f.part.omglive) {
-            f.part.socket.disconnect()
-            f.part.omglive = null;
+        if (ff.part.omglive) {
+            ff.part.socket.disconnect()
+            ff.part.omglive = null;
             f.setLiveModeUI();
         }
         else {
-            if (!f.part.liveRoom) {
-                f.part.liveRoom = tg.omglive.getRoomNamePart(f.part);
+            if (!ff.part.liveRoom) {
+                ff.part.liveRoom = tg.omglive.getRoomNamePart(ff.part);
             }
-            tg.omglive.turnOnPart(f.part, function () {
+            tg.omglive.turnOnPart(ff.part, function () {
                 f.setLiveModeUI();
             });
         }
     };
     
     f.verticalButton.onclick = function () {
-        f.part.data.surface.url = "PRESET_VERTICAL";
-        tg.instrument.show(f.part);
+        ff.part.data.surface.url = "PRESET_VERTICAL";
+        tg.instrument.show(ff.part);
     };
     f.sequencerButton.onclick = function () {
-        f.part.data.surface.url = "PRESET_SEQUENCER";
-        tg.sequencer.show(f.part);
+        ff.part.data.surface.url = "PRESET_SEQUENCER";
+        tg.sequencer.show(ff.part);
     };
     
     f.setLiveModeUI =  function () {
-        if (f.part.omglive) {
+        if (ff.part.omglive) {
             f.liveModeButton.innerHTML = "OMG Live Mode is ON";
             f.liveModeDetails.style.display = "block";
             
-            f.liveRoomInput.value = f.part.liveRoom;
-            f.liveUrlInput.value = window.location.origin + "/live/" + encodeURIComponent(f.part.liveRoom);
+            f.liveRoomInput.value = ff.part.liveRoom;
+            f.liveUrlInput.value = window.location.origin + "/live/" + encodeURIComponent(ff.part.liveRoom);
         }
         else {
             f.liveModeButton.innerHTML = "OMG Live Mode is OFF";
@@ -1540,19 +1538,19 @@ tg.partOptionsFragment.setup = function () {
     
     
     f.clearButton.onclick = function () {
-        if (f.part.data.notes) {
-            f.part.data.notes = [];
+        if (ff.part.data.notes) {
+            ff.part.data.notes = [];
         }
-        if (f.part.data.tracks) {
-            for (var i = 0; i < f.part.data.tracks.length; i++) {
-                for (var j = 0; j < f.part.data.tracks[i].data.length; j++) {
-                    f.part.data.tracks[i].data[j] = false;
+        if (ff.part.data.tracks) {
+            for (var i = 0; i < ff.part.data.tracks.length; i++) {
+                for (var j = 0; j < ff.part.data.tracks[i].data.length; j++) {
+                    ff.part.data.tracks[i].data[j] = false;
                 }
             }
         }
     };
     f.removeButton.onclick = function () {
-        var i = tg.currentSection.parts.indexOf(f.part);
+        var i = tg.currentSection.parts.indexOf(ff.part);
         if (i > -1) {
             tg.currentSection.parts.splice(i, 1)
             tg.currentSection.data.parts.splice(i, 1)
@@ -1562,28 +1560,31 @@ tg.partOptionsFragment.setup = function () {
     }
     
     f.submixerButton.onclick = function () {
-        tg.showSubmixFragment(f.part);
+        tg.showSubmixFragment(ff.part);
     };
 
 };
 
-
 tg.partOptionsFragment.onshow = function (part) {
-    var f = this;
-    f.part = part;
+    this.part = part
+}
+
+tg.partOptionsFragment.tabs.options.onshow = function () {
+    var f = this
+    var part = tg.partOptionsFragment.part
 
     if (!f.randomizeImg.getAttribute("src")) {
         f.randomizeImg.src = "/img/monkey48.png";
     }
-    
-    f.nameInput.value = part.data.name;
 
     part.midiChannel = part.midiChannel || "Off";
-    this.midiCanvas.data = part;
-    if (this.midiCanvas.sizeCanvas) {
-        this.midiCanvas.sizeCanvas();
+    f.midiCanvas.data = part;
+    if (f.midiCanvas.sizeCanvas) {
+        f.midiCanvas.sizeCanvas();
     }
-    
+
+    f.nameInput.value = part.data.name;
+
     if (part.data.surface.url === "PRESET_VERTICAL") {
         f.verticalButton.style.display = "none";
         f.sequencerButton.style.display = "block";
@@ -1611,16 +1612,9 @@ tg.partOptionsFragment.onshow = function (part) {
 
     f.surfaceArea.style.display = part.osc ? "none" : "block";
 
-    f.setLiveModeUI();    
-    
-    tg.partFXListDiv = document.getElementById("part-options-fx-list");
-    tg.setupAddFXButtons(part, 
-            document.getElementById("part-options-add-fx-button"), 
-            document.getElementById("part-options-available-fx"), 
-            tg.partFXListDiv);
-    tg.setupPartOptionsFX(part, tg.partFXListDiv);
-};
+    f.setLiveModeUI();
 
+};
 
 
 /*

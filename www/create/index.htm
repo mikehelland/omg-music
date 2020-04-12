@@ -174,11 +174,10 @@
             </div>
         </div>
         <div id="part-options-fragment" class="fragment">
-            <div id="part-options-tabs" class="detail-tab-row">
-                <div id="part-options-fx-tab" class="detail-tab">FX</div>
-                <div id="part-options-tab" class="detail-tab">Options</div>
-            </div>
-            <div id="part-options-fx" class="detail-fragment-body">
+            <div id="part-options-fx" class="detail-tab-page detail-fragment-body">
+                <div class="detail-tab-caption">
+                    FX
+                </div>
                 <button id="part-options-add-fx-button">Add FX</button>
                 <div id="part-options-available-fx">
                 </div>
@@ -186,16 +185,19 @@
                 <div id="part-options-fx-list">
                 </div>
             </div>
-            <div id="part-options-detail" class="detail-fragment-body">
+            <div id="part-options-detail" class="detail-tab-page detail-fragment-body">
+                <div class="detail-tab-caption">
+                    Options
+                </div>
                 <input id="part-options-name">
-                <canvas id="part-options-midi-canvas"></canvas>
                 <div id="part-options-surface-area">
+                    <hr>
+                    <button id="part-options-submixer-button">Sub Mix</button>
                     Surface:<br>
                     <button id="part-options-vertical-surface">Switch to Vertical Surface</button>
                     <button id="part-options-sequencer-surface">Switch to Sequencer Surface</button>
                 </div>
                 
-                <button id="part-options-submixer-button">Tracks Sub Mixer</button>
                 <hr>
                 <button id="part-options-omglive-mode">OMG LIVE Mode</button>
                 <div id="part-options-omglive-details">
@@ -203,6 +205,7 @@
                     <div>Others can connect at:</div>
                     <input id="part-options-omglive-url" readonly>
                 </div>
+                <canvas id="part-options-midi-canvas"></canvas>
                 <button class="img-button" id="part-options-randomize">
                     <img style="vertical-align:middle" height="32" width="32" src=""> Randomize</button>
                 <hr>
@@ -254,11 +257,12 @@
                 <div class="detail-tab-caption">
                     Settings
                 </div>
+                <div>
                 <br>
                 <div id="user-fragment-settings-list"></div>
                 <hr>
                 <button id="user-logout-button">Log Out</button>
-
+                </div>
             </div>
         </div>
         <div id="song-fragment" class="fragment">

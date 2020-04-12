@@ -251,6 +251,7 @@ body {
 
 #key-fragment {
     flex-direction:row;
+    height:100%;
 }
 #key-list {
     flex-grow:1;
@@ -295,11 +296,6 @@ body {
 
 #osc-buttons {
     padding:0.3em;
-}
-
-#part-options-fragment {
-    width:100%;
-    display:none;
 }
 
 .fx-slider {
@@ -412,7 +408,7 @@ body {
     flex-grow:1;
     border:1px solid #888888;
     cursor:pointer;
-    padding:10px 10px 11px;
+    padding:14px 10px 14px;
     opacity:0.8;
 }
 
@@ -510,6 +506,7 @@ input {
 
 #sequencer-fragment, #instrument-fragment, #mix-fragment, #chords-fragment, #live-fragment {
     flex-direction:column;
+    height:100%;
 }
 
 #sequencer-fragment-toolbar, #instrument-fragment-toolbar {
@@ -565,7 +562,6 @@ input {
 }
 
 .fragment {
-    height:100%;
     width:100%;
     display:none;
 }
@@ -781,4 +777,8 @@ h2 {
     float:right;
     border:1px solid #888888;
     cursor: pointer;
+}
+
+hr {
+    margin:12px 0;
 }
