@@ -3054,7 +3054,7 @@ tg.onmidinoteoff = function (noteNumber, channel) {
     });
 };
 
-tg.onmidinoteon = function (noteNumber, channel) {
+tg.onmidinoteon = function (noteNumber, velocity, channel) {
     tg.midiParts.forEach(part => {
         if (!(part.midiChannel === channel || part.midiChannel === "All")) {
             return;
@@ -3079,9 +3079,9 @@ tg.onmidinoteon = function (noteNumber, channel) {
         }
         if (part.data.surface.url === "PRESET_SEQUENCER") {
             tg.player.playSound(part.data.tracks[note.note].sound, part, 
-                part.data.tracks[note.note].audioParams)
+                part.data.tracks[note.note].audioParams, velocity / 120)
                 if (tg.omglive && tg.omglive.socket) {
-                    tg.omglive.sendPlaySound(note.note, part)
+                    tg.omglive.sendPlaySound(note.note, velocity / 120, part)
                 }
         }
         else {

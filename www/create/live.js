@@ -459,9 +459,14 @@ tg.omglive.ondata = function (data) {
         }
     }
     else if (data.action === "playSound") {
-        let part = tg.currentSection.getPart(data.partName); //todo cache this so not everytime
-        tg.player.playSound(part.data.tracks[data.noteNumber].sound, part, 
-                part.data.tracks[data.noteNumber].audioParams)
+        //store the part so not searching everytime
+        if (tg.omglive.lastPartName !== data.partName) {
+            tg.omglive.lastPart = tg.currentSection.getPart(data.partName)
+            tg.omglive.lastPartName = data.partName
+        }
+        tg.player.playSound(tg.omglive.lastPart.data.tracks[data.noteNumber].sound, 
+                tg.omglive.lastPart, 
+                tg.omglive.lastPart.data.tracks[data.noteNumber].audioParams, data.strength)
     }
 };
 
@@ -585,12 +590,13 @@ tg.omglive.chat = function (text) {
     });
 };
 
-tg.omglive.sendPlaySound = function (noteNumber, part) {
+tg.omglive.sendPlaySound = function (noteNumber, strength, part) {
     tg.omglive.socket.emit("data", {
         action: "playSound",
         partName: part.data.name,
         user: tg.omglive.username, 
-        noteNumber: noteNumber
+        noteNumber: noteNumber,
+        strength: strength
     });
 }
 

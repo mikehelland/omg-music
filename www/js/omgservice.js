@@ -874,7 +874,7 @@ omg.midi = {
         switch (event.data[0] & 0xf0) {
             case 0x90:
                 if (event.data[2]!=0) {  // if velocity != 0, this is a note-on message
-                    omg.midi.onnoteon(event.data[1], channel);
+                    omg.midi.onnoteon(event.data[1], event.data[2], channel);
                     return;
                 }
                 // if velocity == 0, fall thru: it's a note-off.  MIDI's weird, y'all.
