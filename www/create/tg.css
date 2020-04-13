@@ -692,7 +692,7 @@ button {
   background-image: linear-gradient(to bottom, #222222, #000000);
   border-radius: 6px;
   color: #ffffff;
-  font-size: 18px;
+  font-size: 105%;
   padding: 10px 20px 10px 20px;
   margin: 5px 0px;
   border: solid #888888 1px;

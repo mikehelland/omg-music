@@ -223,6 +223,7 @@ fp.searchParams.viewerParams.onplaybuttonclick = function (viewer) {
         gauntlet.style.display = "block"
         fp.gauntletLoaded = true
         gauntlet.onload = () => {
+            window.frames[0].document.body.style.fontSize = "65%"
             fp.searchParams.viewerParams.onplaybuttonclick(viewer)
         }
         if (fp.isMobileDiv.clientWidth) {
