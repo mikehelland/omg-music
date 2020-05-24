@@ -3033,8 +3033,8 @@ tg.onmidinoteoff = function (noteNumber, channel) {
             return
         }
 
-        tg.player.noteOff({scaledNote: noteNumber}, part, 0); 
-        return
+        //tg.player.noteOff({scaledNote: noteNumber}, part, 0); 
+        //return
 
         for (var i = 0; i< part.activeMIDINotes.length; i++) {
             if (part.activeMIDINotes[i].scaledNote === noteNumber) {
@@ -3083,8 +3083,8 @@ tg.onmidinoteon = function (noteNumber, velocity, channel) {
                 }
         }
         else {
-            //tg.player.playLiveNotes(part.activeMIDINotes, part, 0); 
-            tg.player.noteOn(note, part, velocity); 
+            tg.player.playLiveNotes(part.activeMIDINotes, part, 0); 
+            //tg.player.noteOn(note, part, velocity); 
         }
 
     });
