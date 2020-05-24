@@ -1518,3 +1518,58 @@ OMusicPlayer.prototype.disconnectMic = function (part) {
         track.stop();
     });
 }
+
+
+
+OMusicPlayer.prototype.noteOn = function (note, part, velocity) {
+    if (this.disableAudio) {
+        return
+    }
+
+    if (this.context && this.context.state === "suspended") {
+        this.context.resume();
+    }
+    
+    if (part.osc) {
+        part.baseFrequency = this.makeFrequency(note.scaledNote);
+        part.osc.frequency.setValueAtTime(
+                part.baseFrequency * part.data.audioParams.warp, this.context.currentTime);
+        part.preFXGain.gain.setTargetAtTime(part.data.audioParams.gain, this.context.currentTime, 0.003);
+    }
+    else if (part.synth) {
+        part.baseFrequency = this.makeFrequency(note.scaledNote);
+        part.synth.lastFrequency = part.baseFrequency * part.data.audioParams.warp
+        part.synth.onNoteOn(part.synth.lastFrequency, velocity)
+        part.notesPlaying[note.scaledNote] = part.synth.lastFrequency
+    }
+    else {
+        //var sound = this.getSound(part.data.soundSet, notes[0]);
+        note.sound = this.getSoundURL(part.soundSet, note);
+        part.notesPlaying[note.scaledNote] = this.playSound(note.sound, part, undefined, velocity / 120);
+    }
+        
+};
+
+OMusicPlayer.prototype.noteOff = function (note, part) {
+  
+    if (!part.notesPlaying[note.scaledNote]) {
+        return
+    }
+    else if (part.synth) {
+        part.synth.onNoteOff(part.notesPlaying[note.scaledNote])
+    }
+    else if (part.osc) {
+        part.preFXGain.gain.setTargetAtTime(0,
+                this.context.currentTime, 0.003);
+    }  
+    else {
+        part.notesPlaying[note.scaledNote].bufferGain.gain.setTargetAtTime(0, this.context.currentTime, 0.001);
+        part.notesPlaying[note.scaledNote].stop(this.context.currentTime + 0.015);
+    }
+
+    delete part.notesPlaying[note.scaledNote]
+    
+    part.nextBeat = 0;
+    part.currentI = -1;
+    
+};

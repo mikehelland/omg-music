@@ -342,13 +342,15 @@ function OMGPart(div, data, section) {
             this.makeAudioParams(this.data.tracks[i]);
         }
     }
+
+    this.notesPlaying = {}
     
     this.makeAudioParams(false, (this.data.soundSet.url || "").startsWith("PRESET_OSC"));
     
     if (this.data.id) {
         this.saved = true;
     }
-    
+
 }
 
 OMGPart.prototype.makeAudioParams = function (track, osc) {
