@@ -1356,7 +1356,7 @@ tg.saveFragment.onSave = function (data) {
     tg.song.data.id = data.id;
     tg.song.data.user_id = data.user_id;
 
-    var savedUrl = location.origin + "/play/" + data.id;
+    var savedUrl = location.origin + "/view/" + data.id;
     tg.saveFragment.urlInput.value = savedUrl;
     tg.saveFragment.urlLink.href = savedUrl;
 
@@ -3299,9 +3299,9 @@ tg.partButtonOnDown = (button, part) => {
 //keep this last
 
 
-var moreScripts = [{url: "../omg-music/sequencer_surface.js"},
-    {url: "../omg-music/vertical_surface.js"},
-    {url: "../omg-music/monkey.js"},
+var moreScripts = [{url: "../js/sequencer_surface.js"},
+    {url: "../js/vertical_surface.js"},
+    {url: "../js/monkey.js"},
     {url: "live.js", onload: () => {
         if (tg.onLiveScriptLoaded) {
             tg.onLiveScriptLoaded()

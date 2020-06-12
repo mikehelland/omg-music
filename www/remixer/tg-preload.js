@@ -196,12 +196,13 @@ tg.getSong(function (song) {
     catch (e) {console.log(e)}
 
     var scriptTag;
-    ["../js/omgservice.js",
-        "../omg-music/tuna-min.js", 
-        "../omg-music/omusic_player.js", 
-        //todo music player should handle tuna, fx, and viktor
-        "../omg-music/fx.js",
-        "../omg-music/libs/viktor/viktor.js",
+    ["/js/omgservice.js",
+        "../js/omgservice_music.js",
+        "../js/libs/tuna-min.js", 
+        "../js/omusic_player.js", 
+        //todo music player should load tuna, fx, and viktor
+        "../js/fx.js",
+        "../js/libs/viktor/viktor.js",
         "tg.js",
     ].forEach(js => {
         scriptTag = document.createElement("script");
