@@ -11,7 +11,6 @@ function OMGEmbeddedViewerMusic(viewer) {
         this.data.type,
         () => {
             this.song = OMGSong.prototype.make(this.data);
-            console.log(this.song)
             this.drawCanvas(this.data)
         }
     )

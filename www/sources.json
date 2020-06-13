@@ -1,0 +1,22 @@
+[
+  {
+    "name": "OpenMusic.Gallery",
+    "url": "https://openmusic.gallery/data/?type=SOUNDSET"
+  },
+  {
+    "name": "Shiny Happy Kits",
+    "url": "https://mikehelland.github.io/omg-sounds/drums/shiny_happy_kits.json"
+  },
+  {
+    "name": "MusyngKite",
+    "url": "https://mikehelland.github.io/omg-sounds/soundfonts/MusyngKite.json"
+  },
+  {
+    "name": "FluidR3",
+    "url": "https://mikehelland.github.io/omg-sounds/soundfonts/FluidR3.json"
+  },
+  {
+    "name": "FatBoy",
+    "url": "https://mikehelland.github.io/omg-sounds/soundfonts/FatBoy.json"
+  }
+]

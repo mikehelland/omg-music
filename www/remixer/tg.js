@@ -907,7 +907,7 @@ tg.addPartFragment.setup = function () {
     };
 
     var sources = (tg.user && tg.user.sources) || [];
-    fetch("/omg-music/sources.json")
+    fetch("../sources.json")
             .then(function (e) {return e.json();}).then(function (json) {
 
         json.forEach(function (source) {
@@ -941,7 +941,7 @@ tg.addPartFragment.setup = function () {
     document.getElementById("add-square-osc-button").onclick = addOscButtonClick;
     document.getElementById("add-triangle-osc-button").onclick = addOscButtonClick;
 
-    fetch("../omg-music/libs/viktor/viktor_presets.json")
+    fetch("../js/libs/viktor/viktor_presets.json")
     .then(function (e) {return e.json();}).then(function (json) {
         f.loadSynthList(json);
     }).catch(e=>console.warn(e));
