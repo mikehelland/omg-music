@@ -4,6 +4,7 @@ function OMGEmbeddedViewerMusic(viewer) {
     viewer.embedDiv.appendChild(this.canvas)
 
     this.data = viewer.data
+    this.viewer = viewer
 
     viewer.loadScriptsForType(
         ["/apps/music/js/omgclasses.js",
@@ -12,37 +13,116 @@ function OMGEmbeddedViewerMusic(viewer) {
         () => {
             this.song = OMGSong.prototype.make(this.data);
             this.drawCanvas(this.data)
+            this.makePlayButton()
         }
     )
 }
 if (typeof omg === "object" && omg.types && omg.types["SONG"])
     omg.types["SONG"].embedClass = OMGEmbeddedViewerMusic
 
+OMGEmbeddedViewerMusic.prototype.makePlayButton = function () {
+    this.playButton = document.createElement("div")
+    
+    this.playButton.style.position = "absolute"
+    this.playButton.style.top = this.canvas.offsetTop + "px"
+    this.playButton.style.left = this.canvas.offsetLeft + "px"
+    this.playButton.style.width = this.canvas.clientWidth + "px"
+    this.playButton.style.height = this.canvas.clientHeight + "px"
+
+    var img = document.createElement("img")
+    img.src = "/apps/music/img/play-button.svg"
+    img.style.height = this.canvas.clientHeight / 2 + "px"
+    img.style.marginLeft = this.canvas.clientWidth / 2 - this.canvas.clientHeight / 4 + "px"
+    img.style.marginTop = this.canvas.clientHeight / 4 + "px"
+    img.style.cursor = "pointer"
+    this.playButtonImg = img
+    this.playButton.appendChild(img)
+
+    this.playButton.style.opacity = "0.7"
+    img.onmouseenter = e => this.playButton.style.opacity = "1"
+    img.onmouseleave = e => this.playButton.style.opacity = "0.7"
+    
+    this.viewer.embedDiv.appendChild(this.playButton)
+
+    this.playButtonImg.onclick = e => this.playButtonClick()
+}
+
+OMGEmbeddedViewerMusic.prototype.playButtonClick = function (data) {
+
+    var createPlayer = () => {
+        this.player = new OMusicPlayer()
+        this.player.prepareSong(this.song, () => {
+            this.player.play()
+            this.beatMarker.style.display = "block"
+            this.playButtonImg.src = "/apps/music/img/stop-button.svg"
+        })
+        this.player.onBeatPlayedListeners.push(this.onBeatPlayedListener)
+        this.player.onloop = () => this.onloop();
+    }
+
+    if (!this.player) {
+        if (typeof OMusicPlayer === "undefined") {
+            var scripts = ["/apps/music/js/libs/tuna-min.js",
+                            "/apps/music/js/omusic_player.js",
+                            "/apps/music/js/fx.js"
+                        ]
+            var downloaded = 0
+            scripts.forEach(scriptUrl => {
+                var script = document.createElement("script")
+                script.src = scriptUrl
+                script.async = false
+                script.onload = () => {
+                    if (scripts.length === ++downloaded) {
+                        createPlayer()
+                    }
+                }
+                document.body.appendChild(script)
+            })
+            return
+        }
+        createPlayer()
+        return
+    }
+
+    if (this.player.playing) {
+        this.player.stop()
+        this.beatMarker.style.display = "none"
+        this.playButtonImg.src = "/apps/music/img/play-button.svg"
+    }
+    else {
+        this.player.play()
+        this.beatMarker.style.display = "block"
+        this.playButtonImg.src = "/apps/music/img/stop-button.svg"
+    }
+}
+
 OMGEmbeddedViewerMusic.prototype.drawCanvas = function (data) {
 
     this.context = this.canvas.getContext("2d");
-
+    this.canvas.width = this.canvas.clientWidth
+    this.canvas.height = this.canvas.clientHeight
+    
     this.getDrawingData();
     this.draw();
     
     //var pxPerBeat = (this.div.clientWidth - padding) / this.totalBeatsInSong;
-    if (this.div) {
-        var pxPerBeat = (this.div.clientWidth - this.padding) / (this.totalSubbeats * this.drawingData.sections.length);
-        var viewer = this;
-        var beatsInSection = this.song.data.beatParams.measures * this.song.data.beatParams.beats * this.song.data.beatParams.subbeats;
-        viewer.subbeatsPlayed = 0;
-        viewer.beatMarker.style.width = pxPerBeat + "px";
-        viewer.onBeatPlayedListener = function (isubbeat, isection) {
-            viewer.beatMarker.style.left = pxPerBeat * viewer.subbeatsPlayed + "px";
-            if (isubbeat > -1) {
-                viewer.subbeatsPlayed++
-            }
-        };
-        if (this.player) {
-            this.player.onBeatPlayedListeners.push(viewer.onBeatPlayedListener)
+    var pxPerBeat = (this.canvas.clientWidth) / (this.totalSubbeats * this.drawingData.sections.length);
+    var beatsInSection = this.song.data.beatParams.measures * this.song.data.beatParams.beats * this.song.data.beatParams.subbeats;
+    this.subbeatsPlayed = 0;
+    this.beatMarker = document.createElement("div")
+    this.beatMarker.className = "beat-marker"
+    this.beatMarker.style.width = pxPerBeat + "px";
+    this.beatMarker.style.display = "none"
+    this.viewer.embedDiv.appendChild(this.beatMarker)
+    this.onBeatPlayedListener = (isubbeat, isection) => {
+        this.beatMarker.style.left = pxPerBeat * this.subbeatsPlayed + "px";
+        if (isubbeat > -1) {
+            this.subbeatsPlayed++
         }
-    }
-
+        else {
+            this.subbeatsPlayed = 0
+        }
+    };
 };
 
 OMGEmbeddedViewerMusic.prototype.getDrawingData = function () {
@@ -229,3 +309,7 @@ OMGEmbeddedViewerMusic.prototype.draw = function () {
 
     }
 };
+
+OMGEmbeddedViewerMusic.prototype.onloop = function () {
+    this.subbeatsPlayed = 0
+}

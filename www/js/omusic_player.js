@@ -46,11 +46,17 @@ OMusicPlayer.prototype.getAudioContext = function () {
         omg.audioContext = new AudioContext();
         if (!omg.audioContext.createGain)
             omg.audioContext.createGain = omg.audioContext.createGainNode;
-        omg.tuna = new Tuna(omg.audioContext);
     } catch (e) {
         console.warn("no web audio");
         this.disableAudio = true
         return null;
+    }
+
+    if (typeof Tuna === "undefined") {
+        console.warn("omusic_player wants Tuna.js!")
+    }
+    else {
+        omg.tuna = new Tuna(omg.audioContext);
     }
 
     return omg.audioContext;
