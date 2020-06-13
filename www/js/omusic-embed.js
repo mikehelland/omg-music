@@ -21,13 +21,9 @@ if (typeof omg === "object" && omg.types && omg.types["SONG"])
     omg.types["SONG"].embedClass = OMGEmbeddedViewerMusic
 
 OMGEmbeddedViewerMusic.prototype.makePlayButton = function () {
+
     this.playButton = document.createElement("div")
-    
-    this.playButton.style.position = "absolute"
-    this.playButton.style.top = this.canvas.offsetTop + "px"
-    this.playButton.style.left = this.canvas.offsetLeft + "px"
-    this.playButton.style.width = this.canvas.clientWidth + "px"
-    this.playButton.style.height = this.canvas.clientHeight + "px"
+    this.playButton.className = "omg-viewer-play-button"
 
     var img = document.createElement("img")
     img.src = "/apps/music/img/play-button.svg"
@@ -64,7 +60,8 @@ OMGEmbeddedViewerMusic.prototype.playButtonClick = function (data) {
         if (typeof OMusicPlayer === "undefined") {
             var scripts = ["/apps/music/js/libs/tuna-min.js",
                             "/apps/music/js/omusic_player.js",
-                            "/apps/music/js/fx.js"
+                            "/apps/music/js/fx.js",
+                            "/apps/music/js/libs/viktor/viktor.js"
                         ]
             var downloaded = 0
             scripts.forEach(scriptUrl => {
@@ -101,7 +98,7 @@ OMGEmbeddedViewerMusic.prototype.drawCanvas = function (data) {
     this.context = this.canvas.getContext("2d");
     this.canvas.width = this.canvas.clientWidth
     this.canvas.height = this.canvas.clientHeight
-    
+
     this.getDrawingData();
     this.draw();
     
