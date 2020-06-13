@@ -1,6 +1,6 @@
 {
     "activities": [
-		{"name": "Music", "url": "remixer/", "views": ["SONG"]},
+		{"name": "Music", "url": "remixer/", "edits": ["SONG"]},
 		{"name": "Embedded Music Viewer", "url": "js/omusic-embed.js", "embeds": ["SONG"]}
 	]
 }

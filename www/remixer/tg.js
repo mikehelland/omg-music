@@ -3215,8 +3215,10 @@ tg.peakMeters.toggle = function (value) {
 tg.peakMeters.update = function() {
     if (tg.peakMeters.show !== "Off") {
         tg.peakMeters.animating = true;
-        for (var j = 0; j < tg.peakMeters.visibleMeters.length; j++) {
-            tg.peakMeters.visibleMeters[j].updateMeter();
+        for (tg.peakMeters._update_j = 0; 
+                tg.peakMeters._update_j < tg.peakMeters.visibleMeters.length; 
+                tg.peakMeters._update_j++) {
+            tg.peakMeters.visibleMeters[tg.peakMeters._update_j].updateMeter();
         }
 
         window.requestAnimationFrame(tg.peakMeters.update);
@@ -3309,7 +3311,7 @@ var moreScripts = [{url: "../js/sequencer_surface.js"},
     }}
 ]
 if (!tg.player.disableAudio) {
-    moreScripts.push({url: "../js/peakmeter.js", onload: ()=> tg.peakMeters.toggle("All")})
+    moreScripts.push({url: "../js/libs/peakmeter.js", onload: ()=> tg.peakMeters.toggle("All")})
 }
 moreScripts.forEach(script => {
     scriptTag = document.createElement("script");

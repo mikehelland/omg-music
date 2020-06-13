@@ -145,14 +145,13 @@ PeakMeter.prototype.updateMeter = function () {
   const avgPowerDecibels = 10 * Math.log10(sumOfSquares / this.sampleBuffer.length);*/
   
   // Compute peak instantaneous power over the interval.
-  let peakInstantaneousPower = 0;
-  for (let i = 0; i < this.sampleBuffer.length; i++) {
-    const power = this.sampleBuffer[i] ** 2;
-    peakInstantaneousPower = Math.max(power, peakInstantaneousPower);
+  this.peakInstantaneousPower = 0;
+  for (this.update_i = 0; this.update_i < this.sampleBuffer.length; this.update_i++) {
+    this.peakInstantaneousPower = Math.max(this.sampleBuffer[this.update_i] ** 2, this.peakInstantaneousPower);
   }
-  const peakInstantaneousPowerDecibels = 10 * Math.log10(peakInstantaneousPower);
+  this.peakInstantaneousPowerDecibels = 10 * Math.log10(this.peakInstantaneousPower);
   
-  this.channelMasks[0].style.height = this.maskSize(peakInstantaneousPowerDecibels, this.height) + 'px';
+  this.channelMasks[0].style.height = this.maskSize(this.peakInstantaneousPowerDecibels, this.height) + 'px';
   
 };
 
