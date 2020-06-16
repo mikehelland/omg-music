@@ -1,6 +1,7 @@
 {
     "activities": [
 		{"name": "Music", "url": "remixer/", "edits": ["SONG"]},
-		{"name": "Embedded Music Viewer", "url": "js/omusic-embed.js", "embeds": ["SONG"]}
+		{"name": "Embedded Music Viewer", "url": "js/omusic-embed.js", "embeds": ["SONG"]},
+		{"name": "Music Socket Message Handler", "url": "server.js", "socketHandler": ["SONG"]}
 	]
 }

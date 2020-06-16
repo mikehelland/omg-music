@@ -1,13 +1,15 @@
-var omg = {}
-omg.live = {}
-omg.live.getPart = function (song, partName) {
-    for (var i = 0; i < song.sections[0].parts.length; i++) {
-        if (song.sections[0].parts[i].name === partName) {
-            return song.sections[0].parts[i];
+module.exports = function (data, song, passOn) {
+
+    passOn(data)
+
+    var getPart = function (song, partName) {
+        for (var i = 0; i < song.sections[0].parts.length; i++) {
+            if (song.sections[0].parts[i].name === partName) {
+                return song.sections[0].parts[i];
+            }
         }
-    }
-};
-omg.live.updateSong = function (song, data) {
+    };
+
     if (data.action === "partAdd") {
         song.sections[0].parts.push(data.part);
     }
@@ -26,7 +28,7 @@ omg.live.updateSong = function (song, data) {
         song.sections[0].chordProgression = data.value;
     }
     else if (data.property === "audioParams" && data.partName) {
-        let part = omg.live.getPart(song, data.partName);
+        let part = getPart(song, data.partName);
         if (!part) return;
         part.audioParams.mute = data.value.mute;
         part.audioParams.gain = data.value.gain;
@@ -34,14 +36,14 @@ omg.live.updateSong = function (song, data) {
         part.audioParams.warp = data.value.warp;
     }
     else if (data.action === "sequencerChange") {
-        let part = omg.live.getPart(song, data.partName);
+        let part = getPart(song, data.partName);
         part.tracks[data.trackI].data[data.subbeat] = data.value;
     }
     else if (data.action === "verticalChangeNotes") {
         //tg.omglive.onVerticalChangeFrets(data);
     }
     else if (data.action === "fxChange") {
-        let part = data.partName ? omg.live.getPart(song, data.partName) : song;
+        let part = data.partName ? getPart(song, data.partName) : song;
         if (data.fxAction === "add") {
             part.fx.push(data.fxData)
         }
@@ -64,4 +66,4 @@ omg.live.updateSong = function (song, data) {
             }
         }
     }
-};
+}
