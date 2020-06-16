@@ -96,7 +96,7 @@ tg.getSong = function (callback) {
                 tg.remoteTo = param.split("=")[1];
                 blank = true
             }
-            else if (param.startsWith("join=")) {
+            else if (param.startsWith("room=")) {
                 tg.joinLiveRoom = param.split("=")[1];
                 blank = true
             }

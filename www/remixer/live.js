@@ -7,7 +7,7 @@ if (typeof tg !== "object") var tg = {};
 tg.omglive = {
     setup: function (callback) {
         
-        if (typeof io !== "undefined") {
+        if (typeof OMGRealTime !== "undefined") {
             callback();
             return;
         }
@@ -15,7 +15,7 @@ tg.omglive = {
         tg.omglive.username = tg.user ? tg.user.username : "guest" + (Math.round(Math.random() * 1000))
         
         var scriptTag = document.createElement("script");
-        scriptTag.src = "/js/socketio.js";
+        scriptTag.src = "/js/omgrtc.js";
         scriptTag.async = false;
         scriptTag.onload = callback;
         document.body.appendChild(scriptTag);    
@@ -56,7 +56,7 @@ tg.omglive = {
     },
     turnOn: function (action, callback) {
 
-        if (typeof io === "undefined") {
+        if (typeof OMGRealTime === "undefined") {
             tg.omglive.setup(function () {
                 tg.omglive.turnOn(action, callback);
             });
@@ -73,45 +73,60 @@ tg.omglive = {
         
         var url = window.location.origin.replace("http:", "https:");
 
-        tg.omglive.socket = io(url + "/omg-live");
-
+        tg.omglive.socket = new OMGRealTime()
+        
         tg.omglive.socket.on("data", function (data) {
             tg.omglive.ondata(data);
         });
         tg.omglive.socket.on("chat", function (data) {
             tg.omglive.onchat(data);
         });
-        tg.omglive.socket.on("join", function (data) {
+        tg.omglive.socket.onjoined = function (data) {
             tg.omglive.onjoin(data);
-        });
+        };
+        tg.omglive.socket.onnewuser = function (name, data) {
+            tg.omglive.onchat({text: "User joined: " + name});
+        };
+        tg.omglive.socket.onuserleft = function (name) {
+            tg.omglive.onchat({text: "User left: " + name});
+        };
+        tg.omglive.socket.onuserdisconnected = function (name) {
+            tg.omglive.onchat({text: "User disconnected: " + name});
+        };
         
         tg.sequencer.onchange = tg.omglive.onSequencerChangeListener;
         tg.instrument.onchange = tg.omglive.onVerticalChangeListener;
     
         tg.onLoadSongListeners.push(tg.omglive.onLoadSongListener);
 
-        callback();
+        tg.omglive.socket.onready = () => {
+            callback();
+        }
     },
     goLive: function (callback) {
+        tg.omglive.sendDataToRoom = true
+        tg.omglive.sendDataTo = undefined
         tg.omglive.turnOn("goLive", function () {
-            tg.omglive.socket.emit("startSession", 
-                {room: tg.omglive.username, user: tg.omglive.username, song: tg.song.getData()});            
+            var roomName = location.pathname + "?room=" + tg.omglive.username
+            tg.omglive.socket.join(roomName, tg.omglive.username, tg.song.getData());            
             if (callback) callback()
         })
     },
     join: function (roomName, callback) {
+        tg.omglive.sendDataToRoom = true
+        tg.omglive.sendDataTo = undefined
+        
         tg.joinLiveRoom = roomName
+        roomName = location.pathname + "?room=" + roomName
         tg.omglive.joinCallback = callback
         if (tg.omglive.socket) {
             tg.omglive.removeListeners();
-            tg.omglive.socket.emit("leaveSession", {});
-            tg.omglive.socket.emit("joinSession", 
-                {room: roomName, user: tg.omglive.username});
+            tg.omglive.socket.leave();
+            tg.omglive.socket.join(roomName, tg.omglive.username);
         }
         else {
             tg.omglive.turnOn("join", function () {
-                tg.omglive.socket.emit("joinSession", 
-                    {room: roomName, user: tg.omglive.username});
+                tg.omglive.socket.join(roomName, tg.omglive.username);
             })    
         }
     }
@@ -244,7 +259,15 @@ tg.omglive.onreadyrtc = function(rtcdatachannel) {
 
 var peerId = "";
 
-
+tg.omglive.emit = (type, data) => {
+    if (tg.omglive.sendDataToRoom) {
+        data.room = true
+    }
+    else {
+        // todo send to one host
+    }
+    tg.omglive.socket.emit(type, data)
+}
 
 tg.omglive.setupListeners = function () {
     tg.player.onPlayListeners.push(tg.omglive.onPlayListener);
@@ -276,7 +299,7 @@ tg.omglive.onLoadSongListener = function (source) {
 
     tg.omglive.setupListeners();
 
-    tg.omglive.socket.emit("data", {
+    tg.omglive.emit("data", {
         action: "loadSong", 
         value: tg.song.getData()
     });
@@ -285,7 +308,7 @@ tg.omglive.onLoadSongListener = function (source) {
 tg.omglive.onFXChangeListener = function (action, part, fx, source) {
     if (source === "omglive") return;
 
-    tg.omglive.socket.emit("data", {
+    tg.omglive.emit("data", {
         action: "fxChange",
         fxAction: action, 
         partName: part === tg.song ? undefined : part.data.name,
@@ -297,7 +320,7 @@ tg.omglive.onFXChangeListener = function (action, part, fx, source) {
 tg.omglive.onBeatChangeListener = function (beatParams, source) {
     if (source === "omglive") return;
 
-    tg.omglive.socket.emit("data", {
+    tg.omglive.emit("data", {
         property: "beatParams", 
         value: beatParams
     });
@@ -306,7 +329,7 @@ tg.omglive.onBeatChangeListener = function (beatParams, source) {
 tg.omglive.onKeyChangeListener = function (keyParams, source) {
     if (source === "omglive") return;
 
-    tg.omglive.socket.emit("data", {
+    tg.omglive.emit("data", {
         property: "keyParams", 
         value: keyParams
     });
@@ -315,7 +338,7 @@ tg.omglive.onKeyChangeListener = function (keyParams, source) {
 tg.omglive.onChordProgressionChangeListener = function (source) {
     if (source === "omglive") return;
 
-    tg.omglive.socket.emit("data", {
+    tg.omglive.emit("data", {
         property: "chordProgression", 
         value: tg.currentSection.data.chordProgression
     });
@@ -324,7 +347,7 @@ tg.omglive.onChordProgressionChangeListener = function (source) {
 tg.omglive.onPartAudioParamsChangeListener = function (part, source) {
     if (source === "omglive") return;
 
-    tg.omglive.socket.emit("data", {
+    tg.omglive.emit("data", {
         property: "audioParams", 
         partName: part.data.name,
         value: part.data.audioParams
@@ -334,7 +357,7 @@ tg.omglive.onPartAudioParamsChangeListener = function (part, source) {
 tg.omglive.onPartAddListener = function (part, source) {
     if (source === "omglive") return;
 
-    tg.omglive.socket.emit("data", {
+    tg.omglive.emit("data", {
         action: "partAdd", 
         part: part.data,
     });
@@ -348,7 +371,7 @@ tg.omglive.onSequencerChangeListener = function (part, trackI, subbeat) {
         trackI: trackI,
         subbeat: subbeat
     };
-    tg.omglive.socket.emit("data", data);
+    tg.omglive.emit("data", data);
 };
 
 tg.omglive.onVerticalChangeListener = function (part, frets, autobeat) {
@@ -363,14 +386,14 @@ tg.omglive.onVerticalChangeListener = function (part, frets, autobeat) {
     }
     
     if (tg.omglive.calculateNotesLocally) {
-        tg.omglive.socket.emit("data", {
+        tg.omglive.emit("data", {
             action: "verticalChangeNotes", 
             partName: part.data.name,
             value: part.data.notes
         });
     }
     else {
-        tg.omglive.socket.emit("data", {
+        tg.omglive.emit("data", {
             action: "verticalChangeFrets", 
             partName: part.data.name,
             value: frets,
@@ -386,12 +409,13 @@ tg.omglive.onPlayListener = function (play) {
     var data = {
         action: play ? "play" : "stop"
     };
-    tg.omglive.socket.emit("data", data);
+    tg.omglive.emit("data", data);
 };
 
 tg.omglive.onjoin = function (data) {
-    if (data.song && (tg.remoteTo || tg.joinLiveRoom)) {
-        tg.loadSong(data.song, "omglive", tg.omglive.joinCallback);
+    tg.omglive.onchat({text: Object.keys(data.users).length + " users here"})
+    if (data.thing && (tg.remoteTo || tg.joinLiveRoom)) {
+        tg.loadSong(data.thing, "omglive", tg.omglive.joinCallback);
         tg.omglive.joinCallback = undefined
     }
     if (data.offer) {
@@ -571,7 +595,7 @@ tg.omglive.getRoomNamePart = function (part) {
 tg.omglive.switchRoom = function (newRoom) {
     if (tg.omglive.socket) {
         tg.omglive.socket.emit("leaveSession", {room: tg.liveRoom, user: tg.omglive.username});
-        tg.omglive.socket.emit("startSession", {room: newRoom, user: tg.omglive.username, song: tg.song.getData()});
+        tg.omglive.socket.join(newRoom, tg.omglive.username, tg.song.getData());
     }
     tg.liveRoom = newRoom;
 };
@@ -579,19 +603,21 @@ tg.omglive.switchRoom = function (newRoom) {
 tg.omglive.switchRoomPart = function (part, newRoom) {
     part.socket.emit("leaveSession", {room: part.liveRoom, user: tg.omglive.username});
     part.liveRoom = newRoom;
-    part.socket.emit("startSession", {room: part.liveRoom, user: tg.omglive.username});
+    part.socket.join(part.liveRoom, tg.omglive.username);
 };
 
 tg.omglive.chat = function (text) {
     if (!text) return;
     tg.omglive.socket.emit("chat", {
         user: tg.omglive.username, 
-        text: text
+        text: text,
+        room: true
     });
+    tg.omglive.onchat({text: text, user: tg.omglive.username})
 };
 
 tg.omglive.sendPlaySound = function (noteNumber, strength, part) {
-    tg.omglive.socket.emit("data", {
+    tg.omglive.emit("data", {
         action: "playSound",
         partName: part.data.name,
         user: tg.omglive.username, 

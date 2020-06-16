@@ -1499,7 +1499,7 @@ tg.partOptionsFragment.tabs.options.setup = function () {
     
     f.liveModeButton.onclick = function () {
         if (ff.part.omglive) {
-            ff.part.socket.disconnect()
+            ff.part.socket.leave()
             ff.part.omglive = null;
             f.setLiveModeUI();
         }
@@ -2838,7 +2838,7 @@ tg.liveFragment.setup = function () {
 
     f.liveModeButton.onclick = function () {
         if (tg.omglive.socket) {
-            tg.omglive.socket.disconnect();
+            tg.omglive.socket.leave();
             tg.omglive.socket = null;
             f.setLiveModeUI();
         }
@@ -2865,7 +2865,7 @@ tg.liveFragment.setup = function () {
             f.chatInput.style.display = "block";
             
             f.connectedTo.innerHTML = "Connected to <b>" + tg.joinLiveRoom + "</b>"
-            f.liveUrlInput.value = window.location.origin + "/create/?join=" + encodeURIComponent(tg.omglive.username);
+            f.liveUrlInput.value = location.origin + location.pathname + "?room=" + encodeURIComponent(tg.omglive.username);
         }
         else {
             f.connectedTo.innerHTML = "Disconnected from <b>" + tg.joinLiveRoom + "</b>"
