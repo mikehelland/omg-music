@@ -103,6 +103,11 @@ tg.getSong = function (callback) {
             else if (param === "goLive") {
                 tg.goLive = true
             }
+            else if (param.startsWith("use")) {
+                //todo this param gonna have to be parse to an array
+                tg.use = [param.split("=")[1]];
+                blank = true
+            }
         });
     }
 

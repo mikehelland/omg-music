@@ -808,6 +808,12 @@ OMusicPlayer.prototype.makeOsc = function (part) {
 };
 
 OMusicPlayer.prototype.makeSynth = function (part) {
+
+    // todo download??
+    if (typeof Synth === "undefined") {
+        return this.makeOsc(part)
+    }
+
     part.synth = new Synth(this.context, part.data.soundSet.patch)
     patch = patchLoader.load(part.data.soundSet.patch)
     part.synth.loadPatch(patch.instruments.synth)

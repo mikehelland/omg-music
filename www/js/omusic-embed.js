@@ -1,6 +1,11 @@
 function OMGEmbeddedViewerMusic(viewer) {
     this.canvas = document.createElement("canvas")
     this.canvas.className = "omg-viewer-canvas"
+
+    if (viewer.params && viewer.params.maxHeight) {
+        this.canvas.style.height = viewer.params.maxHeight + "px"
+    }
+
     viewer.embedDiv.appendChild(this.canvas)
 
     this.data = viewer.data

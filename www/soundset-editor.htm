@@ -2,7 +2,7 @@
 <html>
     <head>
 
-        <link rel="stylesheet" href="css/main.css" type="text/css" />
+        <link rel="stylesheet" href="/css/main.css" type="text/css" />
 
         <style>
             .url-input {width: 300px;}
@@ -39,8 +39,8 @@
     <body>
 
         <header>
-            <a class="main-page-link" href="index.htm">
-                <span class="main-title-open">Open</span><span class="main-title-media">Music</span><span class="main-title-gallery">.Gallery</span>
+            <a class="main-page-link" href="/index.htm">
+                <span class="main-title-open">Open</span><span class="main-title-media">Media</span><span class="main-title-gallery">.Gallery</span>
             </a>
             <div class="title-bar-user-controls"></div>
         </header>
@@ -107,9 +107,9 @@
 
         </div>
 
-        <script src="js/usercontrols.js"></script>
+        <script src="/js/usercontrols.js"></script>
 
-        <script src="js/omgservice.js"></script>
+        <script src="/js/omgservice.js"></script>
         <script>
 var inputsDiv = document.getElementById("inputs")
 var inputs = {name: document.getElementById("soundset-name"),
@@ -144,8 +144,8 @@ var setInputs = (data) => {
     inputs.chromatic.checked = data.chromatic
     inputs.lowNote.selectedIndex = data.lowNote - 9
     inputs.defaultSurface.value = data.defaultSurface
-    inputs.prefix.value = data.prefix
-    inputs.postfix.value = data.postfix
+    inputs.prefix.value = data.prefix || ""
+    inputs.postfix.value = data.postfix || ""
 
     setList(data)
 }

@@ -913,6 +913,9 @@ tg.addPartFragment.setup = function () {
         json.forEach(function (source) {
             sources.push(source)
         })
+        if (location.hostname === "localhost") {
+            sources.push({name: "dev", url: "/data/?type=SOUNDSET"})
+        }
         var i = 0;
         sources.forEach((function (source) {
             var option = document.createElement("option");
@@ -1099,6 +1102,8 @@ tg.addPart = function (soundSet, source) {
     var part = new OMGPart(undefined,blankPart,tg.currentSection);
     tg.player.loadPart(part, undefined, () => tg.song.partAdded(part, source));
     if (tg.presentationMode) tg.presentationFragment.addPart(part);
+
+    return part
 };
 
 tg.addOsc = function (type, source) {
@@ -3321,6 +3326,19 @@ moreScripts.forEach(script => {
     document.body.appendChild(scriptTag);
 });
 
-if (window.innerWidth > window.innerHeight && !tg.singlePanel && !tg.joinLiveRoom && !tg.goLive) {
+if (tg.use) {
+    tg.use.forEach(id => {
+        omg.server.getId(id, result => {
+            if (result.type === "SOUNDSET") {
+                var part = tg.addPart(result)
+                part.mainFragmentButtonOnClick();
+            }
+        })
+    })
+}
+else if (window.innerWidth > window.innerHeight && !tg.singlePanel && !tg.joinLiveRoom && !tg.goLive) {
     tg.helpFragment.button.onclick();
 }
+
+
+
