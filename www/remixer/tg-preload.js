@@ -146,11 +146,11 @@ tg.preloadSong = function (songData) {
 tg.makeChordsCaption = function (chordI) {
     var chordsCaption = "";
     tg.currentSection.data.chordProgression.forEach(function (chordI, i) {
-        if (tg.player && tg.player.playing && i === tg.player.currentChordI) {
+        if (tg.player && tg.player.playing && i === tg.currentSection.currentChordI) {
             chordsCaption += "<span class='current-chord'>";
         }
         chordsCaption += tg.makeChordCaption(chordI);
-        if (tg.player && tg.player.playing && i === tg.player.currentChordI) {
+        if (tg.player && tg.player.playing && i === tg.currentSection.currentChordI) {
             chordsCaption += "</span>";
         }
         chordsCaption += " "

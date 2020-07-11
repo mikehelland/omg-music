@@ -89,7 +89,7 @@ OMusicPlayer.prototype.play = function (song) {
     
     p.nextBeatTime = p.context.currentTime + (p.latency / 1000);
 
-    p.currentChordI = 0;
+    p.section.currentChordI = 0;
     p.rescaleSection(p.section, p.section.data.chordProgression[0]);
 
     if (typeof (p.onPlay) == "function") {
@@ -127,8 +127,8 @@ OMusicPlayer.prototype._play = function () {
         p.sectionI = p.loopSection;
     }
     
-    if (p.section.chord !== p.section.data.chordProgression[p.currentChordI]) {
-        p.rescaleSection(p.section, p.section.data.chordProgression[p.currentChordI]);
+    if (p.section.chord !== p.section.data.chordProgression[p.section.currentChordI]) {
+        p.rescaleSection(p.section, p.section.data.chordProgression[p.section.currentChordI]);
     }
 
     p.playBeat(p.section, p.iSubBeat);
@@ -244,15 +244,15 @@ OMusicPlayer.prototype.afterSection = function () {
 
     var nextChord = false;
     if (p.section.data.chordProgression) {
-        p.currentChordI++;
-        if (p.currentChordI < p.section.data.chordProgression.length) {
+        p.section.currentChordI++;
+        if (p.section.currentChordI < p.section.data.chordProgression.length) {
             nextChord = true;
         }
         else {
-            p.currentChordI = 0;
+            p.section.currentChordI = 0;
         }
-        if (p.section.chord !== p.section.data.chordProgression[p.currentChordI]) {
-            p.rescaleSection(p.section, p.section.data.chordProgression[p.currentChordI]);
+        if (p.section.chord !== p.section.data.chordProgression[p.section.currentChordI]) {
+            p.rescaleSection(p.section, p.section.data.chordProgression[p.section.currentChordI]);
         }
     }
 
@@ -392,6 +392,8 @@ OMusicPlayer.prototype.stop = function () {
 };
 
 OMusicPlayer.prototype.loadSection = function (section, soundsNeeded) {
+    section.currentChordI = 0
+
     var part;
     for (var ipart = 0; ipart < section.parts.length; ipart++) {
         part = section.parts[ipart];
@@ -960,6 +962,7 @@ OMusicPlayer.prototype.rescale = function (part, keyParams, chord, soundsNeeded)
     }
 };
 
+//todo this has been moved to OMGPart so delete it
 OMusicPlayer.prototype.setupPartWithSoundSet = function (ss, part, load) {
     var p = this;
 
@@ -1248,7 +1251,7 @@ OMusicPlayer.prototype.getTotalSubbeats = function () {
 
 OMusicPlayer.prototype.rescaleSection = function (section, chord) {
     if (typeof chord !== "number") {
-        chord = section.data.chordProgression[this.currentChordI];
+        chord = section.data.chordProgression[this.section.currentChordI];
     }
     var p = this;
     section.parts.forEach(function (part) {

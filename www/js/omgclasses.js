@@ -1,3 +1,4 @@
+// todo see how many places call new OMGSong and remove the div parameter
 function OMGSong(div, data, headerOnly) {
     this.div = div;
     this.sections = [];
@@ -21,7 +22,7 @@ function OMGSong(div, data, headerOnly) {
         this.data = {type: "SONG", name: ""};
         new OMGSection(null, data, this);
     }
-    else if (data.type == "PART") {
+    else if (data.type === "PART") {
         this.data = {type: "SONG", name: ""};
         new OMGPart(null, data, new OMGSection(null, null, this));
     }
@@ -139,11 +140,11 @@ OMGSong.prototype.make = function (data) {
 
     var className = data.constructor.name;
 
-    if (className == "OMGSong") {
+    if (className === "OMGSong") {
         return data;
     }
 
-    if (className == "OMGPart") {
+    if (className === "OMGPart") {
 
         newSong = new OMGSong();
         newSection = new OMGSection(null, null, newSong);
@@ -157,7 +158,7 @@ OMGSong.prototype.make = function (data) {
         return newSong;
     }
 
-    if (className == "OMGSection") {
+    if (className === "OMGSection") {
 
         newSong = new OMGSong();
         newSong.sections.push(data);
@@ -175,28 +176,36 @@ OMGSong.prototype.make = function (data) {
     }
 
     var newSong;
-    if (data.type == "SONG") {
+    if (data.type === "SONG") {
         newSong = new OMGSong(null, data);
         return newSong;
     }
 
-    if (data.type == "SECTION") {
+    if (data.type === "SECTION") {
         //newSong = new OMGSong();
         newSection = new OMGSection(null, data);
         return newSection.song;
     }
 
-    if (data.type == "PART") {
+    if (data.type === "PART") {
         newPart = new OMGPart(null, data);
         return newPart.section.song;
     }
 
-    if (data.type == "SOUNDSET") {
+    if (data.type === "SOUNDSET") {
         newPart = new OMGPart(null, {soundSet: data});
         return newPart.section.song;
     }
 
     return null;
+}
+
+OMGSong.prototype.rescale = function () {
+
+    for (var i = 0; i < this.sections.length; i++) {
+        this.sections[i].rescale()
+    }
+
 }
 
 function OMGSection(div, data, song) {
@@ -251,6 +260,9 @@ function OMGSection(div, data, song) {
         this.data.chordProgression = [0];
     }
 
+    if (!this.data.parts) {
+        this.data.parts = []
+    }
     for (var ip = 0; ip < this.data.parts.length; ip++) {
         partData = this.data.parts[ip];
         part = new OMGPart(null, partData, this);
@@ -277,6 +289,14 @@ OMGSection.prototype.getPart = function (partName) {
         }
     }
 };
+
+OMGSection.prototype.rescale = function (chord) {
+
+    for (var i = 0; i < this.parts.length; i++) {
+        this.parts[i].rescale(this.song.data.keyParams, chord || 0)
+    }
+
+}
 
 function OMGPart(div, data, section) {
     this.div = div;
@@ -324,6 +344,8 @@ function OMGPart(div, data, section) {
             octave: 5
         };
     }
+
+    this.setupSoundSet()
     
     if (!this.data.name) {
         this.data.name = this.data.soundSet.name;
@@ -416,6 +438,7 @@ OMGPart.prototype.makeTracks = function () {
     }
 };
 
+// one for OMGSong and one for OMGPart
 OMGSong.prototype.getFX = function (name) {
     for (var ip = 0; ip < this.fx.length; ip++) {
         if (this.fx[ip].data.name === name) {
@@ -429,4 +452,65 @@ OMGPart.prototype.getFX = function (name) {
             return this.fx[ip];
         }
     }
+};
+
+OMGPart.prototype.rescale = function (keyParams, chord) {
+
+    var data = this.data;
+    if (!data || !data.notes) {
+        return;
+    }
+
+    if (typeof data.soundSet.octave !== "number") {
+
+    }
+
+    var octave = data.soundSet.octave;
+    var octaves2;
+    var newNote;
+    var onote;
+
+    for (var i = 0; i < data.notes.length; i++) {
+        onote = data.notes[i];
+        if (onote.rest || 
+                typeof onote.note !== "number" || 
+                onote.note !== Math.round(onote.note)) {
+            continue;
+        }
+
+        newNote = onote.note + chord;
+        octaves2 = 0;
+        while (newNote >= keyParams.scale.length) {
+            newNote = newNote - keyParams.scale.length;
+            octaves2++;
+        }
+        while (newNote < 0) {
+            newNote = newNote + keyParams.scale.length;
+            octaves2--;
+        }
+
+        newNote = keyParams.scale[newNote] + octaves2 * 12 + 
+                octave * 12 + keyParams.rootNote;
+
+        onote.scaledNote = newNote;
+
+    }
+};
+
+OMGPart.prototype.setupSoundSet = function () {
+    
+    let ss = this.data.soundSet
+    if (!ss)
+        return;
+
+    var topNote = ss.highNote;
+    if (!topNote && ss.data.length) {
+        topNote = ss.lowNote + ss.data.length - 1;
+    }
+    if (!ss.octave) {
+        ss.octave = Math.floor((topNote + ss.lowNote) / 2 / 12);
+    }
+
+    // do we really need this? It's used... but shouldn't be
+    this.soundSet = ss;
 };

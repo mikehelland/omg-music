@@ -13,7 +13,11 @@ function OMGEmbeddedViewerMusic(viewer) {
 
     viewer.loadScriptsForType(
         ["/apps/music/js/omgclasses.js",
-        "/apps/music/js/omgservice_music.js"],
+        "/apps/music/js/omgservice_music.js",
+        "/apps/music/js/libs/tuna-min.js", //todo you know you wanna squelch this bloat
+        "/apps/music/js/omusic_player.js",
+        "/apps/music/js/fx.js",
+        "/apps/music/js/libs/viktor/viktor.js"],
         this.data.type,
         () => {
             this.song = OMGSong.prototype.make(this.data);
@@ -62,26 +66,6 @@ OMGEmbeddedViewerMusic.prototype.playButtonClick = function (data) {
     }
 
     if (!this.player) {
-        if (typeof OMusicPlayer === "undefined") {
-            var scripts = ["/apps/music/js/libs/tuna-min.js",
-                            "/apps/music/js/omusic_player.js",
-                            "/apps/music/js/fx.js",
-                            "/apps/music/js/libs/viktor/viktor.js"
-                        ]
-            var downloaded = 0
-            scripts.forEach(scriptUrl => {
-                var script = document.createElement("script")
-                script.src = scriptUrl
-                script.async = false
-                script.onload = () => {
-                    if (scripts.length === ++downloaded) {
-                        createPlayer()
-                    }
-                }
-                document.body.appendChild(script)
-            })
-            return
-        }
         createPlayer()
         return
     }
@@ -138,9 +122,8 @@ OMGEmbeddedViewerMusic.prototype.getDrawingData = function () {
         var chordedData = [];
         chordedData.sectionName = section.data.name;
         for (var ic = 0; ic < section.data.chordProgression.length; ic++) {
-            if (viewer.player) { //todo make this work without a player? maybe just move up and down
-                viewer.player.rescaleSection(section, section.data.chordProgression[ic]);            
-            }
+            section.rescale(section.data.chordProgression[ic])
+            
             var sectionData = viewer.getSectionDrawingData(section);
             chordedData.push(sectionData);
         }

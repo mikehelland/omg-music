@@ -1493,7 +1493,7 @@ tg.partOptionsFragment.tabs.options.setup = function () {
         if (ff.part.data.surface.url === "PRESET_VERTICAL") {
             ff.part.data.notes = tg.monkey.newMelody();
             tg.player.rescale(ff.part, tg.song.data.keyParams, 
-                tg.currentSection.data.chordProgression[tg.player.currentChordI]);
+                tg.currentSection.data.chordProgression[tg.currentSection.currentChordI]);
         }
         else {
             tg.monkey.getRandomElement(tg.monkey.getSequencerFunctions(ff.part))();
