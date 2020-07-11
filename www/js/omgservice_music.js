@@ -1,7 +1,9 @@
 if (!omg.ui)
     omg.ui = {};
 
-omg.ui.omgUrl = "/omg-music/"; // omg-music/";
+//todo is this the best spot for this?
+//if so player should use it to load its sub-scripts  
+omg.ui.omgUrl = "/apps/music/"; 
 
 omg.ui.noteImageUrls = [[2, "note_half", "note_rest_half"],
     [1.5, "note_dotted_quarter", "note_rest_dotted_quarter"],
