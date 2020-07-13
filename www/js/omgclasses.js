@@ -73,6 +73,8 @@ function OMGSong(div, data, headerOnly) {
     this.onFXChangeListeners = [];
 };
 
+console.log("OMGSong defined", OMGSong)
+
 OMGSong.prototype.keyChanged = function (source) {
     var song = this;
     this.onKeyChangeListeners.forEach(listener => listener(song.data.keyParams, source));
