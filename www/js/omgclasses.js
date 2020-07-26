@@ -73,8 +73,6 @@ function OMGSong(div, data, headerOnly) {
     this.onFXChangeListeners = [];
 };
 
-console.log("OMGSong defined", OMGSong)
-
 OMGSong.prototype.keyChanged = function (source) {
     var song = this;
     this.onKeyChangeListeners.forEach(listener => listener(song.data.keyParams, source));
@@ -502,7 +500,7 @@ OMGPart.prototype.rescale = function (keyParams, chord) {
 OMGPart.prototype.setupSoundSet = function () {
     
     let ss = this.data.soundSet
-    if (!ss)
+    if (!ss || !ss.data)
         return;
 
     var topNote = ss.highNote;
