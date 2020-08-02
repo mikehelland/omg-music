@@ -109,7 +109,9 @@
 
         <script src="/js/usercontrols.js"></script>
 
-        <script src="/js/omgservice.js"></script>
+        <script src="/js/omgservice.js"></script>    
+
+
         <script>
 var inputsDiv = document.getElementById("inputs")
 var inputs = {name: document.getElementById("soundset-name"),
@@ -362,13 +364,19 @@ var remove = function (item) {
     setList(soundset)
 }
         </script>
+
+
+
         <script>
-            var userControls = document.getElementsByClassName("title-bar-user-controls")[0]
-            setupUserControls(userControls, setupPage, () => {
-                document.getElementsByClassName("main-body")[0].innerHTML = 
-                    "<h3>To Add / Edit a sound set please " + userControls.innerHTML + "</h3>"
-            });
+            omg.server.getUser(user => {
+                if (!user) {
+                    window.location = "/signin.htm?fwd=" + encodeURIComponent(window.location.href)
+                }
+                else {
+                    setupPage()
+                }
+            })
         </script>
-    
+
     </body>
 </html>

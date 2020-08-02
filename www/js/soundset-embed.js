@@ -84,7 +84,7 @@ OMGEmbeddedViewerSOUNDSET.prototype.loadSoundSet = function (data, parentDiv) {
             isPlaying = !isPlaying
         }
         this.audioSamples.push({div: div, audio: audio})
-        this.viewer.divDataMap.set(div, item)
+        this.viewer.divDataMap.set(div, {item: item, soundset: data, src: link.src})
     })
 }
 
