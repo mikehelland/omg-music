@@ -1100,7 +1100,8 @@ tg.addPart = function (soundSet, source) {
     var names = tg.currentSection.parts.map(section => section.data.name);
     blankPart.name = omg.util.getUniqueName(soundSet.name, names);
     var part = new OMGPart(undefined,blankPart,tg.currentSection);
-    tg.player.loadPart(part, undefined, () => tg.song.partAdded(part, source));
+    tg.player.loadPart(part)
+    tg.song.partAdded(part, source);
     if (tg.presentationMode) tg.presentationFragment.addPart(part);
 
     return part
@@ -2741,7 +2742,12 @@ tg.micFragment.setup = function () {
 
 tg.micFragment.onshow = function (part) {
     this.part = part
-    this.mediaRecorder = new MediaRecorder(part.inputSource.mediaStream)
+    if (part.inputSource) {
+        this.mediaRecorder = new MediaRecorder(part.inputSource.mediaStream)
+    }
+    else {
+        part.onmediastream = stream => this.mediaRecorder = new MediaRecorder(part.inputSource.mediaStream)
+    }
     this.listFooter.style.display = 
             (this.part.data.soundSet.data && this.part.data.soundSet.data.length > 0) ? 
             "block" : "none"

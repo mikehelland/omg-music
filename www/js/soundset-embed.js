@@ -1,4 +1,5 @@
 function OMGEmbeddedViewerSOUNDSET(viewer) {
+    this.viewer = viewer
     this.playChar = "&nbsp;&#9654;"
     this.stopChar = "&#9724;"
     viewer.embedDiv.style.display = "flex"
@@ -42,6 +43,7 @@ if (typeof omg === "object" && omg.types && omg.types["SOUNDSET"])
 
 OMGEmbeddedViewerSOUNDSET.prototype.loadSoundSet = function (data, parentDiv) {
     this.audioSamples = []
+    this.viewer.divDataMap = new Map()
     data.data.forEach((item) => {
         var div = document.createElement("div")
         var audio = document.createElement("audio")
@@ -82,6 +84,7 @@ OMGEmbeddedViewerSOUNDSET.prototype.loadSoundSet = function (data, parentDiv) {
             isPlaying = !isPlaying
         }
         this.audioSamples.push({div: div, audio: audio})
+        this.viewer.divDataMap.set(div, item)
     })
 }
 

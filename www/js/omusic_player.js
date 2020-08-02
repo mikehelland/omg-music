@@ -401,7 +401,7 @@ OMusicPlayer.prototype.loadSection = function (section, soundsNeeded) {
     }
 };
 
-OMusicPlayer.prototype.loadPart = function (part, soundsNeeded, callback) {
+OMusicPlayer.prototype.loadPart = function (part, soundsNeeded, onload) {
     var p = this;
 
     if (!part.panner && !this.disableAudio) {
@@ -416,18 +416,26 @@ OMusicPlayer.prototype.loadPart = function (part, soundsNeeded, callback) {
 
     if (part.data.surface.url === "PRESET_SEQUENCER") {
         this.loadDrumbeat(part, soundsNeeded);
-        if (callback) callback()
     } else if (part.data.surface.url === "PRESET_MIC") {
-        this.loadMic(part, callback)
+        this.loadMic(part)
         download = false
     } else {
         this.loadMelody(part, soundsNeeded);
-        if (callback) callback()
     }
     
     if (download) {
+        let downloadsLeft = Object.keys(soundsNeeded).length
+
+        if (downloadsLeft === 0) {
+            onload()
+        }
         for (var sound in soundsNeeded) {
-            p.loadSound(sound);
+            p.loadSound(sound, () => {
+                downloadsLeft--
+                if (downloadsLeft === 0 && onload) {
+                    onload()
+                }
+            });
         }
     }
 };
@@ -580,6 +588,7 @@ OMusicPlayer.prototype.prepareSong = function (song, callback) {
         }
         else {
             p.song = song;
+            p.section = song.sections[0]
         }
         if (callback) callback();
     };
@@ -1478,20 +1487,34 @@ OMusicPlayer.prototype.mutePart = function (part, mute) {
     }
 };
 
-OMusicPlayer.prototype.getSound = function (partName, soundName) {
-    var part = this.getPart(partName);
-    if (!part) {
-        return;
+OMusicPlayer.prototype.getSound = function (part, soundName) {
+    if (typeof part === "string") {
+
+        part = this.getPart(part);
+        if (!part) {
+            return;
+        }
     }
     
-    var p = this;
+    var p = this
     if (part.data.tracks) {
         for (var i = 0; i < part.data.tracks.length; i++) {
             if (part.data.tracks[i].name === soundName) {
                 
                 return {
                     play: function () {
-                        p.playSound(part.data.tracks[i].sound, part);
+                        this.source = p.playSound(part.data.tracks[i].sound, part);
+                    },
+                    stop: function () {
+                        this.source.stop()
+                    },
+                    getBuffer: function () {
+                        let sound = part.data.tracks[i].sound
+                        if (p.loadedSounds[sound] &&
+                            p.loadedSounds[sound] !== "loading") {
+                
+                            return p.loadedSounds[sound];
+                        }
                     }
                 };
             }
@@ -1507,7 +1530,7 @@ OMusicPlayer.prototype.getPart = function (partName) {
     }
 };
 
-OMusicPlayer.prototype.loadMic = function (part, callback) {
+OMusicPlayer.prototype.loadMic = function (part) {
     if (!this.allowMic) {
         return
     }
@@ -1517,7 +1540,10 @@ OMusicPlayer.prototype.loadMic = function (part, callback) {
         if (!part.data.audioParams.mute) {
             part.inputSource.connect(part.preFXGain)
         }
-        if (callback) callback()
+        if (part.onmediastream) {
+            part.onmediastream()
+            part.onmediastream = undefined
+        }
     })
 }
 
