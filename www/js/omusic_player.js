@@ -426,7 +426,7 @@ OMusicPlayer.prototype.loadPart = function (part, soundsNeeded, onload) {
     if (download) {
         let downloadsLeft = Object.keys(soundsNeeded).length
 
-        if (downloadsLeft === 0) {
+        if (downloadsLeft === 0 && onload) {
             onload()
         }
         for (var sound in soundsNeeded) {
