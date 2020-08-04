@@ -201,7 +201,7 @@ tg.getSong(function (song) {
     catch (e) {console.log(e)}
 
     var scriptTag;
-    ["/js/omgservice.js",
+    let scripts = ["/js/omgservice.js",
         "../js/omgservice_music.js",
         "../js/libs/tuna-min.js", 
         "../js/omusic_player.js", 
@@ -209,7 +209,15 @@ tg.getSong(function (song) {
         "../js/fx.js",
         "../js/libs/viktor/viktor.js",
         "tg.js",
-    ].forEach(js => {
+    ]
+    
+    // we might be in an iframe, we can use the omg object to share audio context
+    if (parent && parent.omg) {
+        window.omg = parent.omg
+        scripts.splice(0, 1)
+    }
+
+    scripts.forEach(js => {
         scriptTag = document.createElement("script");
         scriptTag.src = js;
         scriptTag.async = false;
