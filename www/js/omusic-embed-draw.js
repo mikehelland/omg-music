@@ -1,16 +1,20 @@
 function OMGEmbeddedViewerMusicDrawer() {
 }
 
-OMGEmbeddedViewerMusicDrawer.prototype.drawCanvas = function (data, canvas) {
+OMGEmbeddedViewerMusicDrawer.prototype.drawCanvas = function (data, canvas, subbeatsToDraw) {
 
     this.song = data
     this.context = canvas.getContext("2d");
+    canvas.width = canvas.clientWidth
+    canvas.height = canvas.clientHeight
     this.width = canvas.width
     this.height = canvas.height
+    this.canvas = canvas
+
+    this.subbeatsToDraw = subbeatsToDraw
 
     this.getDrawingData();
     this.draw();
-    
 };
 
 OMGEmbeddedViewerMusicDrawer.prototype.getDrawingData = function () {
@@ -18,13 +22,13 @@ OMGEmbeddedViewerMusicDrawer.prototype.getDrawingData = function () {
     var beatParams = this.song.beatParams;
     this.beatParams = beatParams;
     this.totalSubbeats = beatParams.subbeats * beatParams.beats * beatParams.measures;
-    
+
     this.drawingData = {sections: []};
     this.song.sections.forEach(function (section, isection) {
         var chordedData = [];
         chordedData.sectionName = section.name;
         for (var ic = 0; ic < section.chordProgression.length; ic++) {
-            //section.rescale(section.chordProgression[ic])
+            //todo section.rescale(section.chordProgression[ic])
             
             var sectionData = viewer.getSectionDrawingData(section);
             chordedData.push(sectionData);
@@ -61,6 +65,9 @@ OMGEmbeddedViewerMusicDrawer.prototype.getDrawingData = function () {
         this.subbeatLength = this.sectionLength / this.totalSubbeats;
     }
 
+    if (this.subbeatsToDraw) {
+        this.subbeatLength = this.width / this.subbeatsToDraw
+    }
 };
 
 OMGEmbeddedViewerMusicDrawer.prototype.getSectionDrawingData = function (section) {
@@ -110,21 +117,33 @@ OMGEmbeddedViewerMusicDrawer.prototype.draw = function () {
     if (this.predraw) {
         this.predraw();
     }
-    
+
+    this.canvas.width = this.canvas.width
+    var subbeatsDrawn = 0
+
     var noteSize = this.subbeatLength > 30 ? 30 : 20
     var usedBeats;
     var marginX, marginY;
     var value;
+    var subbeatsToDraw
     for (var isection = 0; isection < this.drawingData.sections.length; isection++) {
-        
+    
+        if (!this.subbeatsToDraw) {
+            subbeatsToDraw = this.totalSubbeats
+        }
+        else {
+            subbeatsToDraw = (this.subbeatsToDraw - subbeatsDrawn > this.totalSubbeats) ? this.totalSubbeats : (this.subbeatsToDraw - subbeatsDrawn)
+        }
+        console.log(subbeatsToDraw)
         for (var itrack = this.drawingData.sections[isection].tracks.length - 1; itrack >= 0 ; itrack--) {
-            for (var i = 0; i < this.totalSubbeats; i++) {
+            for (var i = 0; i < subbeatsToDraw; i++) {
                 value = this.drawingData.sections[isection].tracks[itrack].data[i];
                 marginX = 1;
                 marginY = this.trackHeight > 5 ? 1 : 0;
                 if (typeof value === "number" && value > 0 && value < 1) {
                     this.context.fillStyle =  i % this.beatParams.beats == 0 ? "#DDDDDD" : "white";
-                    this.context.fillRect(isection * this.sectionLength + i * this.subbeatLength + marginX, 
+                    //this.context.fillRect(isection * this.sectionLength + i * this.subbeatLength + marginX, 
+                    this.context.fillRect((i + subbeatsDrawn) * this.subbeatLength + marginX, 
                                         this.height - itrack * this.drawingData.sections[isection].trackHeight - marginY, 
                                         this.subbeatLength - marginX * 2, -1 * this.drawingData.sections[isection].trackHeight + marginY * 2);
                     marginY = (this.drawingData.sections[isection].trackHeight - this.drawingData.sections[isection].trackHeight * value) / 3;
@@ -132,7 +151,7 @@ OMGEmbeddedViewerMusicDrawer.prototype.draw = function () {
                 }
                 this.context.fillStyle =  value ? "black" : 
                                             (i % this.beatParams.beats == 0 ? "#DDDDDD" : "white");
-                this.context.fillRect(isection * this.sectionLength + i * this.subbeatLength + marginX, 
+                this.context.fillRect((i + subbeatsDrawn) * this.subbeatLength + marginX, 
                                     this.height - itrack * this.drawingData.sections[isection].trackHeight - marginY, 
                                     this.subbeatLength - marginX * 2, -1 * this.drawingData.sections[isection].trackHeight + marginY * 2);
             }
@@ -144,7 +163,7 @@ OMGEmbeddedViewerMusicDrawer.prototype.draw = function () {
             usedBeats = 0;
             for (var inote = 0; inote < this.drawingData.sections[isection].notes[inotes].length; inote++) {
                 note = this.drawingData.sections[isection].notes[inotes][inote].scaledNote
-                x = isection * this.sectionLength + this.subbeatLength * usedBeats * this.beatParams.subbeats
+                x = subbeatsDrawn * this.subbeatLength + this.subbeatLength * usedBeats * this.beatParams.subbeats
 
                 y = (109 - note) / 109 * (this.drawingData.sections[isection].notesHeight - 
                     (omg.ui.useUnicodeNotes ? 0 : noteSize))
@@ -176,12 +195,12 @@ OMGEmbeddedViewerMusicDrawer.prototype.draw = function () {
             }
         }
         
-        if (isection > 0) {
+        if (isection > 0 || subbeatsDrawn > 0) {
             this.context.beginPath();
             this.context.lineWidth = 1;
             this.context.strokeStyle = "black";
-            this.context.moveTo(isection * this.sectionLength, 0);
-            this.context.lineTo(isection * this.sectionLength, this.height);
+            this.context.moveTo(subbeatsDrawn * this.subbeatLength, 0);
+            this.context.lineTo(subbeatsDrawn * this.subbeatLength, this.height);
             this.context.stroke();
         }
 
@@ -189,10 +208,17 @@ OMGEmbeddedViewerMusicDrawer.prototype.draw = function () {
         this.context.lineWidth = 1;
         this.context.strokeStyle = "#AAAAAA";
         for (var imeasure = 1; imeasure < this.beatParams.measures; imeasure++) {
-            this.context.moveTo(isection * this.sectionLength + imeasure * this.measureLength, 0);
-            this.context.lineTo(isection * this.sectionLength + imeasure * this.measureLength, this.height);
+            this.context.moveTo(subbeatsDrawn * this.subbeatLength + imeasure * this.measureLength, 0);
+            this.context.lineTo(subbeatsDrawn * this.subbeatLength + imeasure * this.measureLength, this.height);
         }
         this.context.stroke();
 
+        subbeatsDrawn += this.beatParams.subbeats * this.beatParams.beats
+        if (this.subbeatsToDraw && subbeatsDrawn >= this.subbeatsToDraw) {
+            return
+        }
+        if (this.subbeatsToDraw && isection === this.drawingData.sections.length - 1 && subbeatsDrawn < this.subbeatsToDraw) {
+            isection = -1
+        }
     }
 };
