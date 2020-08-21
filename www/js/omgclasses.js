@@ -298,6 +298,17 @@ OMGSection.prototype.rescale = function (chord) {
 
 }
 
+OMGSection.prototype.addPart = function (data, source) {
+    var part = new OMGPart(undefined,data,this);
+    
+    // add the new part's data to the underlying data
+    this.data.parts.push(part.data)
+
+    this.song.partAdded(part, source);
+    return part
+}
+
+
 function OMGPart(div, data, section) {
     this.div = div;
     this.fx = [];

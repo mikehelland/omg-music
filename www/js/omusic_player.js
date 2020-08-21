@@ -1437,6 +1437,10 @@ OMusicPlayer.prototype.makeAudioNodesForPart = function (part) {
     else if (part.data.soundSet.patch) {
         p.makeSynth(part)
     }
+
+    if (part.onnodesready) {
+        part.onnodesready()
+    }
 };
 
 OMusicPlayer.prototype.makeAudioNodesForSong = function (song) {

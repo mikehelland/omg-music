@@ -93,7 +93,14 @@ tg.loadPart = function (part) {
     part.midiChannel = tg.currentSection.parts.indexOf(part) + 1;
     
     if (tg.peakMeters.show === "All" || tg.peakMeters.show === "Parts") {
-        tg.peakMeters.visibleMeters.push(new PeakMeter(part.postFXGain, part.muteButton, tg.player.context));
+        if (part.postFXGain) {
+            tg.peakMeters.visibleMeters.push(new PeakMeter(part.postFXGain, part.muteButton, tg.player.context));
+        }
+        else {
+            part.onnodesready = () => {
+                tg.peakMeters.visibleMeters.push(new PeakMeter(part.postFXGain, part.muteButton, tg.player.context));
+            }
+        }
     }
     return div;
 };
@@ -1099,9 +1106,12 @@ tg.addPart = function (soundSet, source) {
     var blankPart = {soundSet: soundSet};
     var names = tg.currentSection.parts.map(section => section.data.name);
     blankPart.name = omg.util.getUniqueName(soundSet.name, names);
-    var part = new OMGPart(undefined,blankPart,tg.currentSection);
+    
+    var part = tg.currentSection.addPart(blankPart, source)
+
     tg.player.loadPart(part)
-    tg.song.partAdded(part, source);
+
+    //todo shouldn't this be part of the listener?
     if (tg.presentationMode) tg.presentationFragment.addPart(part);
 
     return part

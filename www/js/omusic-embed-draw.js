@@ -1,7 +1,7 @@
 function OMGEmbeddedViewerMusicDrawer() {
 }
 
-OMGEmbeddedViewerMusicDrawer.prototype.drawCanvas = function (data, canvas, subbeatsToDraw) {
+OMGEmbeddedViewerMusicDrawer.prototype.drawCanvas = function (data, canvas, subbeatsToDraw, performanceData) {
 
     this.song = data
     this.context = canvas.getContext("2d");
@@ -12,6 +12,7 @@ OMGEmbeddedViewerMusicDrawer.prototype.drawCanvas = function (data, canvas, subb
     this.canvas = canvas
 
     this.subbeatsToDraw = subbeatsToDraw
+    this.performanceData = performanceData
 
     this.getDrawingData();
     this.draw();
@@ -24,7 +25,8 @@ OMGEmbeddedViewerMusicDrawer.prototype.getDrawingData = function () {
     this.totalSubbeats = beatParams.subbeats * beatParams.beats * beatParams.measures;
 
     this.drawingData = {sections: []};
-    this.song.sections.forEach(function (section, isection) {
+    let sections = this.performanceData || this.song.sections
+    sections.forEach(function (section, isection) {
         var chordedData = [];
         chordedData.sectionName = section.name;
         for (var ic = 0; ic < section.chordProgression.length; ic++) {
@@ -37,7 +39,7 @@ OMGEmbeddedViewerMusicDrawer.prototype.getDrawingData = function () {
     });
     
     var arrangement = [];
-    if (this.song.arrangement && this.song.arrangement.length > 0) {
+    if (!this.performanceData && this.song.arrangement && this.song.arrangement.length > 0) {
         for (var ia = 0; ia < this.song.arrangement.length; ia++) {
             for (var isection = 0; isection < this.drawingData.sections.length; isection++) {
                 if (this.drawingData.sections[isection].sectionName === this.song.arrangement[ia].name) {
@@ -134,7 +136,7 @@ OMGEmbeddedViewerMusicDrawer.prototype.draw = function () {
         else {
             subbeatsToDraw = (this.subbeatsToDraw - subbeatsDrawn > this.totalSubbeats) ? this.totalSubbeats : (this.subbeatsToDraw - subbeatsDrawn)
         }
-        console.log(subbeatsToDraw)
+        
         for (var itrack = this.drawingData.sections[isection].tracks.length - 1; itrack >= 0 ; itrack--) {
             for (var i = 0; i < subbeatsToDraw; i++) {
                 value = this.drawingData.sections[isection].tracks[itrack].data[i];
@@ -142,7 +144,6 @@ OMGEmbeddedViewerMusicDrawer.prototype.draw = function () {
                 marginY = this.trackHeight > 5 ? 1 : 0;
                 if (typeof value === "number" && value > 0 && value < 1) {
                     this.context.fillStyle =  i % this.beatParams.beats == 0 ? "#DDDDDD" : "white";
-                    //this.context.fillRect(isection * this.sectionLength + i * this.subbeatLength + marginX, 
                     this.context.fillRect((i + subbeatsDrawn) * this.subbeatLength + marginX, 
                                         this.height - itrack * this.drawingData.sections[isection].trackHeight - marginY, 
                                         this.subbeatLength - marginX * 2, -1 * this.drawingData.sections[isection].trackHeight + marginY * 2);
