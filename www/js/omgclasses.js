@@ -115,20 +115,24 @@ OMGSong.prototype.setData = function (data) {
 
 OMGSong.prototype.getData = function () {
 
-    this.data.sections = [];
-    for (var ip = 0; ip < this.sections.length; ip++) {
-        this.data.sections[ip] = this.sections[ip].getData();
+    let data = JSON.parse(JSON.stringify(this.data))
+    data.soundSets = {}
+    data.sections = [];
+    
+    for (var section of this.sections) {
+        data.sections.push(section.getData(data))
     }
+
     if (this.arrangement.length > 0) {
-        this.data.arrangement = [];
+        data.arrangement = [];
         for (ip = 0; ip < this.arrangement.length; ip++) {
-            this.data.arrangement[ip] = this.arrangement[ip].data;
+            data.arrangement[ip] = this.arrangement[ip].data;
         }
     }
     else {
-        delete this.data.arrangement;
+        delete data.arrangement;
     }
-    return this.data;
+    return data;
 };
 
 OMGSong.prototype.make = function (data) {
@@ -271,12 +275,20 @@ function OMGSection(div, data, song) {
     }
 }
 
-OMGSection.prototype.getData = function () {
-    this.data.parts = [];
-    for (var ip = 0; ip < this.parts.length; ip++) {
-        this.data.parts[ip] = this.parts[ip].data;
+OMGSection.prototype.getData = function (songData) {
+    let data = JSON.parse(JSON.stringify(this.data))
+
+    data.parts = []
+    for (var part of this.parts) {
+        
+        var partData = JSON.parse(JSON.stringify(part.data))
+        data.parts.push(partData)
+
+        songData.soundSets[part.data.name] = partData.soundSet
+        delete partData.soundSet
     }
-    return this.data;
+
+    return data;
 };
 
 OMGSection.prototype.getPart = function (partName) {
@@ -348,14 +360,21 @@ function OMGPart(div, data, section) {
     }
     
     if (!this.data.soundSet) {
-        this.data.soundSet = {
-            name: "Sine Oscillator",
-            url: "PRESET_OSC_SINE",
-            highNote: 108,
-            lowNote: 0,
-            chromatic: true,
-            octave: 5
-        };
+
+        // there might be a soundSet for this part in the song's data
+        if (this.section.song.data.soundSets && this.section.song.data.soundSets[this.data.name]) {
+            this.data.soundSet = this.section.song.data.soundSets[this.data.name]
+        }
+        else {
+            this.data.soundSet = {
+                name: "Sine Oscillator",
+                url: "PRESET_OSC_SINE",
+                highNote: 108,
+                lowNote: 0,
+                chromatic: true,
+                octave: 5
+            };
+        }
     }
 
     this.setupSoundSet()
