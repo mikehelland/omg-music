@@ -1,5 +1,5 @@
 OMusicPlayer.prototype.addFXToPart = function (fxName, part, source) {
-    var fx = this.makeFXNodeForPart(fxName, part)
+    var fx = this.makeFXNodeForPart(fxName, part.nodes || part)
     if (fx) {
         part.data.fx.push(fx.data);
 
@@ -216,7 +216,7 @@ OMusicPlayer.prototype.setupFX = function () {
     };
 };
 
-OMusicPlayer.prototype.makeFXNodeForPart = function (fx, part) {
+OMusicPlayer.prototype.makeFXNodeForPart = function (fx, nodes) {
     var fxNode, fxData;
     var fxName = fx;
     if (typeof fx === "object") {
@@ -227,11 +227,11 @@ OMusicPlayer.prototype.makeFXNodeForPart = function (fx, part) {
     var fxNode = this.makeFXNode(fxName, fxData)
 
     if (fxNode) {
-        var connectingNode = part.fx[part.fx.length - 1] || part.preFXGain;
-        connectingNode.disconnect(part.postFXGain);
+        var connectingNode = nodes.fx[nodes.fx.length - 1] || nodes.preFXGain;
+        connectingNode.disconnect(nodes.postFXGain);
         connectingNode.connect(fxNode);
-        fxNode.connect(part.postFXGain);
-        part.fx.push(fxNode);
+        fxNode.connect(nodes.postFXGain);
+        nodes.fx.push(fxNode);
     }
     
     return fxNode;

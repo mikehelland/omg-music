@@ -5,6 +5,8 @@ function OMGSong(div, data, headerOnly) {
     this.fx = [];
     this.loop = true;
     this.gain = 1;
+
+    this.partNodes = {}
     
     if (headerOnly) {
         this.setHeaderData(data);

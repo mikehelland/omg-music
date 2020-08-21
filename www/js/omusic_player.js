@@ -761,83 +761,71 @@ OMusicPlayer.prototype.extendNote = function (part, note) {
     }
 };
 
-OMusicPlayer.prototype.makeOsc = function (part) {
-    var p = this;
-
-    if (!p.context) {
+OMusicPlayer.prototype.makeOsc = function (type) {
+    
+    if (!this.context) {
         return;
     }
 
-    if (part.osc) {
-        console.info("makeOsc, already exists");
-        try {
-            part.osc.stop(p.context.currentTime);
-            part.osc.disconnect(part.gain);
-            part.gain.disconnect(part.preFXGain);
-        } catch (e) {
-        }
+    var osc = this.context.createOscillator()
+
+    if (type.indexOf("SAW") > -1) {
+        osc.type = "sawtooth";
+    } else if (type.indexOf("SINE") > -1) {
+        osc.type = "sine";
+    } else if (type.indexOf("SQUARE") > -1) {
+        osc.type = "square";
+    }
+    else if (type.indexOf("TRIANGLE") > -1) {
+        osc.type = "triangle";
     }
 
-    part.osc = p.context.createOscillator();
+    osc.frequency.setValueAtTime(0, this.context.currentTime);
+    osc.start(this.context.currentTime);
 
-    var soundsetURL = part.data.soundSet.url ||
-            "PRESET_OSC_TRIANGLE_SOFT_DELAY";
-    if (soundsetURL.indexOf("SAW") > -1) {
-        part.osc.type = "sawtooth";
-    } else if (soundsetURL.indexOf("SINE") > -1) {
-        part.osc.type = "sine";
-    } else if (soundsetURL.indexOf("SQUARE") > -1) {
-        part.osc.type = "square";
-    }
-    else if (soundsetURL.indexOf("TRIANGLE") > -1) {
-        part.osc.type = "triangle";
-    }
-
-    part.osc.connect(part.preFXGain);
-
-    part.osc.frequency.setValueAtTime(0, p.context.currentTime);
-    part.osc.start(p.context.currentTime);
-
-    part.osc.finishPart = function () {
+    osc.finishPart = function () {
         
-        part.osc.frequency.setValueAtTime(0, p.nextBeatTime);
+        osc.frequency.setValueAtTime(0, this.nextBeatTime);
         //todo keep freq same, reduce volume
         
         //total hack, this is why things should be processed ala AudioContext, not our own thread
         /*setTimeout(function () {
-            part.osc.stop(p.context.currentTime);
-            part.osc.disconnect(part.preFXGain);
+            osc.stop(p.context.currentTime);
+            osc.disconnect(preFXGain);
 
-            part.oscStarted = false;
-            part.osc = null;
-            part.gain = null;
+            oscStarted = false;
+            osc = null;
+            gain = null;
         }, 50);*/
     };
 
-    part.oscStarted = true;
-
+    return osc
 };
 
-OMusicPlayer.prototype.makeSynth = function (part) {
+OMusicPlayer.prototype.makeSynth = function (patchData, nodes, partData) {
 
     // todo download??
     if (typeof Synth === "undefined") {
-        return this.makeOsc(part)
+        return //todo faill back? this.makeOsc()
     }
 
-    part.synth = new Synth(this.context, part.data.soundSet.patch)
-    patch = patchLoader.load(part.data.soundSet.patch)
-    part.synth.loadPatch(patch.instruments.synth)
-    part.synth.outputNode.connect(part.preFXGain)
+    let synth = new Synth(this.context, patchData)
+    let patch = patchLoader.load(patchData)
+    synth.loadPatch(patch.instruments.synth)
+    synth.outputNode.connect(nodes.preFXGain)
 
-    var fx = part.data.soundSet.patch.daw.fx || []
+    // the synth has built in fx
+    // transfer these to the fx of the part, so the user can change them
+    var fx = patchData.daw.fx || []
     fx.forEach((fxData) => {
-        part.data.fx.push(fxData)
-        this.makeFXNodeForPart(fxData, part);
+        partData.fx.push(fxData)
+        this.makeFXNodeForPart(fxData, nodes);
     })
-    delete part.data.soundSet.patch.daw.fx
+    delete patchData.daw.fx
     
     //todo if (patch.masterVolume) 
+
+    return {synth, fx}
 }
 
 OMusicPlayer.prototype.makeFrequency = function (mapped) {
@@ -1416,27 +1404,49 @@ OMusicPlayer.prototype.recordNote = function (part, note) {
 
 OMusicPlayer.prototype.makeAudioNodesForPart = function (part) {
 
-    var p = this;
-    part.panner = p.context.createStereoPanner();
-    part.gain = p.context.createGain();
-    part.preFXGain = p.context.createGain();
-    part.postFXGain = part.gain;
-    part.preFXGain.connect(part.postFXGain);
-    part.gain.connect(part.panner);
-    part.panner.connect(part.section.song.preFXGain);
-    part.gain.gain.setValueAtTime(part.data.audioParams.gain, p.context.currentTime);
-    part.panner.pan.setValueAtTime(part.data.audioParams.pan, p.context.currentTime);
+    var nodes
 
-    for (var i = 0; i < part.data.fx.length; i++) {
-        p.makeFXNodeForPart(part.data.fx[i], part);        
+    // is this part already in the song?
+    if (part.section.song.partNodes[part.data.name]) {
+        nodes = part.section.song.partNodes[part.data.name]
     }
-    
-    if (part.data.soundSet.url && part.data.soundSet.url.startsWith("PRESET_OSC")) {
-        p.makeOsc(part);
+    else {
+        nodes = {}
+        nodes.fx = []
+        nodes.panner = this.context.createStereoPanner(); 
+        nodes.gain = this.context.createGain();
+        nodes.preFXGain = this.context.createGain();
+        nodes.postFXGain = nodes.gain;
+        nodes.preFXGain.connect(nodes.postFXGain);
+        nodes.gain.connect(nodes.panner);
+        nodes.panner.connect(part.section.song.preFXGain);
+        nodes.gain.gain.setValueAtTime(part.data.audioParams.gain, this.context.currentTime);
+        nodes.panner.pan.setValueAtTime(part.data.audioParams.pan, this.context.currentTime);
+
+        for (var i = 0; i < part.data.fx.length; i++) {
+            this.makeFXNodeForPart(part.data.fx[i], nodes);        
+        }
+        
+        if (part.data.soundSet.url && part.data.soundSet.url.startsWith("PRESET_OSC")) {
+            nodes.osc = this.makeOsc(part.data.soundSet.url);
+            nodes.osc.connect(nodes.preFXGain)
+        }
+        else if (part.data.soundSet.patch) {
+            let synth = this.makeSynth(part.data.soundSet.patch, nodes, part.data)
+            nodes.synth = synth.synth
+        }
+
+        part.section.song.partNodes[part.data.name] = nodes
     }
-    else if (part.data.soundSet.patch) {
-        p.makeSynth(part)
-    }
+
+    part.nodes = nodes
+    part.panner = nodes.panner
+    part.gain = nodes.gain
+    part.preFXGain = nodes.preFXGain
+    part.postFXGain = part.gain;
+    part.osc = nodes.osc
+    part.synth = nodes.synth
+    part.fx = nodes.fx
 
     if (part.onnodesready) {
         part.onnodesready()
