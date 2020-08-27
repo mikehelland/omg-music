@@ -1,3 +1,7 @@
+function OMusicPlayerFX() {
+    //this doesn't do anything except indicate that FX have been loaded
+}
+
 OMusicPlayer.prototype.addFXToPart = function (fxName, part, source) {
     var fx = this.makeFXNodeForPart(fxName, part.nodes || part)
     if (fx) {

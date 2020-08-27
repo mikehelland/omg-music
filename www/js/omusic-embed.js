@@ -15,10 +15,7 @@ function OMGEmbeddedViewerMusic(viewer) {
         ["/apps/music/js/omusic-embed-draw.js",
         "/apps/music/js/omgclasses.js",
         "/apps/music/js/omgservice_music.js",
-        "/apps/music/js/libs/tuna-min.js", //todo you know you wanna squelch this bloat
-        "/apps/music/js/omusic_player.js",
-        "/apps/music/js/fx.js",
-        "/apps/music/js/libs/viktor/viktor.js"],
+        "/apps/music/js/omusic_player.js"],
         () => {
             this.canvas.width = this.canvas.clientWidth
             this.canvas.height = this.canvas.clientHeight

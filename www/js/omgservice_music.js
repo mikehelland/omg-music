@@ -1,6 +1,9 @@
 if (!omg.ui)
     omg.ui = {};
 
+
+omg.music = {}
+
 //todo is this the best spot for this?
 //if so player should use it to load its sub-scripts  
 omg.ui.omgUrl = "/apps/music/"; 
