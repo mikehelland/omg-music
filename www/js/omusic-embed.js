@@ -65,16 +65,18 @@ OMGEmbeddedViewerMusic.prototype.playButtonClick = function (data) {
     var createPlayer = () => {
         this.playButton.classList.add("loader")
         this.player = new OMusicPlayer()
+        this.player.onPlayListeners.push(() => {
+            this.playButton.classList.remove("loader")
+            this.playButtonImg.src = "/apps/music/img/stop-button.svg"
+        })
+        
         this.player.prepareSong(this.song, () => {
             this.player.play()
             this.beatMarker.style.display = "block"
         })
         this.player.onBeatPlayedListeners.push(this.onBeatPlayedListener)
         this.player.onloop = () => this.onloop();
-        this.player.onPlayListeners.push(() => {
-            this.playButton.classList.remove("loader")
-            this.playButtonImg.src = "/apps/music/img/stop-button.svg"
-        })
+        
     }
 
     if (!this.player) {
