@@ -200,6 +200,9 @@ tg.getSong(function (song) {
     }
     catch (e) {console.log(e)}
 
+    // load all scripts manually
+    window._omg_doNotAutoLoadMusicScripts = true
+
     var scriptTag;
     let scripts = ["/js/omgservice.js",
         "../js/omgservice_music.js",

@@ -1,4 +1,8 @@
 (function () {
+    if (window._omg_doNotAutoLoadMusicScripts) {
+        return
+    }
+
     let loadOMGMusic = false
     let el
     let dir = document.currentScript.src.substr(0, document.currentScript.src.lastIndexOf("/") + 1)
