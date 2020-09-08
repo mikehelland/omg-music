@@ -23,7 +23,7 @@ function OMGEmbeddedViewerMusic(viewer) {
             this.drawer = new OMGEmbeddedViewerMusicDrawer()
             this.drawer.drawCanvas(this.data, this.canvas)
             this.drawingData = this.drawer.drawingData
-
+            
             this.song = OMGSong.prototype.make(this.data);
 
             this.makePlayButton()
@@ -95,9 +95,8 @@ OMGEmbeddedViewerMusic.prototype.playButtonClick = function (data) {
 
 OMGEmbeddedViewerMusic.prototype.makeBeatMarker = function () {
     
-    //var pxPerBeat = (this.div.clientWidth - padding) / this.totalBeatsInSong;
-    var pxPerBeat = (this.canvas.clientWidth) / (this.totalSubbeats * this.drawingData.sections.length);
-    var beatsInSection = this.song.data.beatParams.measures * this.song.data.beatParams.beats * this.song.data.beatParams.subbeats;
+    var pxPerBeat = (this.canvas.clientWidth) / (this.drawer.totalSubbeats * this.drawingData.sections.length);
+    //var beatsInSection = this.song.data.beatParams.measures * this.song.data.beatParams.beats * this.song.data.beatParams.subbeats;
     this.subbeatsPlayed = 0;
     this.beatMarker = document.createElement("div")
     this.beatMarker.className = "beat-marker"
