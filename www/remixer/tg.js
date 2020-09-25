@@ -2081,7 +2081,8 @@ tg.showUserThings = function () {
         user: tg.user,
         resultList: listDiv,
         onclick: function (thing) {
-            if (thing.type && thing.type === "PLAYLIST") {
+            console.log(thing.id)
+            /*if (thing.type && thing.type === "PLAYLIST") {
                 listDiv.innerHTML = ""
                 omg.util.loadSearchResults({resultList: listDiv, 
                     results: thing.data,
@@ -2099,15 +2100,31 @@ tg.showUserThings = function () {
             else if (thing.type && thing.type === "SOUNDSET") {
                 tg.addPart(thing, "addPartFragment");
             }
-            else {
+            else {*/
                 tg.loadSong(thing);
                 if (window.innerWidth < window.innerHeight) {
                     tg.hideDetails(true);
                 }
-            }
+            //}
         }
     }
-    omg.util.getUserThings(params);
+
+    omg.server.getHTTP("/data/?type=SONG&user_id=" + params.user.id, function (results) {
+        if (results) {
+            var newDiv
+            results.forEach(result => {
+                newDiv = document.createElement("div")
+                newDiv.innerHTML = result.name || result.type
+                newDiv.onclick = e => params.onclick(result)
+                newDiv.className = "search-thing"
+                listDiv.appendChild(newDiv)
+            })
+        }
+        else {
+            params.resultList.innerHTML = "Error parsing search results.";
+        }
+    });
+    //omg.util.getUserThings(params);
 };
 
 tg.onlogin = function (user) {
@@ -2125,6 +2142,11 @@ tg.onlogin = function (user) {
     tg.userFragment.tabs.user.loginArea.style.display = user ? "none" : "block";
     document.getElementById("user-info").style.display = user ? "block" : "none";
     document.getElementById("user-info-username").innerHTML = user ? user.username : "Login";
+    var div = document.getElementsByClassName("user-created-at")[0];
+    if (div) {
+        div.innerHTML = omg.util.getTimeCaption(user.created_at);
+    }
+
 };
 
 tg.setupFragment(tg.userFragment);
