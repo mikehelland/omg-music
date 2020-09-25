@@ -284,8 +284,11 @@ OMGSection.prototype.getData = function (songData) {
         var partData = JSON.parse(JSON.stringify(part.data))
         data.parts.push(partData)
 
-        songData.soundSets[part.data.name] = partData.soundSet
-        delete partData.soundSet
+        if (songData) {
+            //if we're getting data for the whole song, store the parts' soundsets there
+            songData.soundSets[part.data.name] = partData.soundSet
+            delete partData.soundSet
+        }
     }
 
     return data;
