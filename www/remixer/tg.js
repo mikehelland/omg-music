@@ -2550,7 +2550,7 @@ tg.sectionFragment.updateArrangementElements = function () {
 };
 
 tg.copySection = function (name) {
-    var newSectionData = JSON.parse(JSON.stringify(tg.currentSection.getData()));
+    var newSectionData = tg.currentSection.getData();
     if (name) newSectionData.name = name;
     var names = tg.song.sections.map(section => section.data.name);
     newSectionData.name = omg.util.getUniqueName(newSectionData.name, names);

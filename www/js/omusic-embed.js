@@ -59,6 +59,13 @@ OMGEmbeddedViewerMusic.prototype.makePlayButton = function () {
 
 OMGEmbeddedViewerMusic.prototype.playButtonClick = function (data) {
 
+    let playcountUpdate = () => {
+        if (!this.playButtonHasBeenClicked) {
+            this.playButtonHasBeenClicked = true;                
+            omg.server.postHTTP("/playcount", {id: this.viewer.data.id});
+        }
+    }
+
     var createPlayer = () => {
         this.playButton.classList.add("loader")
         this.player = new OMusicPlayer()
@@ -70,6 +77,7 @@ OMGEmbeddedViewerMusic.prototype.playButtonClick = function (data) {
         this.player.prepareSong(this.song, () => {
             this.player.play()
             this.beatMarker.style.display = "block"
+            playcountUpdate()
         })
         this.player.onBeatPlayedListeners.push(this.onBeatPlayedListener)
         this.player.onloop = () => this.onloop();
@@ -89,22 +97,22 @@ OMGEmbeddedViewerMusic.prototype.playButtonClick = function (data) {
     else {
         this.player.play()
         this.beatMarker.style.display = "block"
-        //this.playButtonImg.src = "/apps/music/img/stop-button.svg"
+        playcountUpdate()
     }
 }
 
 OMGEmbeddedViewerMusic.prototype.makeBeatMarker = function () {
     
-    var pxPerBeat = (this.canvas.clientWidth) / (this.drawer.totalSubbeats * this.drawingData.sections.length);
+    //var pxPerBeat = (this.canvas.clientWidth) / (this.drawer.totalSubbeats * this.drawingData.sections.length);
     //var beatsInSection = this.song.data.beatParams.measures * this.song.data.beatParams.beats * this.song.data.beatParams.subbeats;
     this.subbeatsPlayed = 0;
     this.beatMarker = document.createElement("div")
     this.beatMarker.className = "beat-marker"
-    this.beatMarker.style.width = pxPerBeat + "px";
+    this.beatMarker.style.width = this.drawer.subbeatLength + "px";
     this.beatMarker.style.display = "none"
     this.viewer.embedDiv.appendChild(this.beatMarker)
     this.onBeatPlayedListener = (isubbeat, isection) => {
-        this.beatMarker.style.left = pxPerBeat * this.subbeatsPlayed + "px";
+        this.beatMarker.style.left = this.drawer.subbeatLength * this.subbeatsPlayed + "px";
         if (isubbeat > -1) {
             this.subbeatsPlayed++
         }
