@@ -46,6 +46,7 @@ OMusicPlayer.prototype.adjustFX = function (fx, part, property, value, source) {
 
 OMusicPlayer.prototype.setupFX = function () {
     var p = this;
+    var omusicPath = (typeof omg === "object" && omg.music && omg.music.path) ? omg.music.path : ""
         
     p.fx = {};
     p.fx["EQ"] = {"make" : function (data) {
@@ -139,14 +140,19 @@ OMusicPlayer.prototype.setupFX = function () {
             {"property": "automakeup", default: true, "name": "Auto Makeup", "type": "options", "options": [false, true]}
         ]
     };
-    p.fx["Reverb"] = {"make" : function (data) {return new p.tuna.Convolver(data)},
+    p.fx["Reverb"] = {"make" : function (data) {
+            if (!data.impulse) {
+                data.impulse = omusicPath + "impulses/ir_rev_short.wav"
+            }
+            return new p.tuna.Convolver(data)
+        },
         "controls": [
             {"property": "highCut", default: 22050, "name": "High Cut", "type": "slider", "min": 20, "max": 22050, axis:"revy"},
             {"property": "lowCut", default: 20, "name": "Low Cut", "type": "slider", "min": 20, "max": 22050},
             {"property": "dryLevel", default: 1, "name": "Dry Level", "type": "slider", "min": 0, "max": 1},
             {"property": "wetLevel", default: 1, "name": "Wet Level", "type": "slider", "min": 0, "max": 1, axis:"x"},
             {"property": "level", default: 1, "name": "Level", "type": "slider", "min": 0, "max": 1},
-            {"property": "impulse", default: "/omg-music/impulses/ir_rev_short.wav", "name": "Impulse", "type": "hidden"},
+            {"property": "impulse", default: omusicPath + "impulses/ir_rev_short.wav", "name": "Impulse", "type": "hidden"},
         ]
     };
     p.fx["Filter"] = {"make" : function (data) {return new p.tuna.Filter(data)},
@@ -161,7 +167,7 @@ OMusicPlayer.prototype.setupFX = function () {
     p.fx["Cabinet"] = {"make" : function (data) {return new p.tuna.Cabinet(data)},
         "controls": [
             {"property": "makeupGain", default: 1, "name": "Makeup Gain", "type": "slider", "min": 0, "max": 20},
-            {"property": "impulse", default: "/omg-music/impulses/impulse_guitar.wav", "name": "Impulse", "type": "hidden"}
+            {"property": "impulse", default: omusicPath + "impulses/impulse_guitar.wav", "name": "Impulse", "type": "hidden"}
         ]
     };
     p.fx["Tremolo"] = {"make" : function (data) {return new p.tuna.Tremolo(data)},

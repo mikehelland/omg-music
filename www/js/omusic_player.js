@@ -26,12 +26,6 @@
         document.body.appendChild(el)
     }
 
-    if (typeof Synth === "undefined") {
-        el = document.createElement("script")
-        el.src = dir + "/libs/viktor/viktor.js"
-        document.body.appendChild(el)
-    }
-
     if (typeof Tuna === "undefined") {
         el = document.createElement("script")
         el.src = dir + "/libs/tuna-min.js"
@@ -43,6 +37,13 @@
         el.src = dir + "/fx.js"
         document.body.appendChild(el)
     }
+
+    if (typeof Synth === "undefined") {
+        el = document.createElement("script")
+        el.src = dir + "/libs/viktor/viktor.js"
+        document.body.appendChild(el)
+    }
+
 })()
 
 

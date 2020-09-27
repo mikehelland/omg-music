@@ -1,8 +1,13 @@
 if (!omg.ui)
     omg.ui = {};
 
-
-omg.music = {}
+if (!omg.music) {
+    omg.music = {}
+}
+if (!omg.music.path) {
+    omg.music.path = document.currentScript.src.substr(0, document.currentScript.src.lastIndexOf("/"))
+    omg.music.path = omg.music.path.substr(0, omg.music.path.lastIndexOf("/") + 1)
+}
 
 //todo is this the best spot for this?
 //if so player should use it to load its sub-scripts  
