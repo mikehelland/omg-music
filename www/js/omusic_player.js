@@ -47,18 +47,16 @@
 })()
 
 
-if (!omg.loadedSounds) omg.loadedSounds = {};
-if (!omg.downloadedSoundSets) omg.downloadedSoundSets = {};
-
-
-
 function OMusicPlayer() {
-
-    this.dev = typeof (omg) == "object" && omg.dev;
 
     var p = this;
 
+    p.dev = omg.dev;
+
     p.playing = false;
+    
+    if (!omg.loadedSounds) omg.loadedSounds = {};
+    if (!omg.downloadedSoundSets) omg.downloadedSoundSets = {};
     p.loadedSounds = omg.loadedSounds;
     p.downloadedSoundSets = omg.downloadedSoundSets;
     
@@ -872,7 +870,7 @@ OMusicPlayer.prototype.makeSynth = function (patchData, nodes, partData) {
         this.makeFXNodeForPart(fxData, nodes);
     })
     delete patchData.daw.fx
-    
+
     //todo if (patch.masterVolume) 
 
     return {synth, fx}
