@@ -330,9 +330,7 @@ function OMGPart(div, data, section) {
     this.div = div;
     this.fx = [];
     if (!section || !section.data) {
-        console.log("new OMGPart() called without a section. Not good.");
-        try {throw new Exception();}
-        catch (e) {console.log(e);}
+        console.warn("new OMGPart() called without a section.");
         var song = new OMGSong();
         section = new OMGSection(null, null, song);
     }

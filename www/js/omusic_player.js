@@ -3,45 +3,52 @@
         return
     }
 
-    let loadOMGMusic = false
     let el
     let dir = document.currentScript.src.substr(0, document.currentScript.src.lastIndexOf("/") + 1)
 
+    let loadMusicScripts = () => {
+        if (!omg.music) {
+            el = document.createElement("script")
+            el.src = dir + "omgservice_music.js"
+            document.body.appendChild(el)
+        }
+    
+        if (typeof OMGSong === "undefined") {
+            el = document.createElement("script")
+            el.src = dir + "omgclasses.js"
+            document.body.appendChild(el)
+        }
+    
+        if (typeof Tuna === "undefined") {
+            el = document.createElement("script")
+            el.src = dir + "libs/tuna-min.js"
+            document.body.appendChild(el)
+        }
+    
+        if (typeof OMusicPlayerFX === "undefined") {
+            el = document.createElement("script")
+            el.src = dir + "fx.js"
+            document.body.appendChild(el)
+        }
+    
+        if (typeof Synth === "undefined") {
+            el = document.createElement("script")
+            el.src = dir + "libs/viktor/viktor.js"
+            document.body.appendChild(el)
+        }
+    
+    }
+
     if (typeof omg !== "object") {
         el = document.createElement("script")
-        el.src = "/js/omgservice.js"
+        el.src = dir + "../../../js/omgservice.js"
         document.body.appendChild(el)
-        loadOMGMusic = true
+        el.onload = e => {
+            loadMusicScripts()
+        }
     }
-
-    if (loadOMGMusic || !omg.music) {
-        el = document.createElement("script")
-        el.src = dir + "/omgservice_music.js"
-        document.body.appendChild(el)
-    }
-
-    if (typeof OMGSong === "undefined") {
-        el = document.createElement("script")
-        el.src = dir + "/omgclasses.js"
-        document.body.appendChild(el)
-    }
-
-    if (typeof Tuna === "undefined") {
-        el = document.createElement("script")
-        el.src = dir + "/libs/tuna-min.js"
-        document.body.appendChild(el)
-    }
-
-    if (typeof OMusicPlayerFX === "undefined") {
-        el = document.createElement("script")
-        el.src = dir + "/fx.js"
-        document.body.appendChild(el)
-    }
-
-    if (typeof Synth === "undefined") {
-        el = document.createElement("script")
-        el.src = dir + "/libs/viktor/viktor.js"
-        document.body.appendChild(el)
+    else {
+        loadMusicScripts()
     }
 
 })()
@@ -1340,7 +1347,7 @@ OMusicPlayer.prototype.playLiveNotes = function (notes, part) {
     }
     
     part.liveNotes = notes;
-    if (notes.autobeat === 0) {
+    if (!notes.autobeat) {
         part.playingI = -1;
         if (this.disableAudio) {
             //silence
