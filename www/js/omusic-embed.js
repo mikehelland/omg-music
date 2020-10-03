@@ -5,9 +5,12 @@ function OMGEmbeddedViewerMusic(viewer) {
     if (viewer.params && viewer.params.maxHeight) {
         this.canvas.style.maxHeight = viewer.params.maxHeight + "px"
     }
-
+    
     viewer.embedDiv.appendChild(this.canvas)
 
+    this.canvas.width = viewer.embedDiv.clientWidth
+    this.canvas.height = viewer.embedDiv.clientHeight
+    
     this.data = viewer.data
     this.viewer = viewer
 
@@ -17,9 +20,7 @@ function OMGEmbeddedViewerMusic(viewer) {
         "/apps/music/js/omgservice_music.js",
         "/apps/music/js/omusic_player.js"],
         () => {
-            this.canvas.width = this.canvas.clientWidth
-            this.canvas.height = this.canvas.clientHeight
-
+            
             this.drawer = new OMGEmbeddedViewerMusicDrawer()
             this.drawer.drawCanvas(this.data, this.canvas)
             this.drawingData = this.drawer.drawingData
