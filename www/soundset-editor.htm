@@ -286,6 +286,7 @@ dropZone.ondrop = (e) => {
             handleDroppedItems(e.dataTransfer.items)
         }
         else {
+            soundset.draft = true
             submit((res) => {
                 soundset.user_id = res.user_id;
                 soundset.username = res.username;
@@ -302,14 +303,14 @@ dropZone.ondrop = (e) => {
 }
 
 document.getElementById("submit-button").onclick = function () {
-    console.log("1", soundset.id)
     if (!inputs.name.value || soundset.data.length == 0) {
         alert("SoundSet needs a name, and a sound with a caption and url.")
         return
     }
 
+    delete soundset.draft
+
     submit((res)=>{
-        console.log("2", res)
         if (res.id > 0) {
             window.location = "soundset.htm?id=" + res.id;
         }
