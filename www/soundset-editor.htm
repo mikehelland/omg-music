@@ -287,6 +287,9 @@ dropZone.ondrop = (e) => {
         }
         else {
             submit((res) => {
+                soundset.user_id = res.user_id;
+                soundset.username = res.username;
+
                 autoPrefix = "/uploads/" + omg.user.id + "/" + soundset.id + "/"
                 if (!inputs.prefix.value) {
                     inputs.prefix.value = autoPrefix
@@ -306,7 +309,7 @@ document.getElementById("submit-button").onclick = function () {
     }
 
     submit((res)=>{
-        console.log("2", soundset.id)
+        console.log("2", res)
         if (res.id > 0) {
             window.location = "soundset.htm?id=" + res.id;
         }
@@ -319,6 +322,7 @@ var submit = (cb) => {
     omg.server.post(soundset, function (response) {
         if (response.id) {
             soundset.id = response.id
+
         }
         if (cb) {
             cb(response)
