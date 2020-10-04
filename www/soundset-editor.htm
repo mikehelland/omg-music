@@ -290,7 +290,7 @@ dropZone.ondrop = (e) => {
                 soundset.user_id = res.user_id;
                 soundset.username = res.username;
 
-                autoPrefix = "/uploads/" + omg.user.id + "/" + soundset.id + "/"
+                autoPrefix = window.location.origin + "/uploads/" + omg.user.id + "/" + soundset.id + "/"
                 if (!inputs.prefix.value) {
                     inputs.prefix.value = autoPrefix
                     soundset.prefix = autoPrefix
