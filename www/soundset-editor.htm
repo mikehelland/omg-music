@@ -272,7 +272,7 @@ dropZone.ondrop = (e) => {
         soundset.data.push(sound)
 
         var fd = new FormData();
-        fd.append('soundsetId', soundset.id);
+        fd.append('setId', soundset.id);
         fd.append('file', file);
         fd.append('filename', file.name);
         omg.server.postHTTP("/upload", fd, (res)=>{
