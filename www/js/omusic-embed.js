@@ -67,26 +67,18 @@ OMGEmbeddedViewerMusic.prototype.playButtonClick = function (data) {
         }
     }
 
-    var createPlayer = () => {
+    if (!this.player) {
         this.playButton.classList.add("loader")
         this.player = new OMusicPlayer()
-        this.player.onPlayListeners.push(() => {
-            this.playButton.classList.remove("loader")
-            this.playButtonImg.src = "/apps/music/img/stop-button.svg"
-        })
+        
+        this.setPlayer(this.player)
         
         this.player.prepareSong(this.song, () => {
             this.player.play()
             this.beatMarker.style.display = "block"
             playcountUpdate()
         })
-        this.player.onBeatPlayedListeners.push(this.onBeatPlayedListener)
-        this.player.onloop = () => this.onloop();
         
-    }
-
-    if (!this.player) {
-        createPlayer()
         return
     }
 
@@ -100,6 +92,17 @@ OMGEmbeddedViewerMusic.prototype.playButtonClick = function (data) {
         this.beatMarker.style.display = "block"
         playcountUpdate()
     }
+}
+
+OMGEmbeddedViewerMusic.prototype.setPlayer = function () {
+    this.player.onPlayListeners.push(() => {
+        this.playButton.classList.remove("loader")
+        this.playButtonImg.src = "/apps/music/img/stop-button.svg"
+    })
+    
+    this.player.onBeatPlayedListeners.push(this.onBeatPlayedListener)
+    this.player.onloop = () => this.onloop();
+    
 }
 
 OMGEmbeddedViewerMusic.prototype.makeBeatMarker = function () {
