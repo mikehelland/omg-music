@@ -94,7 +94,8 @@ OMGEmbeddedViewerMusic.prototype.playButtonClick = function (data) {
     }
 }
 
-OMGEmbeddedViewerMusic.prototype.setPlayer = function () {
+OMGEmbeddedViewerMusic.prototype.setPlayer = function (player) {
+    this.player = player
     this.player.onPlayListeners.push(() => {
         this.playButton.classList.remove("loader")
         this.playButtonImg.src = "/apps/music/img/stop-button.svg"
