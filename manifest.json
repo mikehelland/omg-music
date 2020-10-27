@@ -3,7 +3,7 @@
 		{"name": "Music", "url": "remixer/", "edits": ["SONG"], "uses": ["SOUNDSET"]},
 		{"name": "SoundSet", "url": "soundset.htm", "views": ["SOUNDSET"]},
 		{"name": "SoundSet Editor", "url": "soundset-editor.htm", "edits": ["SOUNDSET"]},
-		{"name": "Embedded Music Viewer", "url": "js/omusic-embed.js", "embeds": ["SONG"]},
+		{"name": "Embedded Music Viewer", "url": "js/omusic-embed.js", "embeds": ["SONG", "PART"]},
 		{"name": "Embedded SoundSet Viewer", "url": "js/soundset-embed.js", "embeds": ["SOUNDSET"]},
 		{"name": "Music Socket Message Handler", "url": "server.js", "socketHandler": ["SONG"]}
 	]

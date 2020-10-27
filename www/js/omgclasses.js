@@ -281,7 +281,7 @@ OMGSection.prototype.getData = function (songData) {
     data.parts = []
     for (var part of this.parts) {
         
-        var partData = JSON.parse(JSON.stringify(part.data))
+        var partData = part.getData()
         data.parts.push(partData)
 
         if (songData) {
@@ -547,3 +547,12 @@ OMGPart.prototype.setupSoundSet = function () {
     // do we really need this? It's used... but shouldn't be
     this.soundSet = ss;
 };
+
+OMGPart.prototype.getData = function (options) {
+    var json = JSON.parse(JSON.stringify(this.data))
+    if (options && options.standalone) {
+        json.beatParams = JSON.parse(JSON.stringify(this.section.song.data.beatParams))
+        json.keyParams = JSON.parse(JSON.stringify(this.section.song.data.keyParams))
+    }
+    return json
+}

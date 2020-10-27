@@ -1315,7 +1315,15 @@ tg.saveFragment.save = function () {
     tg.saveFragment.overwriteArea.style.display = "none";
     tg.saveFragment.savedArea.style.display = "none";
 
-    var json = tg.song.getData();
+    // save just the part if there is only one
+    var json
+    if (tg.song.sections.length === 1 && tg.currentSection.parts.length === 1) {
+        json = tg.currentSection.parts[0].getData({standalone: true})
+    }
+    else {
+        json = tg.song.getData();
+    }
+
     var ok = false;
     try {
         JSON.parse(JSON.stringify(json));
