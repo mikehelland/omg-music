@@ -37,9 +37,6 @@ function OMGEmbeddedViewerSOUNDSET(viewer) {
         document.body.appendChild(style)
     }
 }
-if (typeof omg === "object" && omg.types && omg.types["SOUNDSET"])
-    omg.types["SOUNDSET"].embedClass = OMGEmbeddedViewerSOUNDSET
-
 
 OMGEmbeddedViewerSOUNDSET.prototype.loadSoundSet = function (data, parentDiv) {
     this.audioSamples = []
