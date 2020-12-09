@@ -362,9 +362,10 @@ tg.sequencer.setup = function () {
 
         s.part.drumMachine.updateBeatMarker(isubbeat);
     };
-    
-    s.uis = [];
+
 };
+
+tg.sequencer.uis = {}
 
 tg.sequencer.show = function (part) {
     var s = tg.sequencer;
@@ -383,14 +384,21 @@ tg.sequencer.show = function (part) {
     }
 
     if (!part.drumMachine) {
-        part.drumMachine = new OMGDrumMachine(s.surface, part);
-        part.drumMachine.captionWidth = window.innerWidth / 2 / 8;
-        part.drumMachine.readOnly = false;
-        part.drumMachine.onchange = function (part, trackI, subbeat) {
-            s.onchange(part, trackI, subbeat);
-        };
-        s.uis.push(part.drumMachine);
+        console.log(part.data.name)
+        if (s.uis[part.data.name]) {
+            part.drumMachine =  s.uis[part.data.name]
+        }
+        else {  
+            part.drumMachine = new OMGDrumMachine(s.surface, part);
+            part.drumMachine.captionWidth = window.innerWidth / 2 / 8;
+            part.drumMachine.readOnly = false;
+            s.uis[part.data.name] = part.drumMachine;
+        }
     }
+    part.drumMachine.onchange = function (part, trackI, subbeat) {
+        s.onchange(part, trackI, subbeat);
+    };
+    part.drumMachine.setPart(part)
     part.drumMachine.backgroundDrawn = false;
 
     part.drumMachine.beatStrength = s.beatStrength;
@@ -655,7 +663,7 @@ tg.beatsFragment.setupForSong = function () {
     bf.bpmRange = new SliderCanvas(null, bpmProperty, null, beatParams, onchange);
     bf.bpmRange.div.className = "fx-slider";
 
-    var measuresProperty = {"property": "measures", "name": "Measures", "type": "options", options: [1,2,3,4], 
+    var measuresProperty = {"property": "measures", "name": "Measures", "type": "options", options: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16], 
             "color": "#008800"};
     bf.measuresRange = new SliderCanvas(null, measuresProperty, null, beatParams, onchange);
     bf.measuresRange.div.className = "fx-slider";
@@ -2544,6 +2552,25 @@ tg.showSectionFragment = function () {
     tg.player.onBeatPlayedListeners.push(tg.sectionFragment.onBeatPlayedListener);
     
     tg.currentFragment = tg.sectionFragment;
+
+    if (!tg.sectionFragment.autoAdvance) {
+        tg.autoAdvanceSections = !!tg.autoAdvanceSections
+        var onchange = (val) => {
+            if (val) {
+                tg.player.loopSection = -1
+            }
+            else {
+                tg.player.loopSection = tg.player.sectionI
+            }
+        }
+
+        var prop = {"property": "autoAdvanceSections", "name": "Auto Advance", "type": "options", options: [false, true], 
+                "color": "#008800"};
+        tg.sectionFragment.autoAdvance = new SliderCanvas(null, prop, null, tg, onchange);
+        tg.sectionFragment.autoAdvance.div.className = "fx-slider";
+        document.getElementById("section-auto-advance").appendChild(tg.sectionFragment.autoAdvance.div)
+        tg.sectionFragment.autoAdvance.sizeCanvas()
+    }
 };
 
 tg.sectionFragment.onhide = function () {

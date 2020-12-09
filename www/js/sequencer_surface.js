@@ -261,7 +261,7 @@ OMGDrumMachine.prototype.setPart = function (part) {
 
     this.totalBeats = this.beatParams.measures * this.beatParams.beats;
     this.totalSubbeats = this.totalBeats * this.beatParams.subbeats;
-    
+    //this.info = undefined
 };
 
 OMGDrumMachine.prototype.drawBackground = function (w, h) {
@@ -321,7 +321,7 @@ OMGDrumMachine.prototype.draw = function (subbeat, w, h) {
 OMGDrumMachine.prototype.drawFullView = function (subbeat) {
     for (var i = 0; i < this.info.length; i++) {
         for (var j = 0; j < this.totalSubbeats; j++) {
-            var value = this.info[i].track.data[j];
+            var value = this.tracks[this.info[i].i].data[j];
             
             if (!value) {
                 continue;
