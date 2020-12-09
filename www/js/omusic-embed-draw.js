@@ -214,7 +214,7 @@ OMGEmbeddedViewerMusicDrawer.prototype.draw = function () {
         }
         this.context.stroke();
 
-        subbeatsDrawn += this.beatParams.subbeats * this.beatParams.beats
+        subbeatsDrawn += this.beatParams.subbeats * this.beatParams.beats  * this.beatParams.measures
         if (this.subbeatsToDraw && subbeatsDrawn >= this.subbeatsToDraw) {
             return
         }

@@ -140,9 +140,12 @@ OMusicPlayer.prototype.play = function (song) {
 
     p.playing = true;
     p.loopStarted = Date.now();
+    p.songStarted = p.loopStarted
+
     p.iSubBeat = 0;
     
     p.nextBeatTime = p.context.currentTime + (p.latency / 1000);
+    p.nextCommandI = 0
 
     p.section.currentChordI = 0;
     p.rescaleSection(p.section, p.section.data.chordProgression[0]);
@@ -226,6 +229,13 @@ OMusicPlayer.prototype._play = function () {
 
     if (p.playing) {
         setTimeout(function () {p._play();}, (p.nextBeatTime - p.context.currentTime) * 1000 - p.latency)
+
+        if (p.song.data.commandList && p.song.data.commandList[p.nextCommandI]) {
+            if (p.song.data.commandList[p.nextCommandI].t <= Date.now() - p.songStarted) {
+                p.processCommand(p.song.data.commandList[p.nextCommandI])
+                p.nextCommandI++
+            }
+        }
     }
 
     p.latencyMonitor = Math.round((timeToPlay - p.context.currentTime) * 1000);
@@ -1683,3 +1693,24 @@ OMusicPlayer.prototype.noteOff = function (note, part) {
     part.currentI = -1;
     
 };
+
+OMusicPlayer.prototype.processCommand = function (data) {
+    if (data.action === "sequencerChange") {
+        let part = this.section.getPart(data.partName);
+        part.data.tracks[data.trackI].data[data.subbeat] = data.value;
+
+        if (part.drumMachine && !part.drumMachine.hidden) part.drumMachine.draw();
+        //todo if (part.presentationUI) part.presentationUI.draw();
+    }
+    else if (data.action === "verticalChangeFrets") {
+        var part = this.section.getPart(data.partName);
+        if (data.value.length > 0) {
+            data.value.autobeat = data.autobeat;
+            this.playLiveNotes(data.value, part, 0);
+        }
+        else {
+            this.endLiveNotes(part);
+        }
+        if (part.mm && !part.mm.hidden) part.mm.draw();
+    }
+}

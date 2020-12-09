@@ -1,7 +1,7 @@
 {
 	"name": "music",
     "activities": [
-		{"name": "Music", "url": "remixer/", "edits": ["SONG"], "uses": ["SOUNDSET"]},
+		{"name": "Music", "url": "remixer/", "edits": ["SONG","PART"], "uses": ["SOUNDSET"]},
 		{"name": "SoundSet", "url": "soundset.htm", "views": ["SOUNDSET"]},
 		{"name": "SoundSet Editor", "url": "soundset-editor.htm", "edits": ["SOUNDSET"]},
 		{"name": "Embedded Music Viewer", "url": "js/omusic-embed.js", "className": "OMGEmbeddedViewerMusic", "embeds": ["SONG", "PART"]},

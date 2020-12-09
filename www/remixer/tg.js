@@ -1572,6 +1572,7 @@ tg.partOptionsFragment.tabs.options.setup = function () {
                 }
             }
         }
+        ff.part.mainFragmentButtonOnClick()
     };
     f.removeButton.onclick = function () {
         var i = tg.currentSection.parts.indexOf(ff.part);
@@ -3228,6 +3229,10 @@ window.onkeypress = function (e) {
     if (e.key === " " && e.target.tagName === "BODY") {
         tg.playButtonCaption.onclick();
     }
+
+    if (e.key === "r" && !tg.player.playing) {
+        //tg.startRecording()
+    }
 };
 
 tg.peakMeters = {
@@ -3346,6 +3351,36 @@ tg.partButtonOnDown = (button, part) => {
     
 }
 
+
+/* RECORDING STUFF */
+
+tg.startRecording = function () {
+    var t = Date.now()
+    tg.song.data.commandList = []
+    tg.sequencer.onchange = (part, trackI, subbeat, value) => {
+        tg.song.data.commandList.push({
+            action: "sequencerChange", 
+            partName: part.data.name,
+            value: part.data.tracks[trackI].data[subbeat],
+            trackI: trackI,
+            subbeat: subbeat,
+            t: Date.now() - t
+        })
+        
+    }
+    tg.instrument.onchange = (part, frets) => {
+        tg.song.data.commandList.push({
+            action: "verticalChangeFrets", 
+            partName: part.data.name,
+            value: JSON.parse(JSON.stringify(frets)),
+            autobeat: frets.autobeat,
+            t: Date.now() - t
+        })
+        
+    }
+
+    tg.playButtonCaption.onclick();
+}
 
 
 
