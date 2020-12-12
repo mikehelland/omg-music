@@ -378,7 +378,7 @@ function OMGPart(div, data, section) {
         }
     }
 
-    this.setupSoundSet()
+    this.setSoundSet(this.data.soundSet)
     
     if (!this.data.name) {
         this.data.name = this.data.soundSet.name;
@@ -530,11 +530,12 @@ OMGPart.prototype.rescale = function (keyParams, chord) {
     }
 };
 
-OMGPart.prototype.setupSoundSet = function () {
-    
-    let ss = this.data.soundSet
+OMGPart.prototype.setSoundSet = function (ss) {
+
     if (!ss || !ss.data)
         return;
+
+    this.data.soundSet = ss
 
     var topNote = ss.highNote;
     if (!topNote && ss.data.length) {
@@ -544,7 +545,22 @@ OMGPart.prototype.setupSoundSet = function () {
         ss.octave = Math.floor((topNote + ss.lowNote) / 2 / 12);
     }
 
-    // do we really need this? It's used... but shouldn't be
+    this.soundUrls = []
+    var noteIndex
+    for (var i = 0; i < ss.data.length; i++) {
+        if (ss.chromatic) {
+            noteIndex = i + ss.lowNote
+        }
+        else {
+            noteIndex = i
+        }    
+        
+        if (ss.data[i]) {
+            this.soundUrls[noteIndex] = (ss.prefix || "") + ss.data[i].url + (ss.postfix || "");    
+        }
+    }
+
+    // todo do we really need this? It's used... but shouldn't be
     this.soundSet = ss;
 };
 

@@ -448,7 +448,7 @@ OMGDrumMachine.prototype.drawCaptions = function () {
                     this.captionWidth, this.captionHeight);
 
         }
-        if (this.info[i].track.audioParams.mute) {
+        if (this.tracks[this.info[i].i].audioParams.mute) {
             this.ctx.globalAlpha = 0.6;
             this.ctx.fillStyle = "#880000";
             this.ctx.fillRect(this.left, this.top + i * this.captionHeight, 

@@ -703,7 +703,6 @@ OMusicPlayer.prototype.playBeatForDrumPart = function (iSubBeat, part) {
 
     if (part.data.audioParams.mute)
         return;
-    var strength;
     for (var i = 0; i < tracks.length; i++) {
         if (tracks[i].data[iSubBeat]) {
             if (!tracks[i].audioParams.mute) {
@@ -1255,6 +1254,7 @@ OMusicPlayer.prototype.playSound = function (sound, part, audioParams, strength)
 };
 
 OMusicPlayer.prototype.getSoundURL = function (soundSet, note) {
+    console.warn("deprecrating omuisplayer getSoundUrl")
     var noteIndex;
     if (soundSet.chromatic) {
         noteIndex = note.scaledNote - soundSet.lowNote;
@@ -1641,7 +1641,7 @@ OMusicPlayer.prototype.disconnectMic = function (part) {
 
 
 
-OMusicPlayer.prototype.noteOn = function (note, part, velocity) {
+OMusicPlayer.prototype.noteOn = function (noteNumber, part, velocity) {
     if (this.disableAudio) {
         return
     }
@@ -1651,43 +1651,41 @@ OMusicPlayer.prototype.noteOn = function (note, part, velocity) {
     }
     
     if (part.osc) {
-        part.baseFrequency = this.makeFrequency(note.scaledNote);
+        part.baseFrequency = this.makeFrequency(noteNumber);
         part.osc.frequency.setValueAtTime(
                 part.baseFrequency * part.data.audioParams.warp, this.context.currentTime);
         part.preFXGain.gain.setTargetAtTime(part.data.audioParams.gain, this.context.currentTime, 0.003);
     }
     else if (part.synth) {
-        part.baseFrequency = this.makeFrequency(note.scaledNote);
+        part.baseFrequency = this.makeFrequency(noteNumber);
         part.synth.lastFrequency = part.baseFrequency * part.data.audioParams.warp
         part.synth.onNoteOn(part.synth.lastFrequency, velocity)
-        part.notesPlaying[note.scaledNote] = part.synth.lastFrequency
+        part.notesPlaying[noteNumber] = part.synth.lastFrequency
     }
     else {
-        //var sound = this.getSound(part.data.soundSet, notes[0]);
-        note.sound = this.getSoundURL(part.soundSet, note);
-        part.notesPlaying[note.scaledNote] = this.playSound(note.sound, part, undefined, velocity / 120);
+        part.notesPlaying[noteNumber] = this.playSound(part.soundUrls[noteNumber], part, undefined, velocity / 120);
     }
         
 };
 
-OMusicPlayer.prototype.noteOff = function (note, part) {
+OMusicPlayer.prototype.noteOff = function (noteNumber, part) {
   
-    if (!part.notesPlaying[note.scaledNote]) {
+    if (!part.notesPlaying[noteNumber]) {
         return
     }
     else if (part.synth) {
-        part.synth.onNoteOff(part.notesPlaying[note.scaledNote])
+        part.synth.onNoteOff(part.notesPlaying[noteNumber])
     }
     else if (part.osc) {
         part.preFXGain.gain.setTargetAtTime(0,
                 this.context.currentTime, 0.003);
     }  
     else {
-        part.notesPlaying[note.scaledNote].bufferGain.gain.setTargetAtTime(0, this.context.currentTime, 0.001);
-        part.notesPlaying[note.scaledNote].stop(this.context.currentTime + 0.015);
+        part.notesPlaying[noteNumber].bufferGain.gain.setTargetAtTime(0, this.context.currentTime, 0.001);
+        part.notesPlaying[noteNumber].stop(this.context.currentTime + 0.015);
     }
 
-    delete part.notesPlaying[note.scaledNote]
+    delete part.notesPlaying[noteNumber]
     
     part.nextBeat = 0;
     part.currentI = -1;
