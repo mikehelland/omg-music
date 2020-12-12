@@ -95,7 +95,8 @@ OMGMusicChat.prototype.setupUser = function (user, local) {
         user.part.gain.gain.setValueAtTime(volumeSlider.value/100, 0)
     }
 
-    user.part = new OMGPart(null, {name: user.name, audioParams: {gain: 0.5}, soundSet: this.INSTRUMENTS.TD_DRUMKIT}, this.section)
+    user.part = new OMGPart(null, {name: user.name, audioParams: {gain: 0.3}, soundSet: this.INSTRUMENTS.TD_DRUMKIT}, this.section)
+    volumeSlider.value = 30
     this.player.loadPart(user.part)
 
     this.makeMeter(user)
@@ -214,7 +215,6 @@ midi input
 
 more soundsets
 
-use gs server for turn/stun
 
 disable login button till ready
 
