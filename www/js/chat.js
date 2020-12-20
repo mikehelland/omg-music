@@ -32,7 +32,7 @@ OMGMusicChat.prototype.setupKeyboard = function () {
     document.body.onkeydown = e => {
         let note = keyMap[e.key]
         if (note && !keys[e.key]) {
-            this.noteOn(note, this.part)
+            this.noteOn(note, 66, this.part)
             keys[e.key] = true
         }
     }
@@ -59,7 +59,10 @@ OMGMusicChat.prototype.whenPlayersReady = function () {
 
 OMGMusicChat.prototype.setupLocalUser = function (user) {
     this.setupUser(user, true)
+    this.user = user
     this.part = user.part
+
+    this.setupMIDI()
 }
 
 OMGMusicChat.prototype.setupUser = function (user, local) {
@@ -95,16 +98,15 @@ OMGMusicChat.prototype.setupUser = function (user, local) {
         user.part.gain.gain.setValueAtTime(volumeSlider.value/100, 0)
     }
 
-    user.part = new OMGPart(null, {name: user.name, audioParams: {gain: 0.3}, soundSet: this.INSTRUMENTS.TD_DRUMKIT}, this.section)
+    var instrument = Object.values(this.INSTRUMENTS)[0]
+    user.part = new OMGPart(null, {name: user.name, audioParams: {gain: 0.3}, soundSet: instrument}, this.section)
     volumeSlider.value = 30
     this.player.loadPart(user.part)
 
     this.makeMeter(user)
 }
 
-OMGMusicChat.prototype.noteOn = function (noteNumber, part) {
-
-    var velocity = 100
+OMGMusicChat.prototype.noteOn = function (noteNumber, velocity, part) {
 
     if (!part.data.soundSet.chromatic) {
         noteNumber = noteNumber % part.soundSet.data.length;
@@ -131,6 +133,7 @@ OMGMusicChat.prototype.noteOff = function (noteNumber, part) {
 }
 
 OMGMusicChat.prototype.INSTRUMENTS = {
+    //PERCUSSION: {"data":[{"url":"bongol.mp3","name":"bongol"},{"url":"bongoh.mp3","name":"bongoh"},{"url":"clickl.mp3","name":"clickl"},{"url":"clickh.mp3","name":"clickh"},{"url":"clav.mp3","name":"clav"},{"url":"shhk.mp3","name":"shhk"},{"url":"scrape.mp3","name":"scrape"},{"url":"whoop.mp3","name":"whoop"},{"url":"chimes.mp3","name":"chimes"}],"name":"Precussion","type":"SOUNDSET","prefix":"https://openmedia.gallery/uploads/1/1753/","lowNote":72,"postfix":"","user_id":"1","username":"m                   ","chromatic":false,"created_at":1601816482033,"omgVersion":1,"last_modified":1601816482033,"defaultSurface":"PRESET_SEQUENCER","id":1753},
     TD_DRUMKIT: {"data":[{"url":"https://cwilso.github.io/MIDIDrums/sounds/drum-samples/acoustic-kit/kick.wav","name":"Kick"},{"url":"https://cwilso.github.io/MIDIDrums/sounds/drum-samples/acoustic-kit/snare.wav","name":"X Stick"},{"url":"https://cwilso.github.io/MIDIDrums/sounds/drum-samples/acoustic-kit/snare.wav","name":"Snare"},{"url":"https://cwilso.github.io/MIDIDrums/sounds/drum-samples/TheCheebacabra1/tom3.wav","name":"Tom 4 Rim"},{"url":"https://cwilso.github.io/MIDIDrums/sounds/drum-samples/TheCheebacabra1/snare.wav","name":"Snare Rim"},{"url":"https://cwilso.github.io/MIDIDrums/sounds/drum-samples/TheCheebacabra1/tom3.wav","name":"Tom 4"},{"url":"https://mikehelland.com/omg/drums/rock_hihat_closed.mp3","name":"Closed HH"},{"url":"https://cwilso.github.io/MIDIDrums/sounds/drum-samples/acoustic-kit/tom3.wav","name":"Tom 3"},{"url":"https://mikehelland.com/omg/drums/hh_hihat.mp3","name":"Pedal HH"},{"url":"https://cwilso.github.io/MIDIDrums/sounds/drum-samples/acoustic-kit/tom2.wav","name":"Tom 2"},{"url":"https://mikehelland.com/omg/drums/rock_hihat_open.mp3","name":"Open HH"},{"url":"https://cwilso.github.io/MIDIDrums/sounds/drum-samples/TheCheebacabra1/tom2.wav","name":"Tom 2 Rim"},{"url":"https://cwilso.github.io/MIDIDrums/sounds/drum-samples/acoustic-kit/tom1.wav","name":"Tom 1"},{"url":"https://mikehelland.com/omg/drums/rock_crash.mp3","name":"Crash 1"},{"url":"https://cwilso.github.io/MIDIDrums/sounds/drum-samples/TheCheebacabra1/tom1.wav","name":"Tom 1 Rim"},{"url":"https://mikehelland.com/omg/drums/ride.wav","name":"Ride"},{"url":"https://mikehelland.com/omg/drums/rock_crash.mp3","name":"Crash 2 Rim"},{"url":"https://mikehelland.com/omg/drums/ride2.wav","name":"Ride Rim"},{"url":"","name":"-"},{"url":"https://mikehelland.com/omg/drums/rock_crash.mp3","name":"Crash 1 Rim"},{"url":"","name":"-"},{"url":"https://mikehelland.com/omg/drums/rock_crash.mp3","name":"Crash 2"},{"url":"https://cwilso.github.io/MIDIDrums/sounds/drum-samples/TheCheebacabra1/tom3.wav","name":"Tom 3 Rim"},{"url":"https://mikehelland.com/omg/drums/ride2.wav","name":"Ride Edge Rim"}],"name":"TD KIT","type":"SOUNDSET","prefix":"","lowNote":24,"postfix":"","user_id":"1","approved":true,"username":"m                   ","chromatic":false,"created_at":1586541415888,"omgVersion":1,"last_modified":1586548042206,"defaultSurface":"PRESET_SEQUENCER","id":1652},
     MARIMBA: {"data":[{"url":"A3.mp3","name":"A3"},{"url":"Bf3.mp3","name":"Bf3"},{"url":"B3.mp3","name":"B3"},{"url":"C3.mp3","name":"C3"},{"url":"Cs3.mp3","name":"Cs3"},{"url":"D3.mp3","name":"D3"},{"url":"Ds3.mp3","name":"Ds3"},{"url":"E3.mp3","name":"E3"},{"url":"F3.mp3","name":"F3"},{"url":"Fs3.mp3","name":"Fs3"},{"url":"G3.mp3","name":"G3"},{"url":"Gs3.mp3","name":"Gs3"},{"url":"A5.mp3","name":"A5"},{"url":"Bf5.mp3","name":"Bf5"},{"url":"B5.mp3","name":"B5"},{"url":"C5.mp3","name":"C5"},{"url":"Cs5.mp3","name":"Cs5"},{"url":"D5.mp3","name":"D5"},{"url":"Ds5.mp3","name":"Ds5"},{"url":"E5.mp3","name":"E5"},{"url":"F5.mp3","name":"F5"},{"url":"Fs5.mp3","name":"Fs5"},{"url":"G5.mp3","name":"G5"},{"url":"Gs5.mp3","name":"Gs5"},{"url":"A6.mp3","name":"A6"}],"name":"MARIMBA","type":"SOUNDSET","prefix":"http://www.mikehelland.com/omg/joe/MARIMBA/","lowNote":45,"postfix":"","user_id":"1","approved":true,"username":"m                   ","chromatic":true,"created_at":1513315862817,"last_modified":1520375628138,"defaultSurface":"PRESET_VERTICAL","id":417},
     GUITAR: {"data":[{"url":"e","name":"E2"},{"url":"f","name":"F2"},{"url":"fs","name":"F#2"},{"url":"g","name":"G2"},{"url":"gs","name":"G#2"},{"url":"a","name":"A2"},{"url":"bf","name":"Bb2"},{"url":"b","name":"B2"},{"url":"c","name":"C3"},{"url":"cs","name":"C#3"},{"url":"d","name":"D3"},{"url":"ds","name":"D#3"},{"url":"e2","name":"E3"},{"url":"f2","name":"F3"},{"url":"fs2","name":"F#2"},{"url":"g2","name":"G2"},{"url":"gs2","name":"G#2"},{"url":"a2","name":"A3"},{"url":"bf2","name":"Bb3"},{"url":"b2","name":"B3"},{"url":"c2","name":"C4"},{"url":"cs2","name":"C#4"},{"url":"d2","name":"D4"},{"url":"ds2","name":"D#4"},{"url":"e3","name":"E4"},{"url":"f3","name":"F4"},{"url":"fs3","name":"F#4"},{"url":"g3","name":"G4"},{"url":"gs3","name":"G#4"},{"url":"a3","name":"A4"},{"url":"bf3","name":"Bb4"},{"url":"b3","name":"B4"},{"url":"c3","name":"C5"},{"url":"cs3","name":"C#5"},{"url":"d3","name":"D5"},{"url":"ds3","name":"D#5"},{"url":"e4","name":"E5"},{"url":"f4","name":"F5"},{"url":"fs4","name":"F#5"},{"url":"g4","name":"G5"},{"url":"gs4","name":"G#5"},{"url":"a4","name":"A5"},{"url":"bf4","name":"Bb5"},{"url":"b4","name":"B5"},{"url":"c4","name":"C6"},{"url":"cs4","name":"C#6"}],"name":"Electric Guitar","tags":"melody","type":"SOUNDSET","prefix":"http://mikehelland.com/omg/electric/electric_","lowNote":40,"postfix":".mp3","user_id":"1","approved":true,"username":"m                   ","chromatic":true,"created_at":1513199866864,"last_modified":1520375591557,"defaultSurface":"PRESET_VERTICAL","id":396},
@@ -204,6 +207,13 @@ OMGMusicChat.prototype.changeSoundSet = function (instrument, part) {
     this.player.loadPart(part)
 
 }
+
+OMGMusicChat.prototype.setupMIDI = function () {
+    this.midi = new OMGMIDI()
+    this.midi.onnoteon  = (note, velocity) => this.noteOn(note, velocity, this.part)
+    this.midi.onnoteoff = (note) => this.noteOff(note, this.part)
+}
+
 
 // todo 
 /*
