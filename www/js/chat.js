@@ -1,5 +1,6 @@
 function OMGMusicChat(rt, onready) {
     this.rt = rt
+    this.piano = new PianoCanvas()
 }
 
 OMGMusicChat.prototype.setupPlayer = function () {
@@ -66,7 +67,9 @@ OMGMusicChat.prototype.setupLocalUser = function (user) {
 }
 
 OMGMusicChat.prototype.setupUser = function (user, local) {
-    
+
+    this.makePianoCanvas(user)
+
     if (local) {
         var selectInstrument = document.createElement("select")
         for (var instrument in this.INSTRUMENTS) {
@@ -102,6 +105,7 @@ OMGMusicChat.prototype.setupUser = function (user, local) {
     user.part = new OMGPart(null, {name: user.name, audioParams: {gain: 0.3}, soundSet: instrument}, this.section)
     volumeSlider.value = 30
     this.player.loadPart(user.part)
+
 
     this.makeMeter(user)
 }
@@ -214,6 +218,15 @@ OMGMusicChat.prototype.setupMIDI = function () {
     this.midi.onnoteoff = (note) => this.noteOff(note, this.part)
 }
 
+OMGMusicChat.prototype.makePianoCanvas = function (user) {
+    user.pianoCanvas = document.createElement("canvas")
+    user.pianoCanvas.className = "piano-canvas"
+    user.div.appendChild(user.pianoCanvas)
+
+    user.pianoCtx = user.pianoCanvas.getContext("2d")
+    this.piano.draw(user.pianoCtx)
+}
+
 
 // todo 
 /*
@@ -222,8 +235,6 @@ pan
 fx
 
 keyboard visual
-
-midi input
 
 more soundsets
 
