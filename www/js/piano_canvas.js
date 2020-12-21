@@ -1,4 +1,4 @@
-function PianoCanvas() {
+function PianoCanvas(div) {
     var blackKeys = [1, 3, 6, 8, 10]
 
     var keys = []
@@ -23,9 +23,28 @@ function PianoCanvas() {
             this.whiteKeyCount++
         }
     }
+
+    this.setupCanvas(div)
 }
 
-PianoCanvas.prototype.draw = function (ctx, pressed) {
+PianoCanvas.prototype.setupCanvas = function (div) {
+    var canvasBack = document.createElement("canvas")
+    var canvas = document.createElement("canvas")
+
+    canvasBack.style.width = "100%"
+    canvasBack.style.height = "100%"
+    canvas.style.width = "100%"
+    canvas.style.height = "100%"
+    canvas.style.position = "absolute"
+    canvas.style.top = "0px"
+    canvas.style.left = "0px"
+
+    div.appendChild(canvasBack)
+    div.appendChild(canvas)
+
+    var ctx = canvasBack.getContext("2d")
+    this.ctx = canvas.getContext("2d")
+
     ctx.canvas.width = ctx.canvas.clientWidth
     ctx.canvas.height = ctx.canvas.clientHeight
     ctx.fillStyle = "white"
@@ -48,20 +67,21 @@ PianoCanvas.prototype.draw = function (ctx, pressed) {
                         this.whiteKeyWidth - 2, ctx.canvas.height * 0.66)
         }
     }
+}
 
-    if (!pressed) {
-        return
-    }
+PianoCanvas.prototype.drawPressed = function (pressed) {
 
-    ctx.fillStyle = "green"
+    this.ctx.canvas.width = this.ctx.canvas.clientWidth
+    this.ctx.canvas.height = this.ctx.canvas.clientHeight
+    this.ctx.fillStyle = "green"
     for (this._di = 0; this._di < pressed.length; this._di++) {
 
         this._dk = this.keys[pressed[this._di]]
         if (this._dk.white) {
-            ctx.fillRect(this._dk.x, 0, this.whiteKeyWidth, ctx.canvas.height)
+            this.ctx.fillRect(this._dk.x, 0, this.whiteKeyWidth, this.ctx.canvas.height)
         }
         else {
-            ctx.fillRect(this._dk.x, 0, this.whiteKeyWidth - 2, ctx.canvas.height * 0.66)
+            this.ctx.fillRect(this._dk.x, 0, this.whiteKeyWidth - 2, this.ctx.canvas.height * 0.66)
         }
     }   
 }

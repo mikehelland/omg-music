@@ -1,6 +1,5 @@
 function OMGMusicChat(rt, onready) {
     this.rt = rt
-    this.piano = new PianoCanvas()
 }
 
 OMGMusicChat.prototype.setupPlayer = function () {
@@ -33,14 +32,14 @@ OMGMusicChat.prototype.setupKeyboard = function () {
     document.body.onkeydown = e => {
         let note = keyMap[e.key]
         if (note && !keys[e.key]) {
-            this.noteOn(note, 66, this.part)
+            this.noteOn(note, 66, this.user)
             keys[e.key] = true
         }
     }
     document.body.onkeyup = e => {
         let note = keyMap[e.key]
         if (note) {
-            this.noteOff(note, this.part)
+            this.noteOff(note, this.user)
             keys[e.key] = false
         }
     }
@@ -68,6 +67,7 @@ OMGMusicChat.prototype.setupLocalUser = function (user) {
 
 OMGMusicChat.prototype.setupUser = function (user, local) {
 
+    user.pressed = []
     this.makePianoCanvas(user)
 
     if (local) {
@@ -110,30 +110,42 @@ OMGMusicChat.prototype.setupUser = function (user, local) {
     this.makeMeter(user)
 }
 
-OMGMusicChat.prototype.noteOn = function (noteNumber, velocity, part) {
+OMGMusicChat.prototype.noteOn = function (noteNumber, velocity, user) {
 
-    if (!part.data.soundSet.chromatic) {
-        noteNumber = noteNumber % part.soundSet.data.length;
+    if (user === this.user) {
+        this.sendNoteOn(noteNumber, velocity, user.part)
     }
 
-    if (part.data.surface.url === "PRESET_SEQUENCER") {
-        this.player.playSound(part.data.tracks[noteNumber].sound, part,
-            part.data.tracks[noteNumber].audioParams, velocity / 120)
+    this._non = user.part.data.soundSet.chromatic ? noteNumber : noteNumber % user.part.soundSet.data.length
 
-        this.sendPlaySound(noteNumber, velocity / 120, part)
+    if (user.part.data.surface.url === "PRESET_SEQUENCER") {
+        this.player.playSound(user.part.data.tracks[this._non].sound, user.part,
+            user.part.data.tracks[this._non].audioParams, velocity / 120)
     }
     else {
-        this.player.noteOn(noteNumber, part, velocity)
-        this.sendPlayNote(noteNumber, velocity / 120, part)
+        this.player.noteOn(this._non, user.part, velocity)
     }
+
+    if (user.pressed.indexOf(noteNumber) === -1) {
+        user.pressed.push(noteNumber)
+    }
+    user.piano.drawPressed(user.pressed)
 }
 
-OMGMusicChat.prototype.noteOff = function (noteNumber, part) {
-    if (part.data.surface.url === "PRESET_SEQUENCER") {
-        return
+OMGMusicChat.prototype.noteOff = function (noteNumber, user) {
+    if (user.part.data.surface.url === "PRESET_VERTICAL") {
+        this.player.noteOff(noteNumber, user.part)
     }
-    this.player.noteOff(noteNumber, part)
-    this.sendNoteOff(noteNumber, part)
+
+    if (user === this.user) {
+        this.sendNoteOff(noteNumber, user.part)
+    }
+    
+    this._noi = user.pressed.indexOf(noteNumber)
+    if (this._noi > -1) {
+        user.pressed.splice(this._noi, 1)
+    }
+    user.piano.drawPressed(user.pressed)
 }
 
 OMGMusicChat.prototype.INSTRUMENTS = {
@@ -165,17 +177,14 @@ OMGMusicChat.prototype.updateMeters = function () {
     window.requestAnimationFrame(() => this.updateMeters());
 };
 
-OMGMusicChat.prototype.sendPlaySound = function (note, velocity, part) {
-    this.rt.sendCommandToRoom({action: "playsound", note: note, velocity: velocity, partI: part.position})         
+OMGMusicChat.prototype.sendNoteOn = function (note, velocity) {
+    this.rt.sendCommandToRoom({action: "noteon", note: note, velocity: velocity})         
 }
-OMGMusicChat.prototype.sendPlayNote = function (note, velocity, part) {
-    this.rt.sendCommandToRoom({action: "playnote", note: note, velocity: velocity, partI: part.position})
-}
-OMGMusicChat.prototype.sendNoteOff = function (note, part) {
-    this.rt.sendCommandToRoom({action: "noteoff", note: note, partI: part.position})
+OMGMusicChat.prototype.sendNoteOff = function (note) {
+    this.rt.sendCommandToRoom({action: "noteoff", note: note})
 }
 OMGMusicChat.prototype.sendChangeSoundSet = function (instrument) {
-    this.rt.sendCommandToRoom({action: "changeSoundSet", instrument: instrument, partI: this.part.position})
+    this.rt.sendCommandToRoom({action: "changeSoundSet", instrument: instrument})
 }
 
 OMGMusicChat.prototype.setupCommands = function () {
@@ -186,16 +195,11 @@ OMGMusicChat.prototype.setupCommands = function () {
         }
         this._cmdPart = this._cmdFrom.part
             
-        if (data.command.action === "playsound") {
-            this.player.playSound(this._cmdPart.data.tracks[data.command.note].sound, 
-                    this._cmdPart,
-                    this._cmdPart.data.tracks[data.command.note].audioParams, data.command.velocity)
-        }
-        else if (data.command.action === "playnote") {
-            this.player.noteOn(data.command.note, this._cmdPart, 100) //todo velocity?
+        if (data.command.action === "noteon") {
+            this.noteOn(data.command.note, data.command.velocity, this._cmdFrom)
         }
         else if (data.command.action === "noteoff") {
-            this.player.noteOff(data.command.note, this._cmdPart)
+            this.noteOff(data.command.note, this._cmdFrom)
         }
         else if (data.command.action === "changeSoundSet") {
             this.changeSoundSet(data.command.instrument, this._cmdPart)
@@ -214,17 +218,17 @@ OMGMusicChat.prototype.changeSoundSet = function (instrument, part) {
 
 OMGMusicChat.prototype.setupMIDI = function () {
     this.midi = new OMGMIDI()
-    this.midi.onnoteon  = (note, velocity) => this.noteOn(note, velocity, this.part)
-    this.midi.onnoteoff = (note) => this.noteOff(note, this.part)
+    this.midi.onnoteon  = (note, velocity) => this.noteOn(note, velocity, this.user)
+    this.midi.onnoteoff = (note) => this.noteOff(note, this.user)
 }
 
 OMGMusicChat.prototype.makePianoCanvas = function (user) {
-    user.pianoCanvas = document.createElement("canvas")
+    user.pianoCanvas = document.createElement("div")
     user.pianoCanvas.className = "piano-canvas"
     user.div.appendChild(user.pianoCanvas)
 
-    user.pianoCtx = user.pianoCanvas.getContext("2d")
-    this.piano.draw(user.pianoCtx)
+    user.piano = new PianoCanvas(user.pianoCanvas)
+
 }
 
 
@@ -233,8 +237,6 @@ OMGMusicChat.prototype.makePianoCanvas = function (user) {
 
 pan
 fx
-
-keyboard visual
 
 more soundsets
 
