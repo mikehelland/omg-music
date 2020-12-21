@@ -58,9 +58,13 @@ OMGMusicChat.prototype.whenPlayersReady = function () {
 }
 
 OMGMusicChat.prototype.setupLocalUser = function (user) {
+    user.data = {}
     this.setupUser(user, true)
     this.user = user
     this.part = user.part
+
+    user.data.instrument = user.part.data.name
+    this.rt.updateLocalUserData(user.data)
 
     this.setupMIDI()
 }
@@ -80,12 +84,14 @@ OMGMusicChat.prototype.setupUser = function (user, local) {
             this.changeSoundSet(instrument, this.part)
 
             this.sendChangeSoundSet(instrument)
+            user.data.instrument = instrument
+            this.rt.updateLocalUserData(user.data)
         }
         user.div.appendChild(selectInstrument)
     }
     else {
         var instrumentDiv = document.createElement("span")
-        instrumentDiv.innerHTML = user.instrumentName
+        instrumentDiv.innerHTML = user.data ? user.data.instrument : Object.values(this.INSTRUMENTS)[0].name
         instrumentDiv.className = "user-instrument"
         user.div.appendChild(instrumentDiv)
         user.instrumentDiv = instrumentDiv
@@ -101,8 +107,12 @@ OMGMusicChat.prototype.setupUser = function (user, local) {
         user.part.gain.gain.setValueAtTime(volumeSlider.value/100, 0)
     }
 
-    var instrument = Object.values(this.INSTRUMENTS)[0]
-    user.part = new OMGPart(null, {name: user.name, audioParams: {gain: 0.3}, soundSet: instrument}, this.section)
+    var soundSet = Object.values(this.INSTRUMENTS)[0]
+    if (user.data && user.data.instrument) {
+        soundSet = this.INSTRUMENTS[user.data.instrument]
+    }
+    
+    user.part = new OMGPart(null, {name: user.name, audioParams: {gain: 0.3}, soundSet: soundSet}, this.section)
     volumeSlider.value = 30
     this.player.loadPart(user.part)
 
