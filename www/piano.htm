@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        #piano {position:relative;}
+    </style>
+</head>
+<body>
+    <div id="piano"></div>
+
+    <script src="/js/omgservice.js"></script>
+    <script src="js/piano_surface.js"></script>
+
+    <script>
+        var piano = new PianoSurface(document.getElementById("piano"))
+        piano.setupEvents(console.log, console.log)
+    </script>
