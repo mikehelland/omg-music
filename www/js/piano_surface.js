@@ -63,7 +63,7 @@ PianoSurface.prototype.setupCanvas = function (div) {
         else {
             this.keys[this._di].x = 2 + this.whiteKeys.length * this.whiteKeyWidth - this.whiteKeyWidth / 2
             ctx.fillRect(this.keys[this._di].x, 0, 
-                        this.whiteKeyWidth - 2, ctx.canvas.height * 0.66)
+                        this.whiteKeyWidth - 2, ctx.canvas.height * 0.6)
         }
     }
 }
@@ -80,7 +80,7 @@ PianoSurface.prototype.drawPressed = function (pressed) {
             this.ctx.fillRect(this._dk.x, 0, this.whiteKeyWidth, this.ctx.canvas.height)
         }
         else {
-            this.ctx.fillRect(this._dk.x, 0, this.whiteKeyWidth - 2, this.ctx.canvas.height * 0.66)
+            this.ctx.fillRect(this._dk.x, 0, this.whiteKeyWidth - 2, this.ctx.canvas.height * 0.6)
         }
     }   
 }
