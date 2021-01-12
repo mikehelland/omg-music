@@ -1,21 +1,26 @@
 function PianoSurface(div) {
     var blackKeys = [1, 3, 6, 8, 10]
+    var noteNames = ["C", "C#", "D", "Eb", "E", "F", "F#", "G", "Ab", "A", "Bb", "B"]
 
     var keys = []
+    var key 
     for (var i = 0; i < 128; i++) {
 
         var ii = i % 12
 
-        keys.push({
+        key = {
             note: i,
-            white: blackKeys.indexOf(ii) === -1
-        })
+            white: blackKeys.indexOf(ii) === -1,
+            name: noteNames[ii]
+        }
+
+        keys.push(key)
 
     }
 
     this.keys = keys
     this.start = 24
-    this.end = 102
+    this.end = 96
 
     this.whiteKeyCount = 0
     for (i = this.start; i <= this.end; i++) {
@@ -24,6 +29,9 @@ function PianoSurface(div) {
         }
     }
 
+    this.blackKeyLength = 0.6
+    this.showNoteNames = true
+    
     this.setupCanvas(div)
 }
 
@@ -51,6 +59,7 @@ PianoSurface.prototype.setupCanvas = function (div) {
     ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height)
     ctx.strokeStyle = "black"
     ctx.fillStyle = "black"
+    ctx.textAlign = "center"
     this.whiteKeys = []
     this.whiteKeyWidth = ctx.canvas.width / this.whiteKeyCount
     for (this._di = this.start; this._di <= this.end; this._di++) {
@@ -58,12 +67,16 @@ PianoSurface.prototype.setupCanvas = function (div) {
         if (this.keys[this._di].white) {
             this.keys[this._di].x = this.whiteKeys.length * this.whiteKeyWidth
             ctx.strokeRect(this.keys[this._di].x, 0, this.whiteKeyWidth, ctx.canvas.height)
-            this.whiteKeys.push(this.keys[this._di]) 
+            this.whiteKeys.push(this.keys[this._di])
+            
+            if (this.showNoteNames) {
+                ctx.fillText(this.keys[this._di].name, this.keys[this._di].x + this.whiteKeyWidth / 2, ctx.canvas.height * 0.8)
+            }
         }
         else {
             this.keys[this._di].x = 2 + this.whiteKeys.length * this.whiteKeyWidth - this.whiteKeyWidth / 2
             ctx.fillRect(this.keys[this._di].x, 0, 
-                        this.whiteKeyWidth - 2, ctx.canvas.height * 0.6)
+                        this.whiteKeyWidth - 2, ctx.canvas.height * this.blackKeyLength)
         }
     }
 }
@@ -73,14 +86,24 @@ PianoSurface.prototype.drawPressed = function (pressed) {
     this.ctx.canvas.width = this.ctx.canvas.clientWidth
     this.ctx.canvas.height = this.ctx.canvas.clientHeight
     this.ctx.fillStyle = "green"
+    this.ctx.strokeStyle = "black"
+    this.ctx.textAlign = "center"
     for (this._di = 0; this._di < pressed.length; this._di++) {
 
         this._dk = this.keys[pressed[this._di]]
         if (this._dk.white) {
             this.ctx.fillRect(this._dk.x, 0, this.whiteKeyWidth, this.ctx.canvas.height)
+            this.ctx.strokeRect(this._dk.x, 0, this.whiteKeyWidth, this.ctx.canvas.height)
+
+            if (this.showNoteNames) {
+                this.ctx.fillStyle = "white"
+                this.ctx.fillText(this._dk.name, this._dk.x + this.whiteKeyWidth / 2, this.ctx.canvas.height * 0.8)
+                this.ctx.fillStyle = "green"
+            }
         }
         else {
-            this.ctx.fillRect(this._dk.x, 0, this.whiteKeyWidth - 2, this.ctx.canvas.height * 0.6)
+            this.ctx.fillRect(this._dk.x, 0, this.whiteKeyWidth - 2, this.ctx.canvas.height * this.blackKeyLength)
+            this.ctx.strokeRect(this._dk.x, 0, this.whiteKeyWidth - 2, this.ctx.canvas.height * this.blackKeyLength)
         }
     }   
 }
@@ -110,10 +133,10 @@ PianoSurface.prototype.onup = function (touch) {
 
 PianoSurface.prototype.keyHitTest = function (touch) {
     var key = this.whiteKeys[Math.floor(touch.x / this.whiteKeyWidth)].note
-    if (touch.y / this.ctx.canvas.height < 0.66 && touch.x % this.whiteKeyWidth < this.whiteKeyWidth / 2 && !this.keys[key - 1].white) {
+    if (touch.y / this.ctx.canvas.height < this.blackKeyLength && touch.x % this.whiteKeyWidth < this.whiteKeyWidth / 2 && !this.keys[key - 1].white) {
         key--
     }
-    else if (touch.y / this.ctx.canvas.height < 0.66 && touch.x % this.whiteKeyWidth > this.whiteKeyWidth / 2 && !this.keys[key + 1].white) {
+    else if (touch.y / this.ctx.canvas.height < this.blackKeyLength && touch.x % this.whiteKeyWidth > this.whiteKeyWidth / 2 && !this.keys[key + 1].white) {
         key++
     }
     return key
