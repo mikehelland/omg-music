@@ -1,11 +1,9 @@
 {
 	"name": "music",
     "activities": [
-		{"name": "Music", "url": "remixer/", "edits": ["SONG","PART"], "uses": ["SOUNDSET"]},
 		{"name": "SoundSet", "url": "soundset.htm", "views": ["SOUNDSET"]},
 		{"name": "SoundSet Editor", "url": "soundset-editor.htm", "edits": ["SOUNDSET"]},
 		{"name": "Embedded Music Viewer", "url": "js/omusic-embed.js", "className": "OMGEmbeddedViewerMusic", "embeds": ["SONG", "PART"]},
-		{"name": "Embedded SoundSet Viewer", "url": "js/soundset-embed.js", "className": "OMGEmbeddedViewerSOUNDSET", "embeds": ["SOUNDSET"]},
-		{"name": "Music Socket Message Handler", "url": "server.js", "socketHandler": ["SONG"]}
+		{"name": "Embedded SoundSet Viewer", "url": "js/soundset-embed.js", "className": "OMGEmbeddedViewerSOUNDSET", "embeds": ["SOUNDSET"]}
 	]
 }
