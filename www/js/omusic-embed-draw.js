@@ -156,7 +156,7 @@ OMGEmbeddedViewerMusicDrawer.prototype.draw = function () {
                                     this.height - itrack * this.drawingData.sections[isection].trackHeight - marginY, 
                                     this.subbeatLength - marginX * 2, -1 * this.drawingData.sections[isection].trackHeight + marginY * 2);
             }
-        }
+        }      
         this.context.fillStyle = "black";
         this.context.font = noteSize + "pt serif";
         var y, x, note
@@ -223,3 +223,98 @@ OMGEmbeddedViewerMusicDrawer.prototype.draw = function () {
         }
     }
 };
+
+
+// the above does the whole OMGSong, and now I need just a single part
+// instead of refactoring, I'm doubling up
+
+
+OMGEmbeddedViewerMusicDrawer.prototype.drawPartCanvas = function (part, canvas, beatParams) {
+
+    canvas.width = canvas.clientWidth
+    canvas.height = canvas.clientHeight
+ 
+    if (part.surface.url === "PRESET_SEQUENCER") {
+        this.drawPartBeats(part, canvas, beatParams, 0, 0, canvas.width, canvas.height)
+    }
+    else {
+        this.drawPartNotes(part, canvas, beatParams, 0, 0, canvas.width, canvas.height)
+    }
+}
+
+OMGEmbeddedViewerMusicDrawer.prototype.drawPartNotes = function (part, canvas, beatParams, x, y, w, h) {
+    
+    var y, x, note
+    var usedBeats = 0;
+    
+    var subbeatsDrawn = 0
+    var subbeatsToDraw = beatParams.subbeats * beatParams.beats * beatParams.measures
+    var subbeatLength = canvas.width / subbeatsToDraw
+    var noteSize = subbeatLength > 30 ? 30 : 20
+
+    var context = canvas.getContext("2d");
+
+    context.fillStyle = "#DDDDDD"
+    context.fillRect(0, 0, canvas.width, canvas.height)
+
+    context.fillStyle = "black";
+    context.font = noteSize + "pt serif";
+    
+    for (var note of part.notes) {
+        x = subbeatsDrawn * subbeatLength + subbeatLength * usedBeats * beatParams.subbeats
+
+        y = (109 - note.note) / 109 * (canvas.height - (omg.ui.useUnicodeNotes ? 0 : noteSize))
+        if (y < 30) {
+            context.save()
+            context.translate(x, y)
+            context.scale(1, -1)
+            x = 0
+            y = 0
+        }
+
+        if (omg.ui.useUnicodeNotes) {
+            context.fillText(omg.ui.getTextForNote(note), x, y);
+        }
+        else {
+            context.drawImage(omg.ui.getImageForNote(note), x, y - noteSize, noteSize, noteSize);
+        }
+        if (y < 30) {
+            context.restore()
+        }
+        usedBeats += note.beats;
+        if (usedBeats * beatParams.subbeats >= subbeatsToDraw) {
+            break;
+        }
+    }
+}
+
+OMGEmbeddedViewerMusicDrawer.prototype.drawPartBeats = function (part, canvas, beatParams, x, y, w, h) {
+    var context = canvas.getContext("2d");
+    
+    var tracks = part.tracks
+    var subbeatsDrawn = 0
+    var subbeatsToDraw = beatParams.subbeats * beatParams.beats * beatParams.measures
+    var subbeatLength = canvas.width / subbeatsToDraw
+    var height = canvas.height / tracks.length
+    
+    for (var itrack = 0; itrack < tracks.length; itrack++) {
+        for (var i = 0; i < subbeatsToDraw; i++) {
+            value = tracks[itrack].data[i];
+            marginX = 1;
+            marginY = 1 //this.trackHeight > 5 ? 1 : 0;
+            if (typeof value === "number" && value > 0 && value < 1) {
+                context.fillStyle =  i % beatParams.beats == 0 ? "#DDDDDD" : "white";
+                context.fillRect((i + subbeatsDrawn) * subbeatLength + marginX, 
+                                    itrack * height - marginY, 
+                                    subbeatLength - marginX * 2, -1 * height + marginY * 2);
+                marginY = (height - height * value) / 3;
+                marginX = (subbeatLength - subbeatLength * value) / 3;
+            }
+            context.fillStyle =  value ? "black" : 
+                                        (i % beatParams.beats == 0 ? "#DDDDDD" : "white");
+            context.fillRect((i + subbeatsDrawn) * subbeatLength + marginX, 
+                                itrack * height - marginY, 
+                                subbeatLength - marginX * 2, height + marginY * 2);
+        }
+    }   
+}

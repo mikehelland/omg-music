@@ -1,17 +1,16 @@
-// todo see how many places call new OMGSong and remove the div parameter
-function OMGSong(div, data, headerOnly) {
-    this.div = div;
+function OMGSong(data, dataOld) {
     this.sections = [];
     this.fx = [];
     this.loop = true;
     this.gain = 1;
 
+    if (dataOld) {
+        data = dataOld
+        console.warn("update OMGSong params, data first")
+    }
     this.partNodes = {}
     
-    if (headerOnly) {
-        this.setHeaderData(data);
-    }
-    else if (!data) {
+    if (!data) {
         this.data = {type: "SONG", name: ""};
     }
     else if (data.type === "SONG") {
@@ -22,11 +21,11 @@ function OMGSong(div, data, headerOnly) {
     }
     else if (data.type === "SECTION") {
         this.data = {type: "SONG", name: ""};
-        new OMGSection(null, data, this);
+        new OMGSection(data, this);
     }
     else if (data.type === "PART") {
         this.data = {type: "SONG", name: ""};
-        new OMGPart(null, data, new OMGSection(null, null, this));
+        new OMGPart(null, data, new OMGSection(null, this));
     }
     else {
         data.type = "SONG";
@@ -73,6 +72,7 @@ function OMGSong(div, data, headerOnly) {
     this.onPartAddListeners = [];
     this.onChordProgressionChangeListeners = [];
     this.onFXChangeListeners = [];
+    this.onPartChangeListeners = [];
 };
 
 OMGSong.prototype.keyChanged = function (source) {
@@ -102,11 +102,22 @@ OMGSong.prototype.fxChanged = function (action, part, fx, source) {
 };
 
 
+OMGSong.prototype.partChanged = function (part, track, subbeat, value, source) {
+    if (this.onPartChangeListeners.length === 0) {
+        return
+    }
+    for (var listener of this.onPartChangeListeners) {
+        listener(part, track, subbeat, value, source)
+    }
+};
+
+
+
 OMGSong.prototype.setData = function (data) {
     this.data = data;
 
     for (var i = 0; i < data.sections.length; i++) {
-        var ooo = new OMGSection(null, data.sections[i], this);
+        var ooo = new OMGSection(data.sections[i], this);
     }
 
     if (!this.data.name)
@@ -153,7 +164,7 @@ OMGSong.prototype.make = function (data) {
     if (className === "OMGPart") {
 
         newSong = new OMGSong();
-        newSection = new OMGSection(null, null, newSong);
+        newSection = new OMGSection(null, newSong);
         newSection.parts.push(data);
         data.section = newSection;
 
@@ -183,13 +194,13 @@ OMGSong.prototype.make = function (data) {
 
     var newSong;
     if (data.type === "SONG") {
-        newSong = new OMGSong(null, data);
+        newSong = new OMGSong(data);
         return newSong;
     }
 
     if (data.type === "SECTION") {
         //newSong = new OMGSong();
-        newSection = new OMGSection(null, data);
+        newSection = new OMGSection(data);
         return newSection.song;
     }
 
@@ -214,11 +225,16 @@ OMGSong.prototype.rescale = function () {
 
 }
 
-function OMGSection(div, data, song) {
+OMGSong.prototype.setKey = function (rootNote, scale, source) {
+    this.data.keyParams.scale = scale;
+    this.data.keyParams.rootNote = rootNote;
+    this.keyChanged(source);
+}
+
+function OMGSection(data, song) {
     var partData;
     var part;
 
-    this.div = div;
     this.parts = [];
     this.partLookup = {};
 
@@ -332,7 +348,7 @@ function OMGPart(div, data, section) {
     if (!section || !section.data) {
         console.warn("new OMGPart() called without a section.");
         var song = new OMGSong();
-        section = new OMGSection(null, null, song);
+        section = new OMGSection(null, song);
     }
 
     this.section = section;
@@ -571,4 +587,9 @@ OMGPart.prototype.getData = function (options) {
         json.keyParams = JSON.parse(JSON.stringify(this.section.song.data.keyParams))
     }
     return json
+}
+
+OMGPart.prototype.change = function (track, subbeat, value) {
+    //TODO are we gonna change it?
+    this.section.song.partChanged(this, track, subbeat, value)
 }

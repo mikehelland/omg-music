@@ -199,6 +199,8 @@ OMGDrumMachine.prototype.ondown = function (touch) {
 
         if (omgdrums.onchange)
             omgdrums.onchange(this.part, trackI, subbeat);
+
+        this.part.change(trackI, subbeat, data[subbeat])
         
         this.touches.push(touch);
     }
@@ -242,6 +244,8 @@ OMGDrumMachine.prototype.onmove = function (touch) {
         if (omgdrums.onchange)
             omgdrums.onchange(this.part, trackI, subbeat);
 
+        this.part.change(trackI, subbeat, data[subbeat])
+
     }
 
     this.draw();
@@ -275,10 +279,7 @@ OMGDrumMachine.prototype.drawBackground = function (w, h) {
 
     this.setRowColumnSizes();
 
-    var offsets = omg.ui.totalOffsets(this.canvas);
-    this.offsetLeft = offsets.left;
-    this.offsetTop = offsets.top;
-
+    this.setPageOffsets()
     if (this.selectedTrack > -1) {
         this.drawTrackViewBackground();
     }
@@ -575,3 +576,9 @@ OMGDrumMachine.prototype.hide = function () {
     this.beatMarker.style.display = "none";
     this.hidden = true;
 };
+
+OMGDrumMachine.prototype.setPageOffsets = function () {
+    var offsets = omg.ui.totalOffsets(this.canvas);
+    this.offsetLeft = offsets.left;
+    this.offsetTop = offsets.top;
+}

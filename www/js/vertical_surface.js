@@ -392,7 +392,7 @@ OMGMelodyMaker.prototype.doneTouching = function () {
     }
 };
 
-OMGMelodyMaker.prototype.updateOffsets = function () {
+OMGMelodyMaker.prototype.setPageOffsets = function () {
     this.offsets = omg.ui.totalOffsets(this.canvas);
 };
 
@@ -505,7 +505,7 @@ OMGMelodyMaker.prototype.setCanvasEvents = function () {
         e.preventDefault();
 
         if (omgmm.redoOffsets) {
-            omgmm.updateOffsets();
+            omgmm.setPageOffsets();
             omgmm.redoOffsets = false;
         }
 
@@ -549,7 +549,7 @@ OMGMelodyMaker.prototype.setCanvasEvents = function () {
         e.preventDefault();
 
         if (omgmm.redoOffsets) {
-            omgmm.updateOffsets();
+            omgmm.setPageOffsets();
             omgmm.redoOffsets = false;
         }
 

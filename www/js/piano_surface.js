@@ -29,7 +29,7 @@ function PianoSurface(div) {
         }
     }
 
-    this.blackKeyLength = 0.6
+    this.blackKeyLength = 0.5
     this.showNoteNames = true
     
     this.setupCanvas(div)
@@ -46,6 +46,9 @@ PianoSurface.prototype.setupCanvas = function (div) {
     canvas.style.position = "absolute"
     canvas.style.top = "0px"
     canvas.style.left = "0px"
+    canvasBack.style.position = "absolute"
+    canvasBack.style.top = "0px"
+    canvasBack.style.left = "0px"
 
     div.appendChild(canvasBack)
     div.appendChild(canvas)
@@ -53,8 +56,12 @@ PianoSurface.prototype.setupCanvas = function (div) {
     var ctx = canvasBack.getContext("2d")
     this.ctx = canvas.getContext("2d")
 
+    
     ctx.canvas.width = ctx.canvas.clientWidth
     ctx.canvas.height = ctx.canvas.clientHeight
+    this.ctx.canvas.width = ctx.canvas.clientWidth
+    this.ctx.canvas.height = ctx.canvas.clientHeight
+    console.log(this.ctx.canvas.clientWidth, ctx.canvas.clientWidth) 
     ctx.fillStyle = "white"
     ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height)
     ctx.strokeStyle = "black"
@@ -79,21 +86,27 @@ PianoSurface.prototype.setupCanvas = function (div) {
                         this.whiteKeyWidth - 2, ctx.canvas.height * this.blackKeyLength)
         }
     }
+    console.log(this.ctx.canvas.clientWidth, ctx.canvas.clientWidth) 
+    
 }
 
 PianoSurface.prototype.drawPressed = function (pressed) {
-
+    console.log(this.ctx.canvas.clientWidth)
     this.ctx.canvas.width = this.ctx.canvas.clientWidth
     this.ctx.canvas.height = this.ctx.canvas.clientHeight
     this.ctx.fillStyle = "green"
     this.ctx.strokeStyle = "black"
     this.ctx.textAlign = "center"
+    this.pressedKeyOffset = 4
     for (this._di = 0; this._di < pressed.length; this._di++) {
 
         this._dk = this.keys[pressed[this._di]]
         if (this._dk.white) {
-            this.ctx.fillRect(this._dk.x, 0, this.whiteKeyWidth, this.ctx.canvas.height)
-            this.ctx.strokeRect(this._dk.x, 0, this.whiteKeyWidth, this.ctx.canvas.height)
+            this.ctx.fillRect(this._dk.x + this.pressedKeyOffset, 
+                    this.ctx.canvas.height * this.blackKeyLength + this.pressedKeyOffset, 
+                    this.whiteKeyWidth - this.pressedKeyOffset * 2, 
+                    this.ctx.canvas.height * (1 - this.blackKeyLength) - this.pressedKeyOffset * 2)
+            //this.ctx.strokeRect(this._dk.x, 0, this.whiteKeyWidth, this.ctx.canvas.height)
 
             if (this.showNoteNames) {
                 this.ctx.fillStyle = "white"
@@ -102,8 +115,11 @@ PianoSurface.prototype.drawPressed = function (pressed) {
             }
         }
         else {
-            this.ctx.fillRect(this._dk.x, 0, this.whiteKeyWidth - 2, this.ctx.canvas.height * this.blackKeyLength)
-            this.ctx.strokeRect(this._dk.x, 0, this.whiteKeyWidth - 2, this.ctx.canvas.height * this.blackKeyLength)
+            this.ctx.fillRect(this._dk.x + this.pressedKeyOffset, 
+                this.pressedKeyOffset, 
+                this.whiteKeyWidth - 2 - this.pressedKeyOffset * 2, 
+                this.ctx.canvas.height * this.blackKeyLength - 2 - this.pressedKeyOffset * 2)
+            //this.ctx.strokeRect(this._dk.x, 0, this.whiteKeyWidth - 2, this.ctx.canvas.height * this.blackKeyLength)
         }
     }   
 }

@@ -86,7 +86,10 @@ function OMusicPlayer() {
 
     p.loopSection = -1;
     
-    p.setupFX();
+    // TODO make loading FX optional, if there's no FX, don't get them
+    if (p.setupFX) {
+        p.setupFX();
+    }
 }
 
 OMusicPlayer.prototype.getAudioContext = function () {
@@ -1465,6 +1468,8 @@ OMusicPlayer.prototype.recordNote = function (part, note) {
         }
         part.data.notes.push(note);
     }
+    part.section.song.partChanged(part)
+
 };
 
 OMusicPlayer.prototype.makeAudioNodesForPart = function (part) {
