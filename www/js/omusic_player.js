@@ -74,6 +74,11 @@ function OMusicPlayer() {
     p.context = p.getAudioContext();
     p.tuna = omg.tuna;
 
+    if (typeof WebAudioFontPlayer !== "undefined") {
+        p.soundFontPlayer = new WebAudioFontPlayer();
+        p.soundFontPlayer.loader.decodeAfterLoading(p.context, '_tone_0250_SoundBlasterOld_sf2');
+    }
+    
     this.auditioningParts = [];
 
     p.onBeatPlayedListeners = [];
@@ -1651,11 +1656,15 @@ OMusicPlayer.prototype.noteOn = function (noteNumber, part, velocity) {
         return
     }
 
-    if (this.context && this.context.state === "suspended") {
+    if (this.context.state === "suspended") {
         this.context.resume();
     }
     
-    if (part.osc) {
+    if (part.soundFont) {
+        part.notesPlaying[noteNumber] = this.soundFontPlayer.queueWaveTable(this.context, this.context.destination
+            , _tone_0250_SoundBlasterOld_sf2, 0, noteNumber, 20);
+    }
+    else if (part.osc) {
         part.baseFrequency = this.makeFrequency(noteNumber);
         part.osc.frequency.setValueAtTime(
                 part.baseFrequency * part.data.audioParams.warp, this.context.currentTime);
@@ -1677,6 +1686,9 @@ OMusicPlayer.prototype.noteOff = function (noteNumber, part) {
   
     if (!part.notesPlaying[noteNumber]) {
         return
+    }
+    else if (part.soundFont) {
+        part.notesPlaying[noteNumber].cancel()
     }
     else if (part.synth) {
         part.synth.onNoteOff(part.notesPlaying[noteNumber])
