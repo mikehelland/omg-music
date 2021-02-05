@@ -1662,7 +1662,7 @@ OMusicPlayer.prototype.noteOn = function (noteNumber, part, velocity) {
     
     if (part.soundFont) {
         part.notesPlaying[noteNumber] = this.soundFontPlayer.queueWaveTable(this.context, this.context.destination
-            , _tone_0250_SoundBlasterOld_sf2, 0, noteNumber, 20);
+            , _tone_0250_SoundBlasterOld_sf2, 0, noteNumber - 12, 20);
     }
     else if (part.osc) {
         part.baseFrequency = this.makeFrequency(noteNumber);
