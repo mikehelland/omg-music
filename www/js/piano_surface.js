@@ -91,7 +91,6 @@ PianoSurface.prototype.setupCanvas = function (div) {
 }
 
 PianoSurface.prototype.drawPressed = function (pressed) {
-    console.log(this.ctx.canvas.clientWidth)
     this.ctx.canvas.width = this.ctx.canvas.clientWidth
     this.ctx.canvas.height = this.ctx.canvas.clientHeight
     this.ctx.fillStyle = "green"

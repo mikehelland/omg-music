@@ -76,7 +76,7 @@ function OMusicPlayer() {
 
     if (typeof WebAudioFontPlayer !== "undefined") {
         p.soundFontPlayer = new WebAudioFontPlayer();
-        p.soundFontPlayer.loader.decodeAfterLoading(p.context, '_tone_0250_SoundBlasterOld_sf2');
+        //p.soundFontPlayer.loader.decodeAfterLoading(p.context, '_tone_0000_Chaos_sf2');
     }
     
     this.auditioningParts = [];
@@ -487,7 +487,17 @@ OMusicPlayer.prototype.loadPart = function (part, soundsNeeded, onload) {
         soundsNeeded = {};
     }
 
-    if (part.data.surface.url === "PRESET_SEQUENCER") {
+    if (part.data.soundSet.soundFont) {
+        part.soundFont = part.data.soundSet.soundFont.name
+        part.soundFont = part.soundFont.replace(".js", "")
+        if (!part.soundFont.startsWith("_tone_")) {
+            part.soundFont = "_tone_" + part.soundFont
+        }
+        this.soundFontPlayer.loader.startLoad(this.context, 
+                part.data.soundSet.soundFont.url, 
+                part.data.soundSet.soundFont.name)
+    }
+    else if (part.data.surface.url === "PRESET_SEQUENCER") {
         this.loadDrumbeat(part, soundsNeeded);
     } else if (part.data.surface.url === "PRESET_MIC") {
         this.loadMic(part)
@@ -1183,6 +1193,14 @@ OMusicPlayer.prototype.playNote = function (note, part) {
         return;
     }
 
+    //todo should be one call!
+    if (part.soundFont) {
+        var liveNote = this.soundFontPlayer.queueWaveTable(this.context, this.context.destination
+            , window[part.soundFont], 0, note.scaledNote, 20)
+        setTimeout(function () {
+                liveNote.cancel()
+            }, p.song.data.beatParams.subbeats * note.beats * p.subbeatLength * 0.85);    
+    }
     if (part.synth) {
         part.baseFrequency = p.makeFrequency(note.scaledNote);
         var noteFrequency = part.baseFrequency * part.data.audioParams.warp
@@ -1363,12 +1381,21 @@ OMusicPlayer.prototype.playLiveNotes = function (notes, part) {
         part.synth.onNoteOff(part.synth.lastFrequency)
         part.synth.lastFrequency = 0
     }
+    else if (part.soundFont && part.liveNote) {
+        part.liveNote.cancel()
+        part.liveNote = null
+    }
     
     part.liveNotes = notes;
     if (!notes.autobeat) {
         part.playingI = -1;
         if (this.disableAudio) {
             //silence
+        }
+        else if (part.soundFont) {
+            //part.notesPlaying[notes[0].scaledNote]
+            part.liveNote = this.soundFontPlayer.queueWaveTable(this.context, this.context.destination
+                , window[part.soundFont], 0, notes[0].scaledNote, 20); //_tone_0000_Chaos_sf2_file
         }
         else if (part.osc) {
             part.baseFrequency = this.makeFrequency(notes[0].scaledNote);
@@ -1401,8 +1428,18 @@ OMusicPlayer.prototype.playLiveNotes = function (notes, part) {
 };
 
 OMusicPlayer.prototype.endLiveNotes = function (part) {
-  
-    if (part.synth && part.synth.lastFrequency) {
+    //todo make thits a single playNote function call
+    
+    if (this.disableAudio) {
+        //silence
+    }
+    else if (part.soundFont) {
+        if (part.liveNote) {
+            part.liveNote.cancel()
+            part.liveNote = null
+        }
+    }
+    else if (part.synth && part.synth.lastFrequency) {
         part.synth.onNoteOff(part.synth.lastFrequency)
         part.synth.lastFrequency = 0
     }
@@ -1662,7 +1699,7 @@ OMusicPlayer.prototype.noteOn = function (noteNumber, part, velocity) {
     
     if (part.soundFont) {
         part.notesPlaying[noteNumber] = this.soundFontPlayer.queueWaveTable(this.context, this.context.destination
-            , _tone_0250_SoundBlasterOld_sf2, 0, noteNumber, 20);
+            , window[part.soundFont], 0, noteNumber, 20);
     }
     else if (part.osc) {
         part.baseFrequency = this.makeFrequency(noteNumber);
