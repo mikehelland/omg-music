@@ -1,4 +1,11 @@
 function OMGSong(data, dataOld) {
+    
+    // each song has sections (eg intro, verse, chorus) and parts (eg drums, bass, keyboard)
+    // each section also has parts
+    // song.parts describes the part's soundset and fx and audio nodes
+    // song.section.parts describes the part's data (what notes to play when)
+    
+    this.parts = {}
     this.sections = [];
     this.fx = [];
     this.loop = true;
@@ -94,6 +101,9 @@ OMGSong.prototype.chordProgressionChanged = function (source) {
 };
 
 OMGSong.prototype.partAdded = function (part, source) {
+    if (!this.parts[part.data.name]) {
+        this.parts[part.data.name] = part
+    }
     this.onPartAddListeners.forEach(listener => listener(part, source));
 };
 
@@ -359,6 +369,7 @@ function OMGPart(div, data, section) {
         section.song = new OMGSong();
         section.song.sections.push(section.song);
     }
+    this.song = this.section.song
 
     this.data = data || {};
     this.data.type = this.data.type || "PART";
