@@ -25,6 +25,10 @@ function OMGSong(data) {
     this.data.name = this.data.name || ""
     this.saved = this.data.id ? true : false
 
+    // this is when sections and parts where arrays
+    // probably delete this later in 2021
+    this.upgrade(this.data)
+
     if (!this.data.parts) {
         this.data.parts = {}
     }
@@ -64,6 +68,7 @@ function OMGSong(data) {
     this.onBeatChangeListeners = [];
     this.onPartAudioParamsChangeListeners = [];
     this.onPartAddListeners = [];
+    this.onPartSectionAddListeners = [];
     this.onChordProgressionChangeListeners = [];
     this.onFXChangeListeners = [];
     this.onPartChangeListeners = [];
@@ -71,6 +76,27 @@ function OMGSong(data) {
     this.loadParts()
     this.loadSections()
 };
+
+OMGSong.prototype.upgrade = function (data) {
+    // pre 2021 no part heads and array based sections/parts
+    if (Array.isArray(data.sections)) {
+        var sections = {}
+        var partHeads = {}
+        for (var section of data.sections) {
+            var parts = {}
+            sections[section.name] = section
+            for (var part of section.parts) {
+                parts[part.name] = part // todo without header
+                if (!partHeads[part.name]) {
+                    partHeads[part.name] = part // todo without detail
+                }
+            }
+            section.parts = parts
+        }
+        data.sections = sections
+        data.parts = partHeads
+    }
+}
 
 OMGSong.prototype.loadParts = function () {
     for (var part in this.data.parts) {
@@ -107,13 +133,14 @@ OMGSong.prototype.loadSectionParts = function (section) {
     }
 }
 
-OMGSong.prototype.addPart = function (data) {
+OMGSong.prototype.addPart = function (data, source) {
     var part = new OMGSongPart(data)
     var name = this.getUniqueName(part.data.name, this.parts)
     part.data.name = name
     this.parts[name] = part
     this.parts[name].song = this
     this.data.parts[name] = part.data
+    this.onPartAddListeners.forEach(listener => listener(part, source));
     return part
 }
 
@@ -136,13 +163,15 @@ OMGSong.prototype.addSection = function (copy) {
     return section
 }
 
-OMGSong.prototype.addPartToSection = function (headPart, section) {
+OMGSong.prototype.addPartToSection = function (headPart, section, source) {
+    console.log(headPart)
     var part = new OMGSongPart(headPart.data)
     part.section = section
     part.song = this
     part.headPart = headPart
     section.parts[headPart.data.name] = part
     section.data.parts[headPart.data.name] = part.data
+    this.onPartSectionAddListeners.forEach(listener => listener(part, section, source));
     return part
 }
 
@@ -168,13 +197,6 @@ OMGSong.prototype.partMuteChanged = function (part, source) {
 
 OMGSong.prototype.chordProgressionChanged = function (source) {
     this.onChordProgressionChangeListeners.forEach(listener => listener(source));
-};
-
-OMGSong.prototype.partAdded = function (part, source) {
-    if (!this.parts[part.data.name]) {
-        this.parts[part.data.name] = part
-    }
-    this.onPartAddListeners.forEach(listener => listener(part, source));
 };
 
 OMGSong.prototype.fxChanged = function (action, part, fx, source) {
@@ -253,7 +275,7 @@ OMGSong.prototype.getUniqueName = function (name, names) {
 function OMGSongPart(data) {
     
     this.fx = [];
-    
+
     this.data = data || {};
     this.data.type = this.data.type || "PART";
     
@@ -484,8 +506,7 @@ function OMusicPlayer() {
     this.mp3PlayOffset = 0.052
     
     this.context = this.getAudioContext();
-    this.tuna = omg.tuna;
-
+    
     if (typeof WebAudioFontPlayer !== "undefined") {
         this.soundFontPlayer = new WebAudioFontPlayer()
     }
@@ -503,8 +524,8 @@ function OMusicPlayer() {
     this.arrangementI = -1
     
     // TODO make loading FX optional, if there's no FX, don't get them
-    if (this.setupFX) {
-        this.setupFX();
+    if (OMGAudioFX) {
+        this.fxFactory = new OMGAudioFX(this)
     }
 }
 
@@ -530,13 +551,6 @@ OMusicPlayer.prototype.getAudioContext = function () {
     }
 
     window.omgmusic.audioContext = context
-
-    if (typeof Tuna === "undefined") {
-        console.warn("omusic_player wants Tuna.js!")
-    }
-    else {
-        omg.tuna = new Tuna(omg.audioContext);
-    }
 
     return context;
 };
@@ -889,15 +903,22 @@ OMusicPlayer.prototype.loadSection = function (section, soundsNeeded) {
     section.currentChordI = 0
 
     var part;
-    for (var ipart = 0; ipart < section.parts.length; ipart++) {
-        part = section.parts[ipart];
+    for (var partName in section.parts) {
+        part = section.parts[partName];
         this.loadPart(part, soundsNeeded);
     }
 };
 
+OMusicPlayer.prototype.loadPartHeader = function (part) {
+    if (!part.panner && !this.disableAudio) {
+        this.makeAudioNodesForPart(part);
+    }
+}
+
 OMusicPlayer.prototype.loadPart = function (part, soundsNeeded, onload) {
     var p = this;
 
+    // this will pick up the part header
     if (!part.panner && !this.disableAudio) {
         this.makeAudioNodesForPart(part);
     }
@@ -1022,7 +1043,7 @@ OMusicPlayer.prototype.loadDrumbeat = function (part, soundsNeeded) {
         }
 
         if (soundsNeeded && tracks[i].sound && 
-                !omg.loadedSounds[tracks[i].sound] &&
+                !this.loadedSounds[tracks[i].sound] &&
                 !soundsNeeded[tracks[i].sound]) {
             soundsNeeded[tracks[i].sound] = true;
         }
@@ -1082,9 +1103,12 @@ OMusicPlayer.prototype.prepareSong = function (song, callback) {
 
     var soundsNeeded = {};
 
-    for (var isection = 0; isection < song.sections.length; isection++) {
+    for (var partName in song.parts) {
+        p.loadPartHeader(song.parts[partName]);
+    }
 
-        p.loadSection(song.sections[isection], soundsNeeded);
+    for (var sectionName in song.sections) {
+        p.loadSection(song.sections[sectionName], soundsNeeded);
     }
 
     var finish = function () {
@@ -1455,7 +1479,7 @@ OMusicPlayer.prototype.rescale = function (part, keyParams, chord, soundsNeeded)
         }
         
         if (soundsNeeded && onote.sound && 
-                !omg.loadedSounds[onote.sound] &&
+                !this.loadedSounds[onote.sound] &&
                 !soundsNeeded[onote.sound]) {
             soundsNeeded[onote.sound] = true;
         }
@@ -1620,7 +1644,7 @@ OMusicPlayer.prototype.playNote = function (note, part) {
     if (part.soundFont) {
         var liveNote = this.soundFontPlayer.queueWaveTable(this.context, part.preFXGain,
             window[part.soundFont], 0, note.scaledNote, 20)
-        setTimeout(function () {
+        setTimeout(() => {
                 if (liveNote) {
                     liveNote.cancel()
                 }
@@ -1631,7 +1655,7 @@ OMusicPlayer.prototype.playNote = function (note, part) {
         var noteFrequency = part.baseFrequency * part.data.audioParams.warp
         part.synth.onNoteOn(noteFrequency, 100)
         
-        setTimeout(function () {
+        setTimeout(() => {
             part.synth.onNoteOff(noteFrequency)
         }, this.song.data.beatParams.subbeats * note.beats * this.subbeatLength * 0.85);
     }
@@ -1644,7 +1668,7 @@ OMusicPlayer.prototype.playNote = function (note, part) {
         
         //this should be a timeout so it can be canceled if
         //a different note has played
-        setTimeout(function () {
+        setTimeout(() => {
             if (part.osc && part.playingI === playingI) {
                 part.preFXGain.gain.setTargetAtTime(0, this.context.currentTime, 0.003);
             }
@@ -2200,3 +2224,69 @@ OMusicPlayer.prototype.processCommand = function (data) {
         if (part.mm && !part.mm.hidden) part.mm.draw();
     }
 }
+
+
+OMusicPlayer.prototype.addFXToPart = function (fxName, part, source) {
+    var fx = this.makeFXNodeForPart(fxName, part.nodes || part)
+    if (fx) {
+        part.data.fx.push(fx.data);
+
+        this.song.fxChanged("add", part, fx, source);
+    }
+    return fx;
+};
+
+OMusicPlayer.prototype.removeFXFromPart = function (fx, part, source) {
+    var index = part.fx.indexOf(fx);
+    
+    var connectingNode = part.fx[index - 1]
+    connectingNode = connectingNode ? connectingNode.node : part.preFXGain
+    var connectedNode = part.fx[index + 1]
+    connectedNode = connectedNode ? connectedNode.node : part.postFXGain
+    fx.node.disconnect();
+    connectingNode.disconnect();
+    connectingNode.connect(connectedNode);
+
+    part.fx.splice(index, 1);
+    index = part.data.fx.indexOf(fx.data);
+    part.data.fx.splice(index, 1);
+
+    this.song.fxChanged("remove", part, fx, source);
+};
+
+OMusicPlayer.prototype.adjustFX = function (fx, part, property, value, source) {
+    //todo isAudioParam should be set in this file
+    if (fx.isAudioParam) {
+        fx[property].setValueAtTime(value, tg.player.context.currentTime);
+    }
+    else {
+        fx[property] = value;
+    }
+    
+    fx.data[property] = value;
+    var changes = {}
+    changes[property] =  value
+    this.song.fxChanged(changes, part, fx, source);
+}
+
+OMusicPlayer.prototype.makeFXNodeForPart = function (fx, nodes) {
+    var fxNode, fxData;
+    var fxName = fx;
+    if (typeof fx === "object") {
+        fxName = fx.name;
+        fxData = fx;
+    }
+    
+    var fxInfo = this.fxFactory.makeFXNode(fxName, fxData)
+
+    if (fxInfo && fxInfo.node) {
+        fxNode = fxInfo.node
+        var connectingNode = nodes.fx.length > 0 ? nodes.fx[nodes.fx.length - 1].node : nodes.preFXGain
+        connectingNode.disconnect(nodes.postFXGain);
+        connectingNode.connect(fxNode);
+        fxNode.connect(nodes.postFXGain);
+        nodes.fx.push(fxInfo);
+    }
+    
+    return fxInfo;
+};

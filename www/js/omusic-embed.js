@@ -16,11 +16,12 @@ function OMGEmbeddedViewerMusic(viewer) {
 
     omg.util.loadScripts(
         ["/apps/music/js/omusic-embed-draw.js",
-        "/apps/music/js/omgclasses.js",
+        /*"/apps/music/js/omgclasses.js",*/
         "/apps/music/js/omgservice_music.js",
-        "/apps/music/js/omusic_player.js"],
+        "/apps/music/js/omusic_player2.js"],
         () => {
-            this.song = OMGSong.prototype.make(this.data);
+            //this.song = OMGSong.prototype.make(this.data);
+            this.song = new OMGSong(this.data);
 
             this.drawer = new OMGEmbeddedViewerMusicDrawer()
             this.drawer.drawCanvas(this.song.getData(), this.canvas)

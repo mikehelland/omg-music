@@ -26,17 +26,19 @@ OMGEmbeddedViewerMusicDrawer.prototype.getDrawingData = function () {
 
     this.drawingData = {sections: []};
     let sections = this.performanceData || this.song.sections
-    sections.forEach(function (section, isection) {
+    for (sectionName in sections) {
+        var section = sections[sectionName]
         var chordedData = [];
         chordedData.sectionName = section.name;
-        for (var ic = 0; ic < section.chordProgression.length; ic++) {
+        var chordProgression = section.chordProgression || [0]
+        for (var ic = 0; ic < chordProgression.length; ic++) {
             //todo section.rescale(section.chordProgression[ic])
             
             var sectionData = viewer.getSectionDrawingData(section);
             chordedData.push(sectionData);
         }
         viewer.drawingData.sections.push(chordedData);
-    });
+    }
     
     var arrangement = [];
     if (!this.performanceData && this.song.arrangement && this.song.arrangement.length > 0) {
@@ -75,7 +77,8 @@ OMGEmbeddedViewerMusicDrawer.prototype.getDrawingData = function () {
 OMGEmbeddedViewerMusicDrawer.prototype.getSectionDrawingData = function (section) {
     var viewer = this;
     var sectionData = {tracks: [], notes: [], section: section};
-    section.parts.forEach(function (part) {
+    for (var partName in section.parts) {
+        var part = section.parts[partName]
         if (part.audioParams.mute) {
             return;
         }
@@ -98,7 +101,7 @@ OMGEmbeddedViewerMusicDrawer.prototype.getSectionDrawingData = function (section
                 sectionData.notes.push(JSON.parse(JSON.stringify(part.notes)));
             }
         }
-    });
+    }
     
     if (sectionData.tracks.length > 0) {
         if (sectionData.notes.length === 0) {
