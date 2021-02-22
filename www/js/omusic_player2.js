@@ -935,10 +935,17 @@ OMusicPlayer.prototype.loadPart = function (part, soundsNeeded, onload) {
         if (!part.soundFont.startsWith("_tone_")) {
             part.soundFont = "_tone_" + part.soundFont
         }
-        this.soundFontPlayer.loader.startLoad(this.context, 
-                part.data.soundSet.soundFont.url, 
-                part.data.soundSet.soundFont.name)
-        //this.soundFontPlayer.loader.decodeAfterLoading(this.context, part.data.soundSet.soundFont.name);
+
+        if (!this.downloadedSoundSets[part.data.soundSet.soundFont.url]) {
+            var soundfontScriptEl = document.createElement("script")
+            soundfontScriptEl.src = part.data.soundSet.soundFont.url
+            soundfontScriptEl.onload = e => {
+                //todo silently hit every note so it's loaded?
+                this.soundFontPlayer.loader.decodeAfterLoading(this.context, part.data.soundSet.soundFont.name);
+            }
+            document.body.appendChild(soundfontScriptEl)
+            this.downloadedSoundSets[part.data.soundSet.soundFont.url] = true
+        }
     }
     else if (part.data.surface.url === "PRESET_SEQUENCER") {
         this.loadDrumbeat(part, soundsNeeded);
