@@ -140,13 +140,12 @@ OMGSong.prototype.addSection = function (copy) {
 }
 
 OMGSong.prototype.addPartToSection = function (headPart, section, source) {
-    console.log(headPart)
     var part = new OMGSongPart(headPart.data)
     part.section = section
     part.song = this
     part.headPart = headPart
     section.parts[headPart.data.name] = part
-    section.data.parts[headPart.data.name] = part.data
+    section.data.parts.push(part.data)
     this.onPartSectionAddListeners.forEach(listener => listener(part, section, source));
     return part
 }

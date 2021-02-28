@@ -1,17 +1,37 @@
 function OMGMelodyMaker(div, part, player) {
 
+    div.style.display = "flex"
+    div.style.flexDirection = "column"
+
+    this.toolBarDiv = document.createElement("div")
+    div.appendChild(this.toolBarDiv)
+
+    this.canvasHolder = document.createElement("div")
+    this.canvasHolder.style.flexGrow = 1
+
     this.bgCanvas = document.createElement("canvas");
     this.bgCanvas.className = "surface-canvas";
-    div.appendChild(this.bgCanvas);
+    this.bgCanvas.style.position = "absolute"
+    this.bgCanvas.style.width = "100%"
+    this.bgCanvas.style.height = "100%"
+    this.canvasHolder.appendChild(this.bgCanvas);
     this.beatCanvas = document.createElement("canvas");
     this.beatCanvas.className = "surface-canvas";
-    div.appendChild(this.beatCanvas);
+    this.beatCanvas.style.position = "absolute"
+    this.beatCanvas.style.width = "100%"
+    this.beatCanvas.style.height = "100%"
+    this.canvasHolder.appendChild(this.beatCanvas);
     this.canvas = document.createElement("canvas");
     this.canvas.className = "surface-canvas";
-    div.appendChild(this.canvas);
+    this.canvas.style.position = "absolute"
+    this.canvas.style.width = "100%"
+    this.canvas.style.height = "100%"
+    this.canvasHolder.appendChild(this.canvas);
     this.context = this.canvas.getContext("2d");
     this.bgContext = this.bgCanvas.getContext("2d");
     this.beatContext = this.beatCanvas.getContext("2d");
+
+    div.appendChild(this.canvasHolder)
     
     this.bottomFretBottom = 0;
     this.topFretTop = 0;
@@ -86,8 +106,8 @@ OMGMelodyMaker.prototype.draw = function (isubbeat, w, h) {
         this.backgroundDrawn = true;
     }
     
-    this.canvas.width = w || this.canvas.clientWidth;
-    this.canvas.height = h || this.canvas.clientHeight;
+    this.canvas.width = w || this.bgCanvas.clientWidth;
+    this.canvas.height = h || this.bgCanvas.clientHeight;
 
     this.context.globalAlpha = 0.4;
     if (this.touchingXSection > -1) {

@@ -35,20 +35,6 @@ function OMGDrumMachine(div, part, params) {
 
     if (!params) params = {};
 
-    //if (!params.noBackground) {
-        this.bgCanvas = document.createElement("canvas");
-        this.bgCanvas.className = "surface-canvas";        
-        this.bgCtx = this.bgCanvas.getContext("2d");
-    //}
-    div.appendChild(this.bgCanvas);
-    this.canvas = document.createElement("canvas");
-    this.canvas.className = "surface-canvas";
-    div.appendChild(this.canvas);
-    this.ctx = this.canvas.getContext("2d");
-
-    this.readOnly = params.readOnly || true;
-    this.beatStrength = 1;
-    
     this.foreColor = params.foreColor || "white";
     this.downbeatColor = params.downbeatColor || "#333333";
     this.beatColor = params.beatColor || "#111111";
@@ -57,6 +43,63 @@ function OMGDrumMachine(div, part, params) {
     }
     this.backgroundColor = "black"
 
+    this.toolBarDiv = document.createElement("div")
+    this.toolBarDiv.style.display = "flex"
+
+    var beatLevels = 10
+    for (let i = beatLevels; i > 0; i--) {
+        let strengthButton = document.createElement("button")
+        strengthButton.innerHTML = i / beatLevels
+        strengthButton.style.backgroundColor = this.backgroundColor
+        strengthButton.style.color = this.foreColor
+        strengthButton.style.flexGrow = 1
+        this.toolBarDiv.appendChild(strengthButton)
+        strengthButton.onclick = e => {
+            this.beatStrength = i / beatLevels
+            strengthButton.style.backgroundColor = this.foreColor
+            strengthButton.style.color = this.backgroundColor
+            if (this.selectedStrengthButton) {
+                this.selectedStrengthButton.style.backgroundColor = this.backgroundColor
+                this.selectedStrengthButton.style.color = this.foreColor
+            }
+            this.selectedStrengthButton = strengthButton
+        }
+        if (i === beatLevels) {
+            strengthButton.onclick()
+        }
+    
+    }
+    
+    div.style.display = "flex"
+    div.style.flexDirection = "column"
+    
+    div.appendChild(this.toolBarDiv)
+
+    this.canvasHolder = document.createElement("div")
+    this.canvasHolder.style.flexGrow = 1
+    this.canvasHolder.style.position = "relative"
+
+    this.bgCanvas = document.createElement("canvas");
+    this.bgCanvas.className = "surface-canvas";        
+    this.bgCanvas.style.position = "absolute"
+    this.bgCanvas.style.width = "100%"
+    this.bgCanvas.style.height = "100%"
+    this.canvasHolder.appendChild(this.bgCanvas);
+    this.canvas = document.createElement("canvas");
+    this.canvas.className = "surface-canvas";
+    this.canvas.style.position = "absolute"
+    this.canvas.style.width = "100%"
+    this.canvas.style.height = "100%"
+    this.canvasHolder.appendChild(this.canvas);
+    
+    this.bgCtx = this.bgCanvas.getContext("2d");
+    this.ctx = this.canvas.getContext("2d");
+
+    div.appendChild(this.canvasHolder)
+
+    this.readOnly = params.readOnly || false // true;
+    this.beatStrength = 1;
+    
     this.selectedTrack = -1;
     
     this.left = 0;
@@ -275,9 +318,10 @@ OMGDrumMachine.prototype.drawBackground = function (w, h) {
     this.bgCanvas.height = h || this.bgCanvas.clientHeight;
     this.bgCtx.fillStyle = this.backgroundColor
     this.bgCtx.fillRect(0, 0, this.bgCanvas.width, this.bgCanvas.height)
-
-    if (!this.info) {
+    
+    if (!this.info || this.lastHeight !== this.bgCanvas.height) {
         this.setInfo();
+        this.lastHeight = this.bgCanvas.height
     }
 
     this.setRowColumnSizes();
@@ -309,8 +353,8 @@ OMGDrumMachine.prototype.draw = function (subbeat, w, h) {
         this.backgroundDrawn = true;
     }
 
-    this.canvas.width = w || this.canvas.clientWidth;
-    this.canvas.height = h || this.canvas.clientHeight;
+    this.canvas.width = w || this.bgCanvas.clientWidth;
+    this.canvas.height = h || this.bgCanvas.clientHeight;
 
     this.drawCaptions();
     
@@ -335,18 +379,9 @@ OMGDrumMachine.prototype.drawFullView = function (subbeat) {
                 value = 1;
             }
 
-            if (value === 1) {
-                this.beatMarginX = 1;
-                this.beatMarginY = 1;
-            }
-            else if (value >= 0.5) {
-                this.beatMarginX = this.columnWidth / 10;
-                this.beatMarginY = this.rowHeight / 10;
-            }
-            else {
-                this.beatMarginX = this.columnWidth / 5;
-                this.beatMarginY = this.rowHeight / 5
-            }
+            this.beatMarginX = 1 + (1 - value) * this.columnWidth * 0.35;
+            this.beatMarginY = 1 + (1 - value) * this.rowHeight * 0.35;
+        
             this.ctx.fillStyle = this.foreColor;
             this.ctx.fillRect(this.left + this.captionWidth + this.columnWidth * j + this.beatMarginX, 
                     this.top + this.rowHeight * i + this.beatMarginY,
@@ -384,19 +419,9 @@ OMGDrumMachine.prototype.drawTrackView = function (subbeat) {
             if (typeof value !== "number") {
                 value = 1;
             }
-            
-            if (value === 1) {
-                this.beatMarginX = 1;
-                this.beatMarginY = 1;
-            }
-            else if (value >= 0.5) {
-                this.beatMarginX = this.columnWidth / 10;
-                this.beatMarginY = this.rowHeight / 10;
-            }
-            else {
-                this.beatMarginX = this.columnWidth / 5;
-                this.beatMarginY = this.rowHeight / 5
-            }
+
+            this.beatMarginX = 1 + (1 - value) * this.columnWidth * 0.35;
+            this.beatMarginY = 1 + (1 - value) * this.rowHeight * 0.35;
 
             this.ctx.fillStyle = this.foreColor;
             this.ctx.fillRect(this.left + this.captionWidth + this.columnWidth * j + this.beatMarginX, 
