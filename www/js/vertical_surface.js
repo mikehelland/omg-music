@@ -955,11 +955,12 @@ OMGMelodyMaker.prototype.setPart = function (part, welcomeStyle) {
     this.skipFretsTop = this.part.data.surface.skipTop || 0;
     this.skipFretsBottom = this.part.data.surface.skipBottom || 0;
     
-    if (this.data.notes.length == 0) {
+    // todo add tools
+    //if (this.data.notes.length == 0) {
         this.mode = "APPEND";
-    } else {
-        this.mode = "EDIT";
-    }
+    //} else {
+    //    this.mode = "EDIT";
+    //}
 
     var visibility;
     this.welcomeStyle = welcomeStyle;

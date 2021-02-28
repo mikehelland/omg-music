@@ -1,19 +1,25 @@
-function OMGAudioFX(player) {
+function OMGAudioFX(musicContext, onready) {
 
-    this.player = player
-    this.context = player.context
+    this.player = musicContext
+    this.context = musicContext.audioContext
     // load tuna
     if (typeof Tuna === "undefined") {
-        console.warn("omusic_player wants Tuna.js!")
+        var scriptEl = document.createElement("script")
+        scriptEl.src = this.scriptSrc.substr(0, this.scriptSrc.lastIndexOf("/") + 1) + "libs/tuna-min.js"
+        scriptEl.onload = () => {
+            this.tuna = new Tuna(this.context);
+            this.setupFX()
+            if (onready) onready()
+        }
+        document.body.appendChild(scriptEl)
     }
     else {
         this.tuna = new Tuna(this.context);
+        this.setupFX()
     }
-
-    this.setupFX()
-
 }
 
+OMGAudioFX.prototype.scriptSrc = document.currentScript.src
 
 OMGAudioFX.prototype.makeFXNode = function (fxName, fxData) {
     var fxNode;
@@ -364,13 +370,13 @@ OMGAudioFX.prototype.makeDelay = function (data) {
         set: function(value) {
             data.time = value;
             //delay.delayTime.setValueAtTime(value, p.context.currentTime);
-            delay.delayTime.exponentialRampToValueAtTime(value, p.context.currentTime + p.player.latency/1000);
+            delay.delayTime.exponentialRampToValueAtTime(value, p.context.currentTime) // + p.player.latency/1000);
         }
     });
     Object.defineProperty(input, 'feedback', {
         set: function(value) {
             data.feedback = value;
-            feedback.gain.exponentialRampToValueAtTime(data.bypass ? 0 : value, p.context.currentTime + p.player.latency/1000);
+            feedback.gain.exponentialRampToValueAtTime(data.bypass ? 0 : value, p.context.currentTime) // + p.player.latency/1000);
         }
     });
     Object.defineProperty(input, 'bypass', {

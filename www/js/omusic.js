@@ -289,7 +289,7 @@ OMusicContext.prototype.addFXToPart = function (fxName, part, source) {
     if (fx) {
         part.data.fx.push(fx.data);
 
-        this.song.fxChanged("add", part, fx, source);
+        part.song.fxChanged("add", part, fx, source);
     }
     return fx;
 };
@@ -309,7 +309,7 @@ OMusicContext.prototype.removeFXFromPart = function (fx, part, source) {
     index = part.data.fx.indexOf(fx.data);
     part.data.fx.splice(index, 1);
 
-    this.song.fxChanged("remove", part, fx, source);
+    part.song.fxChanged("remove", part, fx, source);
 };
 
 OMusicContext.prototype.adjustFX = function (fx, part, property, value, source) {
@@ -324,7 +324,7 @@ OMusicContext.prototype.adjustFX = function (fx, part, property, value, source) 
     fx.data[property] = value;
     var changes = {}
     changes[property] =  value
-    this.song.fxChanged(changes, part, fx, source);
+    part.song.fxChanged(changes, part, fx, source);
 }
 
 OMusicContext.prototype.makeFXNodeForPart = function (fx, nodes) {
@@ -428,8 +428,9 @@ OMusicContext.prototype.getFXFactory = function () {
         }
 
         if (typeof OMGAudioFX !== "undefined") {
-            this.fxFactory = new OMGAudioFX(this)
-            resolve(this.fxFactory)
+            this.fxFactory = new OMGAudioFX(this, () => {
+                resolve(this.fxFactory)    
+            })
             return
         }
 
@@ -437,10 +438,11 @@ OMusicContext.prototype.getFXFactory = function () {
             var scriptEl = document.createElement("script")
             scriptEl.src = "/apps/music/js/fxfactory.js"
             scriptEl.onload = () => {
-                this.fxFactory = new OMGAudioFX(this)
-                this.onfxfactoryready.forEach(resolve => {
-                    resolve(this.fxFactory)
-                })    
+                this.fxFactory = new OMGAudioFX(this, () => {
+                    this.onfxfactoryready.forEach(resolve => {
+                        resolve(this.fxFactory)
+                    })    
+                })
             }
             this.onfxfactoryready = []
             document.body.appendChild(scriptEl)
@@ -785,17 +787,9 @@ OMusicContext.prototype.updatePartVolumeAndPan = function (part) {
 
 
 
-OMusicPlayer.prototype.mutePart = function (part, mute) {
-    if (typeof part === "string") {
-        part = this.getPart(part);
-    }
-
-    if (!part) {
-        return
-    }
-
+OMusicContext.prototype.mutePart = function (part, mute) {
     part.data.audioParams.mute = mute || false;
-    this.song.partMuteChanged(part);
+    part.song.partMuteChanged(part);
 
     if (part.osc && part.data.audioParams.mute) {
         part.preFXGain.gain.cancelScheduledValues(this.audioContext.currentTime)
@@ -811,7 +805,7 @@ OMusicPlayer.prototype.mutePart = function (part, mute) {
     }
 };
 
-OMusicPlayer.prototype.getSound = function (part, soundName) {
+OMusicContext.prototype.getSound = function (part, soundName) {
     if (typeof part === "string") {
 
         part = this.getPart(part);
@@ -846,7 +840,7 @@ OMusicPlayer.prototype.getSound = function (part, soundName) {
     }
 };
 
-OMusicPlayer.prototype.getPart = function (partName) {
+OMusicContext.prototype.getPart = function (partName) {
     for (var i = 0; i < this.section.parts.length; i++) {
         if (this.section.parts[i].data.name === partName) {
             return this.section.parts[i];
@@ -854,7 +848,7 @@ OMusicPlayer.prototype.getPart = function (partName) {
     }
 };
 
-OMusicPlayer.prototype.loadMic = function (part) {
+OMusicContext.prototype.loadMic = function (part) {
     if (!this.allowMic) {
         return
     }
@@ -871,7 +865,7 @@ OMusicPlayer.prototype.loadMic = function (part) {
     })
 }
 
-OMusicPlayer.prototype.disconnectMic = function (part) {
+OMusicContext.prototype.disconnectMic = function (part) {
     if (!part.inputSource) {
         return
     }

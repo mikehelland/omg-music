@@ -18,13 +18,11 @@ function OMGEmbeddedViewerMusic(viewer) {
         ["/apps/music/js/omusic-embed-draw.js",
         /*"/apps/music/js/omgclasses.js",*/
         "/apps/music/js/omgservice_music.js",
-        "/apps/music/js/omusic_player2.js"],
+        //"/apps/music/js/omusic_player2.js"
+        ],
         () => {
-            //this.song = OMGSong.prototype.make(this.data);
-            this.song = new OMGSong(this.data);
-
             this.drawer = new OMGEmbeddedViewerMusicDrawer()
-            this.drawer.drawCanvas(this.song.getData(), this.canvas)
+            this.drawer.drawCanvas(this.data, this.canvas)
             this.drawingData = this.drawer.drawingData
             
             this.makePlayButton()
@@ -60,28 +58,26 @@ OMGEmbeddedViewerMusic.prototype.makePlayButton = function () {
     this.playButtonImg.onclick = e => this.playButtonClick()
 }
 
-OMGEmbeddedViewerMusic.prototype.playButtonClick = function (data) {
+OMGEmbeddedViewerMusic.prototype.playButtonClick = async function (data) {
 
     let playcountUpdate = () => {
         if (!this.playButtonHasBeenClicked) {
             this.playButtonHasBeenClicked = true;                
-            omg.server.postHTTP("/playcount", {id: this.viewer.data.id});
+            omg.server.postHTTP("/playcount", {id: this.data.id});
         }
     }
 
     if (!this.player) {
         this.playButton.classList.add("loader")
-        this.player = new OMusicPlayer()
+        var OMusicContext = await import("./omusic.js")
+        this.musicContext = new OMusicContext.default()
+        
+        var {player, song} = await this.musicContext.load(this.data)
+        
+        this.player = player
+        this.song = song
         
         this.setPlayer(this.player)
-        
-        this.player.prepareSong(this.song, () => {
-            this.player.play()
-            this.beatMarker.style.display = "block"
-            playcountUpdate()
-        })
-        
-        return
     }
 
     if (this.player.playing) {
