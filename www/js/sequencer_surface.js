@@ -55,6 +55,7 @@ function OMGDrumMachine(div, part, params) {
     if (typeof params.captionWidth === "number") {
         this.captionWidth = params.captionWidth;
     }
+    this.backgroundColor = "black"
 
     this.selectedTrack = -1;
     
@@ -272,6 +273,8 @@ OMGDrumMachine.prototype.drawBackground = function (w, h) {
     
     this.bgCanvas.width = w || this.bgCanvas.clientWidth;
     this.bgCanvas.height = h || this.bgCanvas.clientHeight;
+    this.bgCtx.fillStyle = this.backgroundColor
+    this.bgCtx.fillRect(0, 0, this.bgCanvas.width, this.bgCanvas.height)
 
     if (!this.info) {
         this.setInfo();
