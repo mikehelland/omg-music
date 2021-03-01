@@ -862,7 +862,7 @@ var CONST = {
 */
 
 
-function Synth( audioContext, config ) {
+export function Synth( audioContext, config ) {
 	var self = this,
 		voices = [],
 		voicesAvailable = [],

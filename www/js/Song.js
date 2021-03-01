@@ -24,6 +24,7 @@ export default function OMGSong(data) {
     this.saved = this.data.id ? true : false
 
     if (!this.data.parts) {
+        this.backwardsCompat1 = true
         this.data.parts = []
     }
     if (!this.data.sections) {
@@ -62,7 +63,6 @@ export default function OMGSong(data) {
     this.onBeatChangeListeners = [];
     this.onPartAudioParamsChangeListeners = [];
     this.onPartAddListeners = [];
-    this.onPartSectionAddListeners = [];
     this.onChordProgressionChangeListeners = [];
     this.onFXChangeListeners = [];
     this.onPartChangeListeners = [];
@@ -77,6 +77,27 @@ OMGSong.prototype.loadParts = function () {
         this.parts[part.name] = new OMGSongPart(part)
         this.parts[part.name].song = this
     }
+
+    if (!this.backwardsCompat1) {
+        //return
+    }
+
+    // find any parts that might not be in the header
+    // mainly for backwards compat, <2021
+    for (var section of this.data.sections) {
+        for (part of section.parts) {
+            if (!this.parts[part.name]) {
+                console.log("lateload", part.name)
+                var data = JSON.parse(JSON.stringify(part))
+                delete data.notes
+                delete data.tracks
+                this.data.parts.push(data)
+                this.parts[part.name] = new OMGSongPart(part)
+                this.parts[part.name].song = this
+            }
+        }
+    }
+    
 }
 
 OMGSong.prototype.loadSections = function () {
@@ -110,14 +131,25 @@ OMGSong.prototype.loadSectionParts = function (section) {
 }
 
 OMGSong.prototype.addPart = function (data, source) {
-    var part = new OMGSongPart(data)
-    var name = this.getUniqueName(part.data.name, this.parts)
-    part.data.name = name
-    this.parts[name] = part
+    var headPart = new OMGSongPart(data)
+    var name = this.getUniqueName(headPart.data.name, this.parts)
+    headPart.data.name = name
+    this.parts[name] = headPart
     this.parts[name].song = this
-    this.data.parts[name] = part.data
-    this.onPartAddListeners.forEach(listener => listener(part, source));
-    return part
+    this.data.parts[name] = headPart.data
+
+    for (var sectionName in this.sections) {
+        var section = this.sections[sectionName]
+        let part = new OMGSongPart(headPart.data)
+        part.section = section
+        part.song = this
+        part.headPart = headPart
+        section.parts[headPart.data.name] = part
+        section.data.parts.push(part.data)
+    }
+    
+    this.onPartAddListeners.forEach(listener => listener(headPart, source));
+    return headPart
 }
 
 OMGSong.prototype.addSection = function (copy) {
@@ -137,17 +169,6 @@ OMGSong.prototype.addSection = function (copy) {
         this.arrangement.push({section: name, repeats: 1})
     }
     return section
-}
-
-OMGSong.prototype.addPartToSection = function (headPart, section, source) {
-    var part = new OMGSongPart(headPart.data)
-    part.section = section
-    part.song = this
-    part.headPart = headPart
-    section.parts[headPart.data.name] = part
-    section.data.parts.push(part.data)
-    this.onPartSectionAddListeners.forEach(listener => listener(part, section, source));
-    return part
 }
 
 OMGSong.prototype.makeSection = function (data) {

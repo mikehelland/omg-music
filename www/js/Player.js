@@ -1,6 +1,5 @@
 "use strict";
 
-console.log("player.js")
 // This is called by the music context
 // it takes the music context and a song loaded by the music context
 // everything should be loaded, all this has to do is play and stop
@@ -46,9 +45,7 @@ OMusicPlayer.prototype.play = async function (song) {
         return
     }
     if (song && !song.loaded) {
-        console.log("loading")
         await this.loadSong(song)
-        console.log("loaded")
         this.song = song
     }
 
@@ -72,7 +69,7 @@ OMusicPlayer.prototype.play = async function (song) {
     // should rescale for other reasons too
     if (this.section.data.chordProgression) {
         this.section.currentChordI = 0;
-        this.rescaleSection(this.section, this.section.data.chordProgression[0]);
+        this.musicContext.rescaleSection(this.section, this.section.data.chordProgression[0]);
     }
 
     if (typeof (this.onPlay) == "function") {
@@ -112,7 +109,7 @@ OMusicPlayer.prototype._play = function () {
     // todo 
     if (this.section.data.chordProgression) {
         if (this.section.chord !== this.section.data.chordProgression[this.section.currentChordI]) {
-            this.rescaleSection(this.section, this.section.data.chordProgression[this.section.currentChordI]);
+            this.musicContext.rescaleSection(this.section, this.section.data.chordProgression[this.section.currentChordI]);
         }
     }
 
@@ -244,7 +241,7 @@ OMusicPlayer.prototype.afterSection = function () {
             p.section.currentChordI = 0;
         }
         if (p.section.chord !== p.section.data.chordProgression[p.section.currentChordI]) {
-            p.rescaleSection(p.section, p.section.data.chordProgression[p.section.currentChordI]);
+            p.musicContext.rescaleSection(p.section, p.section.data.chordProgression[p.section.currentChordI]);
         }
     }
 
@@ -256,7 +253,6 @@ OMusicPlayer.prototype.afterSection = function () {
 };
 
 OMusicPlayer.prototype.setupNextSection = function (fromStart) {
-    console.log("setupNextSection", fromStart)
     var p = this;
     if (fromStart) {
         p.loopSection = null
@@ -496,10 +492,7 @@ OMusicPlayer.prototype.playBeatWithLiveNote = function (iSubBeat, part) {
             var note = {note: part.liveNotes[index].note,
                 scaledNote: part.liveNotes[index].scaledNote,
                 beats: part.liveNotes.autobeat / part.section.song.data.beatParams.subbeats};
-            if (part.soundSet && !part.soundSet.osc) {
-                note.sound = this.getSoundURL(part.soundSet, part.liveNotes[index]);
-            }
-
+            
             this.playNote(note, part);
             if (this.playing && !part.data.audioParams.mute) {
                 this.recordNote(part, note);
@@ -553,7 +546,6 @@ OMusicPlayer.prototype.playNote = function (note, part) {
 
     //todo should be one call!
     if (part.soundFont) {
-        console.log("hello playNote")
         var liveNote = this.musicContext.soundFontPlayer.queueWaveTable(this.audioContext, part.preFXGain,
             window[part.soundFont], 0, note.scaledNote, 20)
         setTimeout(() => {
@@ -562,7 +554,7 @@ OMusicPlayer.prototype.playNote = function (note, part) {
                 }
             }, this.song.data.beatParams.subbeats * note.beats * this.subbeatLength * 0.85);    
     }
-    if (part.synth) {
+    else if (part.synth) {
         part.baseFrequency = this.makeFrequency(note.scaledNote);
         var noteFrequency = part.baseFrequency * part.data.audioParams.warp
         part.synth.onNoteOn(noteFrequency, 100)
@@ -586,8 +578,9 @@ OMusicPlayer.prototype.playNote = function (note, part) {
             }
         }, this.song.data.beatParams.subbeats * note.beats * this.subbeatLength * 0.85);
     }
-    else {
-        var audio = this.playSound(note.sound, part);
+    else if (part.soundUrls){
+        var sound = part.soundUrls[note.scaledNote]
+        var audio = this.playSound(sound, part);
         if (audio) {
             audio.bufferGain.gain.linearRampToValueAtTime(part.data.audioParams.gain, 
                 this.audioContext.currentTime + fromNow * 0.995);
@@ -685,10 +678,9 @@ OMusicPlayer.prototype.playLiveNotes = function (notes, part) {
             part.synth.lastFrequency = part.baseFrequency * part.data.audioParams.warp
             part.synth.onNoteOn(part.synth.lastFrequency, 100)
         }
-        else {
-            //var sound = this.getSound(part.data.soundSet, notes[0]);
-            notes[0].sound = this.getSoundURL(part.soundSet, notes[0]);
-            sectionPart.liveNotes.liveAudio = this.playSound(notes[0].sound, part);
+        else if (part.soundUrls) {
+            var sound = part.soundUrls[notes[0].scaledNote];
+            sectionPart.liveNotes.liveAudio = this.playSound(sound, part);
         }
         
         if (this.playing && !part.data.audioParams.mute) {

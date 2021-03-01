@@ -69,7 +69,8 @@ OMGEmbeddedViewerMusic.prototype.playButtonClick = async function (data) {
 
     if (!this.player) {
         this.playButton.classList.add("loader")
-        var OMusicContext = await import("./omusic.js")
+        var OMusicContext = await import("/apps/music/js/omusic.js")
+        //var OMusicContext = await import("./omusic.js")
         this.musicContext = new OMusicContext.default()
         
         var {player, song} = await this.musicContext.load(this.data)

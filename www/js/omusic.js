@@ -171,8 +171,6 @@ OMusicContext.prototype.loadMelody = function (part, soundsNeeded) {
 OMusicContext.prototype.prepareMelody = function (part, soundsNeeded) {
     var p = this;
     
-    this.setupPartWithSoundSet(part.soundSet, part);
-    
     if (this.loadFullSoundSets) {
         this.loadSoundsFromSoundSet(part.soundSet);
         return;
@@ -247,7 +245,6 @@ OMusicContext.prototype.loadSong = function (song) {
     return new Promise((resolve, reject) => {
         // the song could have FX, sound fonts, synths, get all that ready
         this.getAddOnsForSong(song).then(() => {
-            console.log("loading2")
             if (!song.madeAudioNodes && !this.disableAudio) {
                 this.makeAudioNodesForSong(song);
             }
@@ -264,7 +261,6 @@ OMusicContext.prototype.loadSong = function (song) {
 
             if (Object.keys(soundsNeeded).length === 0 || this.disableAudio) {
                 song.loaded = true
-                console.log("loadedddd1")
                 resolve()
                 return true;
             }
@@ -274,7 +270,6 @@ OMusicContext.prototype.loadSong = function (song) {
                     delete soundsNeeded[sound];
                     if (Object.keys(soundsNeeded).length === 0) {
                         song.loaded = true
-                        console.log("loadedddd2")
                         resolve()
                     }
                 });
@@ -463,7 +458,7 @@ OMusicContext.prototype.getAddOnsForSong = function (song) {
         if (part.fx && part.fx.length > 0) {
             hasFX = true
         }
-        if (part.soundSet.soundFont) {
+        if (part.soundSet && part.soundSet.soundFont) {
             hasSoundFont = true
         }
     }
@@ -475,7 +470,7 @@ OMusicContext.prototype.getAddOnsForSong = function (song) {
     if (hasSoundFont) {
         addOns.push(this.getSoundFontPlayer())
     }
-    console.log(addOns)
+
     return Promise.all(addOns)
 }
 
@@ -523,10 +518,7 @@ OMusicContext.prototype.makeOsc = function (type) {
 
 OMusicContext.prototype.makeSynth = function (patchData, nodes, partData) {
 
-    // todo download??
-    if (typeof Synth === "undefined") {
-        return //todo faill back? this.makeOsc()
-    }
+    var {Synth} = import("./libs/viktor/viktor/js")
 
     let synth = new Synth(this.audioContext, patchData)
     let patch = patchLoader.load(patchData)
@@ -877,3 +869,10 @@ OMusicContext.prototype.disconnectMic = function (part) {
         track.stop();
     });
 }
+
+OMusicContext.prototype.loadSoundsFromSoundSet = function (soundSet) {
+    for (var i = 0; i < soundSet.data.length; i++) {
+        this.loadSound((soundSet.prefix || "") + soundSet.data[i].url + 
+            (soundSet.postfix || ""));
+    }
+};
