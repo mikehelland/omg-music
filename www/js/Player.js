@@ -72,10 +72,6 @@ OMusicPlayer.prototype.play = async function (song) {
         this.musicContext.rescaleSection(this.section, this.section.data.chordProgression[0]);
     }
 
-    if (typeof (this.onPlay) == "function") {
-        // should use the listeners array, but still here because its used
-        this.onPlay(p);
-    }
     for (var il = 0; il < this.onPlayListeners.length; il++) {
         try {
             this.onPlayListeners[il].call(null, true);
@@ -349,10 +345,6 @@ OMusicPlayer.prototype.stop = function () {
     clearInterval(p.playingIntervalHandle);
     p.playing = false;
 
-    if (typeof (p.onStop) == "function") {
-        // should use the listeners array, but still here because its used
-        p.onStop(p);
-    }
     for (var il = 0; il < p.onPlayListeners.length; il++) {
         try {
             p.onPlayListeners[il].call(null, false);
@@ -722,15 +714,15 @@ OMusicPlayer.prototype.endLiveNotes = function (part) {
                 this.audioContext.currentTime, 0.003);
     }  
     else {
-        if (part.liveNotes && part.liveNotes.liveAudio) {
-            part.liveNotes.liveAudio.bufferGain.gain.setTargetAtTime(0, this.audioContext.currentTime, 0.001);
-            part.liveNotes.liveAudio.stop(this.audioContext.currentTime + 0.015);
+        if (sectionPart.liveNotes && sectionPart.liveNotes.liveAudio) {
+            sectionPart.liveNotes.liveAudio.bufferGain.gain.setTargetAtTime(0, this.audioContext.currentTime, 0.001);
+            sectionPart.liveNotes.liveAudio.stop(this.audioContext.currentTime + 0.015);
         }
     }
-    part.liveNotes = [];
+    sectionPart.liveNotes = [];
     
-    part.nextBeat = 0;
-    part.currentI = -1;
+    sectionPart.nextBeat = 0;
+    sectionPart.currentI = -1;
     
     if (!this.playing && this.auditioningParts.indexOf(sectionPart) > -1) {
         this.auditionEnd(sectionPart);
