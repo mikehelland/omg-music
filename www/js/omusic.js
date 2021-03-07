@@ -279,7 +279,12 @@ OMusicContext.prototype.addFXToPart = function (fxName, part, source) {
     if (fx) {
         part.data.fx.push(fx.data);
 
-        part.song.fxChanged("add", part, fx, source);
+        if (part.song) {
+            part.song.fxChanged("add", part, fx, source);
+        }
+        else {
+            // todo probably added FX to the master track (song itself)
+        }
     }
     return fx;
 };
@@ -299,7 +304,12 @@ OMusicContext.prototype.removeFXFromPart = function (fx, part, source) {
     index = part.data.fx.indexOf(fx.data);
     part.data.fx.splice(index, 1);
 
-    part.song.fxChanged("remove", part, fx, source);
+    if (part.song) {
+        part.song.fxChanged("remove", part, fx, source);
+    }
+    else {
+        // master fx
+    }
 };
 
 OMusicContext.prototype.adjustFX = function (fx, part, property, value, source) {
