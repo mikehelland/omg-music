@@ -33,6 +33,9 @@ function PianoSurface(div) {
     this.showNoteNames = true
     
     this.setupCanvas(div)
+    this.setupMultiTouch(this.ctx.canvas, this)
+    this.setupKeyboard()
+
 }
 
 PianoSurface.prototype.setupCanvas = function (div) {
@@ -123,10 +126,16 @@ PianoSurface.prototype.drawPressed = function (pressed) {
     }   
 }
 
+PianoSurface.prototype.noteOn = function () {
+    //this.drawPressed(this.touches)
+}
+PianoSurface.prototype.noteOff = function () {
+    //this.drawPressed(this.touches)
+}
+
 PianoSurface.prototype.setupEvents = function (noteOn, noteOff) {
     this.noteOn = noteOn
     this.noteOff = noteOff
-    this.setupMultiTouch(this.ctx.canvas, this)
 }
 
 PianoSurface.prototype.ondown = function (touch) {
@@ -277,3 +286,30 @@ PianoSurface.prototype.setupMultiTouch = function (div, handler) {
     });
 
 }
+
+PianoSurface.prototype.setupKeyboard = function () {
+
+    var keyMap = {
+        "a": 48, "s": 50, "d": 52, "f": 53, "g": 55, "h": 57, "j": 59, "k": 60, "l": 62, ";": 64,
+        "q": 47, "w": 49, "e": 51, "r": 52, "t": 54, "y": 56, "u": 58, "i": 60, "o": 61, "p": 63,
+        "z": 36, "x": 38, "c": 40, "v": 41, "b": 43, "n": 45, "m": 47
+    }
+
+    var keys = {}
+
+    document.body.onkeydown = e => {
+        let note = keyMap[e.key] + 12
+        if (note && !keys[e.key]) {
+            this.noteOn(note, 66)
+            keys[e.key] = true
+        }
+    }
+    document.body.onkeyup = e => {
+        let note = keyMap[e.key] + 12
+        if (note) {
+            this.noteOff(note)
+            keys[e.key] = false
+        }
+    }
+}
+    
