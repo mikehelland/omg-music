@@ -35,6 +35,9 @@ function OMGDrumMachine(div, part, params) {
 
     if (!params) params = {};
 
+    this.div = document.createElement("div")
+    div.appendChild(this.div)
+
     this.foreColor = params.foreColor || "white";
     this.downbeatColor = params.downbeatColor || "#333333";
     this.beatColor = params.beatColor || "#111111";
@@ -70,10 +73,11 @@ function OMGDrumMachine(div, part, params) {
     
     }
     
-    div.style.display = "flex"
-    div.style.flexDirection = "column"
+    this.div.style.display = "flex"
+    this.div.style.flexDirection = "column"
+    this.div.style.height = "100%"
     
-    div.appendChild(this.toolBarDiv)
+    this.div.appendChild(this.toolBarDiv)
 
     this.canvasHolder = document.createElement("div")
     this.canvasHolder.style.flexGrow = 1
@@ -95,7 +99,7 @@ function OMGDrumMachine(div, part, params) {
     this.bgCtx = this.bgCanvas.getContext("2d");
     this.ctx = this.canvas.getContext("2d");
 
-    div.appendChild(this.canvasHolder)
+    this.div.appendChild(this.canvasHolder)
 
     this.readOnly = params.readOnly || false // true;
     this.beatStrength = 1;
@@ -115,7 +119,7 @@ function OMGDrumMachine(div, part, params) {
     
     this.beatMarker = document.createElement("div");
     this.beatMarker.className = "beat-marker";
-    div.appendChild(this.beatMarker);
+    this.canvasHolder.appendChild(this.beatMarker);
 }
 
 OMGDrumMachine.prototype.setCanvasEvents = function () {
@@ -343,8 +347,7 @@ OMGDrumMachine.prototype.draw = function (subbeat, w, h) {
         return;
 
     if (this.hidden) {
-        this.bgCanvas.style.display = "block";
-        this.canvas.style.display = "block";
+        this.div.style.display = "flex"
         this.hidden = false;
     }
 
@@ -599,9 +602,7 @@ OMGDrumMachine.prototype.getCaptionY = function (i, length) {
 }
 
 OMGDrumMachine.prototype.hide = function () {
-    this.canvas.style.display = "none";
-    this.bgCanvas.style.display = "none";
-    this.beatMarker.style.display = "none";
+    this.div.style.display = "none";
     this.hidden = true;
 };
 
