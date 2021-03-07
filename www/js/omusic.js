@@ -46,7 +46,7 @@ OMusicContext.prototype.getAudioContext = function () {
 };
 
 OMusicContext.prototype.load = async function (data) {
-    var song = new OMGSong(data)
+    var song = new OMGSong(this, data)
     await this.loadSong(song)
 
     var player = new OMusicPlayer(this, song)
@@ -70,7 +70,7 @@ OMusicContext.prototype.loadPartHeader = function (part) {
         this.makeAudioNodesForPart(part);
     }
 
-    if (part.data.soundSet.soundFont) {
+    if (part.data.soundSet.soundFont && part.data.soundSet.soundFont.name) {
         part.soundFont = part.data.soundSet.soundFont.name
         part.soundFont = part.soundFont.replace(".js", "")
         if (!part.soundFont.startsWith("_tone_")) {
@@ -78,18 +78,23 @@ OMusicContext.prototype.loadPartHeader = function (part) {
         }
 
         if (!this.downloadedSoundSets[part.data.soundSet.soundFont.url]) {
-            var soundfontScriptEl = document.createElement("script")
-            soundfontScriptEl.src = part.data.soundSet.soundFont.url
-            soundfontScriptEl.onload = e => {
-                //todo silently hit every note so it's loaded?
-                
-                this.getSoundFontPlayer().then(sfPlayer => {
-                    sfPlayer.loader.decodeAfterLoading(this.audioContext, part.data.soundSet.soundFont.name);
-                })
-                
-            }
-            document.body.appendChild(soundfontScriptEl)
             this.downloadedSoundSets[part.data.soundSet.soundFont.url] = true
+            
+            return new Promise((resolve, reject) => {
+                var soundfontScriptEl = document.createElement("script")
+                soundfontScriptEl.src = part.data.soundSet.soundFont.url
+                soundfontScriptEl.onload = e => {
+                    //todo silently hit every note so it's loaded?
+                    
+                    this.getSoundFontPlayer().then(sfPlayer => {
+                        sfPlayer.loader.decodeAfterLoading(this.audioContext, part.data.soundSet.soundFont.name);
+                        resolve()
+                    })
+                    
+                }
+                document.body.appendChild(soundfontScriptEl)
+            })
+            
         }
     }
 }
@@ -169,7 +174,6 @@ OMusicContext.prototype.loadMelody = function (part, soundsNeeded) {
 };
 
 OMusicContext.prototype.prepareMelody = function (part, soundsNeeded) {
-    var p = this;
     
     if (this.loadFullSoundSets) {
         this.loadSoundsFromSoundSet(part.soundSet);
@@ -183,7 +187,7 @@ OMusicContext.prototype.prepareMelody = function (part, soundsNeeded) {
             return;
         }
         chordsDone.push(chord);
-        p.rescale(part, part.section.song.data.keyParams, chord, soundsNeeded);
+        this.rescale(part, part.section.song.data.keyParams, chord, soundsNeeded);
         
     });
 
@@ -240,7 +244,7 @@ OMusicContext.prototype.loadURL = function (url, callback) {
 
 };
 
-OMusicContext.prototype.loadSong = function (song) {
+OMusicContext.prototype.loadSong = async function (song) {
 
     return new Promise((resolve, reject) => {
         // the song could have FX, sound fonts, synths, get all that ready
@@ -249,31 +253,22 @@ OMusicContext.prototype.loadSong = function (song) {
                 this.makeAudioNodesForSong(song);
             }
             
-            var soundsNeeded = {};
+            var soundsNeeded = {}
+            var promises = []
     
             for (var partName in song.parts) {
-                this.loadPartHeader(song.parts[partName]);
+                promises.push(this.loadPartHeader(song.parts[partName]));
             }
     
             for (var sectionName in song.sections) {
-                this.loadSection(song.sections[sectionName], soundsNeeded);
+                promises.push(this.loadSection(song.sections[sectionName], soundsNeeded));
             }
-
-            if (Object.keys(soundsNeeded).length === 0 || this.disableAudio) {
-                song.loaded = true
-                resolve()
-                return true;
-            }
-    
+            
             for (var sound in soundsNeeded) {
-                this.loadSound(sound, function (sound) {
-                    delete soundsNeeded[sound];
-                    if (Object.keys(soundsNeeded).length === 0) {
-                        song.loaded = true
-                        resolve()
-                    }
-                });
+                promises.push(this.loadSound(sound));
             }
+            Promise.all(promises).then(()=>resolve())
+
         })
     })
 };
@@ -518,7 +513,7 @@ OMusicContext.prototype.makeOsc = function (type) {
 
 OMusicContext.prototype.makeSynth = function (patchData, nodes, partData) {
 
-    var {Synth} = import("./libs/viktor/viktor/js")
+    var {Synth} = import("./libs/viktor/viktor.js")
 
     let synth = new Synth(this.audioContext, patchData)
     let patch = patchLoader.load(patchData)
@@ -541,18 +536,14 @@ OMusicContext.prototype.makeSynth = function (patchData, nodes, partData) {
 
 
 
-OMusicContext.prototype.loadSound = function (sound, onload) {
-    var p = this;
-
-    if (!sound || !p.audioContext || p.disableAudio) {
+OMusicContext.prototype.loadSound = function (sound) {
+    if (!sound || !this.audioContext || this.disableAudio) {
         return;
     }
     var key = sound;
     var url = sound;
-    onload = onload || function () {};
-    
-    if (p.loadedSounds[key]) {
-        onload(key);
+
+    if (this.loadedSounds[key]) {
         return;
     }
     
@@ -560,58 +551,55 @@ OMusicContext.prototype.loadSound = function (sound, onload) {
         url = sound.slice(5);
     }
 
-    p.loadedSounds[key] = "loading";
+    this.loadedSounds[key] = "loading";
 
-    if (!omg.util) {
-        p.downloadSound(url, key, onload);
-        return;
-    }
+    return new Promise((resolve, reject) => {
+        this.getSavedSound(key, buffer => {
+            if (buffer) {
+                this.audioContext.decodeAudioData(buffer, (buffer) => {
+                    this.loadedSounds[key] = buffer;
+                    buffer.omgIsMP3 = url.toLowerCase().endsWith(".mp3");
+                    resolve(key);
+                }, function () {
+                    console.warn("error loading sound url: " + url);
+                    resolve(key);
+                });
+            }
+            else {
+                this.downloadSound(url, key, () => {
+                    resolve(key)   
+                });
+            }
+        })
+    })
     
-    var saved = omg.util.getSavedSound(key, function (buffer) {
-        if (!buffer) {
-            p.downloadSound(url, key, onload);
-        }
-        else {
-            p.audioContext.decodeAudioData(buffer, function (buffer) {
-                p.loadedSounds[key] = buffer;
-                buffer.omgIsMP3 = url.toLowerCase().endsWith(".mp3");
-                onload(key);
-            }, function () {
-                console.warn("error loading sound url: " + url);
-                onload(key);
-            });
-        }
-    });
 };
 
 OMusicContext.prototype.downloadSound = function (url, key, onload, secondTry) {
-    var p = this;
     var request = new XMLHttpRequest();
 
     request.open('GET', url, true);
     request.responseType = 'arraybuffer';
 
-    request.onload = function () {
+    request.onload = () => {
         var data = request.response.slice(0);
-        p.audioContext.decodeAudioData(request.response, function (buffer) {
-            p.loadedSounds[key] = buffer;
+        this.audioContext.decodeAudioData(request.response, (buffer) => {
+            this.loadedSounds[key] = buffer;
             buffer.omgIsMP3 = url.toLowerCase().endsWith(".mp3")
             onload(key);
-            if (omg.util) {
-                omg.util.saveSound(key, data);
-            }
-        }, function () {
+            this.saveSound(key, data);
+        }, () => {
             console.warn("error loading sound url: " + url);
             onload(key);
         });
     }
-    request.onerror = function (e) {
+    request.onerror = (e) => {
         if (secondTry) {
             return;
         }
 
         url = "https://cors-anywhere.herokuapp.com/" + url;
-        p.downloadSound(url, key, onload, true);
+        this.downloadSound(url, key, onload, true);
     }
     request.send();
 };
@@ -620,29 +608,27 @@ OMusicContext.prototype.downloadSound = function (url, key, onload, secondTry) {
 
 OMusicContext.prototype.rescaleSection = function (section, chord) {
     if (typeof chord !== "number") {
-        chord = section.data.chordProgression[this.section.currentChordI];
+        chord = section.data.chordProgression[section.currentChordI];
     }
-    var p = this;
     for (var partName in section.parts) {
         var part = section.parts[partName]
         if (part.data.surface.url === "PRESET_VERTICAL" && part.data.soundSet.chromatic) {
-            p.rescale(part, section.song.data.keyParams, chord || 0);
+            this.rescale(part, section.song.data.keyParams, chord || 0);
         }
     }
     section.chord = chord;
 };
 
-OMusicContext.prototype.rescaleSong = function (rootNote, ascale, chord) {
-    var p = this;
-    var song = this.song.data;
-    if (rootNote != undefined) {
+OMusicContext.prototype.rescaleSong = function (song, rootNote, ascale, chord) {
+    //todo update this stuff, rigt?
+    /*if (rootNote != undefined) {
         song.rootNote = rootNote;
     }
     if (ascale != undefined) {
         song.ascale = ascale;
-    }
-    for (var sectionName in this.song.sections) {
-        p.rescaleSection(this.song.sections[sectionName], chord || 0);
+    }*/
+    for (var sectionName in song.sections) {
+        this.rescaleSection(song.sections[sectionName], chord || 0);
     }
 };
 
@@ -668,30 +654,33 @@ OMusicContext.prototype.rescale = function (part, keyParams, chord, soundsNeeded
             continue;
         }
 
-        newNote = onote.note + chord;
-        octaves2 = 0;
-        while (newNote >= keyParams.scale.length) {
-            newNote = newNote - keyParams.scale.length;
-            octaves2++;
-        }
-        while (newNote < 0) {
-            newNote = newNote + keyParams.scale.length;
-            octaves2--;
-        }
+        if (part.data.soundSet.chromatic) {
+            newNote = onote.note + chord;
+            octaves2 = 0;
+            while (newNote >= keyParams.scale.length) {
+                newNote = newNote - keyParams.scale.length;
+                octaves2++;
+            }
+            while (newNote < 0) {
+                newNote = newNote + keyParams.scale.length;
+                octaves2--;
+            }
 
-        newNote = keyParams.scale[newNote] + octaves2 * 12 + 
-                octave * 12 + keyParams.rootNote;
-
-        onote.scaledNote = newNote;
-        
-        if (part.soundSet && !part.soundSet.osc) {
-            p.updateNoteSound(onote, part.soundSet);
+            onote.scaledNote = keyParams.scale[newNote] + octaves2 * 12 + 
+                    octave * 12 + keyParams.rootNote;
+        }
+        else {
+            onote.scaledNote = onote.note
         }
         
-        if (soundsNeeded && onote.sound && 
-                !this.loadedSounds[onote.sound] &&
-                !soundsNeeded[onote.sound]) {
-            soundsNeeded[onote.sound] = true;
+        // todo this does the work of prepare melody... maybe it shouldn't be here
+        // then this wouldn't need to be called for non-chromatic parts
+        if (soundsNeeded && part.soundUrls) {
+            var url = part.soundUrls[onote.scaledNote]
+            
+            if (url && !this.loadedSounds[url] && !soundsNeeded[url]) {
+                soundsNeeded[url] = true;
+            }
         }
     }
 };
@@ -875,4 +864,45 @@ OMusicContext.prototype.loadSoundsFromSoundSet = function (soundSet) {
         this.loadSound((soundSet.prefix || "") + soundSet.data[i].url + 
             (soundSet.postfix || ""));
     }
+};
+
+OMusicContext.prototype.getSavedSound = function (sound, callback) {
+    if (this.noDB) {
+        callback();
+        return;
+    }
+    try {
+    var request = indexedDB.open("omg_sounds", 1);
+    request.onupgradeneeded = function (e) {
+        var db = e.target.result;
+        db.createObjectStore("saved_sounds");
+    };
+    request.onsuccess = function(e) {
+        var db = e.target.result;
+        var trans = db.transaction("saved_sounds");
+        var request = trans.objectStore("saved_sounds").get(sound);
+        request.onsuccess = function (e) {
+            callback(request.result);
+        }
+    };
+    request.onerror = function (e) {
+        this.noDB = true;
+        callback();
+    };
+    } catch (e) {
+        console.warn("getSavedSound threw an error", e);
+        this.noDB = true;
+        callback();
+    }
+};
+
+OMusicContext.prototype.saveSound = function (sound, data) {
+    if (this.noDB) return;
+    try {
+    indexedDB.open("omg_sounds").onsuccess = function(e) {
+        var db = e.target.result;
+        var trans = db.transaction(["saved_sounds"], "readwrite");
+        trans.objectStore("saved_sounds").put(data, sound);
+    };
+    } catch (e) {console.error(e);}
 };
