@@ -4,7 +4,9 @@ console.log("Song.js")
 // OMGSong wraps an OMG song so things like the player and DAW needs to can be added
 // it's for storing anything related to session that can't be stringified 
 
-export default function OMGSong(data) {
+export default function OMGSong(musicContext, data) {
+
+    this.musicContext = musicContext
     
     // each song has sections (eg intro, verse, chorus) and parts (eg drums, bass, keyboard)
     // each section also has parts
@@ -85,15 +87,18 @@ OMGSong.prototype.loadParts = function () {
     // find any parts that might not be in the header
     // mainly for backwards compat, <2021
     for (var section of this.data.sections) {
-        for (part of section.parts) {
-            if (!this.parts[part.name]) {
-                console.log("lateload", part.name)
-                var data = JSON.parse(JSON.stringify(part))
-                delete data.notes
-                delete data.tracks
-                this.data.parts.push(data)
-                this.parts[part.name] = new OMGSongPart(part)
-                this.parts[part.name].song = this
+        if (section.parts) {
+            for (part of section.parts) {
+                if (!this.parts[part.name]) {
+                    console.log("lateload", part.name)
+                    var data = JSON.parse(JSON.stringify(part))
+                    delete data.notes
+                    delete data.tracks
+                    this.data.parts.push(data)
+                    var omgpart = new OMGSongPart(part)
+                    this.parts[omgpart.data.name] = omgpart
+                    this.parts[omgpart.data.name].song = this
+                }
             }
         }
     }
@@ -137,7 +142,8 @@ OMGSong.prototype.addPart = function (data, source) {
     this.parts[name] = headPart
     this.parts[name].song = this
     this.data.parts[name] = headPart.data
-
+    this.musicContext.loadPartHeader(headPart)
+    
     for (var sectionName in this.sections) {
         var section = this.sections[sectionName]
         let part = new OMGSongPart(headPart.data)
@@ -146,6 +152,7 @@ OMGSong.prototype.addPart = function (data, source) {
         part.headPart = headPart
         section.parts[headPart.data.name] = part
         section.data.parts.push(part.data)
+        this.musicContext.loadPart(part)
     }
     
     this.onPartAddListeners.forEach(listener => listener(headPart, source));
@@ -164,6 +171,7 @@ OMGSong.prototype.addSection = function (copy) {
     this.data.sections[name] = section.data
 
     this.loadSectionParts(section)
+    this.musicContext.loadSection(section)
 
     if (!this.data.arrangement) {
         this.arrangement.push({section: name, repeats: 1})
@@ -176,6 +184,7 @@ OMGSong.prototype.makeSection = function (data) {
     data.name = data.name || "Section"
     data.parts = data.parts || []
     data.measures = data.measures || 1
+    data.chordProgression = data.chordProgression|| [0]
     return {data, parts: {}, song: this}
 }
 
