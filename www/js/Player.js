@@ -113,7 +113,7 @@ OMusicPlayer.prototype._play = function () {
 
     for (var il = 0; il < this.onBeatPlayedListeners.length; il++) {
         try {
-            this.onBeatPlayedListeners[il].call(null, this.iSubBeat, this.section);
+            this.onBeatPlayedListeners[il].call(null, this.iSubBeat, this.section, this.section.currentChordI);
         } catch (ex) {
             console.error(ex);
         }

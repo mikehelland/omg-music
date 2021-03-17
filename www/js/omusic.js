@@ -678,6 +678,12 @@ OMusicContext.prototype.rescale = function (part, keyParams, chord, soundsNeeded
 
             onote.scaledNote = keyParams.scale[newNote] + octaves2 * 12 + 
                     octave * 12 + keyParams.rootNote;
+
+            // move down if to high 
+            while (part.soundUrls && onote.scaledNote >= part.soundUrls.length && onote.scaledNote > 12) {
+                onote.scaledNote -= 12
+            }
+            //todo too low?
         }
         else {
             onote.scaledNote = onote.note

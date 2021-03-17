@@ -1,4 +1,4 @@
-function OMGEmbeddedViewerMusicDrawer() {
+export default function OMGEmbeddedViewerMusicDrawer() {
 }
 
 OMGEmbeddedViewerMusicDrawer.prototype.drawCanvas = function (data, canvas, subbeatsToDraw, performanceData) {
@@ -26,7 +26,7 @@ OMGEmbeddedViewerMusicDrawer.prototype.getDrawingData = function () {
 
     this.drawingData = {sections: []};
     let sections = this.performanceData || this.song.sections
-    for (sectionName in sections) {
+    for (var sectionName in sections) {
         var section = sections[sectionName]
         var chordedData = [];
         chordedData.sectionName = section.name;
@@ -302,9 +302,9 @@ OMGEmbeddedViewerMusicDrawer.prototype.drawPartBeats = function (part, canvas, b
     
     for (var itrack = 0; itrack < tracks.length; itrack++) {
         for (var i = 0; i < subbeatsToDraw; i++) {
-            value = tracks[itrack].data[i];
-            marginX = 1;
-            marginY = 1 //this.trackHeight > 5 ? 1 : 0;
+            var value = tracks[itrack].data[i];
+            var marginX = 1;
+            var marginY = 1 //this.trackHeight > 5 ? 1 : 0;
             if (typeof value === "number" && value > 0 && value < 1) {
                 context.fillStyle =  i % beatParams.beats == 0 ? "#DDDDDD" : "white";
                 context.fillRect((i + subbeatsDrawn) * subbeatLength + marginX, 
