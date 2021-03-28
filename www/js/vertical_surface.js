@@ -77,7 +77,7 @@ OMGMelodyMaker.prototype.drawBackground = function (w, h) {
     this.beatWidth = canvas.width / (
             this.beatParams.subbeats * 
             this.beatParams.beats * 
-            this.beatParams.measures);
+            this.part.section.data.measures);
     this.restHeight = canvas.height / 2 - this.noteHeight / 2;
     
     this.frets.height = (canvas.height - this.topFretTop - this.bottomFretBottom) / 

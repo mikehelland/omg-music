@@ -130,7 +130,7 @@ OMusicPlayer.prototype._play = function () {
     }
 
     if (this.iSubBeat >= beatParams.beats * beatParams.subbeats * 
-                                    beatParams.measures) {
+                                    this.section.data.measures) {
         this.afterSection();
 
         //this is autolatenecy
@@ -483,7 +483,7 @@ OMusicPlayer.prototype.playBeatWithLiveNote = function (iSubBeat, part) {
             
             var note = {note: part.liveNotes[index].note,
                 scaledNote: part.liveNotes[index].scaledNote,
-                beats: part.liveNotes.autobeat / part.section.song.data.beatParams.subbeats};
+                beats: part.liveNotes.autobeat / part.song.data.beatParams.subbeats};
             
             this.playNote(note, part);
             if (this.playing && !part.data.audioParams.mute) {

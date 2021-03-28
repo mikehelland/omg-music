@@ -232,26 +232,26 @@ OMGEmbeddedViewerMusicDrawer.prototype.draw = function () {
 // instead of refactoring, I'm doubling up
 
 
-OMGEmbeddedViewerMusicDrawer.prototype.drawPartCanvas = function (part, canvas, beatParams) {
+OMGEmbeddedViewerMusicDrawer.prototype.drawPartCanvas = function (part, canvas, beatParams, measures) {
 
     canvas.width = canvas.clientWidth
     canvas.height = canvas.clientHeight
  
     if (part.surface.url === "PRESET_SEQUENCER") {
-        this.drawPartBeats(part, canvas, beatParams, 0, 0, canvas.width, canvas.height)
+        this.drawPartBeats(part, canvas, beatParams, measures, 0, 0, canvas.width, canvas.height)
     }
     else {
-        this.drawPartNotes(part, canvas, beatParams, 0, 0, canvas.width, canvas.height)
+        this.drawPartNotes(part, canvas, beatParams, measures, 0, 0, canvas.width, canvas.height)
     }
 }
 
-OMGEmbeddedViewerMusicDrawer.prototype.drawPartNotes = function (part, canvas, beatParams, x, y, w, h) {
+OMGEmbeddedViewerMusicDrawer.prototype.drawPartNotes = function (part, canvas, beatParams, measures, x, y, w, h) {
     
     var y, x, note
     var usedBeats = 0;
     
     var subbeatsDrawn = 0
-    var subbeatsToDraw = beatParams.subbeats * beatParams.beats * beatParams.measures
+    var subbeatsToDraw = beatParams.subbeats * beatParams.beats * measures
     var subbeatLength = canvas.width / subbeatsToDraw
     var noteSize = subbeatLength > 30 ? 30 : 20
 
@@ -291,12 +291,12 @@ OMGEmbeddedViewerMusicDrawer.prototype.drawPartNotes = function (part, canvas, b
     }
 }
 
-OMGEmbeddedViewerMusicDrawer.prototype.drawPartBeats = function (part, canvas, beatParams, x, y, w, h) {
+OMGEmbeddedViewerMusicDrawer.prototype.drawPartBeats = function (part, canvas, beatParams, measures, x, y, w, h) {
     var context = canvas.getContext("2d");
     
     var tracks = part.tracks
     var subbeatsDrawn = 0
-    var subbeatsToDraw = beatParams.subbeats * beatParams.beats * beatParams.measures
+    var subbeatsToDraw = beatParams.subbeats * beatParams.beats * measures
     var subbeatLength = canvas.width / subbeatsToDraw
     var height = canvas.height / tracks.length
     

@@ -311,7 +311,7 @@ OMGDrumMachine.prototype.setPart = function (part) {
     this.beatParams = part.section.song.data.beatParams;
     this.tracks = part.data.tracks;
 
-    this.totalBeats = this.beatParams.measures * this.beatParams.beats;
+    this.totalBeats = part.section.data.measures * this.beatParams.beats;
     this.totalSubbeats = this.totalBeats * this.beatParams.subbeats;
     //this.info = undefined
 };
@@ -572,7 +572,7 @@ OMGDrumMachine.prototype.setRowColumnSizes = function () {
     this.beatMarker.style.display = "none";
     this.beatMarkerShowing = false;
     
-    this.totalBeats = this.beatParams.measures * this.beatParams.beats;
+    this.totalBeats = this.part.section.data.measures * this.beatParams.beats;
     this.totalSubbeats = this.totalBeats * this.beatParams.subbeats;
     
     if (this.selectedTrack < 0) {
