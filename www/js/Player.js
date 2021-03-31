@@ -468,6 +468,9 @@ OMusicPlayer.prototype.playBeatForMelody = function (iSubBeat, part) {
         if (part.data.audioParams.mute) {
             //play solo they can't here ya
         }
+        if (part.headPart && part.headPart.data.audioParams.mute) {
+            //play solo they can't here ya
+        }
         else if (note) {
             this.playNote(note, part, data);
         }
