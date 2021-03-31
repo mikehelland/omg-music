@@ -328,12 +328,20 @@ OMusicPlayer.prototype.setupNextSection = function (fromStart) {
     // todo find the next section in the arrangement
     p.arrangementI++;
     if (p.arrangementI >= p.song.arrangement.length) {
-        p.arrangementI = 0
-        if (!p.song.loop) {
-            p.stop();
+
+        // a hook for clients that want to keep going
+        if (this.onreachedend && this.onreachedend()) {
+            p.arrangementI--
+            return 
         }
         else {
-            if (p.onloop) p.onloop();
+            p.arrangementI = 0
+            if (!p.song.loop) {
+                p.stop();
+            }
+            else {
+                if (p.onloop) p.onloop();
+            }
         }
     }
     p.section = p.song.sections[p.song.arrangement[p.arrangementI].section];
@@ -396,6 +404,8 @@ OMusicPlayer.prototype.playBeatForPart = function (iSubBeat, part) {
 OMusicPlayer.prototype.playBeatForDrumPart = function (iSubBeat, part) {
     var tracks = part.data.tracks;
 
+    if (part.headPart && part.headPart.data.audioParams.mute)
+        return;
     if (part.data.audioParams.mute)
         return;
     for (var i = 0; i < tracks.length; i++) {
