@@ -31,7 +31,7 @@ omg.ui.totalOffsets = function (element, parent) {
 
 
 
-function OMGDrumMachine(div, part, params) {
+export default function OMGDrumMachine(div, part, params) {
 
     if (!params) params = {};
 

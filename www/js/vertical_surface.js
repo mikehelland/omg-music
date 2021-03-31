@@ -1,4 +1,4 @@
-function OMGMelodyMaker(div, part, player) {
+export default function OMGMelodyMaker(div, part, player) {
 
     div.style.display = "flex"
     div.style.flexDirection = "column"
@@ -166,7 +166,7 @@ OMGMelodyMaker.prototype.drawFrets = function () {
     this.bgContext.moveTo(0, this.topFretTop);
     this.bgContext.lineTo(this.bgCanvas.width, this.topFretTop);
     for (var i = this.skipFretsBottom; i < this.frets.length - this.skipFretsTop; i++) {    
-        ii = this.frets.length - i - this.skipFretsTop;;
+        var ii = this.frets.length - i - this.skipFretsTop;;
         
         if (this.frets[i].octaveMarker) {
             this.bgContext.fillStyle = "#333333";
