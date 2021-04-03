@@ -217,10 +217,11 @@ OMusicPlayer.prototype._audition = function () {
 
 OMusicPlayer.prototype.afterSection = function () {
     var p = this;
-    p.iSubBeat = 0;
-    p.loopStarted = Date.now();
 
+    // is this ever used? some kind of queue
     if (p.nextUp) {
+        p.iSubBeat = 0;
+        p.loopStarted = Date.now();
         p.song = p.nextUp;
         p.setupNextSection(true);
         p.nextUp = null;
@@ -244,10 +245,16 @@ OMusicPlayer.prototype.afterSection = function () {
     if (!nextChord) {
         p.lastSection = p.section;
 
-        p.setupNextSection();
+        var movingOn = p.setupNextSection();
+        if (movingOn) {
+            p.iSubBeat = 0;
+            p.loopStarted = Date.now();
+        }
     }
 };
 
+// this function will return false if we're at the end
+// and the onreachend() hook adds more and returns true
 OMusicPlayer.prototype.setupNextSection = function (fromStart) {
     var p = this;
     if (fromStart) {
@@ -261,7 +268,7 @@ OMusicPlayer.prototype.setupNextSection = function (fromStart) {
             //todo part of the arrangement?
             p.section = Object.values(p.song.sections)[0];
         }
-        return;
+        return true;
     }
     
     if (typeof p.queueSection === "number") {
@@ -282,7 +289,7 @@ OMusicPlayer.prototype.setupNextSection = function (fromStart) {
     if (p.loopSection) {
         p.section = p.loopSection;
         if (p.onloop) p.onloop()
-        return;
+        return true;
     }
 
     // todo arrangement stuff
@@ -332,7 +339,8 @@ OMusicPlayer.prototype.setupNextSection = function (fromStart) {
         // a hook for clients that want to keep going
         if (this.onreachedend && this.onreachedend()) {
             p.arrangementI--
-            return 
+            p.section.currentChordI = 0
+            return false 
         }
         else {
             p.arrangementI = 0
@@ -345,6 +353,7 @@ OMusicPlayer.prototype.setupNextSection = function (fromStart) {
         }
     }
     p.section = p.song.sections[p.song.arrangement[p.arrangementI].section];
+    return true
 };
 
 OMusicPlayer.prototype.stop = function () {
