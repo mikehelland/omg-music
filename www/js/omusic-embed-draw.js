@@ -23,6 +23,7 @@ OMGEmbeddedViewerMusicDrawer.prototype.getDrawingData = function () {
     var beatParams = this.song.beatParams;
     this.beatParams = beatParams;
     this.totalSubbeats = beatParams.subbeats * beatParams.beats * beatParams.measures;
+    this.measuresToDraw = 0
 
     this.drawingData = {sections: []};
     let sections = this.performanceData || this.song.sections
@@ -38,8 +39,11 @@ OMGEmbeddedViewerMusicDrawer.prototype.getDrawingData = function () {
             chordedData.push(sectionData);
         }
         viewer.drawingData.sections.push(chordedData);
+        this.measuresToDraw += section.measures || 1
     }
     
+    // todo figure out this arrangement thing, will need to recount measuresToDraw
+
     var arrangement = [];
     if (!this.performanceData && this.song.arrangement && this.song.arrangement.length > 0) {
         for (var ia = 0; ia < this.song.arrangement.length; ia++) {
@@ -64,9 +68,8 @@ OMGEmbeddedViewerMusicDrawer.prototype.getDrawingData = function () {
     this.drawingData.sections = arrangement;
     
     if (this.drawingData.sections.length > 0) {
-        this.sectionLength = Math.max(40, this.width / this.drawingData.sections.length);
-        this.measureLength = this.sectionLength / this.beatParams.measures;
-        this.subbeatLength = this.sectionLength / this.totalSubbeats;
+        this.measureLength = Math.max(40, this.width / this.measuresToDraw);
+        this.subbeatLength = this.measureLength / this.totalSubbeats;
     }
 
     if (this.subbeatsToDraw) {
@@ -76,7 +79,8 @@ OMGEmbeddedViewerMusicDrawer.prototype.getDrawingData = function () {
 
 OMGEmbeddedViewerMusicDrawer.prototype.getSectionDrawingData = function (section) {
     var viewer = this;
-    var sectionData = {tracks: [], notes: [], section: section};
+    var measures = section.measures || 1
+    var sectionData = {tracks: [], notes: [], section: section, measures: measures};
     for (var partName in section.parts) {
         var part = section.parts[partName]
         if (part.audioParams.mute) {
@@ -88,7 +92,7 @@ OMGEmbeddedViewerMusicDrawer.prototype.getSectionDrawingData = function (section
                 if (part.tracks[i].audioParams.mute) {
                     continue;
                 }
-                for (var j = 0; j < viewer.totalSubbeats; j++) {
+                for (var j = 0; j < viewer.totalSubbeats * measures; j++) {
                     if (part.tracks[i].data[j]) {
                         sectionData.tracks.push(part.tracks[i]);
                         break;
@@ -130,46 +134,47 @@ OMGEmbeddedViewerMusicDrawer.prototype.draw = function () {
     var usedBeats;
     var marginX, marginY;
     var value;
+    var section
     var subbeatsToDraw
     for (var isection = 0; isection < this.drawingData.sections.length; isection++) {
-    
+        section = this.drawingData.sections[isection]
         if (!this.subbeatsToDraw) {
-            subbeatsToDraw = this.totalSubbeats
+            subbeatsToDraw = this.totalSubbeats * section.measures
         }
         else {
             subbeatsToDraw = (this.subbeatsToDraw - subbeatsDrawn > this.totalSubbeats) ? this.totalSubbeats : (this.subbeatsToDraw - subbeatsDrawn)
         }
         
-        for (var itrack = this.drawingData.sections[isection].tracks.length - 1; itrack >= 0 ; itrack--) {
+        for (var itrack = section.tracks.length - 1; itrack >= 0 ; itrack--) {
             for (var i = 0; i < subbeatsToDraw; i++) {
-                value = this.drawingData.sections[isection].tracks[itrack].data[i];
+                value = section.tracks[itrack].data[i];
                 marginX = 1;
                 marginY = this.trackHeight > 5 ? 1 : 0;
                 if (typeof value === "number" && value > 0 && value < 1) {
                     this.context.fillStyle =  i % this.beatParams.beats == 0 ? "#DDDDDD" : "white";
                     this.context.fillRect((i + subbeatsDrawn) * this.subbeatLength + marginX, 
-                                        this.height - itrack * this.drawingData.sections[isection].trackHeight - marginY, 
-                                        this.subbeatLength - marginX * 2, -1 * this.drawingData.sections[isection].trackHeight + marginY * 2);
-                    marginY = (this.drawingData.sections[isection].trackHeight - this.drawingData.sections[isection].trackHeight * value) / 3;
+                                        this.height - itrack * section.trackHeight - marginY, 
+                                        this.subbeatLength - marginX * 2, -1 * section.trackHeight + marginY * 2);
+                    marginY = (section.trackHeight - section.trackHeight * value) / 3;
                     marginX = (this.subbeatLength - this.subbeatLength * value) / 3;
                 }
                 this.context.fillStyle =  value ? "black" : 
                                             (i % this.beatParams.beats == 0 ? "#DDDDDD" : "white");
                 this.context.fillRect((i + subbeatsDrawn) * this.subbeatLength + marginX, 
-                                    this.height - itrack * this.drawingData.sections[isection].trackHeight - marginY, 
-                                    this.subbeatLength - marginX * 2, -1 * this.drawingData.sections[isection].trackHeight + marginY * 2);
+                                    this.height - itrack * section.trackHeight - marginY, 
+                                    this.subbeatLength - marginX * 2, -1 * section.trackHeight + marginY * 2);
             }
         }      
         this.context.fillStyle = "black";
         this.context.font = noteSize + "pt serif";
         var y, x, note
-        for (var inotes = 0; inotes < this.drawingData.sections[isection].notes.length; inotes++) {
+        for (var inotes = 0; inotes < section.notes.length; inotes++) {
             usedBeats = 0;
-            for (var inote = 0; inote < this.drawingData.sections[isection].notes[inotes].length; inote++) {
-                note = this.drawingData.sections[isection].notes[inotes][inote].scaledNote
+            for (var inote = 0; inote < section.notes[inotes].length; inote++) {
+                note = section.notes[inotes][inote].scaledNote
                 x = subbeatsDrawn * this.subbeatLength + this.subbeatLength * usedBeats * this.beatParams.subbeats
 
-                y = (109 - note) / 109 * (this.drawingData.sections[isection].notesHeight - 
+                y = (109 - note) / 109 * (section.notesHeight - 
                     (omg.ui.useUnicodeNotes ? 0 : noteSize))
                 if (y < 30) {
                     this.context.save()
@@ -181,19 +186,19 @@ OMGEmbeddedViewerMusicDrawer.prototype.draw = function () {
 
                 if (omg.ui.useUnicodeNotes) {
                     this.context.fillText(
-                        omg.ui.getTextForNote(this.drawingData.sections[isection].notes[inotes][inote]),
+                        omg.ui.getTextForNote(section.notes[inotes][inote]),
                         x, y);
                 }
                 else {
                     this.context.drawImage(
-                        omg.ui.getImageForNote(this.drawingData.sections[isection].notes[inotes][inote]),
+                        omg.ui.getImageForNote(section.notes[inotes][inote]),
                         x, y - noteSize, noteSize, noteSize);
                 }
                 if (y < 30) {
                     this.context.restore()
                 }
-                usedBeats += this.drawingData.sections[isection].notes[inotes][inote].beats;
-                if (usedBeats * this.beatParams.subbeats >= this.totalSubbeats) {
+                usedBeats += section.notes[inotes][inote].beats;
+                if (usedBeats * this.beatParams.subbeats >= this.totalSubbeats * section.measures) {
                     break;
                 }
             }
