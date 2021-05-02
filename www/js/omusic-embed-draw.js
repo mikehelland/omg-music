@@ -80,7 +80,7 @@ OMGEmbeddedViewerMusicDrawer.prototype.getSectionDrawingData = function (section
     for (var partName in section.parts) {
         var part = section.parts[partName]
         if (part.audioParams.mute) {
-            return;
+            continue;
         }
 
         if (part.surface.url === "PRESET_SEQUENCER") {
