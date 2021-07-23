@@ -861,7 +861,6 @@ var CONST = {
 
 */
 
-console.log("exporting synth")
 export function Synth( audioContext, config ) {
 	var self = this,
 		voices = [],
