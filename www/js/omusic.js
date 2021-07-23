@@ -3,6 +3,9 @@
 import OMusicPlayer from "./Player.js"
 import OMGSong from "./Song.js"
 
+// todo lazy load this if we can, its hard because makeAudioNodes is syncronous
+import {Synth, patchLoader} from "./libs/viktor/viktor.js"
+
 export default function OMusicContext() {
 
     // a global variable to reuse the soundsets we've downloaded
@@ -522,8 +525,6 @@ OMusicContext.prototype.makeOsc = function (type) {
 };
 
 OMusicContext.prototype.makeSynth = function (patchData, nodes, partData) {
-
-    var {Synth} = import("./libs/viktor/viktor.js")
 
     let synth = new Synth(this.audioContext, patchData)
     let patch = patchLoader.load(patchData)

@@ -861,7 +861,7 @@ var CONST = {
 
 */
 
-
+console.log("exporting synth")
 export function Synth( audioContext, config ) {
 	var self = this,
 		voices = [],
@@ -2311,7 +2311,7 @@ var	ENGINE_VERSION_1 = 1,
 	ENGINE_VERSION_6 = 6,
 	CURRENT_ENGINE_VERSION = "ENGINE_VERSION_" + CONST.ENGINE_VERSION;
 
-var patchLoader = {
+export var patchLoader = {
 
 	load: function( patch ) {
 		var self = this,
