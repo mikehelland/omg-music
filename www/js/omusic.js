@@ -3,9 +3,6 @@
 import OMusicPlayer from "./Player.js"
 import OMGSong from "./Song.js"
 
-// todo lazy load this if we can, its hard because makeAudioNodes is syncronous
-import {Synth, patchLoader} from "./libs/viktor/viktor.js"
-
 export default function OMusicContext() {
 
     // a global variable to reuse the soundsets we've downloaded
@@ -80,24 +77,23 @@ OMusicContext.prototype.loadPartHeader = function (part) {
             part.soundFont = "_tone_" + part.soundFont
         }
 
-        if (!this.downloadedSoundSets[part.data.soundSet.soundFont.url]) {
-            this.downloadedSoundSets[part.data.soundSet.soundFont.url] = true
+        let url = part.data.soundSet.soundFont.url
+        let name = part.soundFont //part.data.soundSet.soundFont.name
+            
+        if (!this.downloadedSoundSets[url]) {
+            this.downloadedSoundSets[url] = true
             
             return new Promise((resolve, reject) => {
-                var soundfontScriptEl = document.createElement("script")
-                soundfontScriptEl.src = part.data.soundSet.soundFont.url
-                soundfontScriptEl.onload = e => {
-                    //todo silently hit every note so it's loaded?
-                    
-                    this.getSoundFontPlayer().then(sfPlayer => {
-                        sfPlayer.loader.decodeAfterLoading(this.audioContext, part.data.soundSet.soundFont.name);
+            
+                this.getSoundFontPlayer().then(sfPlayer => {        
+                    sfPlayer.loader.startLoad(this.audioContext, url, name);
+                    sfPlayer.loader.waitLoad(() => {
+                        sfPlayer.loader.decodeAfterLoading(this.audioContext, name)
                         resolve()
                     })
-                    
-                }
-                document.body.appendChild(soundfontScriptEl)
+                })
+
             })
-            
         }
     }
 }
@@ -524,8 +520,11 @@ OMusicContext.prototype.makeOsc = function (type) {
     return osc
 };
 
-OMusicContext.prototype.makeSynth = function (patchData, nodes, partData) {
+OMusicContext.prototype.makeSynth = async function (patchData, nodes, partData) {
 
+    await this.getFXFactory()
+    var {Synth, patchLoader} = await import("./libs/viktor/viktor.js")
+    
     let synth = new Synth(this.audioContext, patchData)
     let patch = patchLoader.load(patchData)
     synth.loadPatch(patch.instruments.synth)
@@ -542,7 +541,7 @@ OMusicContext.prototype.makeSynth = function (patchData, nodes, partData) {
 
     //todo if (patch.masterVolume) 
 
-    return {synth, fx}
+    return synth
 }
 
 
@@ -733,8 +732,10 @@ OMusicContext.prototype.makeAudioNodesForPart = function (part) {
             nodes.osc.connect(nodes.preFXGain)
         }
         else if (part.data.soundSet.patch) {
-            let synth = this.makeSynth(part.data.soundSet.patch, nodes, part.data)
-            nodes.synth = synth.synth
+            this.makeSynth(part.data.soundSet.patch, nodes, part.data).then(synth => {
+                part.synth = synth
+            })
+            
         }
     }
 
@@ -744,7 +745,6 @@ OMusicContext.prototype.makeAudioNodesForPart = function (part) {
     part.preFXGain = nodes.preFXGain
     part.postFXGain = part.gain;
     part.osc = nodes.osc
-    part.synth = nodes.synth
     part.fx = nodes.fx
 
     if (part.onnodesready) {
