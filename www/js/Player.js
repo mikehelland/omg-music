@@ -216,39 +216,40 @@ OMusicPlayer.prototype._audition = function () {
 };
 
 OMusicPlayer.prototype.afterSection = function () {
-    var p = this;
+    this.iSubBeat = 0;
+    //this.loopStarted = Date.now();
 
     // is this ever used? some kind of queue
-    if (p.nextUp) {
-        p.iSubBeat = 0;
-        p.loopStarted = Date.now();
-        p.song = p.nextUp;
-        p.setupNextSection(true);
-        p.nextUp = null;
+    if (this.nextUp) {
+        this.iSubBeat = 0;
+        this.loopStarted = Date.now();
+        this.song = this.nextUp;
+        this.setupNextSection(true);
+        this.nextUp = null;
         return;
     }
 
     var nextChord = false;
-    if (p.section.data.chordProgression) {
-        p.section.currentChordI++;
-        if (p.section.currentChordI < p.section.data.chordProgression.length) {
+    if (this.section.data.chordProgression) {
+        this.section.currentChordI++;
+        if (this.section.currentChordI < this.section.data.chordProgression.length) {
             nextChord = true;
         }
         else {
-            p.section.currentChordI = 0;
+            this.section.currentChordI = 0;
         }
-        if (p.section.chord !== p.section.data.chordProgression[p.section.currentChordI]) {
-            p.musicContext.rescaleSection(p.section, p.section.data.chordProgression[p.section.currentChordI]);
+        if (this.section.chord !== this.section.data.chordProgression[this.section.currentChordI]) {
+            this.musicContext.rescaleSection(this.section, this.section.data.chordProgression[this.section.currentChordI]);
         }
     }
 
     if (!nextChord) {
-        p.lastSection = p.section;
+        this.lastSection = this.section;
 
-        var movingOn = p.setupNextSection();
+        var movingOn = this.setupNextSection();
         if (movingOn) {
-            p.iSubBeat = 0;
-            p.loopStarted = Date.now();
+            this.iSubBeat = 0;
+            this.loopStarted = Date.now();
         }
     }
 };
@@ -360,28 +361,27 @@ OMusicPlayer.prototype.setupNextSection = function (fromStart) {
 };
 
 OMusicPlayer.prototype.stop = function () {
-    var p = this;
+    
+    clearInterval(this.playingIntervalHandle);
+    this.playing = false;
 
-    clearInterval(p.playingIntervalHandle);
-    p.playing = false;
-
-    for (var il = 0; il < p.onPlayListeners.length; il++) {
+    for (var il = 0; il < this.onPlayListeners.length; il++) {
         try {
-            p.onPlayListeners[il].call(null, false);
+            this.onPlayListeners[il].call(null, false);
         } catch (ex) {
             console.error(ex);
         }
     }
     
-    for (var il = 0; il < p.onBeatPlayedListeners.length; il++) {
+    for (var il = 0; il < this.onBeatPlayedListeners.length; il++) {
         try {
-            p.onBeatPlayedListeners[il].call(null, -1, p.section);
+            this.onBeatPlayedListeners[il].call(null, -1, this.section);
         } catch (ex) {console.error(ex);}
     }
 
 
-    if (p.song && p.song.sections[p.song.playingSection]) {
-        var parts = p.song.sections[p.song.playingSection].parts;
+    if (this.song && this.song.sections[this.song.playingSection]) {
+        var parts = this.song.sections[this.song.playingSection].parts;
         for (var ip = 0; ip < parts.length; ip++) {
             if (parts[ip].osc) {
                 parts[ip].osc.finishPart();
