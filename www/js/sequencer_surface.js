@@ -49,6 +49,8 @@ export default function OMGDrumMachine(div, part, params) {
     this.toolBarDiv = document.createElement("div")
     this.toolBarDiv.style.display = "flex"
 
+    this.setupMeasureSelect()
+
     var beatLevels = 10
     for (let i = beatLevels; i > 0; i--) {
         let strengthButton = document.createElement("button")
@@ -240,15 +242,15 @@ OMGDrumMachine.prototype.ondown = function (touch) {
         }
 
         data = this.tracks[trackI].data;
-        data[subbeat] = (data[subbeat] === this.beatStrength) ? 
+        data[this.subbeatOffset + subbeat] = (data[this.subbeatOffset + subbeat] === this.beatStrength) ? 
                 0 : this.beatStrength;
 
         touch.lastBox = [column, row];
 
         if (omgdrums.onchange)
-            omgdrums.onchange(this.part, trackI, subbeat);
+            omgdrums.onchange(this.part, trackI, this.subbeatOffset + subbeat);
 
-        this.part.change(trackI, subbeat, data[subbeat])
+        this.part.change(trackI, this.subbeatOffset + subbeat, data[this.subbeatOffset + subbeat])
         
         this.touches.push(touch);
     }
@@ -285,14 +287,14 @@ OMGDrumMachine.prototype.onmove = function (touch) {
             
         }
         data = this.tracks[trackI].data;
-        data[subbeat] = (data[subbeat] === this.beatStrength) ? 0 : this.beatStrength;
+        data[this.subbeatOffset + subbeat] = (data[this.subbeatOffset + subbeat] === this.beatStrength) ? 0 : this.beatStrength;
 
         touch.lastBox = [column, row];
 
         if (omgdrums.onchange)
-            omgdrums.onchange(this.part, trackI, subbeat);
+            omgdrums.onchange(this.part, trackI, this.subbeatOffset + subbeat);
 
-        this.part.change(trackI, subbeat, data[subbeat])
+        this.part.change(trackI, subbeat, data[this.subbeatOffset + subbeat])
 
     }
 
@@ -311,7 +313,8 @@ OMGDrumMachine.prototype.setPart = function (part) {
     this.beatParams = part.section.song.data.beatParams;
     this.tracks = part.data.tracks;
 
-    this.totalBeats = part.section.data.measures * this.beatParams.beats;
+    this.measures = this.displayMeasure === "ALL" ? this.part.section.data.measures : 1
+    this.totalBeats = this.measures * this.beatParams.beats;
     this.totalSubbeats = this.totalBeats * this.beatParams.subbeats;
     //this.info = undefined
 };
@@ -372,7 +375,7 @@ OMGDrumMachine.prototype.draw = function (subbeat, w, h) {
 OMGDrumMachine.prototype.drawFullView = function (subbeat) {
     for (var i = 0; i < this.info.length; i++) {
         for (var j = 0; j < this.totalSubbeats; j++) {
-            var value = this.tracks[this.info[i].i].data[j];
+            var value = this.tracks[this.info[i].i].data[j + this.subbeatOffset];
             
             if (!value) {
                 continue;
@@ -405,7 +408,7 @@ OMGDrumMachine.prototype.drawTrackView = function (subbeat) {
     var subbeatIndex;
     for (var i = 0; i < this.totalBeats; i++) {
         for (var j = 0; j < this.beatParams.subbeats; j++) {
-            subbeatIndex = j + i * this.beatParams.subbeats;
+            subbeatIndex = this.subbeatOffset + j + i * this.beatParams.subbeats;
             var value = this.tracks[this.selectedTrack].data[subbeatIndex];
             if (!value) {
                 if (subbeatIndex === subbeat) {
@@ -506,6 +509,21 @@ OMGDrumMachine.prototype.updateBeatMarker = function (subbeat) {
         this.beatMarkerShowing = false;
         return;
     }
+
+    // todo 23July21
+    /*if (this.displayMeasure === "CURRENT") {
+        if (subbeat < this.subbeatOffset) {
+            this.subbeatOffset = 0
+            this.draw()
+        }
+        if (subbeat >= this.subbeatOffset + this.totalSubbeats) {
+            // this just assumes the next beat is the first beat of the measure
+            this.subbeatOffset = subbeat 
+            this.draw()
+        }
+
+        subbeat = subbeat - this.subbeatOffset
+    }*/
         
     if (this.selectedTrack > -1) {
         this.beatMarker.style.left = this.captionWidth + this.columnWidth * (subbeat % this.beatParams.subbeats) + "px";
@@ -572,7 +590,8 @@ OMGDrumMachine.prototype.setRowColumnSizes = function () {
     this.beatMarker.style.display = "none";
     this.beatMarkerShowing = false;
     
-    this.totalBeats = this.part.section.data.measures * this.beatParams.beats;
+    this.measures = this.displayMeasure === "ALL" ? this.part.section.data.measures : 1
+    this.totalBeats = this.measures * this.beatParams.beats;
     this.totalSubbeats = this.totalBeats * this.beatParams.subbeats;
     
     if (this.selectedTrack < 0) {
@@ -610,4 +629,24 @@ OMGDrumMachine.prototype.setPageOffsets = function () {
     var offsets = omg.ui.totalOffsets(this.canvas);
     this.offsetLeft = offsets.left;
     this.offsetTop = offsets.top;
+}
+
+OMGDrumMachine.prototype.setupMeasureSelect = function () {
+
+    this.selectMeasure = document.createElement("select")
+    this.selectMeasure.innerHTML = `
+        <option value='CURRENT'>Current</option>    
+        <option value='ALL'>All Measures</option>`
+
+    this.subbeatOffset = 0
+    this.displayMeasure = "CURRENT"
+    this.selectMeasure.onchange = e => {
+        this.displayMeasure = this.selectMeasure.value
+        this.measures = this.displayMeasure === "ALL" ? this.part.section.data.measures : 1
+        this.backgroundDrawn = false
+        this.draw()
+    }
+
+    this.toolBarDiv.appendChild(this.selectMeasure)
+
 }
