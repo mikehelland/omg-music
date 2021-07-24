@@ -1,4 +1,7 @@
+import NoteDrawer from "./NoteDrawer.js"
+
 export default function OMGEmbeddedViewerMusicDrawer() {
+    this.noteDrawer = new NoteDrawer()
 }
 
 OMGEmbeddedViewerMusicDrawer.prototype.drawCanvas = function (data, canvas, subbeatsToDraw, performanceData) {
@@ -174,29 +177,10 @@ OMGEmbeddedViewerMusicDrawer.prototype.draw = function () {
                 note = section.notes[inotes][inote].scaledNote
                 x = subbeatsDrawn * this.subbeatLength + this.subbeatLength * usedBeats * this.beatParams.subbeats
 
-                y = (109 - note) / 109 * (section.notesHeight - 
-                    (omg.ui.useUnicodeNotes ? 0 : noteSize))
-                if (y < 30) {
-                    this.context.save()
-                    this.context.translate(x, y)
-                    this.context.scale(1, -1)
-                    x = 0
-                    y = 0
-                }
-
-                if (omg.ui.useUnicodeNotes) {
-                    this.context.fillText(
-                        omg.ui.getTextForNote(section.notes[inotes][inote]),
-                        x, y);
-                }
-                else {
-                    this.context.drawImage(
-                        omg.ui.getImageForNote(section.notes[inotes][inote]),
-                        x, y - noteSize, noteSize, noteSize);
-                }
-                if (y < 30) {
-                    this.context.restore()
-                }
+                y = (109 - note) / 109 * section.notesHeight
+                
+                this.noteDrawer.drawNote(section.notes[inotes][inote], this.context, x, y)
+        
                 usedBeats += section.notes[inotes][inote].beats;
                 if (usedBeats * this.beatParams.subbeats >= this.totalSubbeats * section.measures) {
                     break;
@@ -271,24 +255,10 @@ OMGEmbeddedViewerMusicDrawer.prototype.drawPartNotes = function (part, canvas, b
     for (var note of part.notes) {
         x = subbeatsDrawn * subbeatLength + subbeatLength * usedBeats * beatParams.subbeats
 
-        y = (109 - note.note) / 109 * (canvas.height - (omg.ui.useUnicodeNotes ? 0 : noteSize))
-        if (y < 30) {
-            context.save()
-            context.translate(x, y)
-            context.scale(1, -1)
-            x = 0
-            y = 0
-        }
+        y = (109 - note.note) / 109 * canvas.height
+        
+        this.noteDrawer.drawNote(note, context, x, y)
 
-        if (omg.ui.useUnicodeNotes) {
-            context.fillText(omg.ui.getTextForNote(note), x, y);
-        }
-        else {
-            context.drawImage(omg.ui.getImageForNote(note), x, y - noteSize, noteSize, noteSize);
-        }
-        if (y < 30) {
-            context.restore()
-        }
         usedBeats += note.beats;
         if (usedBeats * beatParams.subbeats >= subbeatsToDraw) {
             break;

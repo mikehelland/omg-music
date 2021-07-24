@@ -143,11 +143,24 @@ NoteDrawer.prototype.drawNote = function (note, ctx, x, y) {
  
     ctx.font = this.noteSize + "pt serif";
     
+    // todo don't hard code this value
+    if (y < 30) {
+        ctx.save()
+        ctx.translate(x, y)
+        ctx.scale(1, -1)
+        x = 0
+        y = 0
+    }
+    
     if (this.useUnicodeNotes) {
         ctx.fillText(this.getTextForNote(note), x, y);
     }
     else {
         ctx.drawImage(this.getImageForNote(note), x, y - this.noteSize, this.noteSize, this.noteSize);
+    }
+
+    if (y < 30) {
+        ctx.restore()
     }
 
 }

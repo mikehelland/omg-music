@@ -14,25 +14,18 @@ function OMGEmbeddedViewerMusic(viewer) {
     this.data = viewer.data
     this.viewer = viewer
 
-    omg.util.loadScripts(["/apps/music/js/omgservice_music.js"],
-        () => {
+    import("/apps/music/js/omusic-embed-draw.js").then(o => {
+        var OMGEmbeddedViewerMusicDrawer = o.default
 
-            import("/apps/music/js/omusic-embed-draw.js").then(o => {
-                var OMGEmbeddedViewerMusicDrawer = o.default
-        
-                this.drawer = new OMGEmbeddedViewerMusicDrawer()
-                    this.drawer.drawCanvas(this.data, this.canvas)
-                    this.drawingData = this.drawer.drawingData
-                    
-                    this.makePlayButton()
-                    this.makeBeatMarker()
-            })
-        
-        
-        }
-    )
-
+        this.drawer = new OMGEmbeddedViewerMusicDrawer()
+            this.drawer.drawCanvas(this.data, this.canvas)
+            this.drawingData = this.drawer.drawingData
+            
+            this.makePlayButton()
+            this.makeBeatMarker()
+    })
 }
+
 if (typeof omg === "object" && omg.types && omg.types["SONG"]) {
     omg.types["SONG"].embedClass = OMGEmbeddedViewerMusic
     omg.types["PART"].embedClass = OMGEmbeddedViewerMusic
