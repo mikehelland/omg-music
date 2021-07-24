@@ -54,7 +54,7 @@ OMusicPlayer.prototype.play = async function (song) {
         return -1;
     }
 
-    this.setupNextSection() //typeof this.startArrangementAt !== "number");
+    this.setupNextSection(true) //typeof this.startArrangementAt !== "number");
 
     this.playing = true;
     this.loopStarted = Date.now();
