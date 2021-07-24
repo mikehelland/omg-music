@@ -262,6 +262,9 @@ OMusicPlayer.prototype.setupNextSection = function (fromStart) {
         if (p.song.arrangement.length > 0) {
             p.arrangementI = 0;
             p.section = p.song.sections[p.song.arrangement[p.arrangementI].section];
+
+            //todo this arrangement stuff is all half baked
+            if (!p.section) p.section = Object.values(p.song.sections)[0];
             p.song.arrangement[p.arrangementI].repeated = 0;
         }
         else {
