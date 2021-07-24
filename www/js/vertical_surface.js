@@ -3,15 +3,20 @@ import NoteDrawer from "./NoteDrawer.js"
 export default function OMGMelodyMaker(div, part, player) {
 
     this.noteNames = player.musicContext.noteNames
+    this.div = div
 
     div.style.display = "flex"
     div.style.flexDirection = "column"
 
-    this.toolBarDiv = document.createElement("div")
-    div.appendChild(this.toolBarDiv)
+    this.highContrast = true;
+    this.backgroundColor = "white";
+    this.color = "black";
+
+    this.setupToolBar()
 
     this.canvasHolder = document.createElement("div")
     this.canvasHolder.style.flexGrow = 1
+    this.canvasHolder.style.position = "relative"
 
     this.bgCanvas = document.createElement("canvas");
     this.bgCanvas.className = "surface-canvas";
@@ -44,11 +49,7 @@ export default function OMGMelodyMaker(div, part, player) {
     this.player = player;
 
     this.readOnly = true;
-    
-    this.highContrast = true;
-    this.backgroundColor = "white";
-    this.color = "black";
-    
+        
     this.touchingXSection = -1;
     this.touches = [];
     this.notes = [];
@@ -69,6 +70,60 @@ export default function OMGMelodyMaker(div, part, player) {
         this.setPart(part);
     
     this.setCanvasEvents();
+}
+
+OMGMelodyMaker.prototype.setupToolBar = function (w, h) {
+    this.toolBarDiv = document.createElement("div")
+    this.toolBarDiv.style.display = "flex"
+
+    this.editButton = document.createElement("button")
+    this.editButton.innerHTML = "Edit"
+    this.editButton.style.backgroundColor = this.highContrast ? this.color : this.backgroundColor
+    this.editButton.style.color = !this.highContrast ? this.color : this.backgroundColor
+    this.editButton.style.flexGrow = 1
+        
+    this.toolBarDiv.appendChild(this.editButton)
+
+    this.zoomButton = document.createElement("button")
+    this.zoomButton.innerHTML = "Zoom"
+    this.zoomButton.style.backgroundColor = this.highContrast ? this.color : this.backgroundColor
+    this.zoomButton.style.color = !this.highContrast ? this.color : this.backgroundColor
+    this.zoomButton.style.flexGrow = 1
+    
+    this.toolBarDiv.appendChild(this.zoomButton)
+
+    this.div.appendChild(this.toolBarDiv)
+
+    this.zoomButton.onclick = e => {
+        this.editButton.style.backgroundColor = this.highContrast ? this.color : this.backgroundColor
+        this.editButton.style.color = !this.highContrast ? this.color : this.backgroundColor
+            
+        if (this.mode === "ZOOM") {
+            this.zoomButton.style.backgroundColor = this.highContrast ? this.color : this.backgroundColor
+            this.zoomButton.style.color = !this.highContrast ? this.color : this.backgroundColor
+            this.mode = "WRITE"
+        }
+        else {
+            this.zoomButton.style.backgroundColor = !this.highContrast ? this.color : this.backgroundColor
+            this.zoomButton.style.color = this.highContrast ? this.color : this.backgroundColor
+            this.mode = "ZOOM"
+        }
+    }
+    this.editButton.onclick = e => {
+        this.zoomButton.style.backgroundColor = this.highContrast ? this.color : this.backgroundColor
+        this.zoomButton.style.color = !this.highContrast ? this.color : this.backgroundColor
+        
+        if (this.mode === "EDIT") {
+            this.editButton.style.backgroundColor = this.highContrast ? this.color : this.backgroundColor
+            this.editButton.style.color = !this.highContrast ? this.color : this.backgroundColor
+            this.mode = "WRITE"
+        }
+        else {
+            this.editButton.style.backgroundColor = !this.highContrast ? this.color : this.backgroundColor
+            this.editButton.style.color = this.highContrast ? this.color : this.backgroundColor
+            this.mode = "EDIT"
+        }
+    }
 }
 
 OMGMelodyMaker.prototype.drawBackground = function (w, h) {
