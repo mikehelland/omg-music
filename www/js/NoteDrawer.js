@@ -5,7 +5,7 @@ export default function NoteDrawer() {
         && navigator.userAgent.indexOf("iPad") === -1 
         && navigator.userAgent.indexOf("Mac OS X") === -1 ;
 
-    this.useUnicodeNotes = false
+    //this.useUnicodeNotes = false
     if (!this.useUnicodeNotes) {
         this.setupNoteImages();
     }
