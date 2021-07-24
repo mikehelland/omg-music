@@ -6,19 +6,21 @@ export default function OMGEmbeddedViewerMusicDrawer() {
 
 OMGEmbeddedViewerMusicDrawer.prototype.drawCanvas = function (data, canvas, subbeatsToDraw, performanceData) {
 
-    this.song = data
-    this.context = canvas.getContext("2d");
-    canvas.width = canvas.clientWidth
-    canvas.height = canvas.clientHeight
-    this.width = canvas.width
-    this.height = canvas.height
-    this.canvas = canvas
+    this.noteDrawer.onReady(() => {
+        this.song = data
+        this.context = canvas.getContext("2d");
+        canvas.width = canvas.clientWidth
+        canvas.height = canvas.clientHeight
+        this.width = canvas.width
+        this.height = canvas.height
+        this.canvas = canvas
 
-    this.subbeatsToDraw = subbeatsToDraw
-    this.performanceData = performanceData
+        this.subbeatsToDraw = subbeatsToDraw
+        this.performanceData = performanceData
 
-    this.getDrawingData();
-    this.draw();
+        this.getDrawingData();
+        this.draw();
+    })
 };
 
 OMGEmbeddedViewerMusicDrawer.prototype.getDrawingData = function () {

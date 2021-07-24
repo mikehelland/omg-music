@@ -1,4 +1,8 @@
+import NoteDrawer from "./NoteDrawer.js"
+
 export default function OMGMelodyMaker(div, part, player) {
+
+    this.noteNames = player.musicContext.noteNames
 
     div.style.display = "flex"
     div.style.flexDirection = "column"
@@ -57,6 +61,9 @@ export default function OMGMelodyMaker(div, part, player) {
 
     this.noteWidth = 25;
     this.noteHeight = 40;
+
+    this.noteDrawer = new NoteDrawer()
+    this.noteDrawer.highContrast = this.highContrast
 
     if (part)
         this.setPart(part);
@@ -129,19 +136,14 @@ OMGMelodyMaker.prototype.draw = function (isubbeat, w, h) {
     this.context.fillStyle = this.highContrast ? this.backgroundColor : this.color;
     this.context.font = "28pt arial";
 
-    for (var i = 0; i < this.notesInfo.length; i++) {
-        if (omg.ui.useUnicodeNotes) {
-            this.context.fillText(this.notesInfo[i].text, this.notesInfo[i].x, this.notesInfo[i].y);
-        }
-        else {
-            this.context.drawImage(this.notesInfo[i].image, this.notesInfo[i].x, this.notesInfo[i].y - this.noteHeight * 0.75);
-        }
+    for (var noteInfo of this.notesInfo) {
+        this.noteDrawer.drawNote(noteInfo.note, this.context, noteInfo.x, noteInfo.y)
 
         if (this.mode === "EDIT") {
-            if (this.noteHovering === this.notesInfo[i].note || 
-                    this.edittingNoteInfo && this.notesInfo[i].note === this.edittingNoteInfo.note) {
+            if (this.noteHovering === noteInfo.note || 
+                    this.edittingNoteInfo && noteInfo.note === this.edittingNoteInfo.note) {
                 this.context.strokeStyle = this.highContrast ? this.backgroundColor : this.color;
-                this.context.strokeRect(this.notesInfo[i].x, this.notesInfo[i].y - 30, 
+                this.context.strokeRect(noteInfo.x, noteInfo.y - 30, 
                     this.noteWidth, this.noteHeight);
             }
         }
@@ -200,13 +202,7 @@ OMGMelodyMaker.prototype.setupNotesInfo = function () {
     var noteInfo;
     for (var i = 0; i < this.data.notes.length; i++) {
         noteInfo = {note: this.data.notes[i]};
-        if (omg.ui.useUnicodeNotes) {
-            noteInfo.text = omg.ui.getTextForNote(noteInfo.note);
-        }
-        else {
-            noteInfo.image = omg.ui.getImageForNote(noteInfo.note, this.highContrast);
-        }
-
+        
         if (noteInfo.note.rest) {
             noteInfo.y = this.restHeight;
         } else {
@@ -301,18 +297,16 @@ OMGMelodyMaker.prototype.drawButtons = function (buttonRow, x, y, width, height)
                 context.globalAlpha = 1;
             }
 
-            if (button.noteImg) {
-                context.drawImage(button.noteImg, nextLeft + imageWidth * 0.16,
-                        ymargin, imageWidth, heightmargin);
-            }
-
             context.strokeRect(nextLeft, ymargin, buttonWidth, heightmargin);
+            this.noteDrawer.highContrast = false
+            context.fillStyle = "black";
             if (button.note) {
-                context.fillStyle = "black";
-                context.fillText(button.note,
-                        nextLeft + buttonWidth / 2 - context.measureText(button.note).width / 2 - 7,
-                        y + height / 2 + 3 + 11);
+                this.noteDrawer.drawNote(button.note, context, 
+                    nextLeft + buttonWidth / 2 - 7,
+                    y + height / 2 + 3 + 11)
+            
             }
+            this.noteDrawer.highContrast = this.highContrast
             if (button.text) {
                 context.fillStyle = "black";
                 context.fillText(button.text,
@@ -373,7 +367,7 @@ OMGMelodyMaker.prototype.setupFretBoard = function () {
         if (!chromatic || scale.indexOf((i - rootNote % 12) % 12) > -1) {
             frets.push({
                 note: i,
-                caption: chromatic ? omg.ui.noteNames[i] : soundSet.data[i].name,
+                caption: chromatic ? this.noteNames[i] : soundSet.data[i].name,
                 octaveMarker: chromatic && i % 12 === rootNote
             });
         }
@@ -453,18 +447,8 @@ OMGMelodyMaker.prototype.setupEditDialog = function () {
 
         beats = beatChoices[iimg];
 
-        if (omg.ui.useUnicodeNotes) {
-            restNoteImage = omg.ui.getTextForNote({rest: true, beats: beats});
-            noteImage = omg.ui.getTextForNote({rest: false, beats: beats});
-            noteButton = {button: true, note: noteImage, width: 22};
-            restButton = {button: true, note: restNoteImage, width: 22};
-        }
-        else {
-            restNoteImage = omg.ui.getImageForNote({rest: true, beats: beats});
-            noteImage = omg.ui.getImageForNote({rest: false, beats: beats});
-            noteButton = {button: true, noteImg: noteImage, width: 22};
-            restButton = {button: true, noteImg: restNoteImage, width: 22};
-        }
+        noteButton = {button: true, note: {beats}, width: 22};
+        restButton = {button: true, note: {beats}, width: 22};
 
         this.noteButtonRow.push(noteButton);
         noteButton.onclick = (function (beats) {
