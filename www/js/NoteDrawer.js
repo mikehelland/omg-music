@@ -5,19 +5,27 @@ export default function NoteDrawer() {
         && navigator.userAgent.indexOf("iPad") === -1 
         && navigator.userAgent.indexOf("Mac OS X") === -1 ;
 
-    //this.useUnicodeNotes = false
+    this.useUnicodeNotes = false
     if (!this.useUnicodeNotes) {
         this.setupNoteImages();
     }
 
 }
+NoteDrawer.prototype.onReadyListeners = []
 
+NoteDrawer.prototype.onReady = function (callback) {
+    if (this.useUnicodeNotes || this.loaded) {
+        callback()
+        return
+    }
 
+    NoteDrawer.prototype.onReadyListeners.push(callback)
+}
 
 NoteDrawer.prototype.setupNoteImages = function () {
     if (NoteDrawer.prototype.noteImages)
         return;
-
+    
     this.noteImageUrls = [
         [2, "note_half", "note_rest_half"],
         [1.5, "note_dotted_quarter", "note_rest_dotted_quarter"],
@@ -36,9 +44,14 @@ NoteDrawer.prototype.setupNoteImages = function () {
     var areAllNotesLoaded = () => {
         loadedNotes++;
         if (loadedNotes == this.noteImageUrls.length * 4) {
-            NoteDrawer.prototype.noteImages = noteImages;
+            this.loaded = true
+            for (var listener of NoteDrawer.prototype.onReadyListeners) {
+                listener()
+            }
+            NoteDrawer.prototype.onReadyListeners = []
         }
     };
+    NoteDrawer.prototype.noteImages = noteImages;
 
     for (var i = 0; i < this.noteImageUrls.length; i++) {
 
@@ -156,7 +169,8 @@ NoteDrawer.prototype.drawNote = function (note, ctx, x, y) {
         ctx.fillText(this.getTextForNote(note), x, y);
     }
     else {
-        ctx.drawImage(this.getImageForNote(note), x, y - this.noteSize, this.noteSize, this.noteSize);
+        ctx.drawImage(this.getImageForNote(note, this.highContrast), 
+            x, y - this.noteSize, this.noteSize, this.noteSize);
     }
 
     if (y < 30) {
@@ -164,6 +178,9 @@ NoteDrawer.prototype.drawNote = function (note, ctx, x, y) {
     }
 
 }
+
+// this forces the images to load into the prototype
+let nd = new NoteDrawer()
 
 /*this.splitInts = function (string) {
     var ints = string.split(",");
