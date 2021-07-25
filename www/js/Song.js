@@ -278,6 +278,24 @@ OMGSong.prototype.getUniqueName = function (name, names) {
 };
 
 
+OMGSong.prototype.removeSection = function (sectionToRemove) {
+    if (!sectionToRemove || !sectionToRemove.data || 
+        !this.sections[sectionToRemove.data.name]) {
+        return 
+    }
+
+    delete this.sections[sectionToRemove.data.name]
+
+    for (var i = this.arrangement.length - 1; i >= 0; i--) {
+        if (this.arrangement[i].section === sectionToRemove.data.name) {
+            this.arrangement.splice(i, 1)
+        }
+    }
+    // todo check the arrangement data?
+    // todo fire change listener
+    
+}
+
 
 function OMGSongPart(data) {
     

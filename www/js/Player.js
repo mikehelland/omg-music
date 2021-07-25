@@ -257,42 +257,42 @@ OMusicPlayer.prototype.afterSection = function () {
 // this function will return false if we're at the end
 // and the onreachend() hook adds more and returns true
 OMusicPlayer.prototype.setupNextSection = function (fromStart) {
-    var p = this;
+
     if (fromStart) {
-        p.loopSection = null
-        if (p.song.arrangement.length > 0) {
-            p.arrangementI = 0;
-            p.section = p.song.sections[p.song.arrangement[p.arrangementI].section];
+        this.loopSection = null
+        if (this.song.arrangement.length > 0) {
+            this.arrangementI = 0;
+            this.section = this.song.sections[this.song.arrangement[this.arrangementI].section];
 
             //todo this arrangement stuff is all half baked
-            if (!p.section) p.section = Object.values(p.song.sections)[0];
-            p.song.arrangement[p.arrangementI].repeated = 0;
+            if (!this.section) this.section = Object.values(this.song.sections)[0];
+            this.song.arrangement[this.arrangementI].repeated = 0;
         }
         else {
-            //todo part of the arrangement?
-            p.section = Object.values(p.song.sections)[0];
+            // there is no arrangement
+            this.section = Object.values(this.song.sections)[0];
         }
         return true;
     }
     
-    if (typeof p.queueSection === "number") {
-        p.loopSection = p.queueSection;
-        p.queSection = undefined;
+    if (typeof this.queueSection === "number") {
+        this.loopSection = this.queueSection;
+        this.queSection = undefined;
     }
-    else if (typeof p.queueSection === "string") {
+    else if (typeof this.queueSection === "string") {
         for (var i = 0; i < this.song.sections.length; i++) {
-            if (this.song.sections[i].data.name === p.queueSection) {
-                p.loopSection = i;
-                p.queSection = undefined;
+            if (this.song.sections[i].data.name === this.queueSection) {
+                this.loopSection = i;
+                this.queSection = undefined;
                 break;
             }
         }
     }
 
 
-    if (p.loopSection) {
-        p.section = p.loopSection;
-        if (p.onloop) p.onloop()
+    if (this.loopSection) {
+        this.section = this.loopSection;
+        if (this.onloop) this.onloop()
         return true;
     }
 
@@ -337,26 +337,26 @@ OMusicPlayer.prototype.setupNextSection = function (fromStart) {
     }*/
 
     // todo find the next section in the arrangement
-    p.arrangementI++;
-    if (p.arrangementI >= p.song.arrangement.length) {
+    this.arrangementI++;
+    if (this.arrangementI >= this.song.arrangement.length) {
 
         // a hook for clients that want to keep going
         if (this.onreachedend && this.onreachedend()) {
-            p.arrangementI--
-            p.section.currentChordI = 0
+            this.arrangementI--
+            this.section.currentChordI = 0
             return false 
         }
         else {
-            p.arrangementI = 0
-            if (!p.song.loop) {
-                p.stop();
+            this.arrangementI = 0
+            if (!this.song.loop) {
+                this.stop();
             }
             else {
-                if (p.onloop) p.onloop();
+                if (this.onloop) this.onloop();
             }
         }
     }
-    p.section = p.song.sections[p.song.arrangement[p.arrangementI].section];
+    this.section = this.song.sections[this.song.arrangement[this.arrangementI].section];
     return true
 };
 
