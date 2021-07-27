@@ -28,33 +28,32 @@ export default function OMusicPlayer(musicContext, song) {
 
     this.nextUp = null;
 
-    this.arrangementI = -1
+    this.setupNextSection(true)
 }
 
 
 
-OMusicPlayer.prototype.play = async function (song) {
+OMusicPlayer.prototype.play = async function () {
     if (!this.audioContext)
         return;
 
     if (this.audioContext.state === "suspended")
         this.audioContext.resume();
 
-    if (!song && !this.song) {
-        console.warn("OMusicPlayer.play(), no song passed and no song loaded")
+    if (!this.song) {
+        console.warn("OMusicPlayer.play(), no song loaded")
         return
     }
-    if (song && !song.loaded) {
-        await this.loadSong(song)
-        this.song = song
-    }
-
+    
     if (!this.song.sections || !Object.keys(this.song.sections).length) {
         console.warn("no sections to play()");
         return -1;
     }
 
-    this.setupNextSection(true) //typeof this.startArrangementAt !== "number");
+    if (!this.section) {
+        // could have been added after we loaded
+        this.setupNextSection(this.arrangementI === 0)
+    }
 
     this.playing = true;
     this.loopStarted = Date.now();
@@ -186,32 +185,31 @@ OMusicPlayer.prototype._audition = function () {
         return;
     }
     
-    var p = this;
-    var beatParams = p.song.data.beatParams;
+    var beatParams = this.song.data.beatParams;
 
-    p.subbeatLength = 1000 / (beatParams.bpm / 60 * beatParams.subbeats);
+    this.subbeatLength = 1000 / (beatParams.bpm / 60 * beatParams.subbeats);
 
-    for (var part of p.auditioningParts) {
-        p.playBeatForMelody(p.iSubBeat, part);
+    for (var part of this.auditioningParts) {
+        this.playBeatForMelody(this.iSubBeat, part);
     }
 
-    p.iSubBeat++;
+    this.iSubBeat++;
 
-    var timeToPlay = p.nextBeatTime;
-    if (p.iSubBeat % 2 === 1) {
-        p.nextBeatTime += (p.subbeatLength + beatParams.shuffle * p.subbeatLength) / 1000;
+    var timeToPlay = this.nextBeatTime;
+    if (this.iSubBeat % 2 === 1) {
+        this.nextBeatTime += (this.subbeatLength + beatParams.shuffle * this.subbeatLength) / 1000;
     }
     else {
-        p.nextBeatTime += (p.subbeatLength - beatParams.shuffle * p.subbeatLength) / 1000;
+        this.nextBeatTime += (this.subbeatLength - beatParams.shuffle * this.subbeatLength) / 1000;
     }
 
-    if (p.iSubBeat >= beatParams.beats * beatParams.subbeats * 
+    if (this.iSubBeat >= beatParams.beats * beatParams.subbeats * 
                                     beatParams.measures) {
-        p.iSubBeat = 0;
+        this.iSubBeat = 0;
     }
 
-    if (p.auditioningParts.length > 0) {
-        setTimeout(function () {p._audition ();}, (p.nextBeatTime - p.audioContext.currentTime) * 1000 - p.latency)
+    if (this.auditioningParts.length > 0) {
+        setTimeout(function () {this._audition ();}, (this.nextBeatTime - this.audioContext.currentTime) * 1000 - this.latency)
     }
 };
 
@@ -260,13 +258,14 @@ OMusicPlayer.prototype.setupNextSection = function (fromStart) {
 
     if (fromStart) {
         this.loopSection = null
+        this.arrangementI = 0;
         if (this.song.arrangement.length > 0) {
-            this.arrangementI = 0;
-            this.section = this.song.sections[this.song.arrangement[this.arrangementI].section];
+            this.arrangementSection = this.song.arrangement[this.arrangementI]
+            this.section = this.arrangementSection.section;
 
             //todo this arrangement stuff is all half baked
             if (!this.section) this.section = Object.values(this.song.sections)[0];
-            this.song.arrangement[this.arrangementI].repeated = 0;
+            this.arrangementSection.repeated = 0;
         }
         else {
             // there is no arrangement
@@ -275,15 +274,15 @@ OMusicPlayer.prototype.setupNextSection = function (fromStart) {
         return true;
     }
     
-    if (typeof this.queueSection === "number") {
-        this.loopSection = this.queueSection;
-        this.queSection = undefined;
+    if (typeof this.queuedSection === "number") {
+        this.loopSection = this.queuedSection;
+        this.queuedSection = undefined;
     }
-    else if (typeof this.queueSection === "string") {
+    else if (typeof this.queuedSection === "string") {
         for (var i = 0; i < this.song.sections.length; i++) {
-            if (this.song.sections[i].data.name === this.queueSection) {
+            if (this.song.sections[i].data.name === this.queuedSection) {
                 this.loopSection = i;
-                this.queSection = undefined;
+                this.queuedSection = undefined;
                 break;
             }
         }
@@ -342,7 +341,7 @@ OMusicPlayer.prototype.setupNextSection = function (fromStart) {
 
         // a hook for clients that want to keep going
         if (this.onreachedend && this.onreachedend()) {
-            this.arrangementI--
+            this.arrangementI-- //undo the increment
             this.section.currentChordI = 0
             return false 
         }
@@ -356,7 +355,8 @@ OMusicPlayer.prototype.setupNextSection = function (fromStart) {
             }
         }
     }
-    this.section = this.song.sections[this.song.arrangement[this.arrangementI].section];
+    this.arrangementSection = this.song.arrangement[this.arrangementI]
+    this.section = this.arrangementSection.section;
     return true
 };
 
@@ -867,6 +867,18 @@ OMusicPlayer.prototype.noteOff = function (noteNumber, part) {
     
 };
 
+OMusicPlayer.prototype.queueSection = function (arrangementSection) {
+
+    if (!this.playing) {
+        this.arrangementSection = arrangementSection
+        this.section = arrangementSection.section
+        this.arrangementI = this.song.arrangement.indexOf(arrangementSection)
+        this.arrangementSection.repeated = 0
+    }
+
+    //todo ?
+    // set chord progression to 0
+}
 
 
 
@@ -893,189 +905,4 @@ OMusicPlayer.prototype.processCommand = function (data) {
     }
 }
 
-
-
-
-
-//todo this has been moved to OMGPart so delete it
-OMusicPlayer.prototype.setupPartWithSoundSet = function (ss, part, load) {
-    var p = this;
-
-    if (!ss)
-        return;
-
-    var topNote = ss.highNote;
-    if (!topNote && ss.data.length) {
-        topNote = ss.lowNote + ss.data.length - 1;
-    }
-    if (!ss.octave) {
-        ss.octave = Math.floor((topNote + ss.lowNote) / 2 / 12);
-    }
-    if (part.data.soundSet && !part.data.soundSet.octave) {
-        part.data.soundSet.octave = ss.octave;
-    }
-
-    part.soundSet = ss;
-};
-
-
-
-OMusicPlayer.prototype.updateNoteSound = function (note, soundSet) {
-    var noteIndex;
-
-    if (note.rest)
-        return;
-
-    if (soundSet.chromatic) {
-        noteIndex = note.scaledNote - soundSet.lowNote;
-        if (noteIndex < 0) {
-            noteIndex = noteIndex % 12 + 12;
-        } else {
-            while (noteIndex >= soundSet.data.length) {
-                noteIndex = noteIndex - 12;
-            }
-        }
-    }
-    else {
-        noteIndex = note.note;
-    }
-
-    if (!soundSet.data[noteIndex]) {
-        return;
-    }
-    note.sound = (soundSet.prefix || "") + 
-                soundSet.data[noteIndex].url + 
-                (soundSet.postfix || "");
-
-};
-
-//is this used?
-OMusicPlayer.prototype.setupDrumPartWithSoundSet = function (ss, part, load) {
-    var p = this;
-
-    if (!ss)
-        return;
-
-    var prefix = ss.prefix || "";
-    var postfix = ss.postfix || "";
-
-    var track;
-
-    for (var ii = 0; ii < Math.max(part.data.tracks.length, ss.data.length); ii++) {
-        track = part.data.tracks[ii];
-        if (!track) {
-            track = {};
-            track.data = [];
-            track.data[p.getTotalSubbeats()] = false;
-            part.data.tracks.push(track);
-        }
-
-        if (ii < ss.data.length) {
-            track.sound = prefix + ss.data[ii].url + postfix;
-            track.name = ss.data[ii].name;            
-        }
-        else {
-            track.sound = "";
-            track.name = "";
-        }
-
-        if (!track.sound)
-            continue;
-
-        if (load && !p.loadedSounds[track.sound]) {
-            p.loadSound(track.sound, part);
-        }
-    }
-
-};
-
-
-OMusicPlayer.prototype.getSoundSet = function (url, callback) {
-    var p = this;
-
-    if (typeof url != "string") {
-        return;
-    }
-
-    if (!callback) {
-        callback = function () {};
-    }
-
-    var dl = p.downloadedSoundSets[url];
-    if (dl) {
-        callback(dl)
-        return;
-    }
-
-    if (url.indexOf("PRESET_") == 0) {
-        callback(url);
-        return;
-    }
-
-    var xhr2 = new XMLHttpRequest();
-    xhr2.open("GET", url, true)
-    xhr2.onreadystatechange = function () {
-
-        if (xhr2.readyState == 4) {
-            var ojson = JSON.parse(xhr2.responseText);
-            if (ojson) {
-                p.downloadedSoundSets[url] = ojson;
-                callback(ojson);
-            } else {
-                callback(ojson);
-            }
-        }
-    };
-    xhr2.send();
-
-};
-
-OMusicPlayer.prototype.loadSoundsFromSoundSet = function (soundSet) {
-    for (var i = 0; i < soundSet.data.length; i++) {
-        this.loadSound((soundSet.prefix || "") + soundSet.data[i].url + 
-            (soundSet.postfix || ""));
-    }
-};
-
-OMusicPlayer.prototype.getSoundURL = function (soundSet, note) {
-    console.warn("deprecrating omuisplayer getSoundUrl")
-    var noteIndex;
-    if (soundSet.chromatic) {
-        noteIndex = note.scaledNote - soundSet.lowNote;
-        if (noteIndex < 0) {
-            noteIndex = noteIndex % 12 + 12;
-        } else {
-            while (noteIndex >= soundSet.data.length) {
-                noteIndex = noteIndex - 12;
-            }
-        }
-    }
-    else {
-        noteIndex = note.note;
-    }
-
-    if (!soundSet.data[noteIndex]) {
-        return "";
-    }
-
-    //kinda hacky place for this
-    note.sound = (soundSet.prefix || "") + soundSet.data[noteIndex].url + 
-            (soundSet.postfix || "");    
-    
-    return note.sound;
-};
-
-
-OMusicPlayer.prototype.splitInts = function (input) {
-    var newInts = [];
-    var elements = input.split(",");
-    elements.forEach(function (el) {
-        newInts.push(parseInt(el));
-    });
-    return newInts;
-};
-
-OMusicPlayer.prototype.getTotalSubbeats = function () {
-    return this.beats * this.subbeats * this.measures;
-};
 */

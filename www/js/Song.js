@@ -120,7 +120,7 @@ OMGSong.prototype.loadSections = function () {
         this.loadSectionParts(section)
 
         if (addToArrangement) {
-            this.arrangement.push({section: sectionData.name, repeats: 1})
+            this.arrangement.push({section, repeats: 1})
         }
     }
 }
@@ -173,10 +173,9 @@ OMGSong.prototype.addSection = function (copy) {
     this.loadSectionParts(section)
     this.musicContext.loadSection(section)
 
-    if (!this.data.arrangement) {
-        this.arrangement.push({section: name, repeats: 1})
-    }
-    return section
+    var arrangementSection = {section, repeats: 1}
+    this.arrangement.push(arrangementSection)
+    return arrangementSection
 }
 
 OMGSong.prototype.makeSection = function (data) {
@@ -278,20 +277,24 @@ OMGSong.prototype.getUniqueName = function (name, names) {
 };
 
 
-OMGSong.prototype.removeSection = function (sectionToRemove) {
-    if (!sectionToRemove || !sectionToRemove.data || 
-        !this.sections[sectionToRemove.data.name]) {
-        return 
-    }
-
-    delete this.sections[sectionToRemove.data.name]
-
+OMGSong.prototype.removeSection = function (arrangementSection) {
+    var uses = 0
     for (var i = this.arrangement.length - 1; i >= 0; i--) {
-        if (this.arrangement[i].section === sectionToRemove.data.name) {
-            this.arrangement.splice(i, 1)
+        if (this.arrangement[i].section === arrangementSection.section) {
+            uses++
         }
     }
-    // todo check the arrangement data?
+    
+    i = this.arrangement.indexOf(arrangementSection)
+    if (i > -1) {
+        this.arrangement.splice(i, 1)
+    }
+    
+    // if we removed the section's only use, remove it from sections
+    if (uses === 1) {
+        delete this.sections[arrangementSection.section.data.name]
+    }
+
     // todo fire change listener
     
 }
