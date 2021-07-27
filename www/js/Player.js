@@ -209,7 +209,7 @@ OMusicPlayer.prototype._audition = function () {
     }
 
     if (this.auditioningParts.length > 0) {
-        setTimeout(function () {this._audition ();}, (this.nextBeatTime - this.audioContext.currentTime) * 1000 - this.latency)
+        setTimeout(() => {this._audition ();}, (this.nextBeatTime - this.audioContext.currentTime) * 1000 - this.latency)
     }
 };
 
