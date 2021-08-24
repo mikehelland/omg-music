@@ -3,10 +3,13 @@ import NoteDrawer from "./NoteDrawer.js"
 export default function OMGMelodyMaker(div, part, player) {
 
     this.noteNames = player.musicContext.noteNames
-    this.div = div
+    this.div = document.createElement("div")
+    
+    this.div.style.display = "flex"
+    this.div.style.flexDirection = "column"
+    this.div.style.height = "100%"
 
-    div.style.display = "flex"
-    div.style.flexDirection = "column"
+    div.appendChild(this.div)
 
     this.highContrast = true;
     this.backgroundColor = "white";
@@ -40,7 +43,7 @@ export default function OMGMelodyMaker(div, part, player) {
     this.bgContext = this.bgCanvas.getContext("2d");
     this.beatContext = this.beatCanvas.getContext("2d");
 
-    div.appendChild(this.canvasHolder)
+    this.div.appendChild(this.canvasHolder)
     
     this.bottomFretBottom = 0;
     this.topFretTop = 0;
@@ -157,9 +160,10 @@ OMGMelodyMaker.prototype.drawBackground = function (w, h) {
 OMGMelodyMaker.prototype.draw = function (isubbeat, w, h) {
 
     if (this.hidden) {
-        this.bgCanvas.style.display = "block";
-        this.canvas.style.display = "block";
-        this.beatCanvas.style.display = "block";
+        //this.bgCanvas.style.display = "block";
+        //this.canvas.style.display = "block";
+        //this.beatCanvas.style.display = "block";
+        this.div.style.display = "flex"
         this.hidden = false;
     }
 
@@ -1081,9 +1085,10 @@ OMGMelodyMaker.prototype.drawOMGLiveUsers = function () {
 };
 
 OMGMelodyMaker.prototype.hide = function () {
-    this.canvas.style.display = "none";
-    this.beatCanvas.style.display = "none";
-    this.bgCanvas.style.display = "none";
+    //this.canvas.style.display = "none";
+    //this.beatCanvas.style.display = "none";
+    //this.bgCanvas.style.display = "none";
+    this.div.style.display = "none";
     this.hidden = true;
 };
 
