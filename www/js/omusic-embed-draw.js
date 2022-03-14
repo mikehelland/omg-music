@@ -88,11 +88,12 @@ OMGEmbeddedViewerMusicDrawer.prototype.getSectionDrawingData = function (section
     var sectionData = {tracks: [], notes: [], section: section, measures: measures};
     for (var partName in section.parts) {
         var part = section.parts[partName]
-        if (part.audioParams.mute) {
+        var headPart = this.findHeadPart(part.name)
+        if (headPart.audioParams.mute) {
             continue;
         }
 
-        if (part.surface.url === "PRESET_SEQUENCER") {
+        if (headPart.surface.url === "PRESET_SEQUENCER") {
             for (var i = 0; i < part.tracks.length; i++) {
                 if (part.tracks[i].audioParams.mute) {
                     continue;
@@ -227,12 +228,15 @@ OMGEmbeddedViewerMusicDrawer.prototype.drawPartCanvas = function (part, canvas, 
 
     canvas.width = canvas.clientWidth
     canvas.height = canvas.clientHeight
- 
-    if (part.surface.url === "PRESET_SEQUENCER") {
-        this.drawPartBeats(part, canvas, beatParams, measures, 0, 0, canvas.width, canvas.height)
+    if (!part || !part.headPart) {
+        console.warn("drawPartCanvas no part/headPart")
+        return
+    }
+    if (part.headPart.data.surface.url === "PRESET_SEQUENCER") {
+        this.drawPartBeats(part.data, canvas, beatParams, measures, 0, 0, canvas.width, canvas.height)
     }
     else {
-        this.drawPartNotes(part, canvas, beatParams, measures, 0, 0, canvas.width, canvas.height)
+        this.drawPartNotes(part.data, canvas, beatParams, measures, 0, 0, canvas.width, canvas.height)
     }
 }
 
@@ -297,4 +301,12 @@ OMGEmbeddedViewerMusicDrawer.prototype.drawPartBeats = function (part, canvas, b
                                 subbeatLength - marginX * 2, height + marginY * 2);
         }
     }   
+}
+
+OMGEmbeddedViewerMusicDrawer.prototype.findHeadPart = function (partName) {
+    for (var i = 0; i < this.song.parts.length; i++) {
+        if (partName === this.song.parts[i].name) {
+            return this.song.parts[i]
+        }
+    }
 }

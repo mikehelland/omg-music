@@ -403,10 +403,10 @@ OMusicPlayer.prototype.playBeat = function (section, iSubBeat) {
 
 OMusicPlayer.prototype.playBeatForPart = function (iSubBeat, part) {
     
-    if (part.data.surface.url === "PRESET_SEQUENCER") {
+    if (part.surface.url === "PRESET_SEQUENCER") {
         this.playBeatForDrumPart(iSubBeat, part);
     } 
-    else if (part.data.surface.url === "PRESET_MIC") {
+    else if (part.surface.url === "PRESET_MIC") {
         //nothing to do
     } else {
         this.playBeatForMelody(iSubBeat, part);
@@ -418,8 +418,10 @@ OMusicPlayer.prototype.playBeatForDrumPart = function (iSubBeat, part) {
 
     if (part.headPart && part.headPart.data.audioParams.mute)
         return;
-    if (part.data.audioParams.mute)
-        return;
+    
+    //todo figure out audioParams per sectionPart
+    //if (part.data.audioParams.mute)
+    //    return;
     for (var i = 0; i < tracks.length; i++) {
         if (tracks[i].data[iSubBeat]) {
             if (!tracks[i].audioParams.mute) {
@@ -477,9 +479,10 @@ OMusicPlayer.prototype.playBeatForMelody = function (iSubBeat, part) {
         }
         var note = data.notes[part.currentI];
 
-        if (part.data.audioParams.mute) {
+        //todo mute individual section parts
+        //if (part.data.audioParams.mute) {
             //play solo they can't here ya
-        }
+        //}
         if (part.headPart && part.headPart.data.audioParams.mute) {
             //play solo they can't here ya
         }
@@ -511,7 +514,7 @@ OMusicPlayer.prototype.playBeatWithLiveNote = function (iSubBeat, part) {
                 beats: part.liveNotes.autobeat / part.song.data.beatParams.subbeats};
             
             this.playNote(note, part);
-            if (this.playing && !part.data.audioParams.mute) {
+            if (this.playing && !part.headPart.data.audioParams.mute) {
                 this.recordNote(part, note);
                 part.currentI = part.data.notes.indexOf(note) + 1;
             }
@@ -618,7 +621,8 @@ OMusicPlayer.prototype.playSound = function (sound, part, audioParams, strength)
         source.buffer = this.musicContext.loadedSounds[sound];
 
         var gain = 1;
-        var warp = part.data.audioParams.warp;
+        //todo sectionpart vs headpart?
+        var warp = (part.headPart || part).data.audioParams.warp;
         if (audioParams) {
             warp = (warp - 1) + (audioParams.warp - 1) + 1;
             gain = audioParams.gain;
@@ -660,9 +664,9 @@ OMusicPlayer.prototype.playLiveNotes = function (notes, part) {
         part = part.headPart
     }
     
-    if (part.liveNotes && part.liveNotes.liveAudio) {
-            part.liveNotes.liveAudio.bufferGain.gain.setTargetAtTime(0, this.audioContext.currentTime, 0.001);
-            part.liveNotes.liveAudio.stop(this.audioContext.currentTime + 0.015);
+    if (sectionPart.liveNotes && sectionPart.liveNotes.liveAudio) {
+            sectionPart.liveNotes.liveAudio.bufferGain.gain.setTargetAtTime(0, this.audioContext.currentTime, 0.001);
+            sectionPart.liveNotes.liveAudio.stop(this.audioContext.currentTime + 0.015);
     }
     if (part.synth && part.synth.lastFrequency) {
         part.synth.onNoteOff(part.synth.lastFrequency)
@@ -702,7 +706,7 @@ OMusicPlayer.prototype.playLiveNotes = function (notes, part) {
         
         if (this.playing && !part.data.audioParams.mute) {
             this.recordNote(sectionPart, notes[0]);
-            part.currentI = part.data.notes.indexOf(notes[0]) + 1;
+            part.currentI = sectionPart.data.notes.indexOf(notes[0]) + 1;
         }
     }
     else {

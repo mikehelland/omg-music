@@ -86,7 +86,8 @@ OMGSong.prototype.loadParts = function () {
 
     // find any parts that might not be in the header
     // mainly for backwards compat, <2021
-    for (var section of this.data.sections) {
+    //get rid of it
+    /*for (var section of this.data.sections) {
         if (section.parts) {
             for (part of section.parts) {
                 if (!this.parts[part.name]) {
@@ -95,13 +96,13 @@ OMGSong.prototype.loadParts = function () {
                     delete data.notes
                     delete data.tracks
                     this.data.parts.push(data)
-                    var omgpart = new OMGSongPart(part)
+                    var omgpart = new OMGSongPart(data)
                     this.parts[omgpart.data.name] = omgpart
                     this.parts[omgpart.data.name].song = this
                 }
             }
         }
-    }
+    }*/
     
 }
 
@@ -127,10 +128,9 @@ OMGSong.prototype.loadSections = function () {
 
 OMGSong.prototype.loadSectionParts = function (section) {
     for (var partData of section.data.parts) {
-        var part = new OMGSongPart(partData)
+        var part = new OMGSongPart(partData, this.parts[partData.name])
         part.song = this
         part.section = section
-        part.headPart = this.parts[partData.name]
         section.parts[partData.name] = part
     }
 }
@@ -146,10 +146,9 @@ OMGSong.prototype.addPart = function (data, source) {
     
     for (var sectionName in this.sections) {
         var section = this.sections[sectionName]
-        let part = new OMGSongPart(headPart.data)
+        let part = new OMGSongPart({}, headPart) //JSON.parse(JSON.stringify(headPart.data))
         part.section = section
         part.song = this
-        part.headPart = headPart
         section.parts[headPart.data.name] = part
         section.data.parts.push(part.data)
         this.musicContext.loadPart(part)
@@ -299,8 +298,37 @@ OMGSong.prototype.removeSection = function (arrangementSection) {
     
 }
 
+OMGSong.prototype.removePart = function (part) {
 
-function OMGSongPart(data) {
+    for (var s in this.sections) {
+        for (var p in this.sections[s].parts) {
+            if (p === part.data.name) {
+                delete this.sections[s].parts[p]
+                break
+            }
+        }
+        for (var i = 0; i < this.sections[s].data.parts.length; i++) {
+            if (this.sections[s].data.parts[i].name === part.data.name) {
+                this.sections[s].data.parts.splice(i, 1)
+                break
+            }
+        }
+
+    }
+
+    delete this.parts[part.data.name]
+
+}
+
+OMGSong.prototype.getFX = function (name) {
+    for (var ip = 0; ip < this.fx.length; ip++) {
+        if (this.fx[ip].data.name === name) {
+            return this.fx[ip];
+        }
+    }
+};
+
+function OMGSongPart(data, headPart) {
     
     this.fx = [];
 
@@ -311,56 +339,68 @@ function OMGSongPart(data) {
         this.data.fx = [];
     }
 
-    if (!this.data.surface) {
-        if (this.data.soundSet && this.data.soundSet.defaultSurface) {
-            this.data.surface = {url: this.data.soundSet.defaultSurface};
+    // if no headPart is given, this is a headPart, and we need just the header data
+    if (!headPart) {
+        if (!this.data.surface) {
+            if (this.data.soundSet && this.data.soundSet.defaultSurface) {
+                this.data.surface = {url: this.data.soundSet.defaultSurface};
+            }
+            else {
+                this.data.surface = {url: "PRESET_VERTICAL"};
+            }
         }
-        else {
-            this.data.surface = {url: "PRESET_VERTICAL"};
+        
+        if (!this.data.soundSet) {
+    
+            // there might be a soundSet for this part in the song's data
+            /*if (this.section.song.data.soundSets && this.section.song.data.soundSets[this.data.name]) {
+                this.data.soundSet = this.section.song.data.soundSets[this.data.name]
+            }
+            else {*/
+                this.data.soundSet = {
+                    name: "Sine Oscillator",
+                    url: "PRESET_OSC_SINE",
+                    highNote: 108,
+                    lowNote: 0,
+                    chromatic: true,
+                    octave: 5
+                };
+            //}
         }
+    
+        this.setSoundSet(this.data.soundSet)
+    
+        if (!this.data.name) {
+            this.data.name = this.data.soundSet.name;
+        }
+    
+        this.makeAudioParams(false, (this.data.soundSet.url || "").startsWith("PRESET_OSC"));
+    
+    }
+    else {
+        // otherwise we need the detail data
+
+        this.data.name = headPart.data.name
+        this.headPart = headPart
+        this.surface = headPart.data.surface
+
+        if (this.surface.url === "PRESET_VERTICAL") {
+            if (!this.data.notes) {
+                this.data.notes = [];
+            }     
+        }
+        else if (this.surface.url === "PRESET_SEQUENCER") {
+            if (!this.data.tracks) {
+                this.makeTracks();
+            }
+            for (var i = 0; i < this.data.tracks.length; i++) {
+                this.makeAudioParams(this.data.tracks[i]);
+            }
+        }
+    
     }
     
-    if (!this.data.soundSet) {
-
-        // there might be a soundSet for this part in the song's data
-        /*if (this.section.song.data.soundSets && this.section.song.data.soundSets[this.data.name]) {
-            this.data.soundSet = this.section.song.data.soundSets[this.data.name]
-        }
-        else {*/
-            this.data.soundSet = {
-                name: "Sine Oscillator",
-                url: "PRESET_OSC_SINE",
-                highNote: 108,
-                lowNote: 0,
-                chromatic: true,
-                octave: 5
-            };
-        //}
-    }
-
-    this.setSoundSet(this.data.soundSet)
-    
-    if (!this.data.name) {
-        this.data.name = this.data.soundSet.name;
-    }
-    
-    if (this.data.surface.url === "PRESET_VERTICAL") {
-        if (!this.data.notes) {
-            this.data.notes = [];
-        }     
-    }
-    else if (this.data.surface.url === "PRESET_SEQUENCER") {
-        if (!this.data.tracks) {
-            this.makeTracks();
-        }
-        for (var i = 0; i < this.data.tracks.length; i++) {
-            this.makeAudioParams(this.data.tracks[i]);
-        }
-    }
-
     this.notesPlaying = {}
-    
-    this.makeAudioParams(false, (this.data.soundSet.url || "").startsWith("PRESET_OSC"));
     
     if (this.data.id) {
         this.saved = true;
@@ -389,26 +429,20 @@ OMGSongPart.prototype.makeAudioParams = function (track, osc) {
 
 OMGSongPart.prototype.makeTracks = function () {
     this.data.tracks = [];
-    if (this.data.soundSet && this.data.soundSet.data) {
+    //todo maybe do the prefix postfix stuff once and store it in the header?
+    var soundSet = this.headPart.data.soundSet
+    if (soundSet && soundSet.data) {
         var that = this;
-        this.data.soundSet.data.forEach(function (sound) {
+        soundSet.data.forEach(function (sound) {
             var track = {name: sound.name, data: [], 
                     audioParams: {gain: 1, pan: 0, warp: 1}};
-            track.sound = (that.data.soundSet.prefix || "") +
-                    sound.url + (that.data.soundSet.postfix || "");
+            track.sound = (soundSet.prefix || "") +
+                    sound.url + (soundSet.postfix || "");
             that.data.tracks.push(track);
         });
     }
 };
 
-// one for OMGSong and one for OMGSongPart
-OMGSong.prototype.getFX = function (name) {
-    for (var ip = 0; ip < this.fx.length; ip++) {
-        if (this.fx[ip].data.name === name) {
-            return this.fx[ip];
-        }
-    }
-};
 OMGSongPart.prototype.getFX = function (name) {
     for (var ip = 0; ip < this.fx.length; ip++) {
         if (this.fx[ip].data.name === name) {

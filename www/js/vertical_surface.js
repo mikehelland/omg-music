@@ -391,7 +391,7 @@ OMGMelodyMaker.prototype.drawButtons = function (buttonRow, x, y, width, height)
 
 OMGMelodyMaker.prototype.setupFretBoard = function () {
     var keyParams = this.part.section.song.data.keyParams;
-    var soundSet = this.data.soundSet;
+    var soundSet = this.part.headPart.data.soundSet;
     var rootNote;
     var bottomNote;
     var topNote;
@@ -894,8 +894,8 @@ OMGMelodyMaker.prototype.onmoveInZoomMode = function (touch) {
 };
 
 OMGMelodyMaker.prototype.onupInZoomMode = function (touch) {
-    this.part.data.surface.skipTop = this.skipFretsTop;
-    this.part.data.surface.skipBottom = this.skipFretsBottom;
+    this.part.headPart.data.surface.skipTop = this.skipFretsTop;
+    this.part.headPart.data.surface.skipBottom = this.skipFretsBottom;
 };
 
 OMGMelodyMaker.prototype.getFret = function (y) {
@@ -1015,8 +1015,8 @@ OMGMelodyMaker.prototype.setPart = function (part, welcomeStyle) {
     this.data = part.data;
     this.beatParams = part.section.song.data.beatParams;
 
-    this.skipFretsTop = this.part.data.surface.skipTop || 0;
-    this.skipFretsBottom = this.part.data.surface.skipBottom || 0;
+    this.skipFretsTop = this.part.headPart.data.surface.skipTop || 0;
+    this.skipFretsBottom = this.part.headPart.data.surface.skipBottom || 0;
     
     // todo add tools
     //if (this.data.notes.length == 0) {

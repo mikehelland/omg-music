@@ -115,9 +115,9 @@ OMusicContext.prototype.loadPart = function (part, soundsNeeded, onload) {
     if (part.headPart && part.headPart.soundFont) {
         part.soundFont = part.headPart.soundFontPlayer
     }
-    else if (part.data.surface.url === "PRESET_SEQUENCER") {
+    else if (part.surface.url === "PRESET_SEQUENCER") {
         this.loadDrumbeat(part, soundsNeeded);
-    } else if (part.data.surface.url === "PRESET_MIC") {
+    } else if (part.surface.url === "PRESET_MIC") {
         this.loadMic(part)
         download = false
     } else {
@@ -146,25 +146,26 @@ OMusicContext.prototype.loadMelody = function (part, soundsNeeded) {
 
     var data = part.data;
     
-    var section = part.section;
-    var song = part.section ? part.section.song : undefined;
+    //var section = part.section;
+    //var song = part.section ? part.section.song : undefined;
+    var soundSet = part.headPart.data.soundSet
 
     part.currentI = -1;
 
-    if (data.soundSet && data.soundSet.data) {
-        if (!p.downloadedSoundSets[data.soundSet.name]) {
-            p.downloadedSoundSets[data.soundSet.name] = data.soundSet;
+    if (soundSet && soundSet.data) {
+        if (!p.downloadedSoundSets[soundSet.name]) {
+            p.downloadedSoundSets[soundSet.name] = soundSet;
         }
-        part.soundSet = data.soundSet;
+        //todo ?? part.soundSet = data.soundSet;
         p.prepareMelody(part, soundsNeeded);
     }
-    else if (data.soundSet && typeof data.soundSet.url === "string") {
-        if (data.soundSet.url.startsWith("PRESET_OSC")) {
-            part.soundSet = {osc: true};
+    else if (soundSet && typeof soundSet.url === "string") {
+        if (soundSet.url.startsWith("PRESET_OSC")) {
+            soundSet = {osc: true};
         }
         else {
-            p.getSoundSet(data.soundSet.url, function (soundSet) {
-                part.soundSet = soundSet;
+            p.getSoundSet(soundSet.url, function (soundSet) {
+                //?? todo part.soundSet = soundSet;
                 p.prepareMelody(part, soundsNeeded);
             });
         }
@@ -175,7 +176,7 @@ OMusicContext.prototype.loadMelody = function (part, soundsNeeded) {
 OMusicContext.prototype.prepareMelody = function (part, soundsNeeded) {
     
     if (this.loadFullSoundSets) {
-        this.loadSoundsFromSoundSet(part.soundSet);
+        this.loadSoundsFromSoundSet(part.headPart.soundSet);
         return;
     }
 
@@ -357,36 +358,6 @@ OMusicContext.prototype.runPlayerScript = function () {
         }
     
     })
-}
-
-OMusicContext.prototype.getSoundFontPlayer = function () {
-    return new Promise((resolve, reject) => {
-        if (this.soundFontPlayer) {
-            resolve(this.soundFontPlayer)
-            return
-        }
-
-        if (typeof WebAudioFontPlayer !== "undefined") {
-            this.soundFontPlayer = new WebAudioFontPlayer()
-            resolve(this.soundFontPlayer)
-            return
-        }
-
-        if (!this.onsoundfontplayerready) {
-            var scriptEl = document.createElement("script")
-            scriptEl.src = "https://surikov.github.io/webaudiofont/npm/dist/WebAudioFontPlayer.js"
-            scriptEl.onload = () => {
-                this.soundFontPlayer = new WebAudioFontPlayer()
-                this.onsoundfontplayerready.forEach(resolve => {
-                    resolve(this.soundFontPlayer)
-                })    
-            }
-            this.onsoundfontplayerready = []
-            document.body.appendChild(scriptEl)
-        }
-        this.onsoundfontplayerready.push(resolve)
-    })
-    
 }
 
 OMusicContext.prototype.getSoundFontPlayer = function () {
@@ -622,7 +593,7 @@ OMusicContext.prototype.rescaleSection = function (section, chord) {
     }
     for (var partName in section.parts) {
         var part = section.parts[partName]
-        if (part.data.surface.url === "PRESET_VERTICAL" && part.data.soundSet.chromatic) {
+        if (part.surface.url === "PRESET_VERTICAL" && part.headPart.data.soundSet.chromatic) {
             this.rescale(part, section.song.data.keyParams, chord || 0);
         }
     }
@@ -650,7 +621,7 @@ OMusicContext.prototype.rescale = function (part, keyParams, chord, soundsNeeded
         return;
     }
 
-    var octave = data.soundSet.octave;
+    var octave = part.headPart.data.soundSet.octave;
     var octaves2;
     var newNote;
     var onote;
@@ -664,7 +635,7 @@ OMusicContext.prototype.rescale = function (part, keyParams, chord, soundsNeeded
             continue;
         }
 
-        if (part.data.soundSet.chromatic) {
+        if (part.headPart.data.soundSet.chromatic) {
             newNote = onote.note + chord;
             octaves2 = 0;
             while (newNote >= keyParams.scale.length) {
@@ -691,8 +662,8 @@ OMusicContext.prototype.rescale = function (part, keyParams, chord, soundsNeeded
         
         // todo this does the work of prepare melody... maybe it shouldn't be here
         // then this wouldn't need to be called for non-chromatic parts
-        if (soundsNeeded && part.soundUrls) {
-            var url = part.soundUrls[onote.scaledNote]
+        if (soundsNeeded && part.headPart.soundUrls) {
+            var url = part.headPart.soundUrls[onote.scaledNote]
             
             if (url && !this.loadedSounds[url] && !soundsNeeded[url]) {
                 soundsNeeded[url] = true;
