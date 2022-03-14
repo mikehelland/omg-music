@@ -224,19 +224,16 @@ OMGEmbeddedViewerMusicDrawer.prototype.draw = function () {
 // instead of refactoring, I'm doubling up
 
 
-OMGEmbeddedViewerMusicDrawer.prototype.drawPartCanvas = function (part, canvas, beatParams, measures) {
+OMGEmbeddedViewerMusicDrawer.prototype.drawPartCanvas = function (partData, canvas, surface, beatParams, measures) {
 
     canvas.width = canvas.clientWidth
     canvas.height = canvas.clientHeight
-    if (!part || !part.headPart) {
-        console.warn("drawPartCanvas no part/headPart")
-        return
-    }
-    if (part.headPart.data.surface.url === "PRESET_SEQUENCER") {
-        this.drawPartBeats(part.data, canvas, beatParams, measures, 0, 0, canvas.width, canvas.height)
+    
+    if (surface === "PRESET_SEQUENCER") {
+        this.drawPartBeats(partData, canvas, beatParams, measures, 0, 0, canvas.width, canvas.height)
     }
     else {
-        this.drawPartNotes(part.data, canvas, beatParams, measures, 0, 0, canvas.width, canvas.height)
+        this.drawPartNotes(partData, canvas, beatParams, measures, 0, 0, canvas.width, canvas.height)
     }
 }
 
