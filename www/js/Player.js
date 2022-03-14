@@ -684,9 +684,8 @@ OMusicPlayer.prototype.playLiveNotes = function (notes, part) {
             //silence
         }
         else if (part.soundFont) {
-            //part.notesPlaying[notes[0].scaledNote]
-            sectionPart.liveNote = this.musicContext.soundFontPlayer.queueWaveTable(this.audioContext, this.audioContext.destination
-                , window[part.soundFont], 0, notes[0].scaledNote, 20); //_tone_0000_Chaos_sf2_file
+            sectionPart.liveNote = this.musicContext.soundFontPlayer.queueWaveTable(this.audioContext, part.preFXGain,
+                window[part.soundFont], 0, notes[0].scaledNote, 20);
         }
         else if (part.osc) {
             part.baseFrequency = this.makeFrequency(notes[0].scaledNote);
@@ -821,7 +820,7 @@ OMusicPlayer.prototype.noteOn = function (noteNumber, part, velocity) {
     if (this.audioContext.state === "suspended") {
         this.audioContext.resume();
     }
-    
+
     if (part.soundFont) {
         part.notesPlaying[noteNumber] = this.musicContext.soundFontPlayer.queueWaveTable(this.audioContext, this.audioContext.destination
             , window[part.soundFont], 0, noteNumber, 20);

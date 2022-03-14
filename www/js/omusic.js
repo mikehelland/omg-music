@@ -156,7 +156,6 @@ OMusicContext.prototype.loadMelody = function (part, soundsNeeded) {
         if (!p.downloadedSoundSets[soundSet.name]) {
             p.downloadedSoundSets[soundSet.name] = soundSet;
         }
-        //todo ?? part.soundSet = data.soundSet;
         p.prepareMelody(part, soundsNeeded);
     }
     else if (soundSet && typeof soundSet.url === "string") {
@@ -165,7 +164,6 @@ OMusicContext.prototype.loadMelody = function (part, soundsNeeded) {
         }
         else {
             p.getSoundSet(soundSet.url, function (soundSet) {
-                //?? todo part.soundSet = soundSet;
                 p.prepareMelody(part, soundsNeeded);
             });
         }
@@ -222,9 +220,6 @@ OMusicContext.prototype.loadDrumbeat = function (part, soundsNeeded) {
         }
     }
 
-    if (part.data.soundSet && !part.soundSet) {
-        part.soundSet = part.data.soundSet;
-    }
 };
 
 
