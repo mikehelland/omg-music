@@ -557,7 +557,7 @@ OMusicPlayer.prototype.playNote = function (note, part) {
     if (part.headPart) {
         part = part.headPart
     }
-    if (!note || note.rest) {
+    if (!note || note.rest || isNaN(note.scaledNote)) {
         if (part.osc) {
             part.preFXGain.gain.setTargetAtTime(0, this.audioContext.currentTime, 0.003);
         }
